@@ -1,0 +1,46 @@
+### 1. จุดแข็งและข้อดีของโค้ด (Strengths)
+
+- **โค้ดมีเอกลักษณ์และมีเอกสารอธิบายอย่างชัดเจน**  
+  ใช้คำอธิบาย `# trace:implements` ที่ชัดเจนเพื่อแสดงว่าโค้ดสอดคล้องกับบทบาท (PRJ-003, FR-006–FR-010) ซึ่งช่วยให้ผู้ตรวจสอบสามารถติดตามความสัมพันธ์ระหว่างโค้ดกับความต้องการได้อย่างมีประสิทธิภาพ
+
+- **ใช้เทคนิค Mock Tauri Core Invoker ที่ปลอดภัย**  
+  การแทนที่ `window.__TAURI__?.core.invoke` ด้วยฟังก์ชันย้อนกลับ (fallback) ช่วยให้โปรเจกต์สามารถทำงานในสภาพแวดล้อมพัฒนา (dev) ได้โดยไม่ต้องติดตั้ง Tauri ผิดปกติ ซึ่งเพิ่มความสามารถในการทดสอบ
+
+- **จัดการเหตุการณ์ DOM อย่างมีประสิทธิภาพ**  
+  การตั้งค่า `setupNavigation()` ใช้ event listeners ที่ถูกต้องและมีการตรวจสอบว่า element  exist ก่อนเพิ่ม listener ซึ่งช่วยลด risk ของ `null reference`
+
+- **ใช้ async/await พร้อม error handling ที่เหมาะสม**  
+  ในหน้าที่ต่าง ๆ เช่น การสแกน GGUF Directory, การเริ่ม LAN Share, การสร้าง config file มีการใช้ `try/catch/finally` ที่ชัดเจน ซึ่งช่วยรักษาสภาพแวดล้อมให้สมบูรณ์
+
+- **มีการเริ่มต้นแอปพลิเคชันอย่างมีประสิทธิภาพ**  
+  `window.addEventListener('DOMContentLoaded', ...)` ทำให้แอปเริ่มทำงานหลังจาก DOM โหลดเสร็จสมบูรณ์ และเรียก `triggerProbe()`, `syncAllModels()`, `initChat()` อย่างเร็ว
+
+---
+
+### 2. ปัญหาและจุดเสี่ยงที่ต้องระวัง (Potential Bugs, Race Conditions, Error Handling)
+
+- **ความขัดแย้งระหว่าง `lanSharingActive` และ UI สุดท้าย**  
+  ถ้า `start_lan_share` ล้มเหลว แต่ `lanSharingActive` ถูกตั้งค่าเป็น `true` แล้ว การกด Stop จะทำให้เกิด error เนื่องจากไม่มีการ reset `lanSharingActive` ในกรณีล้ม  
+  ✅ **แก้ไข**: ตั้งค่า `lanSharingActive = false` ในกล่อง `catch` เพื่อระวัง state
+
+- **ไม่มีการตรวจสอบความสมบูรณ์ของ `syncAllModels()` ก่อนเรียก `initChat()`**  
+  หาก `syncAllModels()` ล้มเหลว แต่เรียก `initChat()` ก็ตาม อาจทำให้เกิด error ในระบบ chat  
+  ✅ **แก้ไข**: ตั้งค่า `const models = await syncAllModels();` ใน `catch` และแสดง alert หรือ log error
+
+- **การใช้ `btnScanGguf.classList.add('loading')` ไม่มีการ reset state ในกรณี `res.success = false`**  
+  หากการสแกนล้ม แต่ button ยังอยู่ในส状态 loading ซึ่งทำให้ผู้ใช้ไม่สามารถกดทำรายการได้  
+  ✅ **แก้ไข**: ตั้งค่า `btnScanGguf.classList.remove('loading')` ใน `catch` และ `finally`
+
+- **ไม่มีการตรวจสอบค่า `status.download_urls` ก่อนใช้**  
+  หาก `status.download_urls` เป็น `undefined` หรือ `[]` การแสดงผลลัพธ์จะทำให้เกิด error ในการ render  
+  ✅ **แก้ไข**: ตั้งค่า `if (status.download_urls?.length)` ก่อนใช้
+
+- **การใช้ `invoke` ไม่มีการตั้งค่า timeout**  
+  หาก backend ล่าช้าหรือไม่ตอบกลับ แอปจะรออยู่ตลอดเวลา  
+  ✅ **แก้ไข**: ใช้ `Promise.race` กับ `setTimeout` เพื่อตั้ง timeout (เช่น 10 วินาที)
+
+---
+
+### 3. ข้อเสนอแนะในการปรับปรุงตามมาตรฐาน Tauri v2 (Actionable Recommendations)
+
+- **ใช้ `tauri-plugin-http` หรือ `tauri-plugin-fs` ส

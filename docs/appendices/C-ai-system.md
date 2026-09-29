@@ -1,0 +1,389 @@
+# Appendix C — AI System: Model Management & Backend Architecture
+
+| Field | Value |
+|-------|-------|
+| **Version** | 1.0.0 |
+| **Status** | Draft |
+| **Author** | Boss |
+| **Created** | 2026-09-28 |
+| **Parent Doc** | [PRD-SDD-v1.0.md](../PRD-SDD-v1.0.md) |
+
+---
+
+## C.1 Backend Ecosystem Overview
+
+Local LLM Hub รองรับ 4 LLM backend หลัก แต่ละตัวมีลักษณะเฉพาะที่แตกต่างกัน:
+
+### C.1.1 Ollama
+
+| Property | Detail |
+|----------|--------|
+| Default URL | `http://localhost:11434` |
+| Protocol | REST API (Ollama native) |
+| List Models | `GET /api/tags` |
+| Load Model | `POST /api/generate` (first call loads model) |
+| Unload Model | `POST /api/generate` with `keep_alive: 0` |
+| Chat API | `POST /api/chat` |
+| OpenAI Compat | `POST /v1/chat/completions` (Ollama 0.1.24+) |
+| Model Storage | `~/.ollama/models/` |
+| Auto Memory Mgmt | ✅ Unloads after idle timeout |
+| Strengths | Consumer GPU friendly, easy install, auto quantization selection |
+
+### C.1.2 vLLM
+
+| Property | Detail |
+|----------|--------|
+| Default URL | `http://localhost:8000` |
+| Protocol | OpenAI-compatible REST API |
+| List Models | `GET /v1/models` |
+| Load Model | Configured at server startup (1 model per process) |
+| Chat API | `POST /v1/chat/completions` |
+| Streaming | ✅ SSE |
+| Model Storage | HuggingFace cache หรือ custom path |
+| Auto Memory Mgmt | ❌ Manual restart ถ้าจะเปลี่ยน model |
+| Strengths | High throughput, continuous batching, production-grade |
+
+### C.1.3 HuggingFace Transformers
+
+| Property | Detail |
+|----------|--------|
+| Interface | Python library (ไม่มี built-in REST server) |
+| Integration | ผ่าน `text-generation-inference` (TGI) หรือ custom wrapper |
+| Default TGI URL | `http://localhost:8080` |
+| Protocol | OpenAI-compatible (TGI 2.0+) |
+| Model Storage | `~/.cache/huggingface/hub/` |
+| Strengths | Largest model selection, official model releases |
+
+### C.1.4 llama.cpp / GGUF
+
+| Property | Detail |
+|----------|--------|
+| Interface | llama-server REST API หรือ llama.cpp binary |
+| Default URL | `http://localhost:8080` |
+| List Models | ไม่มี (scan filesystem แทน) |
+| Chat API | OpenAI-compatible (`POST /v1/chat/completions`) |
+| File Format | `.gguf` (GGUF v3+) |
+| Model Storage | User-defined directory |
+| Strengths | CPU-friendly, low VRAM requirement, quantization flexibility |
+
+---
+
+## C.2 Model Deduplication Engine
+
+### C.2.1 Normalization Algorithm
+
+```
+FUNCTION normalize(name: str) → canonical: str
+
+1. lowercase(name)
+2. remove file extension: .gguf, .bin, .pt, .safetensors
+3. remove quantization suffix pattern:
+   regex: \.(q\d+_[a-z0-9_]+|q\d+|f16|f32|bf16|int8|int4|ggml|gguf)$
+4. remove version tags: :latest, :v\d+\.\d+, -v\d+
+5. replace separators: [-_/.] → space
+6. collapse multiple spaces
+7. strip leading/trailing whitespace
+
+EXAMPLES:
+  "llama3.2:3b"                            → "llama3.2 3b"
+  "llama3.2:3b-instruct-q4_K_M"           → "llama3.2 3b instruct"
+  "Meta-Llama-3.2-3B-Instruct.Q4_K_M.gguf" → "meta llama 3.2 3b instruct"
+  "meta-llama/Llama-3.2-3B-Instruct"      → "meta llama llama 3.2 3b instruct"
+```
+
+### C.2.2 Deduplication Flow
+
+```
+┌─────────────────────────────────────────────────┐
+│  Raw Models from All Backends                   │
+│  [ollama:llama3.2:3b, gguf:llama3.2-3b.gguf]  │
+└────────────────────┬────────────────────────────┘
+                     │ normalize each name
+┌────────────────────▼────────────────────────────┐
+│  Canonical Name Index                           │
+│  "llama3.2 3b" → [ollama, gguf]               │
+│  "mistral 7b"  → [ollama]                      │
+└────────────────────┬────────────────────────────┘
+                     │ group by canonical name
+┌────────────────────▼────────────────────────────┐
+│  Duplicate Groups                               │
+│  { canonical: "llama3.2 3b",                   │
+│    models: [ollama_entry, gguf_entry],          │
+│    preferred: ollama_entry }                    │
+└────────────────────┬────────────────────────────┘
+                     │ mark is_duplicate, is_preferred
+┌────────────────────▼────────────────────────────┐
+│  UnifiedModel[] with dedup metadata             │
+└─────────────────────────────────────────────────┘
+```
+
+### C.2.3 Priority Matrix
+
+| Scenario | Winner | Reason |
+|----------|--------|--------|
+| Ollama vs GGUF (same model) | Ollama | Auto memory management |
+| Ollama vs vLLM | Ollama (consumer) / vLLM (server) | User configurable |
+| vLLM vs GGUF | vLLM | Higher throughput |
+| HF vs anything | HF loses | Slowest inference without TGI |
+
+---
+
+## C.3 LiteLLM Proxy Architecture
+
+### C.3.1 Why LiteLLM?
+
+LiteLLM เป็น open-source proxy ที่รองรับ 100+ LLM providers ผ่าน OpenAI-compatible interface:
+- ไม่ต้องเขียน adapter สำหรับแต่ละ backend
+- รองรับ load balancing ระหว่าง backends
+- Built-in retry, fallback, และ rate limiting
+- ส่ง usage logs และ cost tracking (optional)
+
+### C.3.2 Auto-Generated Config
+
+```yaml
+# Generated by Local LLM Hub from detected backends
+# Path: sidecar/generated_config.yaml
+
+model_list:
+  # Ollama models
+  - model_name: llama3.2:3b
+    litellm_params:
+      model: ollama/llama3.2:3b
+      api_base: http://localhost:11434
+
+  - model_name: mistral:7b
+    litellm_params:
+      model: ollama/mistral:7b
+      api_base: http://localhost:11434
+
+  # vLLM models
+  - model_name: meta-llama/Llama-3.1-8B-Instruct
+    litellm_params:
+      model: openai/meta-llama/Llama-3.1-8B-Instruct
+      api_base: http://localhost:8000
+      api_key: "none"
+
+  # GGUF models (via llama-server)
+  - model_name: llama3.2-3b-gguf
+    litellm_params:
+      model: openai/llama3.2-3b-gguf
+      api_base: http://localhost:8080
+      api_key: "none"
+
+litellm_settings:
+  drop_params: true
+  request_timeout: 300
+
+general_settings:
+  master_key: "sk-local-llm-hub"
+```
+
+### C.3.3 Sidecar Lifecycle
+
+```
+Tauri App                    Python Sidecar (LiteLLM)
+    │                                  │
+    │── generate config.yaml ─────────▶│
+    │── spawn process ────────────────▶│ litellm --config config.yaml --port 4000
+    │                                  │── starting...
+    │◀─ poll /health (every 500ms) ───│
+    │                                  │── ready ✓
+    │◀─ status: running ──────────────│
+    │                                  │
+    │── (user changes backend) ───────▶│
+    │── SIGTERM ─────────────────────▶│── graceful shutdown
+    │── regenerate config ────────────▶│
+    │── respawn ─────────────────────▶│ litellm --config new_config.yaml
+    │                                  │
+    │── (app close) ─────────────────▶│
+    │── SIGTERM ─────────────────────▶│── shutdown
+```
+
+---
+
+## C.4 Model Card System
+
+### C.4.1 HuggingFace Model Card Structure
+
+HuggingFace model cards ใช้ YAML frontmatter + Markdown body:
+
+```yaml
+---
+license: llama3.2
+language:
+  - en
+base_model: meta-llama/Llama-3.2-3B
+tags:
+  - text-generation
+  - llama
+pipeline_tag: text-generation
+---
+
+# Model Card for Llama 3.2 3B
+
+...markdown content...
+```
+
+### C.4.2 Model Card Fetch Strategy
+
+```
+FUNCTION fetch_model_card(model: UnifiedModel) → ModelCard
+
+IF model.hf_repo_id IS NOT NULL:
+  url = f"https://huggingface.co/{hf_repo_id}/raw/main/README.md"
+  response = HTTP GET url (with HF token if available)
+  
+  IF 200 OK:
+    parse YAML frontmatter
+    convert markdown to HTML
+    RETURN ModelCard
+    
+  IF 404:
+    RETURN ModelCard { readme_markdown: "No model card available" }
+    
+  IF 401:
+    RETURN ModelCard { readme_markdown: "Private model — HF token required" }
+
+ELIF model.backend == "gguf":
+  folder = parent_directory(model.local_path)
+  FOR filename IN ["README.md", "modelcard.md", "MODEL_CARD.md"]:
+    IF file_exists(folder / filename):
+      content = read_file(folder / filename)
+      parse YAML frontmatter
+      RETURN ModelCard
+  RETURN ModelCard { readme_markdown: "No local model card found" }
+
+ELIF model.backend == "ollama":
+  // Try to map Ollama model name to HF repo
+  // e.g., "llama3.2:3b" → "meta-llama/Llama-3.2-3B"
+  hf_repo = OLLAMA_TO_HF_MAPPING.get(normalize(model.display_name))
+  IF hf_repo:
+    RECURSE with model.hf_repo_id = hf_repo
+  ELSE:
+    RETURN ModelCard from ollama /api/show endpoint
+```
+
+### C.4.3 Ollama-to-HuggingFace Mapping Table
+
+```rust
+// Built-in mapping สำหรับโมเดลยอดนิยม
+static OLLAMA_HF_MAP: &[(&str, &str)] = &[
+    ("llama3.2",      "meta-llama/Llama-3.2"),
+    ("llama3.1",      "meta-llama/Llama-3.1"),
+    ("llama3",        "meta-llama/Meta-Llama-3"),
+    ("mistral",       "mistralai/Mistral-7B-v0.1"),
+    ("mixtral",       "mistralai/Mixtral-8x7B-v0.1"),
+    ("gemma2",        "google/gemma-2"),
+    ("gemma",         "google/gemma"),
+    ("phi3",          "microsoft/Phi-3"),
+    ("phi4",          "microsoft/phi-4"),
+    ("qwen2.5",       "Qwen/Qwen2.5"),
+    ("deepseek-r1",   "deepseek-ai/DeepSeek-R1"),
+    ("codellama",     "meta-llama/CodeLlama"),
+    ("starcoder2",    "bigcode/starcoder2"),
+    ("command-r",     "CohereForAI/c4ai-command-r"),
+    ("nomic-embed-text", "nomic-ai/nomic-embed-text-v1"),
+];
+```
+
+---
+
+## C.5 GPU Monitoring
+
+### C.5.1 nvidia-smi Integration
+
+```
+COMMAND: nvidia-smi --query-gpu=index,name,memory.used,memory.total,utilization.gpu,temperature.gpu,power.draw --format=csv,noheader,nounits
+
+OUTPUT EXAMPLE:
+0, NVIDIA GeForce RTX 4090, 8192, 24576, 45, 72, 280.5
+
+PARSE:
+  gpu_index     = 0
+  gpu_name      = "NVIDIA GeForce RTX 4090"
+  vram_used_mb  = 8192
+  vram_total_mb = 24576
+  gpu_util_pct  = 45
+  temp_c        = 72
+  power_draw_w  = 280.5
+```
+
+### C.5.2 RAM Monitoring (Windows)
+
+```rust
+// ใช้ winapi หรือ sysinfo crate
+use sysinfo::{System, SystemExt};
+
+let mut system = System::new_all();
+system.refresh_memory();
+let ram_used_kb = system.used_memory();
+let ram_total_kb = system.total_memory();
+```
+
+---
+
+## C.6 GGUF File Scanner
+
+### C.6.1 Scan Algorithm
+
+```
+FUNCTION scan_gguf(paths: Vec<String>) → Vec<GgufFile>
+
+FOR EACH path IN paths:
+  IF not path.exists():
+    SKIP with warning
+    
+  FOR EACH file IN walk_dir(path, max_depth=5):
+    IF file.extension() == "gguf":
+      metadata = read_gguf_header(file)
+      yield GgufFile {
+        path: file.path,
+        filename: file.name,
+        size_bytes: file.size,
+        model_name: extract_name_from_filename(file.name),
+        quantization: extract_quantization(file.name),
+        // GGUF header fields (if parseable):
+        architecture: metadata.architecture,
+        parameter_count: metadata.parameter_count,
+        context_length: metadata.context_length,
+      }
+```
+
+### C.6.2 GGUF Header Reading
+
+GGUF format มี header ที่อ่านได้โดยไม่ต้อง load ทั้งไฟล์:
+
+```
+Bytes 0-3:   Magic "GGUF"
+Bytes 4-7:   Version (u32)
+Bytes 8-15:  Tensor count (u64)
+Bytes 16-23: Metadata KV count (u64)
+Bytes 24+:   Metadata key-value pairs
+  - "general.name" → model name
+  - "general.architecture" → llama, mistral, etc.
+  - "llama.context_length" → max context
+  - "general.parameter_count" → parameter count
+```
+
+สามารถอ่าน metadata ได้ภายใน milliseconds โดยไม่ต้อง load weights
+
+---
+
+## C.7 Local Multi-Agent Workflow & Model Allocation (SPEC-WORKFLOW-001)
+
+คลังโมเดลที่ผ่านการประเมินและคัดเลือกสำหรับการทำงานแบบ Multi-Agent บนฮาร์ดแวร์ **NVIDIA GeForce RTX 3060 (12GB CUDA VRAM)**:
+
+| Agent / Gate | Primary Model Candidate | Active Params | Speed (t/s) | VRAM Footprint | Model Card Setting |
+|---|---|:---:|:---:|:---:|---|
+| **1. Explorer Agent** | JetBrains Mellum2 12B Instruct | 2.5B MoE | 132.4 | 8.11 GB | `temp: 0.2`, `num_ctx: 16384` |
+| **2. Spec Gate** | Qwen 3.5 9B Sushi Coder RL | 9B Dense | 53.9 | 5.59 GB | `temp: 0.0`, `num_predict: 2048` |
+| **3. Worker Agent** | JetBrains Mellum2 12B Instruct | 2.5B MoE | 132.4 | 8.11 GB | `temp: 0.1`, `num_ctx: 16384` |
+| **4. Verify Gate** | Qwen 3.5 9B Sushi Coder RL | 9B Dense | 53.9 | 5.59 GB | `temp: 0.0`, strict AST audit |
+| **5. Test Gate** | Google Gemma 4 12B Instruct | 12B Dense | 35.8 | 8.05 GB | `temp: 0.1`, `top_k: 20` |
+| **6. Review Gate** | JetBrains Mellum2 12B Thinking | 2.5B MoE | 130.2 | 8.11 GB | `temp: 0.6`, Deep RLVR |
+
+*ข้อกำหนดการสลับโมเดลใน VRAM:*  
+เนื่องจาก VRAM มีจำกัด 12GB ระบบใช้กลยุทธ์ **Phase Grouping** ให้ Explorer, Spec, และ Worker รันกลุ่มแรกโดยไม่มี VRAM eviction และเมื่อเข้าสู่ Verify/Test/Review จะส่งสัญญาณ `{ keep_alive: 0 }` เพื่อเคลียร์ VRAM 1.5 วินาทีก่อนโหลดโมเดลถัดไป
+
+➡️ **ดูข้อกำหนดฉบับสมบูรณ์ที่:** [docs/ai-system/MULTI_AGENT_WORKFLOW_SPEC.md](../ai-system/MULTI_AGENT_WORKFLOW_SPEC.md)
+

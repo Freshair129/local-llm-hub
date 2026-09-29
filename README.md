@@ -1,0 +1,134 @@
+# 🤖 Local LLM Hub
+
+> **One Dashboard. All Your Local LLMs. No Duplicate Loads.**
+
+Local LLM Hub เป็น desktop application (Tauri v2) ที่รวม LLM backend ทุกตัวบนเครื่องของคุณใน UI เดียว พร้อม deduplication engine, model card reader, GPU monitor, chat interface, และ LiteLLM unified proxy
+
+---
+
+## ✨ Features
+
+| Feature | Description |
+|---------|-------------|
+| 🗂️ **Unified Model Dashboard** | รวมโมเดลจาก Ollama, vLLM, HuggingFace, GGUF ใน list เดียว |
+| 🔍 **Deduplication Engine** | ตรวจจับโมเดลที่เหมือนกันข้ามหลาย backend ไม่ให้โหลดซ้ำ |
+| 📋 **Model Card Reader** | อ่าน README.md จาก HuggingFace หรือ local ดู license, tags, capabilities |
+| ▶️ **Start / Stop Control** | Start/Stop โมเดลแต่ละ backend จาก UI โดยตรง |
+| 📊 **GPU / RAM Monitor** | Real-time VRAM + RAM gauge อัปเดตทุก 2 วินาที |
+| 💬 **Built-in Chat** | ทดสอบโมเดลตรงจาก UI ด้วย streaming response |
+| 🔀 **LiteLLM Proxy** | Unified OpenAI-compatible endpoint บน `localhost:4000` |
+
+---
+
+## 🏗️ Architecture
+
+```
+Tauri v2 (Rust backend + WebView2 frontend)
+    ↕ IPC
+Rust Commands: probe, list, dedup, model card, GPU stats, LiteLLM sidecar
+    ↕ HTTP
+Backends: Ollama (:11434) | vLLM (:8000) | HuggingFace | GGUF (local)
+    ↕
+LiteLLM Proxy (:4000) — Unified OpenAI-compatible gateway
+```
+
+---
+
+## 📋 Supported Backends
+
+| Backend | Protocol | Auto-detect |
+|---------|----------|-------------|
+| **Ollama** | Ollama REST API | ✅ localhost:11434 |
+| **vLLM** | OpenAI-compatible | ✅ Configurable URL |
+| **HuggingFace TGI** | OpenAI-compatible | ✅ Configurable URL |
+| **llama.cpp / GGUF** | File system scan | ✅ Configurable scan paths |
+
+---
+
+## 📦 Prerequisites
+
+- **Windows** 10 v1803+ (WebView2 required)
+- **Rust** 1.80+ — `rustup default stable`
+- **Node.js** 18+ — for Tauri CLI
+- **Python** 3.10+ — for LiteLLM sidecar
+- **NVIDIA GPU** + nvidia-smi — for GPU monitoring (optional)
+
+---
+
+## 🚀 Getting Started
+
+```powershell
+# Clone / ไปที่ project directory
+cd local-llm-hub
+
+# Install Node dependencies
+npm install
+
+# Install Python dependencies (LiteLLM sidecar)
+pip install litellm uvicorn pyyaml
+
+# Run in development mode
+npm run tauri dev
+
+# Build for production
+npm run tauri build
+```
+
+---
+
+## 📚 Documentation
+
+| Document | Description |
+|----------|-------------|
+| [PRD-SDD-v1.0.md](docs/PRD-SDD-v1.0.md) | Product Requirements + Software Design Document |
+| [TASKS.md](docs/TASKS.md) | Implementation task list |
+| [adr/ARCHITECTURE.md](docs/adr/ARCHITECTURE.md) | Architecture Decision Records |
+| [appendices/A-api-spec.md](docs/appendices/A-api-spec.md) | Complete API specification |
+| [appendices/C-ai-system.md](docs/appendices/C-ai-system.md) | AI System: backends, dedup, LiteLLM, model cards |
+| [appendices/D-traceability.md](docs/appendices/D-traceability.md) | Requirements traceability matrix |
+| [appendices/E-risk-matrix.md](docs/appendices/E-risk-matrix.md) | Risk assessment |
+| [appendices/F-glossary.md](docs/appendices/F-glossary.md) | Glossary of terms |
+
+---
+
+## 🔀 LiteLLM Proxy Usage
+
+เมื่อ toggle LiteLLM ON ใน app, endpoint `http://localhost:4000` พร้อมใช้:
+
+```bash
+# List available models
+curl http://localhost:4000/v1/models \
+  -H "Authorization: Bearer sk-local-llm-hub"
+
+# Chat with any model
+curl http://localhost:4000/v1/chat/completions \
+  -H "Authorization: Bearer sk-local-llm-hub" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "llama3.2:3b",
+    "messages": [{"role": "user", "content": "Hello!"}],
+    "stream": false
+  }'
+```
+
+---
+
+## 📊 Deduplication Example
+
+```
+Ollama:  llama3.2:3b-instruct-q4_K_M   ──┐
+                                           ├── canonical: "llama3.2 3b instruct"
+GGUF:    Meta-Llama-3.2-3B-Instruct.Q4_K_M.gguf ──┘
+                                              ⚠️ DUPLICATE DETECTED
+                                              ✅ PREFERRED: Ollama (highest priority)
+```
+
+---
+
+## 📝 License
+
+MIT
+
+---
+
+*Built with ❤️ using Tauri v2, Rust, and Vanilla JS*

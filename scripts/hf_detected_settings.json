@@ -1,0 +1,68 @@
+[
+  {
+    "id": "hf.co/JetBrains/Mellum2-12B-A2.5B-Instruct-GGUF-Q4_K_M:Q4_K_M",
+    "repo": "JetBrains/Mellum2-12B-A2.5B-Instruct",
+    "settings": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "repeat_penalty": 1.1,
+      "min_p": 0.05
+    },
+    "snippet": "--- library_name: transformers language: - en pipeline_tag: text-generation model-index: - name: Mellum2 Instruct   results:   - task:       type: text-generation       name: Text Generation     dataset:       type: livecodebench       name: LiveCodeBench v6     metrics:     - name: pass@1       typ"
+  },
+  {
+    "id": "hf.co/JetBrains/Mellum2-12B-A2.5B-Thinking-GGUF-Q4_K_M:Q4_K_M",
+    "repo": "JetBrains/Mellum2-12B-A2.5B-Thinking",
+    "settings": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "repeat_penalty": 1.1,
+      "min_p": 0.05
+    },
+    "snippet": "--- library_name: transformers language: - en pipeline_tag: text-generation model-index: - name: Mellum2 Thinking   results:   - task:       type: text-generation       name: Text Generation     dataset:       type: livecodebench       name: LiveCodeBench v6     metrics:     - name: pass@1       typ"
+  },
+  {
+    "id": "hf.co/bigatuna/Qwen3.5-9b-Sushi-Coder-RL-GGUF:Q4_K_M",
+    "repo": "bigatuna/Qwen3.5-9b-Sushi-Coder-RL-GGUF",
+    "settings": {
+      "temperature": 0,
+      "top_p": 1,
+      "repeat_penalty": 1,
+      "min_p": 0
+    },
+    "snippet": "--- license: apache-2.0 language: - en pipeline_tag: text-generation base_model: bigatuna/Qwen3.5-9b-Sushi-Coder-RL base_model_relation: quantized datasets: - open-r1/codeforces-cots - nohurry/Opus-4.6-Reasoning-3000x-filtered tags: - gguf - llama.cpp - qwen3_5 - code - rl - atropos - multimodal ---"
+  },
+  {
+    "id": "hf.co/mradermacher/Qwen3.5-9B-Coder-GGUF:Q4_K_M",
+    "repo": "mradermacher/Qwen3.5-9B-Coder-GGUF",
+    "settings": {
+      "temperature": 0.2,
+      "top_p": 0.95,
+      "repeat_penalty": 1.1,
+      "min_p": 0.05
+    },
+    "snippet": "--- base_model: armand0e/Qwen3.5-9B-Coder datasets: - TeichAI/claude-4.5-opus-high-reasoning-250x - armand0e/badlogicgames-pi-mono-opus-filtered - armand0e/kimi-k2.6-claude-code-traces - TeichAI/Claude-Opus-4.6-Reasoning-887x - armand0e/minimax-m3-claude-code-traces - armand0e/claude-opus-4.8-pi-tra"
+  },
+  {
+    "id": "hf.co/sillykiwi/Aroow-Rust-Coder-9B-Q4_K_S-GGUF:Q4_K_S",
+    "repo": "sillykiwi/Aroow-Rust-Coder-9B-Q4_K_S-GGUF",
+    "settings": {
+      "temperature": 0.2,
+      "top_p": 0.95,
+      "repeat_penalty": 1.1,
+      "min_p": 0.05
+    },
+    "snippet": "--- library_name: transformers license: apache-2.0 license_link: https://www.apache.org/licenses/LICENSE-2.0 pipeline_tag: text-generation base_model: Convence/Aroow-Rust-Coder-9B language: - en tags: - rust - code - code-generation - code-completion - fill-in-the-middle - llama-cpp - gguf-my-repo -"
+  },
+  {
+    "id": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+    "repo": "empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF",
+    "settings": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "repeat_penalty": 1.05,
+      "min_p": 0.05
+    },
+    "snippet": "--- license: apache-2.0 base_model: empero-ai/Qwythos-9B-Claude-Mythos-5-1M base_model_relation: quantized language: - en pipeline_tag: image-text-to-text library_name: gguf tags: - gguf - llama.cpp - quantized - qwen3.5 - reasoning - uncensored - long-context - 1M-context - function-calling - multi"
+  }
+]

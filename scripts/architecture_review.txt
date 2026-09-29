@@ -1,0 +1,36 @@
+**FR‑010 – LAN File‑Sharing Server (Tokio + HTTP 206)**  
+
+| Architectural Principle | Rationale / Implementation Hint |
+|--------------------------|---------------------------------|
+| **Stateless request handling** | Keep the server state‑free; all file metadata (size, existence) is read on‑demand or cached per‑request. |
+| **Range‑aware response** | Use `hyper::body::BytesMut` + `tokio::io::AsyncReadExt` to stream the requested byte range. Return `206` with `Content‑Range: bytes X‑Y/Total` and `Accept‑Ranges: bytes`. |
+| **Path‑traversal guard** | Canonicalize the incoming path with `std::path::Path::canonicalize()` (or `absolutise` against a root directory) **before** any I/O. Reject if the canonical path does not start with the allowed root. |
+| **Zero‑copy file serving** | Open the file with `tokio::fs::File::open()` and use `tokio::io::copy_buf()` directly into the HTTP response body; avoid intermediate `Vec<u8>`. |
+| **LAN IP discovery & QR** | Bind the listener to `0.0.0.0` on the LAN interface, retrieve the local IP via `tokio::net::UdpSocket::bind("0.0.0.0:0")` + `socket2::Socket::get_local_addr()`. Encode `http://<IP>:<port>` into a QR code (e.g., `qrcode::encode`) and serve it at `/.well-known/qr.svg`. |
+| **Graceful shutdown** | Implement `tokio::signal::ctrl_c()` → `server.close_accept().await` → drain pending ranges before exiting. |
+| **Thread‑pool sizing** | Use Tokio’s default runtime; set `tokio::task::spawn_blocking` for any CPU‑bound path canonicalization to keep the async scheduler responsive. |
+
+### Edge‑Case Checklist (FR‑010)
+
+1. **Zero‑length range** (`Range: bytes=0-0`) – serve a single byte or `416` if file is empty.  
+2. **Overlapping/invalid ranges** (`Range: bytes=100-50`, `Range: bytes=-100`) – clamp to valid start/end, return `416` if start ≥ size.  
+3. **Multiple ranges** (`Range: bytes=0-49,100-149`) – not required by spec; either reject (`400`) or implement multipart/byteranges (complex).  
+4. **Concurrent range requests for the same file** – ensure the file handle is not closed while a range is being streamed; use `Arc<File>` or per‑request open.  
+5. **Symbolic links** – treat them as regular files only if the link points inside the allowed root; otherwise reject.  
+6. **Disk I/O errors** (e.g., ENOSPC, EIO) – return `500` with a JSON error payload; log the event.  
+7. **QR code size limits** – keep the SVG under a few hundredKB; if the LAN IP changes, regenerate on `/.well-known/qr.svg` GET.  
+8. **Firewall/NAT** – the server must be reachable on the LAN subnet; document the need for port forwarding or a static lease.  
+
+---
+
+**FR‑005 – Model Lifecycle (Ollama keep_alive)**  
+
+| Architectural Principle | Rationale / Implementation Hint |
+|--------------------------|---------------------------------|
+| **Explicit keep‑alive policy** | Store the `keep_alive` value per‑model in a `HashMap<ModelId, KeepAlive>` and enforce it on every inference request. |
+| **Unload on `keep_alive: 0`** | When a request arrives with `keep_alive: 0`, immediately call the Ollama API `DELETE /models/{id}` (or the equivalent CLI) and evict the model from the local cache. |
+| **Lazy load on `keep_alive: '15m'`** | If the model is not cached, issue `POST /models/{id}` with the `keep_alive` header set to `'15m'`. Cache the response and schedule a background task to unload after the timeout. |
+| **Timeout handling** | Use `tokio::time::timeout` around the Ollama HTTP calls; on timeout, log and retry once. |
+| **Resource accounting** | Track GPU/CPU usage per‑model (e.g., via `nvidia-smi` or `sysinfo`) and reject new requests if the allocated resources would exceed a configured limit. |
+| **Graceful degradation** | If unload fails (e.g., Ollama still holds the model), keep it in a “stale” state for a short grace period before forcing removal. |
+| **Observability

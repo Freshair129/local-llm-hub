@@ -1,0 +1,30 @@
+## 1️⃣ ภาพรวมและข้อดีของโค้ด (Strengths & Clean Architecture)
+
+| ลักษณะ | คำอธิบาย |
+|--------|-----------|
+| **โครงสร้างโมดูลเบื้องต้น** | ใช้ `import` เพื่อแยก `backend.js`, `model.js`, `observability.js`, `chat.js` – ทำให้ `main.js` เป็น “orchestrator” แทนที่จะทำหน้าที่หลากหลาย |
+| **Safe Tauri Core Invoker** | สร้าง `invoke` เป็น function‑wrapper ที่ fallback ให้ mock ใน dev environment – ไม่ต้องเสียเวลาตรวจสอบ `window.__TAURI__` ทุกครั้ง |
+| **State Management ขั้นพื้นฐาน** | `lanSharingActive` เป็น variable global แต่ใช้อย่างระมัดระวัง (เชื่อมโยงกับ UI) – แสดงว่าผู้พัฒนาเข้าใจว่าต้องติดตามสถานะ LAN Share |
+| **UI Feedback แบบทันที** | - `btnScanGguf` ใช้ `classList.add('loading')` และ `disabled` ก่อน/หลัง call <br> - `btnToggleLan` แก้ไข `textContent` และ `background` ให้เป็นแสดงผลทันที |
+| **การจัดการข้อผิดพลาด** | แต่ละ event listener มี `try / catch` และ `alert` – แม้ alert จะไม่เหมาะสำหรับ production แต่ช่วยให้ผู้ใช้รู้ว่าข้อผิดพลาดเกิดขึ้น |
+| **การเรียกใช้งาน Tauri Commands** | ใช้ `invoke('generate_proxy_config', …)` และ `invoke('start_lan_share', …)` – สอดคล้องกับ schema ของ backend อย่างถูกต้อง |
+| **การเรียกใช้งาน `syncAllModels` แบบซ้ำ** | ใน `setupNavigation` และใน `DOMContentLoaded` – ทำให้มีการเรียกใช้ซ้ำ แต่ไม่มีการ debounce หรือการประมวลผลแบบ batch – อาจทำให้ performance ลดลง |
+| **การสื่อสารแบบ “Push”** | `startTelemetryPolling` ทำงานต่อเวลา (2 s) – แสดงความสนใจในการสื่อสารแบบ real‑time |
+| **การใช้งาน `querySelector` แบบเบา** | ใช้ `document.querySelectorAll` และตรวจสอบ `if (btnX)` ก่อนเพิ่ม listener – ไม่ทำให้เกิด `Cannot read property 'addEventListener' of null` |
+
+**สรุปข้อดี**  
+- โค้ดมี **โครงสร้างเบื้องต้นที่สมบูรณ์** และ **การแยกความรับผิดชอบ** เป็นไปอย่างสมเหตุสมผล  
+- มี **การจัดการ UI feedback** ที่ดีและ **การรองรับ dev environment** แบบ safe  
+- การใช้งาน **Tauri commands** มีโครงสร้างที่ชัดเจนและมี **การจัดการข้อผิดพลาด** แบบพื้นฐาน  
+
+---
+
+## 2️⃣ ข้อสังเกตและจุดที่อาจเกิด Edge Cases / Bugs (Potential Issues, Race conditions, Error handling)
+
+| ประเด็น | รายละเอียด | ความเสี่ยง |
+|---------|------------|------------|
+| **Global variable `lanSharingActive`** | ใช้เป็น flag แบบ singleton แต่ไม่มีการ reset อย่างชัดเจนหลัง `stop_lan_share` (เพียงแค่เปลี่ยน `lanSharingActive = false`) – หากมีการเรียก `invoke` แบบผิดพลาดจะทำให้ flag ถูกตั้งค่าไม่ถูกต้อง | ถ้ามีการเรียก `start_lan_share` ได้หลายครั้งพริกตรงทัน `stop_lan_share` จะ reset flag แต่ UI อาจยังคงแสดง “Stop” ถึงแม้ว่า process ไม่ได้เริ่ม |
+| **การเรียก `syncAllModels` ซ้ำ** | ใน `DOMContentLoaded` และใน `btnSync` listener – หากการ sync ใช้เวลานาน `initChat` จะถูกเรียกอีกครั้งโดยไม่ได้รับผลลัพธ์เดิม | ถ้า `syncAllModels` ทำงานล่วงหน้าแล้วคือ `models` แล้ว `initChat` จะได้ `models` ซ้ำ – แต่อาจทำให้ UI ถูกอัปเดตซ้ำและสร้าง “flash” |
+| **การจัดการข้อผิดพลาดใน `invoke`** | ใช้ `try / catch` แต่ `alert` เป็นวิธีแสดงผล – ไม่มี logging, และ `invoke` อาจ Throw ที่นอกจาก `generate_proxy_config` (เช่น `start_lan_share`) | ผู้ใช้ไม่รู้ว่าข้อผิดพลาดเกิดขึ้นที่ backend แท้ ๆ ไป |
+| **การสร้าง `proxy-config-preview`** | เฉพาะ `previewEl.textContent = yaml` – ไม่มีการตรวจสอบว่า `yaml` เป็น string ที่ถูกต้อง | หาก backend คือ `null` หรือ `undefined` `textContent` จะทำให้ UI แสดง “null” |
+| **การใช้ `scanGguf

@@ -1,0 +1,158 @@
+```javascript
+// card.js - Sliding drawer for model cards with overlay, Esc key close, and markdown rendering
+
+import { invoke } from '@tauri-apps/api/core';
+import { on, off } from '@tauri-apps/api/event';
+
+let cardElement = null;
+let overlayElement = null;
+let isCardOpen = false;
+
+/**
+ * Opens a model card with the given ID
+ * @param {string} modelId - The ID of the model to display
+ */
+export async function openModelCard(modelId) {
+  if (isCardOpen) return;
+
+  // Create card element if it doesn't exist
+  if (!cardElement) {
+    cardElement = document.createElement('div');
+    cardElement.className = 'model-card sliding-drawer';
+    cardElement.innerHTML = `
+      <div class="card-header">
+        <h3>Model Details</h3>
+        <button class="close-btn" aria-label="Close card">&times;</button>
+      </div>
+      <div class="card-content markdown-content"></div>
+    `;
+    
+    // Add close button event listener
+    cardElement.querySelector('.close-btn').addEventListener('click', closeModelCard);
+    
+    // Append to body
+    document.body.appendChild(cardElement);
+  }
+
+  // Fetch and render markdown content
+  try {
+    const markdownContent = await invoke('get_model_markdown', { modelId });
+    cardElement.querySelector('.markdown-content').innerHTML = markdownContent;
+  } catch (error) {
+    cardElement.querySelector('.markdown-content').innerHTML = `<p>Error loading content: ${error.message}</p>`;
+  }
+
+  // Create overlay if it doesn't exist
+  if (!overlayElement) {
+    overlayElement = document.createElement('div');
+    overlayElement.className = 'card-overlay';
+    overlayElement.addEventListener('click', closeModelCard);
+    document.body.appendChild(overlayElement);
+  }
+
+  // Show card and overlay
+  cardElement.style.display = 'block';
+  overlayElement.style.display = 'block';
+  
+  // Position card (slide in from right)
+  cardElement.style.transform = 'translateX(0)';
+  
+  isCardOpen = true;
+
+  // Listen for Escape key to close card
+  const handleEscape = (event) => {
+    if (event.key === 'Escape') {
+      closeModelCard();
+    }
+  };
+  
+  document.addEventListener('keydown', handleEscape);
+  
+  // Store the event listener reference for cleanup
+  cardElement._escapeListener = handleEscape;
+}
+
+/**
+ * Closes the currently open model card
+ */
+export function closeModelCard() {
+  if (!isCardOpen || !cardElement) return;
+
+  // Slide card out to the right
+  cardElement.style.transform = 'translateX(100%)';
+  
+  // Remove from DOM after animation completes
+  setTimeout(() => {
+    if (cardElement && cardElement.parentNode) {
+      cardElement.parentNode.removeChild(cardElement);
+    }
+    if (overlayElement && overlayElement.parentNode) {
+      overlayElement.parentNode.removeChild(overlayElement);
+    }
+    
+    cardElement = null;
+    overlayElement = null;
+    isCardOpen = false;
+  }, 300); // Match CSS transition duration
+
+  // Remove Escape key listener
+  if (cardElement._escapeListener) {
+    document.removeEventListener('keydown', cardElement._escapeListener);
+    delete cardElement._escapeListener;
+  }
+}
+
+// Export for use in other modules
+export { openModelCard, closeModelCard };
+```
+
+```javascript
+// observability.js - Polls 'get_hardware_telemetry' every 2s and updates GPU/RAM gauge DOM elements
+
+import { invoke } from '@tauri-apps/api/core';
+
+let telemetryInterval = null;
+
+/**
+ * Starts polling for hardware telemetry every 2 seconds
+ */
+export async function startTelemetryPolling() {
+  if (telemetryInterval) return;
+
+  // Initial fetch
+  try {
+    const telemetry = await invoke('get_hardware_telemetry');
+    updateGaugeElements(telemetry);
+  } catch (error) {
+    console.error('Failed to fetch initial telemetry:', error);
+  }
+
+  // Set up interval
+  telemetryInterval = setInterval(async () => {
+    try {
+      const telemetry = await invoke('get_hardware_telemetry');
+      updateGaugeElements(telemetry);
+    } catch (error) {
+      console.error('Failed to fetch telemetry:', error);
+    }
+  }, 2000); // Poll every 2 seconds
+}
+
+/**
+ * Stops the telemetry polling
+ */
+export function stopTelemetryPolling() {
+  if (telemetryInterval) {
+    clearInterval(telemetryInterval);
+    telemetryInterval = null;
+  }
+}
+
+/**
+ * Updates the GPU and RAM gauge DOM elements with new telemetry data
+ * @param {Object} telemetry - The telemetry data from the backend
+ */
+function updateGaugeElements(telemetry) {
+  const gpuGauge = document.getElementById('gpu-gauge');
+  const ramGauge = document.getElementById('ram-gauge');
+

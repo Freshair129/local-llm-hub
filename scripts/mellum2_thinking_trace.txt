@@ -1,0 +1,17 @@
+We need to produce a thorough professional code review in Thai with English technical terms where appropriate. Cover four sections: strengths, potential issues, recommendations, summary score.
+
+We should analyze the code.
+
+Strengths: modular imports, uses Tauri invoke with fallback mock, event listeners, loading states, error handling, telemetry, etc.
+
+Potential issues: use of global variable lanSharingActive, not resetting after stop, possible race conditions when multiple clicks, syncAllModels called multiple times, initChat called each time, no debounce, no handling of missing DOM elements, mock invoke returns static data, not handling async errors in invoke, potential memory leaks if listeners added multiple times on DOMContentLoaded (but only once). Also using window.__TAURI__?.core?.invoke may be undefined in dev, but fallback works.
+
+Edge cases: if syncAllModels fails, initChat receives undefined, may cause errors. If scanGgufDirectory fails, alert but not log. If generate_proxy_config fails, alert but not log. LAN sharing toggle may not update UI if status missing download_urls.
+
+Recommendations: use a state management pattern, encapsulate UI updates, use async/await with try/catch, add debounce for sync, use proper error logging, avoid global variable, use constants for selectors, use Tauri command with proper error handling, add unit tests, use TypeScript for better type safety, ensure proper cleanup.
+
+Also note that Tauri v2 uses new APIs, maybe use invoke with `tauri::api::path`? Not needed.
+
+Provide code quality score out of 10 maybe.
+
+Now produce answer in Thai, with English terms where appropriate. Use bullet points, sections.
