@@ -19,6 +19,7 @@ import { initArena, populateArenaModelSelectors } from './js/arena.js';
 import { initDownloader } from './js/downloader.js';
 import { initUpdater } from './js/updater.js';
 import { initDigitalTwin } from './js/digital_twin_3d.js';
+import { initSensors, setupSensorsEvents, refreshSensorTree } from './js/sensors.js';
 
 // Safe Tauri Core Invoker
 const invoke = window.__TAURI__?.core?.invoke || (async (cmd, args) => {
@@ -173,6 +174,8 @@ function setupNavigation() {
         populateArenaModelSelectors();
       } else if (targetView === 'twin') {
         setTimeout(() => initDigitalTwin(), 60);
+      } else if (targetView === 'sensors') {
+        refreshSensorTree();
       }
     });
   });
@@ -309,6 +312,8 @@ window.addEventListener('DOMContentLoaded', async () => {
   initArena();
   initDownloader();
   initUpdater();
+  initSensors();
+  setupSensorsEvents();
   startTelemetryPolling(2000);
   triggerProbe();
   const models = await syncAllModels();

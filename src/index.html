@@ -221,6 +221,15 @@
             <span class="s-lbl">3D Digital Twin</span>
             <span class="ct">3D</span>
           </a>
+          <a class="nav-item s-item" id="nav-sensors" data-view="sensors" data-domain="observability" style="display:none;" title="Deep Hardware Sensors Tree (LHM 102+ Sensors)">
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+              </svg>
+            </span>
+            <span class="s-lbl">Deep Sensors Tree</span>
+            <span class="ct" id="rail-sensor-count">102</span>
+          </a>
 
           <!-- ══════ DOMAIN 5: NETWORK DISTRIBUTION ══════ -->
           <div class="s-grp" data-domain="network-distribution" style="display:none;">NETWORK DISTRIBUTION</div>
@@ -394,6 +403,96 @@
                   <div style="font-size:12px; color:var(--faint); margin-top:8px;">Simulated hardware activity LED blinking on blob read/write</div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- View: Deep Hardware Sensors Tree (102+ Real Sensors) -->
+          <div class="view-panel" id="view-sensors" style="display:none;">
+            <div class="view-header">
+              <div class="view-heading">
+                <h1>Hardware Telemetry &amp; Sensors Tree</h1>
+                <p>Live 102+ telemetry channels from LibreHardwareMonitor sidecar &amp; sysinfo (SPEC-002, ADR-007)</p>
+              </div>
+              <div class="view-actions" style="display:flex; align-items:center; gap:10px;">
+                <span class="badge" id="sensor-sidecar-status-pill" style="padding:6px 12px; font-weight:700;">
+                  ● LHM Sidecar Active
+                </span>
+                <button class="btn btn-primary" id="btn-refresh-sensors" style="font-size:12px; padding:8px 14px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                  </svg>
+                  Refresh Sensors
+                </button>
+              </div>
+            </div>
+
+            <!-- 5-Column Bento KPI Cards -->
+            <div class="storage-kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-top:20px;">
+              <div class="storage-kpi-tile">
+                <span class="metric-label">TOTAL CHANNELS</span>
+                <span class="metric-val cyan" id="kpi-sensor-total">102</span>
+                <div style="font-size:12px; color:var(--mut); margin-top:4px;">Live Sensor Tree</div>
+              </div>
+              <div class="storage-kpi-tile">
+                <span class="metric-label">CPU PACKAGE TEMP</span>
+                <span class="metric-val green" id="kpi-sensor-cputemp">48.0 °C</span>
+                <div style="font-size:12px; color:var(--mut); margin-top:4px;">Core i7-8700K (12T)</div>
+              </div>
+              <div class="storage-kpi-tile">
+                <span class="metric-label">GPU HOTSPOT TEMP</span>
+                <span class="metric-val amber" id="kpi-sensor-gpuhotspot">64.2 °C</span>
+                <div style="font-size:12px; color:var(--mut); margin-top:4px;">RTX 3060 12GB GDDR6</div>
+              </div>
+              <div class="storage-kpi-tile">
+                <span class="metric-label">+12V MAINBOARD RAIL</span>
+                <span class="metric-val cyan" id="kpi-sensor-v12">12.09 V</span>
+                <div style="font-size:12px; color:var(--mut); margin-top:4px;">Nuvoton NCT6795D</div>
+              </div>
+              <div class="storage-kpi-tile">
+                <span class="metric-label">COOLING FANS</span>
+                <span class="metric-val green" id="kpi-sensor-fans">3 Active</span>
+                <div style="font-size:12px; color:var(--mut); margin-top:4px;">PWM Fan Headers</div>
+              </div>
+            </div>
+
+            <!-- Filters Bar (Hardware & Sensor Kind) -->
+            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:12px; padding:16px 20px; margin:20px 0; display:flex; flex-direction:column; gap:12px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                <!-- Hardware Filter Pills -->
+                <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+                  <span style="font-size:12px; font-weight:700; color:var(--mut); margin-right:4px;">HARDWARE:</span>
+                  <button type="button" class="btn btn-ghost sensor-hw-filter active" data-hw="all" style="padding:4px 10px; font-size:11px;">All</button>
+                  <button type="button" class="btn btn-ghost sensor-hw-filter" data-hw="intel" style="padding:4px 10px; font-size:11px;">CPU (i7-8700K)</button>
+                  <button type="button" class="btn btn-ghost sensor-hw-filter" data-hw="nvidia" style="padding:4px 10px; font-size:11px;">GPU (RTX 3060)</button>
+                  <button type="button" class="btn btn-ghost sensor-hw-filter" data-hw="nuvoton" style="padding:4px 10px; font-size:11px;">Motherboard</button>
+                  <button type="button" class="btn btn-ghost sensor-hw-filter" data-hw="storage" style="padding:4px 10px; font-size:11px;">Storage</button>
+                  <button type="button" class="btn btn-ghost sensor-hw-filter" data-hw="system" style="padding:4px 10px; font-size:11px;">RAM &amp; Net</button>
+                </div>
+
+                <!-- Search Input -->
+                <div style="position:relative; min-width:220px;">
+                  <input type="text" id="sensor-search-input" placeholder="Search sensor (e.g. fan, vcore)..." style="width:100%; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.12); border-radius:6px; padding:6px 12px; font-size:12px; color:#fff; outline:none;" />
+                </div>
+              </div>
+
+              <!-- Sensor Kind Filter Pills -->
+              <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap; border-top:1px solid rgba(255,255,255,0.04); padding-top:10px;">
+                <span style="font-size:12px; font-weight:700; color:var(--mut); margin-right:4px;">TYPE:</span>
+                <button type="button" class="btn btn-ghost sensor-kind-filter active" data-kind="all" style="padding:3px 8px; font-size:11px;">All Types</button>
+                <button type="button" class="btn btn-ghost sensor-kind-filter" data-kind="temperature" style="padding:3px 8px; font-size:11px;">Temperature (°C)</button>
+                <button type="button" class="btn btn-ghost sensor-kind-filter" data-kind="load" style="padding:3px 8px; font-size:11px;">Load (%)</button>
+                <button type="button" class="btn btn-ghost sensor-kind-filter" data-kind="voltage" style="padding:3px 8px; font-size:11px;">Voltage (V)</button>
+                <button type="button" class="btn btn-ghost sensor-kind-filter" data-kind="fan" style="padding:3px 8px; font-size:11px;">Fan (RPM)</button>
+                <button type="button" class="btn btn-ghost sensor-kind-filter" data-kind="power" style="padding:3px 8px; font-size:11px;">Power (W)</button>
+                <button type="button" class="btn btn-ghost sensor-kind-filter" data-kind="clock" style="padding:3px 8px; font-size:11px;">Clock (MHz)</button>
+                <button type="button" class="btn btn-ghost sensor-kind-filter" data-kind="data" style="padding:3px 8px; font-size:11px;">Memory &amp; Data</button>
+              </div>
+            </div>
+
+            <!-- Dynamic Grouped Sensor Cards Grid -->
+            <div id="sensor-grid-container">
+              <!-- Rendered dynamically by sensors.js -->
             </div>
           </div>
 

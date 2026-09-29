@@ -1072,3 +1072,12 @@ body::after {
   box-shadow: 0 0 12px var(--green-glow);
 }
 
+/* Sensor Filter Pills Active Styles */
+.sensor-hw-filter.active,
+.sensor-kind-filter.active {
+  background: rgba(124, 242, 107, 0.18) !important;
+  color: var(--green) !important;
+  border-color: rgba(124, 242, 107, 0.4) !important;
+  font-weight: 700 !important;
+}
+

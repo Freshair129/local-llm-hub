@@ -25,6 +25,7 @@ Domain นี้รับผิดชอบ **การแสดงสถาน�
 | FEAT-010 | GPU VRAM Monitor | Active | ❌ |
 | FEAT-011 | RAM Monitor | Active | ❌ |
 | FEAT-018 | 3D Hardware Digital Twin | Active | ❌ |
+| FEAT-020 | Deep Hardware Sensors Tree | Active | ❌ |
 
 ---
 

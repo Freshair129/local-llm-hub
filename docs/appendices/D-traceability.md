@@ -18,7 +18,7 @@
 | FR-003 | Duplicate Detection | Rust: `dedup_models` | `src-tauri/src/commands/models.rs` | `tests/test_dedup.rs` ✅ |
 | FR-004 | Model Card | Rust: `read_model_card` | `src-tauri/src/commands/modelcard.rs` | `tests/test_modelcard.rs` ✅ |
 | FR-005 | Start/Stop Model | Rust: `start_model`, `stop_model` | `src-tauri/src/commands/backends.rs` | `tests/test_model_control.rs` ✅ |
-| FR-006 | GPU Monitor | Rust: `get_gpu_stats` | `src-tauri/src/commands/gpu.rs` | `tests/test_gpu_monitor.rs` ✅ |
+| FR-006 | GPU & Hardware Sensors Monitor | Rust: `get_hardware_telemetry`, `get_sensor_tree`, `get_lhm_status`, `set_fan_duty` | `src-tauri/src/sensors/`, `src/js/sensors.js` | `tests::test_sensor_hub_sysinfo_baseline` ✅ |
 | FR-007 | Chat Interface | Rust: `execute_chat` + JS: `chat.js` | `src-tauri/src/commands/chat.rs` | `tests/test_chat.rs` ✅ |
 | FR-008 | LiteLLM Proxy | Rust: `generate_litellm_config` | `src-tauri/src/commands/proxy.rs` | `tests/test_proxy.rs` ✅ |
 | FR-009 | GGUF Scanner | Rust: `scan_directory_for_gguf` | `src-tauri/src/commands/scanner.rs` | `tests/test_scanner.rs` ✅ |

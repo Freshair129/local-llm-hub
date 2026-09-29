@@ -2,6 +2,7 @@
 target/
 src-tauri/target/
 *.pdb
+sidecar/*.exe
 
 # Local Model Binaries & Large Weights
 models/

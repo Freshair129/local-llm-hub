@@ -3,11 +3,28 @@
 
 pub mod commands;
 pub mod models;
+pub mod sensors;
 pub mod state;
 
 use models::types::ProbeResult;
+use sensors::SensorProvider;
 use state::{AppState, BackendConfig, SharedAppState};
+use std::sync::Arc;
 use tauri::State;
+
+pub struct SensorHub {
+    pub sysinfo: sensors::sysinfo_provider::SysinfoProvider,
+    pub lhm: sensors::lhm_provider::LhmProvider,
+}
+
+impl Default for SensorHub {
+    fn default() -> Self {
+        Self {
+            sysinfo: sensors::sysinfo_provider::SysinfoProvider::new(),
+            lhm: sensors::lhm_provider::LhmProvider::new(),
+        }
+    }
+}
 
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -313,13 +330,61 @@ fn offload_storage_blob(
     commands::storage::execute_blob_offload(&blob_hash, &b_root, &s_root)
 }
 
+// trace:implements FR-006
+#[tauri::command]
+fn get_sensor_tree(
+    sensor_hub: State<'_, Arc<SensorHub>>,
+) -> Result<Vec<sensors::SensorReading>, String> {
+    let mut readings = Vec::new();
+    readings.extend(sensor_hub.sysinfo.read_all());
+    if sensor_hub.lhm.available() {
+        readings.extend(sensor_hub.lhm.read_all());
+    }
+    Ok(readings)
+}
+
+// trace:implements FR-006
+#[tauri::command]
+fn get_lhm_status(sensor_hub: State<'_, Arc<SensorHub>>) -> Result<serde_json::Value, String> {
+    let available = sensor_hub.lhm.available();
+    let note = if available {
+        "LibreHardwareMonitor sidecar active (102+ deep sensors connected)"
+    } else {
+        "LHM sidecar not active — baseline sysinfo active"
+    };
+    Ok(serde_json::json!({
+        "available": available,
+        "note": note,
+        "sidecar_binary": sensors::lhm_provider::locate_sidecar().map(|p| p.to_string_lossy().to_string())
+    }))
+}
+
+// trace:implements FR-006
+#[tauri::command]
+fn set_fan_duty(
+    sensor_hub: State<'_, Arc<SensorHub>>,
+    id: String,
+    percent: f64,
+) -> Result<String, String> {
+    if !sensor_hub.lhm.available() {
+        return Err("LHM sidecar unavailable".to_string());
+    }
+    if sensor_hub.lhm.set_fan(&id, percent) {
+        Ok(format!("Fan {} set to {:.0}%", id, percent))
+    } else {
+        Err(format!("Fan control failed for {}", id))
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let initial_state = state::create_shared_state();
+    let sensor_hub = Arc::new(SensorHub::default());
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .manage(initial_state)
+        .manage(sensor_hub)
         .invoke_handler(tauri::generate_handler![
             greet,
             get_app_state,
@@ -334,6 +399,9 @@ pub fn run() {
             stop_model,
             pull_model,
             get_hardware_telemetry,
+            get_sensor_tree,
+            get_lhm_status,
+            set_fan_duty,
             send_chat_message,
             generate_proxy_config,
             get_proxy_status,
@@ -379,6 +447,34 @@ mod tests {
         assert_eq!(results[1].backend, "vllm");
         assert_eq!(results[2].backend, "hf");
         assert_eq!(results[3].backend, "gguf");
+    }
+
+    // trace:verifies FR-006
+    #[test]
+    fn test_sensor_hub_sysinfo_baseline() {
+        use crate::sensors::SensorProvider;
+        let hub = crate::SensorHub::default();
+        assert!(hub.sysinfo.available());
+        let readings = hub.sysinfo.read_all();
+        assert!(!readings.is_empty(), "sysinfo should return baseline sensors");
+        assert!(readings.iter().any(|r| r.kind == "load"));
+        assert!(readings.iter().any(|r| r.kind == "data"));
+    }
+
+    // trace:verifies FR-006
+    #[test]
+    fn test_sensor_reading_serialization() {
+        let reading = crate::sensors::SensorReading {
+            id: "/test/temp/0".to_string(),
+            name: "CPU Package".to_string(),
+            hw: "Intel Core i7-8700K".to_string(),
+            kind: "temperature".to_string(),
+            value: 45.5,
+            unit: "°C".to_string(),
+        };
+        let json = serde_json::to_string(&reading).expect("serialize reading");
+        let parsed: crate::sensors::SensorReading = serde_json::from_str(&json).expect("deserialize reading");
+        assert_eq!(parsed, reading);
     }
 }
 
