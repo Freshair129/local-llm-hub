@@ -85,13 +85,14 @@
           <b>Local LLM Hub</b>
         </div>
 
-        <!-- Centered Parent Tabs (GHT 2-Tier Master Switcher) -->
+        <!-- Centered Parent Tabs: DOMAINS (docs/STRUCTURE.md) -->
         <div class="tabset" id="ght-parent-tabset">
-          <button type="button" class="ptab on" data-parent="models">Fleet &amp; Models</button>
-          <button type="button" class="ptab" data-parent="telemetry">G-Telemetry</button>
-          <button type="button" class="ptab" data-parent="gateway">Gateway &amp; Chat</button>
-          <button type="button" class="ptab" data-parent="storage">Storage Offload</button>
-          <button type="button" class="ptab" data-parent="studio">Design Studio</button>
+          <button type="button" class="ptab on" data-domain="model-management">Model Management</button>
+          <button type="button" class="ptab" data-domain="backend-integration">Backend Integration</button>
+          <button type="button" class="ptab" data-domain="inference-gateway">Inference Gateway</button>
+          <button type="button" class="ptab" data-domain="observability">Observability</button>
+          <button type="button" class="ptab" data-domain="network-distribution">Network Share</button>
+          <button type="button" class="ptab" data-domain="design-studio">Design Studio</button>
         </div>
 
         <!-- Right Topbar Controls & Observability -->
@@ -130,11 +131,11 @@
 
       <!-- App Shell: Grid Layout with Floating Island Rail + Main Content -->
       <div class="shell" id="app-shell">
-        <!-- Floating Collapsible Island Rail Sidebar (52px ⟷ 260px) -->
+        <!-- Floating Collapsible Island Rail Sidebar (50px ⟷ 260px) -->
         <aside class="sidebar" id="sidebar" aria-label="Command Center Rail">
           <!-- Rail Top Header: Breadcrumb & Pin Button -->
           <div class="s-railtop">
-            <div class="s-crumb" id="sidebar-crumb">HUB / <b>MODELS</b></div>
+            <div class="s-crumb" id="sidebar-crumb">MODEL MANAGEMENT / <b>MODEL CATALOG</b></div>
             <button type="button" class="s-pin" id="sidebar-pin-btn" title="Pin / Unpin Sidebar Rail">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="12" y1="17" x2="12" y2="22"></line>
@@ -143,9 +144,9 @@
             </button>
           </div>
 
-          <!-- Group: FLEET & MODELS -->
-          <div class="s-grp" data-group="models">FLEET & MODELS</div>
-          <a class="nav-item s-item active" id="nav-models" data-view="models" data-parent="models" title="Unified Model Catalog">
+          <!-- ══════ DOMAIN 1: MODEL MANAGEMENT ══════ -->
+          <div class="s-grp" data-domain="model-management">MODEL MANAGEMENT</div>
+          <a class="nav-item s-item active" id="nav-models" data-view="models" data-domain="model-management" title="Unified Model Catalog (FR-002)">
             <span class="ic">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
@@ -153,10 +154,10 @@
                 <line x1="12" y1="17" x2="12" y2="21"></line>
               </svg>
             </span>
-            <span class="s-lbl">Model Manager</span>
+            <span class="s-lbl">Model Catalog</span>
             <span class="ct" id="rail-model-count">0</span>
           </a>
-          <a class="nav-item s-item" id="nav-stats" data-view="stats" data-parent="models" title="Execution Analytics & ROI">
+          <a class="nav-item s-item" id="nav-stats" data-view="stats" data-domain="model-management" title="Execution Analytics & ROI (FR-003)">
             <span class="ic">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -164,9 +165,9 @@
                 <line x1="6" y1="20" x2="6" y2="14"></line>
               </svg>
             </span>
-            <span class="s-lbl">Analytics & ROI</span>
+            <span class="s-lbl">Analytics &amp; ROI</span>
           </a>
-          <a class="nav-item s-item" id="nav-arena" data-view="arena" data-parent="models" title="Model Arena (Side-by-side Battle)">
+          <a class="nav-item s-item" id="nav-arena" data-view="arena" data-domain="model-management" title="Model Arena (Side-by-side Battle FR-011)">
             <span class="ic">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -177,7 +178,7 @@
             </span>
             <span class="s-lbl">Model Arena</span>
           </a>
-          <a class="nav-item s-item" id="nav-downloader" data-view="downloader" data-parent="models" title="Downloader">
+          <a class="nav-item s-item" id="nav-downloader" data-view="downloader" data-domain="model-management" title="Model Downloader (FR-012)">
             <span class="ic">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -188,9 +189,53 @@
             <span class="s-lbl">Downloader</span>
           </a>
 
-          <!-- Group: HARDWARE & SENSORS -->
-          <div class="s-grp" data-group="telemetry">HARDWARE & SENSORS</div>
-          <a class="nav-item s-item" id="nav-gpu" data-view="gpu" data-parent="telemetry" title="Hardware & VRAM Observability">
+          <!-- ══════ DOMAIN 2: BACKEND INTEGRATION ══════ -->
+          <div class="s-grp" data-domain="backend-integration" style="display:none;">BACKEND INTEGRATION</div>
+          <a class="nav-item s-item" id="nav-storage" data-view="storage" data-domain="backend-integration" style="display:none;" title="Storage Symlink Offload (FR-015)">
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M 4 20 L 20 20 A 2 2 0 0 0 22 18 L 22 8 A 2 2 0 0 0 20 6 L 13 6 L 11 3 L 4 3 A 2 2 0 0 0 2 5 L 2 18 A 2 2 0 0 0 4 20 Z"></path>
+              </svg>
+            </span>
+            <span class="s-lbl">Storage Offload</span>
+            <span class="ct">FR-015</span>
+          </a>
+          <a class="nav-item s-item" id="nav-backends" data-view="backends" data-domain="backend-integration" style="display:none;" title="Backend Adapters &amp; Prober (FR-001)">
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+                <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+                <line x1="6" y1="6" x2="6.01" y2="6"></line>
+                <line x1="6" y1="18" x2="6.01" y2="18"></line>
+              </svg>
+            </span>
+            <span class="s-lbl">Backend Adapters</span>
+            <span class="ct">FR-001</span>
+          </a>
+
+          <!-- ══════ DOMAIN 3: INFERENCE GATEWAY ══════ -->
+          <div class="s-grp" data-domain="inference-gateway" style="display:none;">INFERENCE GATEWAY</div>
+          <a class="nav-item s-item" id="nav-gateway" data-view="gateway" data-domain="inference-gateway" style="display:none;" title="LiteLLM Gateway Proxy (FR-008)">
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+            </span>
+            <span class="s-lbl">LiteLLM Gateway</span>
+            <span class="ct">:4000</span>
+          </a>
+          <a class="nav-item s-item" id="nav-chat" data-view="chat" data-domain="inference-gateway" style="display:none;" title="Playground Chat (FR-007)">
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </span>
+            <span class="s-lbl">Playground Chat</span>
+          </a>
+
+          <!-- ══════ DOMAIN 4: OBSERVABILITY ══════ -->
+          <div class="s-grp" data-domain="observability" style="display:none;">OBSERVABILITY</div>
+          <a class="nav-item s-item" id="nav-gpu" data-view="gpu" data-domain="observability" style="display:none;" title="Hardware &amp; VRAM Observability (FR-006)">
             <span class="ic">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="4" y="4" width="16" height="16" rx="2"></rect>
@@ -205,29 +250,13 @@
                 <line x1="1" y1="14" x2="4" y2="14"></line>
               </svg>
             </span>
-            <span class="s-lbl">Hardware & VRAM</span>
+            <span class="s-lbl">Hardware &amp; VRAM</span>
             <span class="ct">12GB</span>
           </a>
 
-          <!-- Group: GATEWAY & CHAT -->
-          <div class="s-grp" data-group="gateway">GATEWAY & CHAT</div>
-          <a class="nav-item s-item" id="nav-gateway" data-view="gateway" data-parent="gateway" title="LiteLLM Gateway Proxy">
-            <span class="ic">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-              </svg>
-            </span>
-            <span class="s-lbl">LiteLLM Gateway</span>
-          </a>
-          <a class="nav-item s-item" id="nav-chat" data-view="chat" data-parent="gateway" title="Playground Chat">
-            <span class="ic">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-              </svg>
-            </span>
-            <span class="s-lbl">Playground Chat</span>
-          </a>
-          <a class="nav-item s-item" id="nav-share" data-view="share" data-parent="gateway" title="LAN Drive Share">
+          <!-- ══════ DOMAIN 5: NETWORK DISTRIBUTION ══════ -->
+          <div class="s-grp" data-domain="network-distribution" style="display:none;">NETWORK DISTRIBUTION</div>
+          <a class="nav-item s-item" id="nav-share" data-view="share" data-domain="network-distribution" style="display:none;" title="LAN Drive Share (FR-010)">
             <span class="ic">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="18" cy="5" r="3"></circle>
@@ -238,29 +267,18 @@
               </svg>
             </span>
             <span class="s-lbl">LAN Drive Share</span>
+            <span class="ct">:8080</span>
           </a>
 
-          <!-- Group: STORAGE & BLOBS -->
-          <div class="s-grp" data-group="storage">STORAGE & BLOBS</div>
-          <a class="nav-item s-item" id="nav-storage" data-view="storage" data-parent="storage" title="Storage Symlink Offload (FR-015)">
-            <span class="ic">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M 4 20 L 20 20 A 2 2 0 0 0 22 18 L 22 8 A 2 2 0 0 0 20 6 L 13 6 L 11 3 L 4 3 A 2 2 0 0 0 2 5 L 2 18 A 2 2 0 0 0 4 20 Z"></path>
-              </svg>
-            </span>
-            <span class="s-lbl">Storage Offload</span>
-            <span class="ct">FR-015</span>
-          </a>
-
-          <!-- Group: DESIGN STUDIO -->
-          <div class="s-grp" data-group="studio">DESIGN STUDIO</div>
-          <a class="nav-item s-item" id="nav-design-studio" data-view="design-studio" data-parent="studio" title="Design Studio & Style Inspector">
+          <!-- ══════ DOMAIN 6: DESIGN STUDIO ══════ -->
+          <div class="s-grp" data-domain="design-studio" style="display:none;">DESIGN STUDIO</div>
+          <a class="nav-item s-item" id="nav-design-studio" data-view="design-studio" data-domain="design-studio" style="display:none;" title="Theme &amp; Layout Studio">
             <span class="ic">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
               </svg>
             </span>
-            <span class="s-lbl">Design Studio</span>
+            <span class="s-lbl">Theme &amp; Layouts</span>
           </a>
 
           <!-- Bottom Mascot Avatar in Rail -->
@@ -811,6 +829,79 @@
 
               <div id="studio-storage-result" style="display:none; margin-top:20px; background:rgba(0,0,0,0.3); border:1px solid var(--glass-border); border-radius:12px; padding:16px;">
                 <!-- Filled dynamically if scan is clicked -->
+              </div>
+            </div>
+          </div>
+
+          <!-- View: Backend Adapters & Probers (FR-001) -->
+          <div class="view-panel" id="view-backends" style="display:none;">
+            <div class="view-header">
+              <div class="view-heading">
+                <h1>Backend Adapters &amp; Engine Probers</h1>
+                <p>Real-time probing, health telemetry, and endpoints for local LLM engines (FR-001)</p>
+              </div>
+              <div class="view-actions">
+                <button class="btn btn-primary" id="btn-probe-backends-main" onclick="window.__triggerProbe && window.__triggerProbe()">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="23 4 23 10 17 10"></polyline>
+                    <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                  </svg>
+                  Re-Probe All Backends
+                </button>
+              </div>
+            </div>
+
+            <!-- 3 Bento Backend Cards -->
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px; margin-top:20px;">
+              <!-- Ollama Card -->
+              <div class="model-card" style="padding:22px; border-color:rgba(124,242,107,0.3);">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                  <span style="font-weight:700; font-size:16px; color:#fff;">Ollama Engine</span>
+                  <span class="badge" style="background:rgba(124,242,107,0.15); color:var(--green);">● Online</span>
+                </div>
+                <div style="font-size:12px; color:var(--mut); margin-bottom:10px;">Primary Local Daemon (RTX 3060 CUDA)</div>
+                <div style="font-family:var(--mono); font-size:12px; background:rgba(0,0,0,0.4); padding:8px 12px; border-radius:6px; color:var(--green);">
+                  http://127.0.0.1:11434
+                </div>
+                <div style="margin-top:14px; font-size:12px; color:var(--mut); line-height:1.6;">
+                  <div>• Latency: <b style="color:var(--tx);">~8 ms</b></div>
+                  <div>• Model Root: <b style="color:var(--tx);">O:\.ollama\models</b></div>
+                  <div>• GPU Offload: <b style="color:var(--green);">Layer Offloading Enabled</b></div>
+                </div>
+              </div>
+
+              <!-- vLLM Card -->
+              <div class="model-card" style="padding:22px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                  <span style="font-weight:700; font-size:16px; color:#fff;">vLLM High-Throughput</span>
+                  <span class="badge" style="color:var(--faint);">○ Standby</span>
+                </div>
+                <div style="font-size:12px; color:var(--mut); margin-bottom:10px;">PagedAttention Inference Engine</div>
+                <div style="font-family:var(--mono); font-size:12px; background:rgba(0,0,0,0.4); padding:8px 12px; border-radius:6px; color:var(--faint);">
+                  http://127.0.0.1:8000
+                </div>
+                <div style="margin-top:14px; font-size:12px; color:var(--mut); line-height:1.6;">
+                  <div>• Status: <b style="color:var(--faint);">Offline / Standby</b></div>
+                  <div>• Protocol: <b style="color:var(--tx);">OpenAI v1 Compatible</b></div>
+                  <div>• Target: <b style="color:var(--tx);">Continuous Batching</b></div>
+                </div>
+              </div>
+
+              <!-- HuggingFace Hub Cache Card -->
+              <div class="model-card" style="padding:22px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                  <span style="font-weight:700; font-size:16px; color:#fff;">HuggingFace Cache</span>
+                  <span class="badge" style="background:rgba(91,192,235,0.15); color:var(--cyan);">● Probed</span>
+                </div>
+                <div style="font-size:12px; color:var(--mut); margin-bottom:10px;">Local Safetensors &amp; GGUF Weights</div>
+                <div style="font-family:var(--mono); font-size:12px; background:rgba(0,0,0,0.4); padding:8px 12px; border-radius:6px; color:var(--cyan);">
+                  ~/.cache/huggingface/hub
+                </div>
+                <div style="margin-top:14px; font-size:12px; color:var(--mut); line-height:1.6;">
+                  <div>• Parser: <b style="color:var(--tx);">ModelCard Reader (FR-004)</b></div>
+                  <div>• Auto-Detection: <b style="color:var(--tx);">Active</b></div>
+                  <div>• Symlink Ready: <b style="color:var(--cyan);">Yes</b></div>
+                </div>
               </div>
             </div>
           </div>

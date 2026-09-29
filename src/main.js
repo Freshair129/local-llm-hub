@@ -85,26 +85,49 @@ function setupNavigation() {
     } catch (err) {}
   }
 
-  // Parent Tab Switching (Fleet & Models, G-Telemetry, Gateway, Storage, Design Studio)
+  const groupHeaders = document.querySelectorAll('.s-grp');
+
+  // Domain Switcher: Topbar tab filters Sidebar modules to ONLY that domain
+  function switchDomain(domainKey) {
+    parentTabs.forEach(t => {
+      const isTarget = t.getAttribute('data-domain') === domainKey;
+      t.classList.toggle('active', isTarget);
+      t.classList.toggle('on', isTarget);
+    });
+
+    groupHeaders.forEach(grp => {
+      const matches = grp.getAttribute('data-domain') === domainKey;
+      grp.style.display = matches ? 'block' : 'none';
+    });
+
+    let firstItem = null;
+    navItems.forEach(item => {
+      const matches = item.getAttribute('data-domain') === domainKey;
+      if (matches) {
+        item.style.display = 'flex';
+        if (!firstItem) firstItem = item;
+      } else {
+        item.style.display = 'none';
+        item.classList.remove('active');
+      }
+    });
+
+    if (firstItem) {
+      firstItem.click();
+    }
+  }
+
+  // Parent Domain Tabs Switching
   parentTabs.forEach(tab => {
     tab.addEventListener('click', () => {
-      parentTabs.forEach(t => {
-        t.classList.remove('active');
-        t.classList.remove('on');
-      });
-      tab.classList.add('active');
-      tab.classList.add('on');
-
-      const parentKey = tab.getAttribute('data-parent');
-      // Highlight matching group or find first child
-      const matchingChild = document.querySelector(`.nav-item[data-parent="${parentKey}"]`);
-      if (matchingChild) {
-        matchingChild.click();
+      const domainKey = tab.getAttribute('data-domain');
+      if (domainKey) {
+        switchDomain(domainKey);
       }
     });
   });
 
-  // Rail Item Clicks
+  // Rail Item Clicks (Modules inside active domain)
   navItems.forEach(item => {
     item.addEventListener('click', (e) => {
       e.preventDefault();
@@ -112,17 +135,19 @@ function setupNavigation() {
       item.classList.add('active');
 
       const targetView = item.getAttribute('data-view');
-      const parentCat = item.getAttribute('data-parent') || 'HUB';
-      const labelText = item.querySelector('.s-lbl')?.textContent || item.querySelector('.nav-item-text')?.textContent || targetView;
+      const domainKey = item.getAttribute('data-domain') || 'model-management';
+      const domainTab = document.querySelector(`.ptab[data-domain="${domainKey}"]`);
+      const domainTitle = domainTab?.textContent?.trim() || domainKey.toUpperCase();
+      const labelText = item.querySelector('.s-lbl')?.textContent?.trim() || targetView;
 
-      // Update Breadcrumb (GHT Style: HUB / PARENT / CHILD)
+      // Update Breadcrumb: DOMAIN / MODULE
       if (crumb) {
-        crumb.innerHTML = `${parentCat.toUpperCase()} / <b>${labelText.toUpperCase()}</b>`;
+        crumb.innerHTML = `${domainTitle.toUpperCase()} / <b>${labelText.toUpperCase()}</b>`;
       }
 
-      // Sync active state on top parent tabs
+      // Sync active state on top domain tabs
       parentTabs.forEach(t => {
-        const matches = t.getAttribute('data-parent') === parentCat;
+        const matches = t.getAttribute('data-domain') === domainKey;
         t.classList.toggle('active', matches);
         t.classList.toggle('on', matches);
       });
@@ -149,6 +174,13 @@ function setupNavigation() {
       }
     });
   });
+
+  // Expose helper globally
+  window.__switchDomain = switchDomain;
+  window.__triggerProbe = triggerProbe;
+
+  // Initialize with Domain 1: Model Management
+  switchDomain('model-management');
 
   // Agent Mascot Avatar Interaction
   const mascotAvatar = document.getElementById('agent-mascot-avatar');
