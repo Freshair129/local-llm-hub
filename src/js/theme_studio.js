@@ -12,15 +12,38 @@ export const THEMES = [
 ];
 
 export function initThemeStudio() {
-  // Load saved theme from localStorage
-  const savedTheme = localStorage.getItem('local-llm-hub-theme') || 'default';
-  applyTheme(savedTheme);
+  // Load saved layout mode
+  const savedLayout = localStorage.getItem('local-llm-hub-layout') || 'classic';
+  applyNavLayout(savedLayout);
 
   // Wire up theme pills in header
   setupHeaderThemeSwitcher();
 
   // Wire up Design Studio view interactions
   setupDesignStudioView();
+}
+
+export function applyNavLayout(layoutMode) {
+  const root = document.documentElement;
+  if (layoutMode === '2tier') {
+    root.setAttribute('data-nav-layout', '2tier');
+  } else {
+    root.removeAttribute('data-nav-layout');
+  }
+  localStorage.setItem('local-llm-hub-layout', layoutMode);
+
+  const btnToggle = document.getElementById('btn-toggle-layout-mode');
+  if (btnToggle) {
+    if (layoutMode === '2tier') {
+      btnToggle.textContent = '📐 กำลังใช้โหมด: GHT 2-Tier Rail (คลิกเพื่อกลับไปใช้ Classic Sidebar)';
+      btnToggle.style.background = '#7cf26b';
+      btnToggle.style.color = '#000';
+    } else {
+      btnToggle.textContent = '🔀 สลับโหมด Layout: [Classic Sidebar ⟷ GHT 2-Tier]';
+      btnToggle.style.background = '';
+      btnToggle.style.color = '';
+    }
+  }
 }
 
 export function applyTheme(themeId) {
@@ -60,9 +83,36 @@ function setupHeaderThemeSwitcher() {
       showToast(`สลับธีมเป็น: ${THEMES.find(t => t.id === themeId)?.name}`);
     });
   });
+
+  // Wire GHT master bar tabs
+  document.querySelectorAll('.master-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.master-tab-btn').forEach(b => b.classList.remove('active-master'));
+      btn.classList.add('active-master');
+      const cat = btn.getAttribute('data-category');
+      
+      // Auto route to view
+      if (cat === 'models') document.getElementById('nav-models')?.click();
+      else if (cat === 'telemetry') document.getElementById('nav-gpu')?.click();
+      else if (cat === 'gateway') document.getElementById('nav-gateway')?.click();
+      else if (cat === 'storage') document.getElementById('nav-design-studio')?.click();
+      else if (cat === 'studio') document.getElementById('nav-design-studio')?.click();
+    });
+  });
 }
 
 function setupDesignStudioView() {
+  // Wire layout toggle button
+  const btnToggleLayout = document.getElementById('btn-toggle-layout-mode');
+  if (btnToggleLayout) {
+    btnToggleLayout.addEventListener('click', () => {
+      const current = localStorage.getItem('local-llm-hub-layout') || 'classic';
+      const next = current === 'classic' ? '2tier' : 'classic';
+      applyNavLayout(next);
+      showToast(`สลับโครงสร้าง Layout เป็น: ${next === '2tier' ? 'GHT 2-Tier Command Bar (รางเมนูย่อขยายได้)' : 'Classic Flat Sidebar'}`);
+    });
+  }
+
   const chooseButtons = document.querySelectorAll('.btn-choose-style');
   chooseButtons.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -109,7 +159,7 @@ function setupDesignStudioView() {
             </div>
             <div style="margin-top:14px; display:flex; justify-content:flex-end;">
               <button class="btn btn-primary" id="btn-quick-offload" style="font-size:12px; padding:6px 14px;">
-                🚀 ย้าย Blobs ที่เหลือไป G:\.ollama_blobs_root (คืนพื้นที่ 18.62 GB)
+                🚀 ย้าย Blobs ที่เหลือไป G:\\.ollama_blobs_root (คืนพื้นที่ 18.62 GB)
               </button>
             </div>
           `;
@@ -122,3 +172,4 @@ function setupDesignStudioView() {
     });
   }
 }
+
