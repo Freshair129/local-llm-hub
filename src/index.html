@@ -78,51 +78,41 @@
 
   <body>
     <div class="appFrame" id="app-root">
-      <!-- Topbar: Floating Island Pill / System Switcher (GHT Style) -->
+      <!-- Topbar: Floating Island Pill / System Switcher (GHT Standard) -->
       <header class="topbar" id="telemetry-bar">
-        <div class="brand-pill" id="brand-pill" title="Local LLM Hub — Command Center">
-          <span class="brand-dot"></span>
-          <b>LOCAL LLM HUB</b>
+        <div class="brand">
+          <div class="brand-mark">⚡</div>
+          <b>Local LLM Hub</b>
         </div>
 
         <!-- Centered Parent Tabs (GHT 2-Tier Master Switcher) -->
-        <nav class="topbar-tabset" id="ght-parent-tabset">
-          <button type="button" class="top-tab-btn active" data-parent="models">
-            <span>📦 Fleet & Models</span>
-          </button>
-          <button type="button" class="top-tab-btn" data-parent="telemetry">
-            <span>📊 G-Telemetry & GPU</span>
-          </button>
-          <button type="button" class="top-tab-btn" data-parent="gateway">
-            <span>⚡ Gateway & Chat</span>
-          </button>
-          <button type="button" class="top-tab-btn" data-parent="storage">
-            <span>💾 Storage Offload</span>
-          </button>
-          <button type="button" class="top-tab-btn" data-parent="studio">
-            <span>🎨 Design Studio</span>
-          </button>
-        </nav>
+        <div class="tabset" id="ght-parent-tabset">
+          <button type="button" class="ptab on" data-parent="models">Fleet &amp; Models</button>
+          <button type="button" class="ptab" data-parent="telemetry">G-Telemetry</button>
+          <button type="button" class="ptab" data-parent="gateway">Gateway &amp; Chat</button>
+          <button type="button" class="ptab" data-parent="storage">Storage Offload</button>
+          <button type="button" class="ptab" data-parent="studio">Design Studio</button>
+        </div>
 
         <!-- Right Topbar Controls & Observability -->
-        <div class="topbar-actions">
+        <div class="topbar-right">
           <!-- VRAM Hardware Gauge -->
-          <div class="gpu-gauge-group" id="stat-gpu-vram" style="display:flex; align-items:center; gap:8px; padding:4px 12px; background:rgba(0,0,0,0.35); border-radius:999px; border:1px solid var(--glass-border);">
-            <span class="gpu-label" style="font-size:11px; font-weight:700; color:var(--green);">VRAM</span>
-            <div class="gauge-track" style="width:58px; height:6px; background:rgba(255,255,255,0.1); border-radius:999px; overflow:hidden;">
-              <div class="gauge-fill" id="gpu-bar" style="width: 63%; height:100%; background:var(--green); border-radius:999px;"></div>
+          <div class="vram-badge" id="stat-gpu-vram">
+            <span class="vram-lbl">VRAM</span>
+            <div class="gauge-track" style="width:48px; height:5px;">
+              <div class="gauge-fill" id="gpu-bar" style="width: 63%;"></div>
             </div>
-            <span class="gauge-value" id="gpu-mem-text" style="font-size:11px; font-family:var(--mono); color:var(--tx);">7.6 / 12G</span>
+            <span class="vram-val" id="gpu-mem-text">7.6 / 12G</span>
           </div>
 
           <!-- All Systems Nominal Health Pill -->
-          <div class="health-pill" id="all-systems-health" title="System Health Status">
-            <span class="dot" style="width:7px; height:7px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); display:inline-block;"></span>
-            <span id="health-status-text">ALL SYSTEMS NOMINAL</span>
+          <div class="health green" id="all-systems-health">
+            <span class="dot"></span>
+            <span id="health-status-text">ALL AGENTS NOMINAL</span>
           </div>
 
           <!-- Sync Models Button -->
-          <button class="tb-icon-btn" id="btn-refresh-models" title="Sync All Models (Ollama, GGUF, HF)">
+          <button class="tb-ico" id="btn-refresh-models" title="Sync All Models" type="button">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="23 4 23 10 17 10"></polyline>
               <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
@@ -130,7 +120,7 @@
           </button>
 
           <!-- Probe Backends Button -->
-          <button class="tb-icon-btn" id="btn-probe-backends" title="Probe Backends (Ollama 11434 & vLLM 8000)">
+          <button class="tb-ico" id="btn-probe-backends" title="Probe Backends" type="button">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
             </svg>
@@ -140,7 +130,7 @@
 
       <!-- App Shell: Grid Layout with Floating Island Rail + Main Content -->
       <div class="shell" id="app-shell">
-        <!-- Floating Collapsible Island Rail Sidebar (54px ⟷ 260px) -->
+        <!-- Floating Collapsible Island Rail Sidebar (52px ⟷ 260px) -->
         <aside class="sidebar" id="sidebar" aria-label="Command Center Rail">
           <!-- Rail Top Header: Breadcrumb & Pin Button -->
           <div class="s-railtop">
@@ -156,111 +146,129 @@
           <!-- Group: FLEET & MODELS -->
           <div class="s-grp" data-group="models">FLEET & MODELS</div>
           <a class="nav-item s-item active" id="nav-models" data-view="models" data-parent="models" title="Unified Model Catalog">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
-              <line x1="8" y1="21" x2="16" y2="21"></line>
-              <line x1="12" y1="17" x2="12" y2="21"></line>
-            </svg>
-            <span class="nav-item-text">Model Manager</span>
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                <line x1="8" y1="21" x2="16" y2="21"></line>
+                <line x1="12" y1="17" x2="12" y2="21"></line>
+              </svg>
+            </span>
+            <span class="s-lbl">Model Manager</span>
             <span class="ct" id="rail-model-count">0</span>
           </a>
           <a class="nav-item s-item" id="nav-stats" data-view="stats" data-parent="models" title="Execution Analytics & ROI">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M18 20V10"></path>
-              <path d="M12 20V4"></path>
-              <path d="M6 20v-6"></path>
-            </svg>
-            <span class="nav-item-text">Analytics & ROI</span>
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 20V10"></path>
+                <path d="M12 20V4"></path>
+                <path d="M6 20v-6"></path>
+              </svg>
+            </span>
+            <span class="s-lbl">Analytics & ROI</span>
           </a>
           <a class="nav-item s-item" id="nav-arena" data-view="arena" data-parent="models" title="Model Arena (Side-by-side Battle)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="8" y1="13" x2="16" y2="13"></line>
-              <line x1="8" y1="17" x2="16" y2="17"></line>
-            </svg>
-            <span class="nav-item-text">Model Arena</span>
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="8" y1="13" x2="16" y2="13"></line>
+                <line x1="8" y1="17" x2="16" y2="17"></line>
+              </svg>
+            </span>
+            <span class="s-lbl">Model Arena</span>
           </a>
           <a class="nav-item s-item" id="nav-downloader" data-view="downloader" data-parent="models" title="Downloader">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            <span class="nav-item-text">Downloader</span>
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+              </svg>
+            </span>
+            <span class="s-lbl">Downloader</span>
           </a>
 
           <!-- Group: HARDWARE & SENSORS -->
           <div class="s-grp" data-group="telemetry">HARDWARE & SENSORS</div>
           <a class="nav-item s-item" id="nav-gpu" data-view="gpu" data-parent="telemetry" title="Hardware & VRAM Observability">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <rect x="4" y="4" width="16" height="16" rx="2"></rect>
-              <rect x="9" y="9" width="6" height="6"></rect>
-              <line x1="9" y1="1" x2="9" y2="4"></line>
-              <line x1="15" y1="1" x2="15" y2="4"></line>
-              <line x1="9" y1="20" x2="9" y2="23"></line>
-              <line x1="15" y1="20" x2="15" y2="23"></line>
-              <line x1="20" y1="9" x2="23" y2="9"></line>
-              <line x1="20" y1="14" x2="23" y2="14"></line>
-              <line x1="1" y1="9" x2="4" y2="9"></line>
-              <line x1="1" y1="14" x2="4" y2="14"></line>
-            </svg>
-            <span class="nav-item-text">Hardware & VRAM</span>
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                <rect x="9" y="9" width="6" height="6"></rect>
+                <line x1="9" y1="1" x2="9" y2="4"></line>
+                <line x1="15" y1="1" x2="15" y2="4"></line>
+                <line x1="9" y1="20" x2="9" y2="23"></line>
+                <line x1="15" y1="20" x2="15" y2="23"></line>
+                <line x1="20" y1="9" x2="23" y2="9"></line>
+                <line x1="20" y1="14" x2="23" y2="14"></line>
+                <line x1="1" y1="9" x2="4" y2="9"></line>
+                <line x1="1" y1="14" x2="4" y2="14"></line>
+              </svg>
+            </span>
+            <span class="s-lbl">Hardware & VRAM</span>
             <span class="ct">12GB</span>
           </a>
 
           <!-- Group: GATEWAY & CHAT -->
           <div class="s-grp" data-group="gateway">GATEWAY & CHAT</div>
           <a class="nav-item s-item" id="nav-gateway" data-view="gateway" data-parent="gateway" title="LiteLLM Gateway Proxy">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-            </svg>
-            <span class="nav-item-text">LiteLLM Gateway</span>
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+              </svg>
+            </span>
+            <span class="s-lbl">LiteLLM Gateway</span>
           </a>
           <a class="nav-item s-item" id="nav-chat" data-view="chat" data-parent="gateway" title="Playground Chat">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-            </svg>
-            <span class="nav-item-text">Playground Chat</span>
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </span>
+            <span class="s-lbl">Playground Chat</span>
           </a>
           <a class="nav-item s-item" id="nav-share" data-view="share" data-parent="gateway" title="LAN Drive Share">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="18" cy="5" r="3"></circle>
-              <circle cx="6" cy="12" r="3"></circle>
-              <circle cx="18" cy="19" r="3"></circle>
-              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-            </svg>
-            <span class="nav-item-text">LAN Drive Share</span>
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="18" cy="5" r="3"></circle>
+                <circle cx="6" cy="12" r="3"></circle>
+                <circle cx="18" cy="19" r="3"></circle>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+              </svg>
+            </span>
+            <span class="s-lbl">LAN Drive Share</span>
           </a>
 
           <!-- Group: STORAGE & BLOBS -->
           <div class="s-grp" data-group="storage">STORAGE & BLOBS</div>
-          <a class="nav-item s-item" id="nav-storage" data-view="design-studio" data-parent="storage" title="Storage Symlink Offload (FR-015)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
-            </svg>
-            <span class="nav-item-text">Symlink Offload</span>
+          <a class="nav-item s-item" id="nav-storage" data-view="storage" data-parent="storage" title="Storage Symlink Offload (FR-015)">
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </span>
+            <span class="s-lbl">Storage Offload</span>
             <span class="ct">FR-015</span>
           </a>
 
           <!-- Group: DESIGN STUDIO -->
           <div class="s-grp" data-group="studio">DESIGN STUDIO</div>
           <a class="nav-item s-item" id="nav-design-studio" data-view="design-studio" data-parent="studio" title="Design Studio & Style Inspector">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-            </svg>
-            <span class="nav-item-text">Design Studio</span>
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+              </svg>
+            </span>
+            <span class="s-lbl">Design Studio</span>
           </a>
 
           <!-- Bottom Mascot Avatar in Rail -->
-          <div class="sidebar-mascot" id="sidebar-mascot">
-            <div class="mascot-avatar" id="agent-mascot-avatar" title="Local Agent: RTX 3060 Active">
+          <div class="sidebar-footer">
+            <div class="mascot-avatar" id="agent-mascot-avatar" title="Local CUDA Agent: RTX 3060 Active">
               🤖
             </div>
-            <div class="mascot-info s-lbl" style="font-family: var(--mono); font-size: 10px; color: var(--green); font-weight: 700;">
-              RTX 3060 CUDA
-            </div>
+            <div class="mascot-lbl s-lbl">RTX 3060 CUDA</div>
           </div>
         </aside>
 
@@ -554,190 +562,255 @@
             </div>
 
             <!-- Comparison Matrix Grid (Component Styles) -->
-            <div class="design-arena-grid">
+            <div class="theme-candidates-grid">
               <!-- Style Candidate 1: Current Style -->
-              <div class="style-candidate-card" style="background:rgba(20, 27, 41, 0.65); border:1px solid rgba(255,255,255,0.1);">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <span class="style-badge-tag" style="background:rgba(99,102,241,0.2); color:#818cf8; border:1px solid rgba(99,102,241,0.4);">
-                    🔮 สไตล์ 1: Modern Indigo (Current)
-                  </span>
-                  <span style="font-size:11px; color:var(--text-dim);">Raycast / Linear Minimal</span>
-                </div>
-                <p style="font-size:13px; color:var(--text-muted); line-height:1.5;">
-                  โทนสี Indigo เรียบหรู สะอาดตา แบบ Modern Web Application บอร์ดการ์ดโปร่งแสง ขอบบางเฉียบ
-                </p>
-
-                <!-- Sample Component: Card -->
-                <div style="background:rgba(15, 23, 42, 0.8); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px;">
+              <div class="style-candidate-card">
+                <div>
                   <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-weight:700; color:#fff; font-size:14px;">qwen2.5-coder:7b</span>
-                    <span class="badge badge-quant">Q4_K_M</span>
+                    <span class="badge" style="background:rgba(99,102,241,0.2); color:#818cf8; border-color:rgba(99,102,241,0.4);">
+                      Modern Indigo
+                    </span>
+                    <span style="font-size:11px; color:var(--text-dim); font-family:var(--mono);">Raycast Minimal</span>
                   </div>
-                  <div style="margin-top:10px;">
-                    <div style="display:flex; justify-content:space-between; font-size:11px; color:#94a3b8; margin-bottom:4px;">
-                      <span>VRAM Allocation</span>
-                      <span>4.7 / 12.0 GB</span>
+                  <p style="font-size:12.5px; color:var(--text-muted); line-height:1.5; margin-top:8px;">
+                    โทนสี Indigo เรียบหรู สะอาดตา การ์ดโปร่งแสง ขอบบางเฉียบ
+                  </p>
+
+                  <div style="background:rgba(15, 23, 42, 0.8); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:12px; margin-top:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <span style="font-weight:700; color:#fff; font-size:13px;">qwen2.5-coder:7b</span>
+                      <span class="badge quant">Q4_K_M</span>
                     </div>
-                    <div class="gauge-track">
-                      <div class="gauge-fill" style="width: 40%; background:#6366f1;"></div>
+                    <div style="margin-top:8px;">
+                      <div class="gauge-track">
+                        <div class="gauge-fill" style="width: 40%; background:#6366f1;"></div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <button class="btn-choose-style" data-theme-target="default" onclick="window.__switchTheme('default')" style="background:#6366f1; color:#fff;">
-                  ✨ ใช้สไตล์ Modern Indigo ทั่วแอป
+                <button class="btn btn-ghost" data-theme-target="default" onclick="window.__switchTheme('default')" style="width:100%; border-color:#6366f1; color:#818cf8;">
+                  ✨ ใช้สไตล์ Modern Indigo
                 </button>
               </div>
 
-              <!-- Style Candidate 2: GHT Command Center (From G:\) -->
-              <div class="style-candidate-card card-bento-ght">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <span class="style-badge-tag" style="background:rgba(124,242,107,0.15); color:#7cf26b; border:1px solid rgba(124,242,107,0.4);">
-                    🟢 สไตล์ 2: GHT Command Center (จาก Drive G:)
-                  </span>
-                  <span style="font-size:11px; color:#7cf26b; font-family:var(--font-mono);">[LIVE_FEED]</span>
-                </div>
-                <p style="font-size:13px; color:var(--text-muted); line-height:1.5;">
-                  พื้นหลัง Obsidian Jet Black ผสมเส้นสะท้อนแสงด้านบน (Specular Highlight) + สีเขียว Terminal Neon และสีส้ม Amber ให้ความรู้สึกเหมือนศูนย์ควบคุมสถานีอวกาศ
-                </p>
-
-                <!-- Sample Component: Bento Card with Circular VRAM & LED strip -->
-                <div style="background:rgba(10, 14, 11, 0.9); border:1px solid rgba(124,242,107,0.25); border-radius:14px; padding:14px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);">
+              <!-- Style Candidate 2: GHT Command Center (Default Primary) -->
+              <div class="style-candidate-card" style="border-color:var(--green); box-shadow:0 0 20px rgba(124,242,107,0.15);">
+                <div>
                   <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                      <span style="width:8px; height:8px; border-radius:50%; background:#7cf26b; box-shadow:0 0 8px #7cf26b;"></span>
-                      <span style="font-weight:800; color:#e8ede6; font-size:14px; font-family:var(--font-mono);">deepseek-r1:8b</span>
-                    </div>
-                    <span style="background:rgba(255,138,30,0.15); color:#ff8a1e; font-weight:700; font-size:10px; padding:2px 8px; border-radius:4px; border:1px solid rgba(255,138,30,0.3); font-family:var(--font-mono);">
-                      ORCHESTRATOR
+                    <span class="badge" style="background:rgba(124,242,107,0.15); color:var(--green); border-color:rgba(124,242,107,0.4);">
+                      🟢 GHT Command Center
                     </span>
+                    <span style="font-size:11px; color:var(--green); font-family:var(--mono);">[PRIMARY DEFAULT]</span>
                   </div>
+                  <p style="font-size:12.5px; color:var(--text-muted); line-height:1.5; margin-top:8px;">
+                    พื้นหลัง Obsidian Jet Black ผสมเส้นแสงด้านบน + เขียว Terminal Neon
+                  </p>
 
-                  <div style="display:flex; align-items:center; gap:16px; margin-top:14px;">
-                    <!-- Circular Gauge -->
-                    <div class="circular-gauge-wrapper" style="width:80px; height:80px;">
-                      <svg class="circular-gauge-svg" viewBox="0 0 100 100">
-                        <circle class="gauge-circle-bg" cx="50" cy="50" r="40" stroke-width="8"></circle>
-                        <circle class="gauge-circle-fill" cx="50" cy="50" r="40" stroke-width="8" stroke-dasharray="251.2" stroke-dashoffset="100" style="stroke:#7cf26b;"></circle>
-                      </svg>
-                      <div class="circular-gauge-center">
-                        <span class="circular-gauge-val" style="font-size:14px; color:#7cf26b;">60%</span>
-                        <span class="circular-gauge-lbl" style="font-size:8px;">LOAD</span>
-                      </div>
+                  <div style="background:rgba(10, 14, 11, 0.9); border:1px solid rgba(124,242,107,0.25); border-radius:10px; padding:12px; margin-top:12px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <span style="font-weight:800; color:#e8ede6; font-size:13px; font-family:var(--mono);">deepseek-r1:8b</span>
+                      <span class="badge role">ORCHESTRATOR</span>
                     </div>
-                    <!-- Right Metrics -->
-                    <div style="flex:1;">
-                      <span style="font-size:11px; color:#8a968a; font-family:var(--font-mono); display:block;">VRAM: 5.6 / 12.0 GB</span>
-                      <div class="led-strip-container">
-                        <div class="led-bar active-green"></div>
-                        <div class="led-bar active-green"></div>
-                        <div class="led-bar active-green"></div>
-                        <div class="led-bar active-amber"></div>
-                        <div class="led-bar"></div>
+                    <div style="margin-top:8px;">
+                      <div class="gauge-track">
+                        <div class="gauge-fill" style="width: 63%; background:var(--green);"></div>
                       </div>
-                      <span style="font-size:10px; color:#556356; font-family:var(--font-mono); margin-top:4px; display:block;">FAN: 1650 RPM | 58°C</span>
                     </div>
                   </div>
                 </div>
 
-                <button class="btn-choose-style" data-theme-target="ght-command-center" onclick="window.__switchTheme('ght-command-center')" style="background:#7cf26b; color:#000;">
-                  🟢 ใช้สไตล์ GHT Command Center ทั่วแอป
+                <button class="btn btn-primary" data-theme-target="ght-command-center" onclick="window.__switchTheme('ght-command-center')" style="width:100%;">
+                  🟢 ใช้สไตล์ GHT Command Center
                 </button>
               </div>
 
               <!-- Style Candidate 3: Cyberpunk Neon HUD -->
-              <div class="style-candidate-card card-cyber-hud">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <span class="style-badge-tag" style="background:rgba(244,63,94,0.15); color:#f43f5e; border:1px solid rgba(244,63,94,0.4);">
-                    ⚡ สไตล์ 3: Cyberpunk HUD
-                  </span>
-                  <span style="font-size:11px; color:#00f0ff;">[PROTOCOL_V2]</span>
-                </div>
-                <p style="font-size:13px; color:var(--text-muted); line-height:1.5;">
-                  เส้นสายเหลี่ยมคมสไตล์ HUD หน้าจอนักบิน ขอบสะท้อนแสงสีชมพู Magenta ผสมแสงนีออน Cyan ล้ำสมัย
-                </p>
-
-                <!-- Sample Component: Cyberpunk HUD Card -->
-                <div style="background:rgba(20, 16, 32, 0.9); border:1px solid #f43f5e; border-radius:4px; padding:14px; position:relative;">
+              <div class="style-candidate-card">
+                <div>
                   <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-weight:800; color:#fdf2f8; font-size:14px;">qwen3.5-coder:14b</span>
-                    <span style="color:#00f0ff; font-size:11px; font-weight:700;">88.4 T/S</span>
+                    <span class="badge" style="background:rgba(244,63,94,0.15); color:#f43f5e; border-color:rgba(244,63,94,0.4);">
+                      Cyberpunk HUD
+                    </span>
+                    <span style="font-size:11px; color:#00f0ff; font-family:var(--mono);">[PROTOCOL_V2]</span>
                   </div>
-                  <div style="margin-top:12px;">
-                    <div class="led-strip-container">
-                      <div class="led-bar active-green"></div>
-                      <div class="led-bar active-green"></div>
-                      <div class="led-bar active-amber"></div>
-                      <div class="led-bar active-red"></div>
-                      <div class="led-bar"></div>
+                  <p style="font-size:12.5px; color:var(--text-muted); line-height:1.5; margin-top:8px;">
+                    เส้นสายเหลี่ยมคมสไตล์ HUD ขอบสีชมพู Magenta ผสมแสงนีออน Cyan
+                  </p>
+
+                  <div style="background:rgba(20, 16, 32, 0.9); border:1px solid #f43f5e; border-radius:8px; padding:12px; margin-top:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <span style="font-weight:800; color:#fdf2f8; font-size:13px;">qwen3.5-coder:14b</span>
+                      <span style="color:#00f0ff; font-size:11px; font-weight:700;">88.4 T/S</span>
                     </div>
-                    <div style="display:flex; justify-content:space-between; font-size:10px; color:#cbd5e1; margin-top:6px;">
-                      <span>VRAM BUDGET: 9.2 GB</span>
-                      <span style="color:#00f0ff;">CUDA 0 READY</span>
+                    <div style="margin-top:8px;">
+                      <div class="gauge-track">
+                        <div class="gauge-fill" style="width: 75%; background:#f43f5e;"></div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <button class="btn-choose-style" data-theme-target="cyberpunk-neon" onclick="window.__switchTheme('cyberpunk-neon')" style="background:#f43f5e; color:#fff;">
-                  ⚡ ใช้สไตล์ Cyberpunk HUD ทั่วแอป
+                <button class="btn btn-ghost" data-theme-target="cyberpunk-neon" onclick="window.__switchTheme('cyberpunk-neon')" style="width:100%; border-color:#f43f5e; color:#f43f5e;">
+                  ⚡ ใช้สไตล์ Cyberpunk HUD
                 </button>
               </div>
 
               <!-- Style Candidate 4: Nordic Frost -->
-              <div class="style-candidate-card" style="background:rgba(17, 24, 39, 0.7); border:1px solid rgba(56,189,248,0.25); border-radius:18px;">
-                <div style="display:flex; justify-content:space-between; align-items:center;">
-                  <span class="style-badge-tag" style="background:rgba(56,189,248,0.15); color:#38bdf8; border:1px solid rgba(56,189,248,0.4);">
-                    ❄️ สไตล์ 4: Nordic Frost Glass
-                  </span>
-                  <span style="font-size:11px; color:#94a3b8;">Frosted Glass</span>
-                </div>
-                <p style="font-size:13px; color:var(--text-muted); line-height:1.5;">
-                  ความเรียบง่ายโทน Ice Blue เย็นตา กระจกฝ้าไฮเอนด์ เหมาะสำหรับการทำงานนาน ๆ ไม่แสบตา
-                </p>
-
-                <!-- Sample Component: Nordic Card -->
-                <div style="background:rgba(30, 41, 59, 0.6); border:1px solid rgba(56,189,248,0.15); border-radius:12px; padding:14px; backdrop-filter:blur(16px);">
+              <div class="style-candidate-card">
+                <div>
                   <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-weight:700; color:#f8fafc; font-size:14px;">gemma-4-26b-a4b</span>
-                    <span style="color:#38bdf8; font-size:11px; font-weight:600;">Active Gate</span>
+                    <span class="badge" style="background:rgba(56,189,248,0.15); color:#38bdf8; border-color:rgba(56,189,248,0.4);">
+                      Nordic Frost
+                    </span>
+                    <span style="font-size:11px; color:#94a3b8; font-family:var(--mono);">Ice Blue</span>
                   </div>
-                  <div style="margin-top:10px;">
-                    <div class="gauge-track">
-                      <div class="gauge-fill" style="width: 55%; background:linear-gradient(90deg, #38bdf8, #818cf8);"></div>
+                  <p style="font-size:12.5px; color:var(--text-muted); line-height:1.5; margin-top:8px;">
+                    ความเรียบง่ายโทน Ice Blue กระจกฝ้าไฮเอนด์ สบายตา
+                  </p>
+
+                  <div style="background:rgba(30, 41, 59, 0.6); border:1px solid rgba(56,189,248,0.15); border-radius:10px; padding:12px; margin-top:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                      <span style="font-weight:700; color:#f8fafc; font-size:13px;">gemma-4-26b-a4b</span>
+                      <span style="color:#38bdf8; font-size:11px; font-weight:600;">Gate</span>
+                    </div>
+                    <div style="margin-top:8px;">
+                      <div class="gauge-track">
+                        <div class="gauge-fill" style="width: 55%; background:#38bdf8;"></div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <button class="btn-choose-style" data-theme-target="nordic-frost" onclick="window.__switchTheme('nordic-frost')" style="background:#38bdf8; color:#0b0f19;">
-                  ❄️ ใช้สไตล์ Nordic Frost ทั่วแอป
+                <button class="btn btn-ghost" data-theme-target="nordic-frost" onclick="window.__switchTheme('nordic-frost')" style="width:100%; border-color:#38bdf8; color:#38bdf8;">
+                  ❄️ ใช้สไตล์ Nordic Frost
                 </button>
               </div>
             </div>
-            </div>
+          </div>
 
-            <!-- Integrated Storage & Symlink Manager Preview Section (FR-015) -->
-            <div style="margin-top:40px; background:var(--bg-card); border:1px solid var(--glass-border); border-radius:18px; padding:24px; box-shadow:inset 0 1px 0 rgba(255,255,255,0.12);">
-              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
-                <div>
-                  <h2 style="font-size:18px; font-weight:800; color:var(--text-main); display:flex; align-items:center; gap:8px;">
-                    <span>📦 Storage & Symlink Offloader (FR-015 Integrated Feature)</span>
-                  </h2>
-                  <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">
-                    ฟีเจอร์เด่นจาก G:\.ollama_blobs_root ที่นำมารวมเข้าสู่ระบบหลัก: ย้าย Blobs คืนพื้นที่ C: พร้อมตรวจสอบสุขภาพ Symlinks
-                  </p>
-                </div>
-                <button class="btn btn-primary" id="btn-studio-audit-storage" style="display:flex; align-items:center; gap:8px;">
+          <!-- View: Dedicated Storage & Symlink Offload (FR-015 Integrated Feature) -->
+          <div class="view-panel" id="view-storage" style="display:none;">
+            <div class="view-header">
+              <div class="view-heading">
+                <h1>Storage &amp; Symlink Offloader</h1>
+                <p>Audit Ollama blob pointers, discover storage roots, and migrate model weights to external NVMe drives without breaking Ollama daemon</p>
+              </div>
+              <div class="view-actions">
+                <button class="btn btn-primary" id="btn-studio-audit-storage">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <circle cx="12" cy="12" r="10"></circle>
                     <polyline points="12 6 12 12 14 14"></polyline>
                   </svg>
-                  <span>🔍 สแกนพื้นที่และสุขภาพ Blobs เดี๋ยวนี้</span>
+                  Scan Blobs &amp; Audit Storage
+                </button>
+              </div>
+            </div>
+
+            <!-- 3-Column Bento KPI Cards -->
+            <div class="storage-kpi-grid">
+              <div class="storage-kpi-tile">
+                <span class="metric-label">C: DEFAULT OLLAMA BLOBS</span>
+                <span class="metric-val amber">42.5 GB</span>
+                <div style="font-size:12px; color:var(--mut); margin-top:4px;">
+                  High Storage Pressure on OS Disk
+                </div>
+              </div>
+
+              <div class="storage-kpi-tile">
+                <span class="metric-label">STORAGE TARGET (G:\.ollama_blobs_root)</span>
+                <span class="metric-val green">480.2 GB</span>
+                <div style="font-size:12px; color:var(--mut); margin-top:4px;">
+                  NVMe Fast Storage Ready
+                </div>
+              </div>
+
+              <div class="storage-kpi-tile">
+                <span class="metric-label">SYMLINK HEALTH AUDIT</span>
+                <span class="metric-val cyan">100% HEALTHY</span>
+                <div style="font-size:12px; color:var(--mut); margin-top:4px;">
+                  18 Verified Symlinks, 0 Broken
+                </div>
+              </div>
+            </div>
+
+            <!-- Blobs & Symlink Offload Manager Bento Card -->
+            <div class="storage-table-card">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <span style="font-weight:700; font-size:15px; color:var(--tx);">Discovered Large Model Blobs</span>
+                  <span class="badge" style="background:rgba(124,242,107,0.15); color:var(--green);">5 Candidates</span>
+                </div>
+                <button class="btn btn-ghost" id="btn-quick-offload" style="font-size:12px; padding:6px 14px;">
+                  🚀 1-Click Safe Offload to G:\
                 </button>
               </div>
 
-              <!-- Storage Result Card -->
+              <!-- Blobs Table -->
+              <table class="storage-blobs-table">
+                <thead>
+                  <tr>
+                    <th>Model Weight / Blob</th>
+                    <th>Size</th>
+                    <th>Storage Location</th>
+                    <th>Symlink Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div style="font-weight:600;">deepseek-r1:8b (sha256:7c38f...)</div>
+                      <div style="font-size:11px; color:var(--faint); font-family:var(--mono);">C:\Users\freshair\.ollama\models\blobs\sha256-7c38...</div>
+                    </td>
+                    <td style="font-family:var(--mono); color:var(--tx);">4.92 GB</td>
+                    <td><span class="badge role">Drive C: (Local)</span></td>
+                    <td><span class="badge" style="color:var(--amber);">Pending Offload</span></td>
+                    <td>
+                      <button class="btn btn-ghost" style="padding:4px 10px; font-size:11px;" onclick="showToast('Initiating safe symlink offload for deepseek-r1...', 'info')">Offload</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div style="font-weight:600;">qwen2.5-coder:14b (sha256:8b41a...)</div>
+                      <div style="font-size:11px; color:var(--faint); font-family:var(--mono);">G:\.ollama_blobs_root\models\blobs\sha256-8b41...</div>
+                    </td>
+                    <td style="font-family:var(--mono); color:var(--tx);">8.98 GB</td>
+                    <td><span class="badge quant">Drive G: (Offloaded)</span></td>
+                    <td><span class="badge" style="color:var(--green); border-color:rgba(124,242,107,0.3);">✓ Active Symlink</span></td>
+                    <td>
+                      <button class="btn btn-ghost" style="padding:4px 10px; font-size:11px;" disabled>Verified</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div style="font-weight:600;">qwen2.5-coder:7b (sha256:6e12c...)</div>
+                      <div style="font-size:11px; color:var(--faint); font-family:var(--mono);">G:\.ollama_blobs_root\models\blobs\sha256-6e12...</div>
+                    </td>
+                    <td style="font-family:var(--mono); color:var(--tx);">4.68 GB</td>
+                    <td><span class="badge quant">Drive G: (Offloaded)</span></td>
+                    <td><span class="badge" style="color:var(--green); border-color:rgba(124,242,107,0.3);">✓ Active Symlink</span></td>
+                    <td>
+                      <button class="btn btn-ghost" style="padding:4px 10px; font-size:11px;" disabled>Verified</button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div style="font-weight:600;">gemma-2-9b (sha256:3a91b...)</div>
+                      <div style="font-size:11px; color:var(--faint); font-family:var(--mono);">C:\Users\freshair\.ollama\models\blobs\sha256-3a91...</div>
+                    </td>
+                    <td style="font-family:var(--mono); color:var(--tx);">5.44 GB</td>
+                    <td><span class="badge role">Drive C: (Local)</span></td>
+                    <td><span class="badge" style="color:var(--amber);">Pending Offload</span></td>
+                    <td>
+                      <button class="btn btn-ghost" style="padding:4px 10px; font-size:11px;" onclick="showToast('Initiating safe symlink offload for gemma-2-9b...', 'info')">Offload</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+
               <div id="studio-storage-result" style="display:none; margin-top:20px; background:rgba(0,0,0,0.3); border:1px solid var(--glass-border); border-radius:12px; padding:16px;">
-                <!-- Filled dynamically by theme_studio.js -->
+                <!-- Filled dynamically if scan is clicked -->
               </div>
             </div>
           </div>

@@ -44,7 +44,7 @@ function setupNavigation() {
   const navItems = document.querySelectorAll('.nav-item');
   const viewPanels = document.querySelectorAll('.view-panel');
   const crumb = document.getElementById('sidebar-crumb');
-  const parentTabs = document.querySelectorAll('.top-tab-btn');
+  const parentTabs = document.querySelectorAll('.ptab, .top-tab-btn');
   const sidebar = document.getElementById('sidebar');
   const shell = document.getElementById('app-shell');
   const pinBtn = document.getElementById('sidebar-pin-btn');
@@ -88,8 +88,12 @@ function setupNavigation() {
   // Parent Tab Switching (Fleet & Models, G-Telemetry, Gateway, Storage, Design Studio)
   parentTabs.forEach(tab => {
     tab.addEventListener('click', () => {
-      parentTabs.forEach(t => t.classList.remove('active'));
+      parentTabs.forEach(t => {
+        t.classList.remove('active');
+        t.classList.remove('on');
+      });
       tab.classList.add('active');
+      tab.classList.add('on');
 
       const parentKey = tab.getAttribute('data-parent');
       // Highlight matching group or find first child
@@ -109,7 +113,7 @@ function setupNavigation() {
 
       const targetView = item.getAttribute('data-view');
       const parentCat = item.getAttribute('data-parent') || 'HUB';
-      const labelText = item.querySelector('.nav-item-text')?.textContent || targetView;
+      const labelText = item.querySelector('.s-lbl')?.textContent || item.querySelector('.nav-item-text')?.textContent || targetView;
 
       // Update Breadcrumb (GHT Style: HUB / PARENT / CHILD)
       if (crumb) {
@@ -118,7 +122,9 @@ function setupNavigation() {
 
       // Sync active state on top parent tabs
       parentTabs.forEach(t => {
-        t.classList.toggle('active', t.getAttribute('data-parent') === parentCat);
+        const matches = t.getAttribute('data-parent') === parentCat;
+        t.classList.toggle('active', matches);
+        t.classList.toggle('on', matches);
       });
 
       store.setState({ activeView: targetView });
