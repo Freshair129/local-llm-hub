@@ -89,9 +89,20 @@ export function startTelemetryPolling(intervalMs = 2000) {
   pollInterval = setInterval(fetchHardwareTelemetry, intervalMs);
 }
 
+export function setTelemetryRefreshRate(intervalMs) {
+  if (pollInterval) {
+    clearInterval(pollInterval);
+    pollInterval = null;
+  }
+  if (intervalMs > 0) {
+    startTelemetryPolling(intervalMs);
+  }
+}
+
 export function stopTelemetryPolling() {
   if (pollInterval) {
     clearInterval(pollInterval);
     pollInterval = null;
   }
 }
+

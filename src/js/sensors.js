@@ -48,12 +48,22 @@ export async function initSensors() {
   await refreshSensorTree();
 
   if (!pollTimer) {
+    setSensorsRefreshRate(2000);
+  }
+}
+
+export function setSensorsRefreshRate(intervalMs) {
+  if (pollTimer) {
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+  if (intervalMs > 0) {
     pollTimer = setInterval(async () => {
       const activeView = document.querySelector('.view-panel[style*="display: block"]')?.id;
       if (activeView === 'view-sensors' || activeView === 'view-twin' || activeView === 'view-gpu') {
         await refreshSensorTree();
       }
-    }, 2000);
+    }, intervalMs);
   }
 }
 

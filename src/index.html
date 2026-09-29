@@ -69,6 +69,19 @@
             <span id="health-status-text">ALL AGENTS NOMINAL</span>
           </div>
 
+          <!-- Refresh Rate Cadence Selector -->
+          <div class="refresh-rate-control" title="Adjust Telemetry Cadence / Refresh Rate" style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.04); border:1px solid var(--line2); padding:3px 10px; border-radius:var(--r-pill);">
+            <span style="font-size:11px; font-family:var(--mono); color:var(--mut);">⏱️</span>
+            <select id="select-telemetry-rate" style="background:transparent; border:none; color:var(--tx); font-size:11.5px; font-family:var(--mono); font-weight:600; outline:none; cursor:pointer;">
+              <option value="500" style="background:#141714; color:#fff;">500ms (2 Hz)</option>
+              <option value="1000" style="background:#141714; color:#fff;">1.0s (1 Hz)</option>
+              <option value="2000" selected style="background:#141714; color:#fff;">2.0s (Default)</option>
+              <option value="3000" style="background:#141714; color:#fff;">3.0s</option>
+              <option value="5000" style="background:#141714; color:#fff;">5.0s (Low)</option>
+              <option value="0" style="background:#141714; color:#ff8a1e;">⏸️ Pause</option>
+            </select>
+          </div>
+
           <!-- Sync Models Button -->
           <button class="tb-ico" id="btn-refresh-models" title="Sync All Models" type="button">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -334,6 +347,48 @@
                 <h3 style="color:#34d399; font-size:16px; margin-bottom:12px;">🔥 GPU Temperature & Load</h3>
                 <div style="font-size:32px; font-weight:700; color:#fff; margin-bottom:8px;" id="obs-temp-text">52 °C</div>
                 <div style="font-size:13px; color:rgba(255,255,255,0.6);" id="obs-load-text">CUDA Core Utilization: 44%</div>
+              </div>
+            </div>
+
+            <!-- Windows Task Manager Process Resource Ranker -->
+            <div class="model-card" style="margin-top:24px; padding:20px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <span style="font-size:18px;">📊</span>
+                  <div>
+                    <h3 style="font-size:16px; font-weight:700; color:#fff; margin:0;">Task Manager — Process Resource Ranker</h3>
+                    <p style="font-size:12px; color:var(--mut); margin:2px 0 0 0;">Host process telemetry ranked by active compute &amp; memory consumption</p>
+                  </div>
+                  <span class="badge" id="taskmanager-active-count" style="background:rgba(255,255,255,0.08); color:var(--tx); font-family:var(--mono); font-size:11px; margin-left:8px;">0 Processes</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                  <div style="position:relative;">
+                    <input type="text" id="proc-search-input" placeholder="Search processes..." style="background:rgba(255,255,255,0.05); border:1px solid var(--line2); border-radius:6px; color:#fff; font-size:12px; padding:6px 12px; width:180px; outline:none;" />
+                  </div>
+                  <div style="display:flex; background:rgba(255,255,255,0.05); border:1px solid var(--line2); border-radius:6px; padding:2px;">
+                    <button class="btn btn-secondary active" id="btn-sort-proc-cpu" style="padding:4px 10px; font-size:11px; border-radius:4px; font-weight:600; cursor:pointer;" type="button">Sort: CPU %</button>
+                    <button class="btn btn-secondary" id="btn-sort-proc-mem" style="padding:4px 10px; font-size:11px; border-radius:4px; font-weight:600; cursor:pointer;" type="button">Sort: RAM</button>
+                  </div>
+                  <button class="btn btn-secondary" id="btn-refresh-proc" style="padding:4px 10px; font-size:11px; border-radius:4px; font-weight:600; cursor:pointer;" type="button" title="Refresh Host Processes">🔄 Refresh</button>
+                </div>
+              </div>
+
+              <!-- Process Table -->
+              <div style="overflow-x:auto; max-height:420px; overflow-y:auto; border:1px solid rgba(255,255,255,0.06); border-radius:8px;">
+                <table style="width:100%; border-collapse:collapse; text-align:left;">
+                  <thead>
+                    <tr style="background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.08); font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--faint);">
+                      <th style="padding:10px 12px; font-weight:600;">Process Name</th>
+                      <th style="padding:10px 12px; font-weight:600; width:90px;">PID</th>
+                      <th style="padding:10px 12px; font-weight:600; width:170px;">CPU Usage</th>
+                      <th style="padding:10px 12px; font-weight:600; width:130px;">Memory (RAM)</th>
+                      <th style="padding:10px 12px; font-weight:600; width:180px;">Disk I/O (Read / Write)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="taskmanager-process-tbody">
+                    <!-- Populated by src/js/process_manager.js -->
+                  </tbody>
+                </table>
               </div>
             </div>
           </div>

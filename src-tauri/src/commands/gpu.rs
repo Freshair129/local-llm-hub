@@ -3,7 +3,7 @@
 //! Real-time Hardware, GPU VRAM, and System Resource Telemetry Service.
 //! Compliant with ADR-100 (Safe Error Handling, Zero Panics, Non-blocking async).
 
-use crate::models::types::{GpuInfo, HardwareTelemetry};
+use crate::models::types::{GpuInfo, HardwareTelemetry, ProcessMetric};
 use std::time::Duration;
 use sysinfo::System;
 
@@ -92,6 +92,45 @@ async fn query_nvidia_smi() -> Vec<GpuInfo> {
     gpus
 }
 
+// trace:implements FR-006
+/// Collects and ranks active processes by CPU or Memory usage (Task Manager style)
+pub async fn poll_top_processes(sort_by_mem: bool, limit: usize) -> Vec<ProcessMetric> {
+    tokio::task::spawn_blocking(move || {
+        let mut sys = System::new();
+        sys.refresh_processes();
+        std::thread::sleep(Duration::from_millis(80));
+        sys.refresh_processes();
+
+        let mut list: Vec<ProcessMetric> = sys
+            .processes()
+            .iter()
+            .map(|(pid, p)| {
+                let disk = p.disk_usage();
+                ProcessMetric {
+                    pid: pid.to_string(),
+                    name: p.name().to_string(),
+                    cpu_usage: (p.cpu_usage() * 10.0).round() / 10.0,
+                    memory_bytes: p.memory(),
+                    virtual_memory_bytes: p.virtual_memory(),
+                    disk_read_bytes: disk.total_read_bytes,
+                    disk_written_bytes: disk.total_written_bytes,
+                }
+            })
+            .collect();
+
+        if sort_by_mem {
+            list.sort_by(|a, b| b.memory_bytes.cmp(&a.memory_bytes));
+        } else {
+            list.sort_by(|a, b| b.cpu_usage.total_cmp(&a.cpu_usage));
+        }
+
+        list.truncate(limit);
+        list
+    })
+    .await
+    .unwrap_or_default()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -105,4 +144,13 @@ mod tests {
         let primary_gpu = &telemetry.gpus[0];
         assert!(primary_gpu.vram_total_bytes > 0);
     }
+
+    // trace:verifies FR-006
+    #[tokio::test]
+    async fn test_poll_top_processes() {
+        let processes = poll_top_processes(false, 10).await;
+        assert!(!processes.is_empty(), "should capture running host processes");
+        assert!(processes.len() <= 10);
+    }
 }
+

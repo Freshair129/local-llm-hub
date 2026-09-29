@@ -10,7 +10,7 @@
 
 import { triggerProbe, scanGgufDirectory } from './js/backend.js';
 import { renderModels, syncAllModels } from './js/model.js';
-import { startTelemetryPolling } from './js/observability.js';
+import { startTelemetryPolling, setTelemetryRefreshRate } from './js/observability.js';
 import { initChat } from './js/chat.js';
 import { showToast } from './js/toast.js';
 import { store } from './js/state.js';
@@ -19,7 +19,8 @@ import { initArena, populateArenaModelSelectors } from './js/arena.js';
 import { initDownloader } from './js/downloader.js';
 import { initUpdater } from './js/updater.js';
 import { initDigitalTwin } from './js/digital_twin_3d.js';
-import { initSensors, setupSensorsEvents, refreshSensorTree } from './js/sensors.js';
+import { initSensors, setupSensorsEvents, refreshSensorTree, setSensorsRefreshRate } from './js/sensors.js';
+import { initProcessManager, setProcessRefreshRate, refreshProcesses } from './js/process_manager.js';
 
 // Safe Tauri Core Invoker
 const invoke = window.__TAURI__?.core?.invoke || (async (cmd, args) => {
@@ -176,6 +177,8 @@ function setupNavigation() {
         setTimeout(() => initDigitalTwin(), 60);
       } else if (targetView === 'sensors') {
         refreshSensorTree();
+      } else if (targetView === 'gpu') {
+        refreshProcesses();
       }
     });
   });
@@ -314,7 +317,22 @@ window.addEventListener('DOMContentLoaded', async () => {
   initUpdater();
   initSensors();
   setupSensorsEvents();
+  initProcessManager();
   startTelemetryPolling(2000);
+
+  // Setup Refresh Rate Cadence Selector Listener
+  const rateSelect = document.getElementById('select-telemetry-rate');
+  if (rateSelect) {
+    rateSelect.addEventListener('change', (e) => {
+      const rate = parseInt(e.target.value, 10);
+      setTelemetryRefreshRate(rate);
+      setSensorsRefreshRate(rate);
+      setProcessRefreshRate(rate);
+      const text = e.target.options[e.target.selectedIndex]?.text || `${rate}ms`;
+      showToast(rate > 0 ? `Telemetry refresh cadence set to ${text}` : 'Telemetry polling paused ⏸️', 'info');
+    });
+  }
+
   triggerProbe();
   const models = await syncAllModels();
   store.setState({ models });

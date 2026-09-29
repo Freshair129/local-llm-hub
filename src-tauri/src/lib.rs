@@ -213,6 +213,17 @@ async fn get_hardware_telemetry() -> Result<crate::models::types::HardwareTeleme
     Ok(commands::gpu::poll_hardware_telemetry().await)
 }
 
+// trace:implements FR-006
+#[tauri::command]
+async fn get_process_telemetry(
+    sort_by: Option<String>,
+    limit: Option<usize>,
+) -> Result<Vec<crate::models::types::ProcessMetric>, String> {
+    let sort_by_mem = sort_by.as_deref() == Some("memory");
+    let max_limit = limit.unwrap_or(25);
+    Ok(commands::gpu::poll_top_processes(sort_by_mem, max_limit).await)
+}
+
 // trace:implements FR-007
 #[tauri::command]
 async fn send_chat_message(
@@ -399,6 +410,7 @@ pub fn run() {
             stop_model,
             pull_model,
             get_hardware_telemetry,
+            get_process_telemetry,
             get_sensor_tree,
             get_lhm_status,
             set_fan_duty,
