@@ -253,6 +253,17 @@
             <span class="s-lbl">Hardware &amp; VRAM</span>
             <span class="ct">12GB</span>
           </a>
+          <a class="nav-item s-item" id="nav-twin" data-view="twin" data-domain="observability" style="display:none;" title="3D Hardware Digital Twin Simulation">
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                <line x1="12" y1="22.08" x2="12" y2="12"></line>
+              </svg>
+            </span>
+            <span class="s-lbl">3D Digital Twin</span>
+            <span class="ct">3D</span>
+          </a>
 
           <!-- ══════ DOMAIN 5: NETWORK DISTRIBUTION ══════ -->
           <div class="s-grp" data-domain="network-distribution" style="display:none;">NETWORK DISTRIBUTION</div>
@@ -368,6 +379,74 @@
                 <h3 style="color:#34d399; font-size:16px; margin-bottom:12px;">🔥 GPU Temperature & Load</h3>
                 <div style="font-size:32px; font-weight:700; color:#fff; margin-bottom:8px;" id="obs-temp-text">52 °C</div>
                 <div style="font-size:13px; color:rgba(255,255,255,0.6);" id="obs-load-text">CUDA Core Utilization: 44%</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- View: 3D Hardware Digital Twin Simulation -->
+          <div class="view-panel" id="view-twin" style="display:none;">
+            <div class="view-header">
+              <div class="view-heading">
+                <h1>3D Hardware Digital Twin</h1>
+                <p>Interactive 3D simulation of NVIDIA GeForce RTX 3060, Motherboard, Heatsink fan, and NVMe SSD telemetry</p>
+              </div>
+              <div class="view-actions">
+                <span class="badge" style="background:rgba(124,242,107,0.15); color:var(--green); padding:6px 12px; font-weight:700;">
+                  ● WebGL 3D Simulation
+                </span>
+              </div>
+            </div>
+
+            <div class="twin-container">
+              <!-- Interactive 3D Canvas Box -->
+              <div id="twin-3d-canvas-container">
+                <!-- Floating HUD Overlays -->
+                <div class="twin-hud-overlay">
+                  <div class="twin-hud-chip">
+                    <span style="color:var(--green);">🎮 GPU:</span>
+                    <span id="twin-stat-gpu-temp">52°C</span> · <span id="twin-stat-gpu-util">44%</span>
+                  </div>
+                  <div class="twin-hud-chip">
+                    <span style="color:var(--cyan);">🧠 CPU:</span>
+                    <span id="twin-stat-cpu-temp">48°C</span> · <span id="twin-stat-cpu-util">34%</span>
+                  </div>
+                  <div class="twin-hud-chip">
+                    <span style="color:var(--amber);">⚡ VRAM:</span>
+                    <span>7.6 / 12 GB</span>
+                  </div>
+                </div>
+
+                <!-- Camera Presets Floating Toolbar -->
+                <div class="twin-cam-toolbar">
+                  <button type="button" class="twin-cam-btn active" id="btn-cam-default">🎥 Isometric</button>
+                  <button type="button" class="twin-cam-btn" id="btn-cam-gpu">🎮 RTX 3060 Focus</button>
+                  <button type="button" class="twin-cam-btn" id="btn-cam-cpu">🧠 CPU Cooler</button>
+                  <button type="button" class="twin-cam-btn" id="btn-cam-top">📐 Top-Down PCB</button>
+                </div>
+              </div>
+
+              <!-- 3D Component Hardware Specs & Telemetry -->
+              <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
+                <div class="model-card" style="padding:16px;">
+                  <span style="font-size:11px; font-weight:700; color:var(--green); font-family:var(--mono);">3D GPU COMPONENT</span>
+                  <div style="font-weight:700; font-size:15px; color:#fff; margin-top:4px;">NVIDIA GeForce RTX 3060</div>
+                  <div style="font-size:12px; color:var(--mut); margin-top:4px;">GA106 Core · 3584 CUDA Cores · 12GB GDDR6 (192-bit)</div>
+                  <div style="font-size:12px; color:var(--faint); margin-top:8px;">Dual cooling fans dynamically rotating with real-time fan curve</div>
+                </div>
+
+                <div class="model-card" style="padding:16px;">
+                  <span style="font-size:11px; font-weight:700; color:var(--cyan); font-family:var(--mono);">3D CPU &amp; THERMAL TOWER</span>
+                  <div style="font-weight:700; font-size:15px; color:#fff; margin-top:4px;">Host Processor &amp; Heatsink</div>
+                  <div style="font-size:12px; color:var(--mut); margin-top:4px;">Aluminum Fin Stack · 8 Copper Heatpipes · 120mm PWM Fan</div>
+                  <div style="font-size:12px; color:var(--faint); margin-top:8px;">IHS emissive glow dynamically shifts: Cyan ⟷ Amber ⟷ Red</div>
+                </div>
+
+                <div class="model-card" style="padding:16px;">
+                  <span style="font-size:11px; font-weight:700; color:var(--amber); font-family:var(--mono);">STORAGE BUS &amp; MEMORY</span>
+                  <div style="font-weight:700; font-size:15px; color:#fff; margin-top:4px;">NVMe PCIe 4.0 &amp; Dual-Channel RAM</div>
+                  <div style="font-size:12px; color:var(--mut); margin-top:4px;">32GB DDR4 3600MT/s · G:\.ollama_blobs_root M.2 NVMe</div>
+                  <div style="font-size:12px; color:var(--faint); margin-top:8px;">Simulated hardware activity LED blinking on blob read/write</div>
+                </div>
               </div>
             </div>
           </div>

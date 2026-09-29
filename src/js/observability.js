@@ -18,6 +18,8 @@ const invoke = window.__TAURI__?.core?.invoke || (async () => ({
   ]
 }));
 
+import { updateDigitalTwinTelemetry } from './digital_twin_3d.js';
+
 let pollInterval = null;
 
 function formatGb(bytes) {
@@ -26,6 +28,20 @@ function formatGb(bytes) {
 
 export function updateTelemetryDOM(telemetry) {
   if (!telemetry) return;
+
+  // Pass mapped hardware telemetry to 3D Digital Twin simulation
+  const gpu = telemetry.gpus?.[0];
+  updateDigitalTwinTelemetry({
+    gpuTemp: gpu?.temperature_c || 52,
+    gpuUtil: gpu?.utilization_pct || 42,
+    gpuFan: Math.max(30, Math.min(100, Math.round((gpu?.temperature_c || 50) * 0.95))),
+    cpuTemp: Math.round(38 + (telemetry.cpu_usage_pct || 0) * 0.35),
+    cpuUtil: Math.round(telemetry.cpu_usage_pct || 15),
+    vramUsed: Number(formatGb(gpu?.vram_used_bytes || 0)),
+    vramTotal: Number(formatGb(gpu?.vram_total_bytes || 12884901888)),
+    ramUsed: Number(formatGb(telemetry.system_ram_used_bytes || 0)),
+    ramTotal: Number(formatGb(telemetry.system_ram_total_bytes || 34359738368))
+  });
 
   // 1. GPU VRAM pill
   const vramPill = document.getElementById('stat-gpu-vram');

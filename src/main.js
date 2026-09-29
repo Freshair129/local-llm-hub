@@ -19,6 +19,7 @@ import { initArena, populateArenaModelSelectors } from './js/arena.js';
 import { initDownloader } from './js/downloader.js';
 import { initUpdater } from './js/updater.js';
 import { initThemeStudio } from './js/theme_studio.js';
+import { initDigitalTwin } from './js/digital_twin_3d.js';
 
 // Safe Tauri Core Invoker
 const invoke = window.__TAURI__?.core?.invoke || (async (cmd, args) => {
@@ -171,6 +172,8 @@ function setupNavigation() {
         renderStatsDashboard();
       } else if (targetView === 'arena') {
         populateArenaModelSelectors();
+      } else if (targetView === 'twin') {
+        setTimeout(() => initDigitalTwin(), 60);
       }
     });
   });

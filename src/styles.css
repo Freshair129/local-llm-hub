@@ -134,8 +134,8 @@ body::after {
   align-items: center;
   gap: 10px;
   height: 54px;
-  width: calc(100% - 32px);
-  max-width: 1280px;
+  width: max-content;
+  max-width: calc(100% - 32px);
   margin: 12px auto 0;
   padding: 0 16px;
   border: 1px solid var(--glass-border);
@@ -310,14 +310,15 @@ body::after {
   grid-template-columns: var(--rail-expanded) minmax(0, 1fr);
 }
 
-/* ── Floating Collapsible Glass Rail (52px ⟷ 260px) ── */
+/* ── Floating Collapsible Glass Rail (Centered Vertically in Viewport) ── */
 .sidebar {
   width: var(--rail-collapsed);
-  align-self: start;
+  align-self: center;
   position: sticky;
-  top: 80px;
+  top: 50%;
+  transform: translateY(-50%);
   max-height: calc(100vh - 100px);
-  min-height: 520px;
+  min-height: auto;
   padding: 10px 6px;
   border: 1px solid var(--glass-border);
   border-radius: var(--r-card); /* 24px */
@@ -977,3 +978,97 @@ body::after {
 .storage-blobs-table tr:hover td {
   background: rgba(255, 255, 255, 0.03);
 }
+
+/* ============================================================
+   3D DIGITAL TWIN PC HARDWARE SIMULATOR
+   ============================================================ */
+.twin-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 14px;
+}
+
+#twin-3d-canvas-container {
+  width: 100%;
+  height: 580px;
+  position: relative;
+  border-radius: var(--r-card);
+  background: radial-gradient(circle at 50% 50%, rgba(20, 32, 22, 0.5), rgba(10, 11, 10, 0.95));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-hi), var(--glass-shadow), inset 0 0 40px rgba(0, 0, 0, 0.7);
+  overflow: hidden;
+  cursor: grab;
+}
+
+#twin-3d-canvas-container:active {
+  cursor: grabbing;
+}
+
+.twin-hud-overlay {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  display: flex;
+  gap: 10px;
+  z-index: 10;
+  pointer-events: none;
+  flex-wrap: wrap;
+}
+
+.twin-hud-chip {
+  background: rgba(14, 18, 15, 0.88);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(12px);
+  padding: 6px 14px;
+  border-radius: var(--r-pill);
+  font-family: var(--mono);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.twin-cam-toolbar {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+  background: rgba(14, 18, 15, 0.9);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  padding: 6px 14px;
+  border-radius: var(--r-pill);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.twin-cam-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--mut);
+  font-size: 11.5px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  transition: all var(--t-fast);
+  white-space: nowrap;
+}
+
+.twin-cam-btn:hover {
+  color: var(--tx);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--line2);
+}
+
+.twin-cam-btn.active {
+  color: #0a0b0a;
+  background: var(--green);
+  font-weight: 700;
+  box-shadow: 0 0 12px var(--green-glow);
+}
+

@@ -20,6 +20,10 @@ class AppStore {
     return this._state;
   }
 
+  getState() {
+    return this._state;
+  }
+
   setState(partial) {
     this._state = { ...this._state, ...partial };
     this._notify();
