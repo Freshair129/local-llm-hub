@@ -432,6 +432,15 @@ body::after {
   transition: opacity 0.2s, height 0.25s;
 }
 
+.sidebar:not(.open):not(:hover):not(.pinned) .s-grp,
+#sidebar:not(.open):not(:hover):not(.pinned) .s-grp {
+  opacity: 0;
+  height: 1px;
+  padding: 0;
+  margin: 6px 4px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
 .sidebar:hover .s-grp,
 .sidebar.open .s-grp,
 .sidebar.pinned .s-grp,
@@ -440,6 +449,9 @@ body::after {
 #sidebar.pinned .s-grp {
   opacity: 1;
   height: auto;
+  margin: 0;
+  padding: 10px 10px 4px;
+  background: transparent;
 }
 
 /* Sidebar Menu Items — Rigid Proportions (GHT Standard) */
@@ -483,16 +495,46 @@ body::after {
   font-weight: 700;
 }
 
-.s-item.active::before, .s-item.on::before, .nav-item.active::before {
+/* Expanded active item: shows glowing green bar on left */
+.sidebar:hover .s-item.active::before,
+.sidebar.open .s-item.active::before,
+.sidebar.pinned .s-item.active::before,
+#sidebar:hover .s-item.active::before,
+#sidebar.open .s-item.active::before,
+#sidebar.pinned .s-item.active::before,
+.sidebar:hover .nav-item.active::before,
+.sidebar.open .nav-item.active::before,
+.sidebar.pinned .nav-item.active::before {
   content: "";
   position: absolute;
-  left: 2px;
+  left: 0;
   top: 18%;
   height: 64%;
   width: 3px;
   border-radius: 99px;
   background: var(--green);
   box-shadow: 0 0 8px var(--green);
+}
+
+/* Collapsed active item: completely remove left sliver, frame with glowing ring */
+.sidebar:not(.open):not(:hover):not(.pinned) .s-item.active::before,
+.sidebar:not(.open):not(:hover):not(.pinned) .s-item.on::before,
+.sidebar:not(.open):not(:hover):not(.pinned) .nav-item.active::before,
+#sidebar:not(.open):not(:hover):not(.pinned) .s-item.active::before,
+#sidebar:not(.open):not(:hover):not(.pinned) .s-item.on::before,
+#sidebar:not(.open):not(:hover):not(.pinned) .nav-item.active::before {
+  display: none !important;
+}
+
+.sidebar:not(.open):not(:hover):not(.pinned) .s-item.active,
+.sidebar:not(.open):not(:hover):not(.pinned) .s-item.on,
+.sidebar:not(.open):not(:hover):not(.pinned) .nav-item.active,
+#sidebar:not(.open):not(:hover):not(.pinned) .s-item.active,
+#sidebar:not(.open):not(:hover):not(.pinned) .s-item.on,
+#sidebar:not(.open):not(:hover):not(.pinned) .nav-item.active {
+  background: rgba(124, 242, 107, 0.12) !important;
+  border: 1px solid rgba(124, 242, 107, 0.45) !important;
+  box-shadow: 0 0 14px rgba(124, 242, 107, 0.22) !important;
 }
 
 /* Rigid Icon Container — NEVER SQUASHED OR DISTORTED */
@@ -505,6 +547,11 @@ body::after {
   flex-shrink: 0;
 }
 
+.sidebar:not(.open):not(:hover):not(.pinned) .s-item .ic,
+#sidebar:not(.open):not(:hover):not(.pinned) .s-item .ic {
+  margin: 0 auto;
+}
+
 .s-item .ic svg, .nav-item .ic svg, .s-item svg {
   width: 17px;
   height: 17px;
@@ -512,6 +559,7 @@ body::after {
   fill: none;
   stroke-width: 2;
   flex-shrink: 0;
+  display: block;
 }
 
 .s-item.active .ic svg, .nav-item.active svg {
@@ -520,11 +568,24 @@ body::after {
 }
 
 .s-lbl, .nav-item-text {
+  display: none;
   opacity: 0;
   width: 0;
   overflow: hidden;
   white-space: nowrap;
   transition: opacity 0.18s;
+}
+
+.sidebar:not(.open):not(:hover):not(.pinned) .s-lbl,
+.sidebar:not(.open):not(:hover):not(.pinned) .nav-item-text,
+#sidebar:not(.open):not(:hover):not(.pinned) .s-lbl,
+#sidebar:not(.open):not(:hover):not(.pinned) .nav-item-text {
+  display: none !important;
+  width: 0 !important;
+  margin: 0 !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
 }
 
 .sidebar:hover .s-lbl,
@@ -539,11 +600,13 @@ body::after {
 #sidebar:hover .nav-item-text,
 #sidebar.open .nav-item-text,
 #sidebar.pinned .nav-item-text {
+  display: inline-block !important;
   opacity: 1 !important;
   width: auto !important;
 }
 
 .s-item .ct {
+  display: none;
   margin-left: auto;
   font-family: var(--mono);
   font-size: 10px;
@@ -552,13 +615,26 @@ body::after {
   transition: opacity 0.18s;
 }
 
+.sidebar:not(.open):not(:hover):not(.pinned) .s-item .ct,
+#sidebar:not(.open):not(:hover):not(.pinned) .s-item .ct {
+  display: none !important;
+  width: 0 !important;
+  margin: 0 !important;
+  opacity: 0 !important;
+  overflow: hidden !important;
+  pointer-events: none !important;
+}
+
 .sidebar:hover .s-item .ct,
 .sidebar.open .s-item .ct,
 .sidebar.pinned .s-item .ct,
 #sidebar:hover .s-item .ct,
 #sidebar.open .s-item .ct,
 #sidebar.pinned .s-item .ct {
+  display: inline-block !important;
   opacity: 1 !important;
+  width: auto !important;
+  margin-left: auto !important;
 }
 
 /* Sidebar Footer & Mascot (Centered and Proportional) */
