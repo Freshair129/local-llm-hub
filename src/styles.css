@@ -58,12 +58,12 @@ body::before {
   position: absolute;
   top: -10%;
   left: 30%;
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--accent-primary) 0%, transparent 70%);
+  opacity: 0.16;
   border-radius: 50%;
   pointer-events: none;
   z-index: 0;
+  transition: opacity 0.3s;
 }
 
 /* === App Shell Layout === */
@@ -78,13 +78,14 @@ body::before {
 /* === Sidebar === */
 #sidebar {
   width: var(--sidebar-width);
-  background: rgba(15, 20, 32, 0.85);
+  background: var(--bg-surface);
   backdrop-filter: blur(16px);
   border-right: 1px solid var(--glass-border);
   display: flex;
   flex-direction: column;
   padding: 24px 16px;
   flex-shrink: 0;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s;
 }
 
 .brand-header {
@@ -106,7 +107,8 @@ body::before {
   font-weight: 800;
   font-size: 16px;
   color: white;
-  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 4px 16px var(--accent-primary);
+  transition: all 0.3s;
 }
 
 .brand-title {
@@ -147,9 +149,10 @@ body::before {
 
 .nav-item.active {
   color: #ffffff;
-  background: rgba(99, 102, 241, 0.15);
-  border-color: rgba(99, 102, 241, 0.3);
-  font-weight: 600;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 14px var(--glass-border-hover);
+  font-weight: 700;
 }
 
 .nav-item svg {

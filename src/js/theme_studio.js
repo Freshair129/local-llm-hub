@@ -5,22 +5,45 @@
 import { showToast } from './toast.js';
 
 export const THEMES = [
-  { id: 'default', name: 'Modern Indigo (Current)', icon: '🔮', accent: '#6366f1' },
+  { id: 'default', name: 'Modern Indigo', icon: '🔮', accent: '#6366f1' },
   { id: 'ght-command-center', name: 'GHT Command Center', icon: '🟢', accent: '#7cf26b' },
   { id: 'cyberpunk-neon', name: 'Cyberpunk HUD', icon: '⚡', accent: '#f43f5e' },
   { id: 'nordic-frost', name: 'Nordic Frost', icon: '❄️', accent: '#38bdf8' }
 ];
 
 export function initThemeStudio() {
-  // Load saved layout mode
+  // 1. Load and apply saved theme
+  const savedTheme = localStorage.getItem('local-llm-hub-theme') || 'default';
+  applyTheme(savedTheme);
+
+  // 2. Load and apply saved layout mode
   const savedLayout = localStorage.getItem('local-llm-hub-layout') || 'classic';
   applyNavLayout(savedLayout);
 
-  // Wire up theme pills in header
-  setupHeaderThemeSwitcher();
+  // 3. Setup header controls
+  setupHeaderControls();
 
-  // Wire up Design Studio view interactions
+  // 4. Setup Design Studio view buttons
   setupDesignStudioView();
+}
+
+export function applyTheme(themeId) {
+  const root = document.documentElement;
+  if (themeId === 'default') {
+    root.removeAttribute('data-theme');
+  } else {
+    root.setAttribute('data-theme', themeId);
+  }
+  localStorage.setItem('local-llm-hub-theme', themeId);
+
+  // Update pills active state
+  document.querySelectorAll('.theme-pill-btn').forEach(btn => {
+    if (btn.getAttribute('data-theme-id') === themeId) {
+      btn.classList.add('active-theme');
+    } else {
+      btn.classList.remove('active-theme');
+    }
+  });
 }
 
 export function applyNavLayout(layoutMode) {
@@ -32,6 +55,24 @@ export function applyNavLayout(layoutMode) {
   }
   localStorage.setItem('local-llm-hub-layout', layoutMode);
 
+  // Update header layout toggle button
+  const headerLayoutLabel = document.getElementById('header-layout-label');
+  const headerLayoutBtn = document.getElementById('header-layout-toggle-btn');
+  if (headerLayoutLabel && headerLayoutBtn) {
+    if (layoutMode === '2tier') {
+      headerLayoutLabel.textContent = 'Layout: GHT 2-Tier';
+      headerLayoutBtn.style.background = 'rgba(124, 242, 107, 0.2)';
+      headerLayoutBtn.style.borderColor = '#7cf26b';
+      headerLayoutBtn.style.color = '#7cf26b';
+    } else {
+      headerLayoutLabel.textContent = 'Layout: Classic';
+      headerLayoutBtn.style.background = '';
+      headerLayoutBtn.style.borderColor = '';
+      headerLayoutBtn.style.color = '';
+    }
+  }
+
+  // Update design studio toggle button if present
   const btnToggle = document.getElementById('btn-toggle-layout-mode');
   if (btnToggle) {
     if (layoutMode === '2tier') {
@@ -46,52 +87,50 @@ export function applyNavLayout(layoutMode) {
   }
 }
 
-export function applyTheme(themeId) {
-  const root = document.documentElement;
-  if (themeId === 'default') {
-    root.removeAttribute('data-theme');
-  } else {
-    root.setAttribute('data-theme', themeId);
-  }
-  localStorage.setItem('local-llm-hub-theme', themeId);
-
-  // Update pills UI
-  document.querySelectorAll('.theme-pill-btn').forEach(btn => {
-    if (btn.getAttribute('data-theme-id') === themeId) {
-      btn.classList.add('active-theme');
-    } else {
-      btn.classList.remove('active-theme');
-    }
-  });
-}
-
-function setupHeaderThemeSwitcher() {
+function setupHeaderControls() {
+  // Theme pills
   const container = document.getElementById('header-theme-selector');
-  if (!container) return;
+  if (container) {
+    container.innerHTML = THEMES.map(t => {
+      const active = (localStorage.getItem('local-llm-hub-theme') || 'default') === t.id;
+      return `
+        <button class="theme-pill-btn ${active ? 'active-theme' : ''}" 
+                data-theme-id="${t.id}" title="${t.name}">
+          ${t.icon} ${t.name.split(' ')[0]}
+        </button>
+      `;
+    }).join('');
 
-  container.innerHTML = THEMES.map(t => `
-    <button class="theme-pill-btn ${localStorage.getItem('local-llm-hub-theme') === t.id || (!localStorage.getItem('local-llm-hub-theme') && t.id === 'default') ? 'active-theme' : ''}" 
-            data-theme-id="${t.id}" title="${t.name}">
-      ${t.icon} ${t.name.split(' ')[0]}
-    </button>
-  `).join('');
-
-  container.querySelectorAll('.theme-pill-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const themeId = btn.getAttribute('data-theme-id');
-      applyTheme(themeId);
-      showToast(`สลับธีมเป็น: ${THEMES.find(t => t.id === themeId)?.name}`);
+    container.querySelectorAll('.theme-pill-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const themeId = btn.getAttribute('data-theme-id');
+        applyTheme(themeId);
+        showToast(`สลับธีมสีเป็น: ${THEMES.find(t => t.id === themeId)?.name}`);
+      });
     });
-  });
+  }
 
-  // Wire GHT master bar tabs
+  // Header layout toggle button
+  const headerLayoutBtn = document.getElementById('header-layout-toggle-btn');
+  if (headerLayoutBtn) {
+    headerLayoutBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const current = localStorage.getItem('local-llm-hub-layout') || 'classic';
+      const next = current === 'classic' ? '2tier' : 'classic';
+      applyNavLayout(next);
+      showToast(`สลับ Layout: ${next === '2tier' ? '🟢 GHT 2-Tier Command Bar' : '🔮 Classic Flat Sidebar'}`);
+    });
+  }
+
+  // GHT master bar tabs
   document.querySelectorAll('.master-tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       document.querySelectorAll('.master-tab-btn').forEach(b => b.classList.remove('active-master'));
       btn.classList.add('active-master');
       const cat = btn.getAttribute('data-category');
       
-      // Auto route to view
       if (cat === 'models') document.getElementById('nav-models')?.click();
       else if (cat === 'telemetry') document.getElementById('nav-gpu')?.click();
       else if (cat === 'gateway') document.getElementById('nav-gateway')?.click();
@@ -102,20 +141,23 @@ function setupHeaderThemeSwitcher() {
 }
 
 function setupDesignStudioView() {
-  // Wire layout toggle button
+  // Wire studio layout toggle button
   const btnToggleLayout = document.getElementById('btn-toggle-layout-mode');
   if (btnToggleLayout) {
-    btnToggleLayout.addEventListener('click', () => {
+    btnToggleLayout.addEventListener('click', (e) => {
+      e.preventDefault();
       const current = localStorage.getItem('local-llm-hub-layout') || 'classic';
       const next = current === 'classic' ? '2tier' : 'classic';
       applyNavLayout(next);
-      showToast(`สลับโครงสร้าง Layout เป็น: ${next === '2tier' ? 'GHT 2-Tier Command Bar (รางเมนูย่อขยายได้)' : 'Classic Flat Sidebar'}`);
+      showToast(`สลับโครงสร้าง Layout เป็น: ${next === '2tier' ? 'GHT 2-Tier Command Bar' : 'Classic Flat Sidebar'}`);
     });
   }
 
+  // Choose style cards buttons
   const chooseButtons = document.querySelectorAll('.btn-choose-style');
   chooseButtons.forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       const themeId = btn.getAttribute('data-theme-target');
       if (themeId) {
         applyTheme(themeId);
@@ -124,10 +166,11 @@ function setupDesignStudioView() {
     });
   });
 
-  // Wire interactive Storage Audit simulator/tester
+  // Storage audit button
   const btnAudit = document.getElementById('btn-studio-audit-storage');
   if (btnAudit) {
-    btnAudit.addEventListener('click', async () => {
+    btnAudit.addEventListener('click', async (e) => {
+      e.preventDefault();
       btnAudit.innerHTML = `<span>⏳ กำลังสแกน Blobs บน Drive C: และ G:...</span>`;
       btnAudit.disabled = true;
 
@@ -165,11 +208,10 @@ function setupDesignStudioView() {
           `;
           
           document.getElementById('btn-quick-offload')?.addEventListener('click', () => {
-            showToast("ส่งคำสั่ง Safe Blob Relocation ไปยัง Background Task เรียบร้อย! 🚀");
+            showToast("ส่งคำสั่ง Safe Blob Relocation เรียบร้อย! 🚀");
           });
         }
       }, 700);
     });
   }
 }
-

@@ -29,7 +29,7 @@
               <line x1="8" y1="21" x2="16" y2="21"></line>
               <line x1="12" y1="17" x2="12" y2="21"></line>
             </svg>
-            Model Manager
+            <span class="nav-item-text">Model Manager</span>
           </a>
           <a class="nav-item" id="nav-stats" data-view="stats">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -37,7 +37,7 @@
               <path d="M12 20V4"></path>
               <path d="M6 20v-6"></path>
             </svg>
-            Model Analytics & ROI
+            <span class="nav-item-text">Model Analytics & ROI</span>
           </a>
           <a class="nav-item" id="nav-gpu" data-view="gpu">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -52,19 +52,19 @@
               <line x1="1" y1="9" x2="4" y2="9"></line>
               <line x1="1" y1="14" x2="4" y2="14"></line>
             </svg>
-            Hardware & VRAM
+            <span class="nav-item-text">Hardware & VRAM</span>
           </a>
           <a class="nav-item" id="nav-gateway" data-view="gateway">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
             </svg>
-            LiteLLM Gateway
+            <span class="nav-item-text">LiteLLM Gateway</span>
           </a>
           <a class="nav-item" id="nav-chat" data-view="chat">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
             </svg>
-            Playground Chat
+            <span class="nav-item-text">Playground Chat</span>
           </a>
           <a class="nav-item" id="nav-arena" data-view="arena">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -73,7 +73,7 @@
               <line x1="8" y1="13" x2="16" y2="13"></line>
               <line x1="8" y1="17" x2="16" y2="17"></line>
             </svg>
-            ⚔️ Model Arena
+            <span class="nav-item-text">⚔️ Model Arena</span>
           </a>
           <a class="nav-item" id="nav-downloader" data-view="downloader">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -81,7 +81,7 @@
               <polyline points="7 10 12 15 17 10"></polyline>
               <line x1="12" y1="15" x2="12" y2="3"></line>
             </svg>
-            📥 Downloader
+            <span class="nav-item-text">📥 Downloader</span>
           </a>
           <a class="nav-item" id="nav-share" data-view="share">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -91,13 +91,13 @@
               <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
               <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
             </svg>
-            LAN Drive Share
+            <span class="nav-item-text">LAN Drive Share</span>
           </a>
           <a class="nav-item" id="nav-design-studio" data-view="design-studio">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
             </svg>
-            🎨 Design Studio
+            <span class="nav-item-text">🎨 Design Studio</span>
           </a>
         </nav>
 
@@ -121,7 +121,7 @@
       <main id="main-content">
         <!-- Top Telemetry & Status Bar -->
         <header id="telemetry-bar">
-          <div class="top-telemetry-left" style="display:flex; gap:16px; align-items:center;">
+          <div class="top-telemetry-left" style="display:flex; gap:14px; align-items:center;">
             <div class="gpu-gauge-group" id="stat-gpu-vram">
               <span class="gpu-label">VRAM</span>
               <div class="gauge-track">
@@ -133,9 +133,12 @@
               <span style="color:#a78bfa; font-weight:600; font-size:12px;">RAM:</span>
               <span style="font-size:12px; color:rgba(255,255,255,0.8);">8.2 / 32.0 GB (25%)</span>
             </div>
-            <div class="theme-selector-group" id="header-theme-selector" title="สลับธีม">
+            <div class="theme-selector-group" id="header-theme-selector" title="สลับธีมสี">
               <!-- Rendered dynamically by theme_studio.js -->
             </div>
+            <button class="btn btn-ghost" id="header-layout-toggle-btn" style="padding:4px 10px; font-size:11px; border-radius:999px; display:flex; align-items:center; gap:6px; border:1px solid var(--glass-border); cursor:pointer;" title="สลับรูปแบบ Layout ระหว่าง Classic Sidebar กับ GHT 2-Tier Command Bar">
+              <span>📐</span> <span id="header-layout-label">Layout: Classic</span>
+            </button>
           </div>
 
           <div class="top-telemetry-right">
