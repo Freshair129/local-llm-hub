@@ -39,11 +39,54 @@ const invoke = window.__TAURI__?.core?.invoke || (async (cmd, args) => {
   return null;
 });
 
-// Navigation Tabs Setup
+// Navigation Tabs Setup (GHT Command Center 2-Tier Architecture)
 function setupNavigation() {
   const navItems = document.querySelectorAll('.nav-item');
   const viewPanels = document.querySelectorAll('.view-panel');
+  const crumb = document.getElementById('sidebar-crumb');
+  const parentTabs = document.querySelectorAll('.top-tab-btn');
+  const sidebar = document.getElementById('sidebar');
+  const shell = document.getElementById('app-shell');
+  const pinBtn = document.getElementById('sidebar-pin-btn');
 
+  // Sidebar Pin Toggle
+  if (pinBtn && sidebar && shell) {
+    pinBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isPinned = sidebar.classList.toggle('pinned');
+      shell.classList.toggle('rail-pinned', isPinned);
+      pinBtn.classList.toggle('on', isPinned);
+      try {
+        localStorage.setItem('local-llm-hub-rail-pinned', isPinned ? 'true' : 'false');
+      } catch (err) {}
+    });
+
+    // Restore saved pin state
+    try {
+      if (localStorage.getItem('local-llm-hub-rail-pinned') === 'true') {
+        sidebar.classList.add('pinned');
+        shell.classList.add('rail-pinned');
+        pinBtn.classList.add('on');
+      }
+    } catch (err) {}
+  }
+
+  // Parent Tab Switching (Fleet & Models, G-Telemetry, Gateway, Storage, Design Studio)
+  parentTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      parentTabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      const parentKey = tab.getAttribute('data-parent');
+      // Highlight matching group or find first child
+      const matchingChild = document.querySelector(`.nav-item[data-parent="${parentKey}"]`);
+      if (matchingChild) {
+        matchingChild.click();
+      }
+    });
+  });
+
+  // Rail Item Clicks
   navItems.forEach(item => {
     item.addEventListener('click', (e) => {
       e.preventDefault();
@@ -51,6 +94,19 @@ function setupNavigation() {
       item.classList.add('active');
 
       const targetView = item.getAttribute('data-view');
+      const parentCat = item.getAttribute('data-parent') || 'HUB';
+      const labelText = item.querySelector('.nav-item-text')?.textContent || targetView;
+
+      // Update Breadcrumb (GHT Style: HUB / PARENT / CHILD)
+      if (crumb) {
+        crumb.innerHTML = `${parentCat.toUpperCase()} / <b>${labelText.toUpperCase()}</b>`;
+      }
+
+      // Sync active state on top parent tabs
+      parentTabs.forEach(t => {
+        t.classList.toggle('active', t.getAttribute('data-parent') === parentCat);
+      });
+
       store.setState({ activeView: targetView });
 
       viewPanels.forEach(panel => {
@@ -73,6 +129,16 @@ function setupNavigation() {
       }
     });
   });
+
+  // Agent Mascot Avatar Interaction
+  const mascotAvatar = document.getElementById('agent-mascot-avatar');
+  if (mascotAvatar) {
+    mascotAvatar.addEventListener('click', () => {
+      showToast('🤖 Local Model Fleet: RTX 3060 CUDA Nominal — All systems ready!', 'success');
+      mascotAvatar.style.transform = 'scale(1.25) rotate(15deg)';
+      setTimeout(() => { mascotAvatar.style.transform = ''; }, 300);
+    });
+  }
 
   // Sync models button
   const btnSync = document.getElementById('btn-refresh-models');

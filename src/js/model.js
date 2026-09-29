@@ -161,10 +161,14 @@ export async function recordModelTask(modelId, success, promptTokens, completion
 export function renderModels(models) {
   const grid = document.getElementById('model-grid');
   const countLabel = document.getElementById('model-count-label');
+  const railCount = document.getElementById('rail-model-count');
   if (!grid) return;
 
   if (countLabel) {
     countLabel.textContent = `Loaded: ${models ? models.length : 0} models`;
+  }
+  if (railCount) {
+    railCount.textContent = models ? models.length : 0;
   }
 
   if (!models || models.length === 0) {
