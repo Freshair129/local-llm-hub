@@ -140,6 +140,34 @@
 
 ---
 
+## ADR-007: Single-Source Push-Based Telemetry via Tauri Events
+
+**Status:** Accepted  
+**Date:** 2026-09-30  
+**Full Document:** [ADR-007-push-telemetry-events.md](ADR-007-push-telemetry-events.md)
+
+**Context:**  
+การ poll `new_all()` จากทั้ง UI และ recording loop ทุก 2s แย่ง CPU และบิดเบือน telemetry ของ LLM inference บน RTX 3060 / i7-8700K
+
+**Decision:**  
+ใช้ persistent `System` ใน `AppState` สุ่มตัวอย่างรอบเดียวทุก 2000ms แล้ว emit ผ่าน Tauri event `telemetry://snapshot` ให้ UI `listen` โดย recording เป็นเพียง atomic flag เช็ค snapshot เดียวกัน
+
+---
+
+## ADR-008: Typed Rust ↔ TypeScript IPC Contract Generation
+
+**Status:** Accepted  
+**Date:** 2026-09-30  
+**Full Document:** [ADR-008-typed-ipc-contracts.md](ADR-008-typed-ipc-contracts.md)
+
+**Context:**  
+การ mirror struct และ string command names ด้วยมือทำให้เกิด silent drift (เช่น GPU metrics ไม่แสดงผล, command ตกค้าง)
+
+**Decision:**  
+สร้าง typed IPC contract จาก Rust เป็น single source of truth โดยใช้ `specta` / `tauri-specta` เพื่อให้ compile error ทันทีเมื่อ contract drift
+
+---
+
 ## ADR-100: Code & Component Boundary Guard Rails
 
 **Status:** Accepted  

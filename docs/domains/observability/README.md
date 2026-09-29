@@ -38,6 +38,13 @@ Domain นี้รับผิดชอบ **การแสดงสถาน�
 
 ---
 
+## Technical Specifications & Architecture
+
+| Document ID | Title | Scope |
+|---|---|---|
+| [SPEC-002](SPEC-002-hardware-telemetry-sensors.md) | Comprehensive Hardware Telemetry Sensor Topology | i7-8700K (12T), RTX 3060, NCT6795D, NVMe SSD |
+| [ADR-007](../../adr/ADR-007-push-telemetry-events.md) | Single-Source Push-Based Telemetry via Tauri Events | Background sampler emitting `telemetry://snapshot` |
+
 ## Boundaries
 
 ```

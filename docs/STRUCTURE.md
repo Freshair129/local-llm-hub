@@ -34,7 +34,8 @@ docs/
 │   │       ├── FEAT-001-ollama-adapter.md
 │   │       ├── FEAT-002-vllm-adapter.md
 │   │       ├── FEAT-003-hf-adapter.md
-│   │       └── FEAT-004-gguf-scanner.md
+│   │       ├── FEAT-004-gguf-scanner.md
+│   │       └── FEAT-019-hf-cache-junction-offload.md
 │   │
 │   ├── model-management/
 │   │   ├── README.md
@@ -51,6 +52,7 @@ docs/
 │   │
 │   └── observability/
 │       ├── README.md
+│       ├── SPEC-002-hardware-telemetry-sensors.md
 │       └── features/
 │           ├── FEAT-010-gpu-monitor.md
 │           ├── FEAT-011-ram-monitor.md
@@ -81,8 +83,12 @@ docs/
 │   ├── FR-014-version-and-autoupdate.md
 │   ├── FR-015-storage-symlink-offloader.md
 │   ├── FR-016-3d-hardware-digital-twin.md
+│   ├── FR-017-huggingface-cache-offload.md
 │   ├── NFR-001-performance.md
 │   └── NFR-002-reliability.md
+│
+├── benchmarks/                     ← LLM Benchmark harness & evaluations
+│   └── SPEC-LLM-Benchmark-Harness.md
 │
 ├── standards/                      ← Repo engineering standards
 │   ├── STD-001-documentation-architecture.md
@@ -117,7 +123,9 @@ docs/
 │   └── MULTI_AGENT_WORKFLOW_SPEC.md ← SPEC-WORKFLOW-001 (Multi-Agent Routing Pipeline)
 │
 ├── adr/
-│   └── ARCHITECTURE.md             ← Includes ADR-001..006, ADR-100, ARCH-001 §4
+│   ├── ARCHITECTURE.md             ← Includes ADR-001..006, ADR-100, ARCH-001 §4
+│   ├── ADR-007-push-telemetry-events.md
+│   └── ADR-008-typed-ipc-contracts.md
 │
 └── .doc-graph.json                 ← Auto-maintained relationship graph
 ```

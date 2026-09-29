@@ -6,7 +6,7 @@
 | **Status** | Active |
 | **Author** | Boss |
 | **Created** | 2026-09-29 |
-| **Source of Truth** | [`src-tauri/src/models/types.rs`](file:///d:/local-llm-hub/src-tauri/src/models/types.rs) |
+| **Source of Truth** | [`src-tauri/src/models/types.rs`](../../src-tauri/src/models/types.rs) |
 | **Parent Doc** | [PRD-SDD-v1.0.md](../PRD-SDD-v1.0.md) |
 
 ---

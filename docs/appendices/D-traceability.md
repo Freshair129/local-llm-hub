@@ -29,6 +29,7 @@
 | FR-014 | Version & Auto-update | Rust: `get_app_version`, `check_for_updates` | `src-tauri/src/commands/updater.rs` | Unit Tests Verified ✅ |
 | FR-015 | Storage & Symlink Offloader | Rust: `audit_blob_symlinks`, `execute_blob_offload` | `src-tauri/src/commands/storage.rs` | Unit Tests Verified ✅ |
 | FR-016 | 3D Hardware Digital Twin | JS: `digital_twin_3d.js` + Three.js | `src/js/digital_twin_3d.js` | Browser Render Verified ✅ |
+| FR-017 | HuggingFace Cache Offloader | Rust: `src-tauri/src/commands/storage.rs` | `docs/requirements/FR-017-huggingface-cache-offload.md` | Specification Verified ✅ |
 
 ## User Stories → Requirements Traceability
 

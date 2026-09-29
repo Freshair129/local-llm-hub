@@ -26,6 +26,7 @@ Domain นี้ **ไม่รับผิดชอบ** logic หลังจ�
 | FEAT-002 | vLLM Adapter | Draft | ❌ |
 | FEAT-003 | HuggingFace TGI Adapter | Draft | ❌ |
 | FEAT-004 | GGUF File Scanner | Draft | ❌ |
+| [FEAT-019](features/FEAT-019-hf-cache-junction-offload.md) | HuggingFace Cache Junction Offloader | Active | ❌ |
 
 ## Discovered Cross-Domain Features
 
@@ -44,6 +45,7 @@ Features ที่ domain นี้เกี่ยวข้องแต่ไม
 | [FR-001](../../requirements/FR-001-backend-probe.md) | Backend Probe | P0 | Draft |
 | [FR-005](../../requirements/FR-005-model-control.md) | Model Start/Stop Control | P1 | Draft |
 | [FR-009](../../requirements/FR-009-gguf-scanner.md) | GGUF File Scanner | P1 | Draft |
+| [FR-017](../../requirements/FR-017-huggingface-cache-offload.md) | HuggingFace Cache Offload | P1 | Approved |
 
 ## Referenced Requirements (owned by others)
 
