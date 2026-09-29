@@ -49,11 +49,24 @@ function setupNavigation() {
   const shell = document.getElementById('app-shell');
   const pinBtn = document.getElementById('sidebar-pin-btn');
 
+  // Sidebar Hover & Pin Handlers (GHT Architecture)
+  if (sidebar) {
+    sidebar.addEventListener('mouseenter', () => {
+      sidebar.classList.add('open');
+    });
+    sidebar.addEventListener('mouseleave', () => {
+      if (!sidebar.classList.contains('pinned')) {
+        sidebar.classList.remove('open');
+      }
+    });
+  }
+
   // Sidebar Pin Toggle
   if (pinBtn && sidebar && shell) {
     pinBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       const isPinned = sidebar.classList.toggle('pinned');
+      sidebar.classList.toggle('open', isPinned);
       shell.classList.toggle('rail-pinned', isPinned);
       pinBtn.classList.toggle('on', isPinned);
       try {
@@ -65,6 +78,7 @@ function setupNavigation() {
     try {
       if (localStorage.getItem('local-llm-hub-rail-pinned') === 'true') {
         sidebar.classList.add('pinned');
+        sidebar.classList.add('open');
         shell.classList.add('rail-pinned');
         pinBtn.classList.add('on');
       }

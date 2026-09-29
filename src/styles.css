@@ -272,7 +272,7 @@ body::after {
 }
 
 /* ── Floating Collapsible Glass Rail (54px ⟷ 260px) ── */
-.sidebar, #sidebar {
+.sidebar {
   width: var(--rail-collapsed);
   align-self: start;
   position: sticky;
@@ -301,12 +301,16 @@ body::after {
 /* Hover or pinned expands smoothly */
 .sidebar:hover,
 .sidebar.open,
-.sidebar.pinned {
-  width: var(--rail-expanded);
+.sidebar.pinned,
+#sidebar:hover,
+#sidebar.open,
+#sidebar.pinned {
+  width: var(--rail-expanded) !important;
   padding: 14px 10px;
-  background: rgba(14, 18, 15, 0.92);
+  background: rgba(14, 18, 15, 0.94);
   border-color: var(--glass-border-hi);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), var(--glass-hi);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), var(--glass-hi);
+  z-index: 50;
 }
 
 .s-railtop {
@@ -330,7 +334,11 @@ body::after {
 }
 
 .sidebar:hover .s-crumb,
-.sidebar.pinned .s-crumb {
+.sidebar.open .s-crumb,
+.sidebar.pinned .s-crumb,
+#sidebar:hover .s-crumb,
+#sidebar.open .s-crumb,
+#sidebar.pinned .s-crumb {
   opacity: 1;
 }
 
@@ -353,7 +361,11 @@ body::after {
 }
 
 .sidebar:hover .s-pin,
-.sidebar.pinned .s-pin {
+.sidebar.open .s-pin,
+.sidebar.pinned .s-pin,
+#sidebar:hover .s-pin,
+#sidebar.open .s-pin,
+#sidebar.pinned .s-pin {
   opacity: 1;
 }
 
@@ -380,7 +392,11 @@ body::after {
 }
 
 .sidebar:hover .s-grp,
-.sidebar.pinned .s-grp {
+.sidebar.open .s-grp,
+.sidebar.pinned .s-grp,
+#sidebar:hover .s-grp,
+#sidebar.open .s-grp,
+#sidebar.pinned .s-grp {
   opacity: 1;
   height: auto;
 }
@@ -406,7 +422,11 @@ body::after {
 }
 
 .sidebar:hover .nav-item,
-.sidebar.pinned .nav-item {
+.sidebar.open .nav-item,
+.sidebar.pinned .nav-item,
+#sidebar:hover .nav-item,
+#sidebar.open .nav-item,
+#sidebar.pinned .nav-item {
   justify-content: flex-start;
   padding: 9px 12px;
 }
@@ -445,11 +465,19 @@ body::after {
 }
 
 .sidebar:hover .nav-item-text,
+.sidebar.open .nav-item-text,
 .sidebar.pinned .nav-item-text,
 .sidebar:hover .s-lbl,
-.sidebar.pinned .s-lbl {
-  opacity: 1;
-  width: auto;
+.sidebar.open .s-lbl,
+.sidebar.pinned .s-lbl,
+#sidebar:hover .nav-item-text,
+#sidebar.open .nav-item-text,
+#sidebar.pinned .nav-item-text,
+#sidebar:hover .s-lbl,
+#sidebar.open .s-lbl,
+#sidebar.pinned .s-lbl {
+  opacity: 1 !important;
+  width: auto !important;
 }
 
 .s-item .ct {
@@ -462,8 +490,12 @@ body::after {
 }
 
 .sidebar:hover .s-item .ct,
-.sidebar.pinned .s-item .ct {
-  opacity: 1;
+.sidebar.open .s-item .ct,
+.sidebar.pinned .s-item .ct,
+#sidebar:hover .s-item .ct,
+#sidebar.open .s-item .ct,
+#sidebar.pinned .s-item .ct {
+  opacity: 1 !important;
 }
 
 /* Bottom Mascot Avatar in Sidebar */
