@@ -18,7 +18,6 @@ import { renderStatsDashboard } from './js/stats.js';
 import { initArena, populateArenaModelSelectors } from './js/arena.js';
 import { initDownloader } from './js/downloader.js';
 import { initUpdater } from './js/updater.js';
-import { initThemeStudio } from './js/theme_studio.js';
 import { initDigitalTwin } from './js/digital_twin_3d.js';
 
 // Safe Tauri Core Invoker
@@ -310,7 +309,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   initArena();
   initDownloader();
   initUpdater();
-  initThemeStudio();
   startTelemetryPolling(2000);
   triggerProbe();
   const models = await syncAllModels();
