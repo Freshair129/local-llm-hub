@@ -53,7 +53,8 @@ docs/
 │       ├── README.md
 │       └── features/
 │           ├── FEAT-010-gpu-monitor.md
-│           └── FEAT-011-ram-monitor.md
+│           ├── FEAT-011-ram-monitor.md
+│           └── FEAT-018-digital-twin.md
 │   │
 │   └── network-distribution/
 │       ├── README.md
@@ -78,6 +79,8 @@ docs/
 │   ├── FR-012-model-downloader.md
 │   ├── FR-013-prompt-presets.md
 │   ├── FR-014-version-and-autoupdate.md
+│   ├── FR-015-storage-symlink-offloader.md
+│   ├── FR-016-3d-hardware-digital-twin.md
 │   ├── NFR-001-performance.md
 │   └── NFR-002-reliability.md
 │

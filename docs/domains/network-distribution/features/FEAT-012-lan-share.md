@@ -7,7 +7,7 @@
 | **Status** | Active / Implemented |
 | **Owner** | Boss |
 | **Created** | 2026-09-29 |
-| **Requirements** | [FR-010](../../requirements/FR-010-lan-sharing.md) |
+| **Requirements** | [FR-010](../../../requirements/FR-010-lan-sharing.md) |
 | **Traceability** | `commands/share.rs`, `src/js/share.js`, `tests/test_lan_share.rs` |
 
 ---

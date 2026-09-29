@@ -22,8 +22,9 @@ Domain นี้รับผิดชอบ **การแสดงสถาน�
 
 | Feature ID | Name | Status | Cross-domain? |
 |------------|------|--------|---------------|
-| FEAT-010 | GPU VRAM Monitor | Draft | ❌ |
-| FEAT-011 | RAM Monitor | Draft | ❌ |
+| FEAT-010 | GPU VRAM Monitor | Active | ❌ |
+| FEAT-011 | RAM Monitor | Active | ❌ |
+| FEAT-018 | 3D Hardware Digital Twin | Active | ❌ |
 
 ---
 
@@ -31,8 +32,9 @@ Domain นี้รับผิดชอบ **การแสดงสถาน�
 
 | ID | Title | Priority | Status |
 |----|-------|----------|--------|
-| [FR-006](../../requirements/FR-006-gpu-monitor.md) | GPU / RAM Monitoring | P1 | Draft |
-| [NFR-001](../../requirements/NFR-001-performance.md) | Performance | P0 | Draft |
+| [FR-006](../../requirements/FR-006-gpu-monitor.md) | GPU / RAM Monitoring | P1 | Active |
+| [FR-016](../../requirements/FR-016-3d-hardware-digital-twin.md) | 3D Hardware Digital Twin Simulation | P1 | Active |
+| [NFR-001](../../requirements/NFR-001-performance.md) | Performance | P0 | Active |
 
 ---
 

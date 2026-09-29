@@ -344,6 +344,88 @@ Result<string, string>
 
 ---
 
+### `get_hardware_telemetry` (FR-006, FR-016)
+
+**Purpose:** ดึงสถานะทรัพยากรฮาร์ดแวร์แบบ Real-time (GPU VRAM, GPU Load, Temperature, System RAM, CPU %) สำหรับเกจและแบบจำลอง 3D Digital Twin
+
+**Input:** ไม่มี
+
+**Output:**
+```typescript
+interface HardwareTelemetry {
+  system_ram_used_bytes: number;
+  system_ram_total_bytes: number;
+  cpu_usage_pct: number;
+  gpus: Array<{
+    index: number;
+    name: string;
+    vram_used_bytes: number;
+    vram_total_bytes: number;
+    utilization_pct: number;
+    temperature_c: number | null;
+  }>;
+}
+```
+
+---
+
+### `get_storage_health` (FR-015)
+
+**Purpose:** ตรวจสอบและประเมินสุขภาพ Symlink และพื้นที่จัดเก็บ Ollama Blobs บน Drive C: และ ไดรฟ์สำรองภายนอก
+
+**Input:**
+```typescript
+{
+  storage_root?: string;        // e.g. "G:\.ollama_blobs_root"
+  blob_pointer_root?: string;   // default: "%USERPROFILE%\.ollama\models\blobs"
+}
+```
+
+**Output:**
+```typescript
+interface SymlinkHealth {
+  checked_at: string;
+  blob_pointer_root: string;
+  storage_root: string;
+  total_blob_count: number;
+  symlink_count: number;
+  bad_symlink_count: number;
+  large_real_blob_count: number;
+  large_real_blob_bytes: number;
+  reclaimable_gb: number;
+  issues: string[];
+}
+```
+
+---
+
+### `offload_storage_blob` (FR-015)
+
+**Purpose:** ย้ายไฟล์โมเดลขนาดใหญ่จาก Drive C: ไปยังไดรฟ์เป้าหมายอย่างปลอดภัย พร้อมสร้าง Windows Symlink ขนาด 0-byte ชี้กลับมาโดยอัตโนมัติ
+
+**Input:**
+```typescript
+{
+  blob_hash: string;
+  blob_pointer_root?: string;
+  storage_root?: string;
+}
+```
+
+**Output:**
+```typescript
+interface OffloadResult {
+  success: boolean;
+  blob_hash: string;
+  bytes_reclaimed: number;
+  symlink_path: string;
+  target_storage_path: string;
+  error?: string;
+}
+```
+
+---
+
 ## A.2 LiteLLM Proxy API
 
 LiteLLM expose OpenAI-compatible API บน configured port (default: 4000)

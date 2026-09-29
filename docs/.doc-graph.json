@@ -35,6 +35,9 @@
     {"id": "req:FR-012", "type": "requirement", "path": "docs/requirements/FR-012-model-downloader.md",   "title": "In-App Downloader",      "domain": "backend-integration", "priority": "P1"},
     {"id": "req:FR-013", "type": "requirement", "path": "docs/requirements/FR-013-prompt-presets.md",     "title": "Prompt Presets",         "domain": "inference-gateway",   "priority": "P1"},
     {"id": "req:FR-014", "type": "requirement", "path": "docs/requirements/FR-014-version-and-autoupdate.md", "title": "Version & Auto-Update", "domain": "backend-integration", "priority": "P1"},
+    {"id": "req:FR-015", "type": "requirement", "path": "docs/requirements/FR-015-storage-symlink-offloader.md", "title": "Storage & Symlink Offloader", "domain": "backend-integration", "priority": "P0"},
+    {"id": "req:FR-016", "type": "requirement", "path": "docs/requirements/FR-016-3d-hardware-digital-twin.md", "title": "3D Hardware Digital Twin Simulation", "domain": "observability", "priority": "P1"},
+    {"id": "feat:FEAT-018", "type": "feature", "path": "docs/domains/observability/features/FEAT-018-digital-twin.md", "title": "3D Hardware Digital Twin Simulation"},
     {"id": "req:NFR-001","type": "requirement", "path": "docs/requirements/NFR-001-performance.md",      "title": "Performance",            "domain": "observability",       "priority": "P0"},
     {"id": "req:NFR-002","type": "requirement", "path": "docs/requirements/NFR-002-reliability.md",      "title": "Reliability",            "domain": "inference-gateway",   "priority": "P0"},
 
@@ -82,6 +85,9 @@
     {"from": "domain:inference-gateway",   "to": "req:FR-008", "relation": "owns"},
     {"from": "domain:inference-gateway",   "to": "req:NFR-002","relation": "owns"},
     {"from": "domain:observability",       "to": "req:FR-006", "relation": "owns"},
+    {"from": "domain:observability",       "to": "req:FR-016", "relation": "owns"},
+    {"from": "domain:observability",       "to": "feat:FEAT-018", "relation": "owns"},
+    {"from": "feat:FEAT-018",             "to": "req:FR-016", "relation": "implements"},
     {"from": "domain:observability",       "to": "req:NFR-001","relation": "owns"},
 
     {"from": "domain:backend-integration", "to": "cross-feat:CROSS-FEAT-001", "relation": "discovers"},

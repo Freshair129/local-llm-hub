@@ -23,6 +23,12 @@
 | FR-008 | LiteLLM Proxy | Rust: `generate_litellm_config` | `src-tauri/src/commands/proxy.rs` | `tests/test_proxy.rs` ✅ |
 | FR-009 | GGUF Scanner | Rust: `scan_directory_for_gguf` | `src-tauri/src/commands/scanner.rs` | `tests/test_scanner.rs` ✅ |
 | FR-010 | LAN Folder Sharing | Rust: `start_lan_share`, `stop_lan_share` | `src-tauri/src/commands/share.rs` | `tests/test_lan_share.rs` ✅ |
+| FR-011 | Multi-Model Arena | JS: `arena.js` + Rust: `execute_chat` | `src/js/arena.js` | Integration Verified ✅ |
+| FR-012 | Model Downloader | JS: `downloader.js` + Rust: `pull_model` | `src/js/downloader.js` | Integration Verified ✅ |
+| FR-013 | Prompt Presets | JS: `chat.js` + `presets.js` | `src/js/chat.js` | Integration Verified ✅ |
+| FR-014 | Version & Auto-update | Rust: `get_app_version`, `check_for_updates` | `src-tauri/src/commands/updater.rs` | Unit Tests Verified ✅ |
+| FR-015 | Storage & Symlink Offloader | Rust: `audit_blob_symlinks`, `execute_blob_offload` | `src-tauri/src/commands/storage.rs` | Unit Tests Verified ✅ |
+| FR-016 | 3D Hardware Digital Twin | JS: `digital_twin_3d.js` + Three.js | `src/js/digital_twin_3d.js` | Browser Render Verified ✅ |
 
 ## User Stories → Requirements Traceability
 

@@ -6,7 +6,7 @@
 | **Status** | In Progress (Backend & Frontend MVP Verified) |
 | **Author** | Boss |
 | **Created** | 2026-09-28 |
-| **References** | [PRD-SDD-v1.0.md](docs/PRD-SDD-v1.0.md) |
+| **References** | [PRD-SDD-v1.0.md](PRD-SDD-v1.0.md) |
 
 ---
 
@@ -218,11 +218,38 @@
 
 ---
 
+## Phase 7 — Advanced Observability & GHT Command Center Architecture
+
+- [x] **7.1** GHT Command Center 2-Tier Architecture
+  - Top Tier: Floating Pill Island (`.topbar`) centered horizontally (`margin: 12px auto 0; width: max-content;`) across 5 core domains:
+    1. Model Management (`model-management`)
+    2. Backend Integration (`backend-integration`)
+    3. Inference Gateway (`inference-gateway`)
+    4. Observability (`observability`)
+    5. Network Share (`network-distribution`)
+  - Sidebar Tier: Floating Collapsible Rail (`.sidebar`) centered vertically in viewport (`top: 50%; transform: translateY(-50%); align-self: center; position: sticky;`) collapsing to 50px icon rail and expanding to 260px on hover/pin.
+  - Eliminated legacy flat layout variations and temporary Design Studio workbench.
+  - _Requirements: FR-006, ARCH-001_
+
+- [x] **7.2** 3D Hardware Digital Twin Simulation (`src/js/digital_twin_3d.js`)
+  - WebGL Three.js interactive physical hardware model: Motherboard PCB, CPU heatsink tower with spinning 120mm PWM fan and dynamic thermal color gradient (Cyan ⟷ Amber ⟷ Red), NVIDIA GeForce RTX 3060 with dual spinning cooling fans, RAM sticks, M.2 NVMe SSD with activity LED.
+  - OrbitControls (left-click rotate, right-click pan, scroll-wheel zoom) + 4 Camera Presets (`Isometric`, `RTX 3060 Focus`, `CPU Cooler`, `Top-Down PCB`).
+  - Wired directly into real-time telemetry polling.
+  - _Requirements: FR-006, FR-016, FEAT-018_
+
+- [x] **7.3** Storage & Symlink Offloader (FR-015)
+  - Inspect Ollama blob pointers on Drive C:, discover candidates across secondary storage drives (e.g. G: NVMe), offload heavy weights atomically with 0-byte Windows symlinks without breaking Ollama daemon.
+  - _Requirements: FR-015, FEAT-017_
+
+---
+
 ## Definition of Done
 
 Task ถือว่า Done เมื่อ:
-- [x] ทำงานถูกต้องตาม requirement ที่ reference (FR-001 ถึง FR-010)
+- [x] ทำงานถูกต้องตาม requirement ที่ reference (FR-001 ถึง FR-016)
 - [x] Error states handled (ADR-100 zero panic)
 - [x] ไม่มี console errors
-- [x] Code ผ่าน `cargo test` 100% pass (44/44 tests green)
+- [x] Code ผ่าน `cargo test` 100% pass (38/38 unit tests green)
+- [x] Browser layout verification verified with subagent screenshots
+
 

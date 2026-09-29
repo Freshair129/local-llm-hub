@@ -1,7 +1,9 @@
 // src/js/digital_twin_3d.js
 // trace:implements FEAT-010
 // trace:implements FEAT-011
+// trace:implements FEAT-018
 // trace:implements FR-006
+// trace:implements FR-016
 
 import * as THREE from '../vendor/three.module.js';
 import { OrbitControls } from '../vendor/OrbitControls.js';

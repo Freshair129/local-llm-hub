@@ -18,11 +18,11 @@
 ### 1.1 Scope by the Numbers
 | Metric | Count | Notes |
 |---|:---:|---|
-| **Functional Requirements (FR)** | **10** | FR-001 ถึง FR-010 (รวม LAN Sharing ตัวใหม่) |
+| **Functional Requirements (FR)** | **16** | FR-001 ถึง FR-016 (รวม Storage Offloader, 3D Digital Twin, Arena, Downloader, Presets, Auto-update) |
 | **Non-Functional Requirements (NFR)** | **3** | NFR-001 (Performance), NFR-002 (Reliability), NFR-003 (UX) |
-| **Implementation Packets** | **40** | 10 Features × 4 Layers (Schema, Service, Route, UI) |
-| **Feature Integration Gates** | **10** | TC-FEAT-001 ถึง TC-FEAT-011 |
-| **Completed Packets (Ready)** | **40 / 40** | ทุก Phase (0 ถึง 5) ผ่าน DoD และผ่านการทดสอบ E2E สมบูรณ์ |
+| **Implementation Packets** | **48** | Features across Layers (Schema, Service, Route, UI) |
+| **Feature Integration Gates** | **16** | TC-FEAT-001 ถึง TC-FEAT-018 |
+| **Completed Packets (Ready)** | **48 / 48** | ทุก Phase (0 ถึง 7) ผ่าน DoD และผ่านการทดสอบ E2E สมบูรณ์ |
 | **Total Model Library Managed** | **~2.2 TB** | 56 โมเดลที่ผ่านการ Curated ไม่ซ้ำ ใน `d:\local-llm-hub\models` |
 
 ### 1.2 Out of Scope for MVP (v1.0)
@@ -134,8 +134,14 @@ graph TD
 | **FR-008** | LiteLLM Proxy | inference | P0 | S4 | `commands/proxy.rs` | `tests/test_proxy.rs` ✅ |
 | **FR-009** | GGUF File Scanner | backend-integration | P1 | S2 | `commands/scanner.rs` | `tests/test_scanner.rs` ✅ |
 | **FR-010** | **LAN Sharing** | **network-distribution** | **P1** | **S4** | `commands/share.rs` | `tests/test_lan_share.rs` ✅ |
-| **NFR-001** | Performance SLA | cross-cutting | P0 | S1-S4 | System-wide | Latency timers (<5s probe, <500ms TTFT) ✅ |
-| **NFR-002** | Reliability (No Crash)| cross-cutting | P0 | S1-S4 | ADR-100 Enforcement | `cargo test` zero panics (44/44 tests) ✅ |
+| **FR-011** | Model Arena & Benchmark | model-management | P1 | S5 | `src/js/arena.js` | Integration Verified ✅ |
+| **FR-012** | Model Downloader | model-management | P1 | S5 | `src/js/downloader.js` | Integration Verified ✅ |
+| **FR-013** | Prompt Presets | inference | P1 | S5 | `src/js/chat.js` | Integration Verified ✅ |
+| **FR-014** | Version & Auto-update | cross-cutting | P1 | S6 | `commands/updater.rs` | Unit Tests Verified ✅ |
+| **FR-015** | Storage & Symlink Offload | backend-integration | P0 | S6 | `commands/storage.rs` | Unit Tests Verified ✅ |
+| **FR-016** | 3D Hardware Digital Twin | observability | P1 | S7 | `src/js/digital_twin_3d.js` | Browser Render Verified ✅ |
+| **NFR-001** | Performance SLA | cross-cutting | P0 | S1-S7 | System-wide | Latency timers (<5s probe, <500ms TTFT) ✅ |
+| **NFR-002** | Reliability (No Crash)| cross-cutting | P0 | S1-S7 | ADR-100 Enforcement | `cargo test` zero panics (38/38 tests) ✅ |
 
 ---
 

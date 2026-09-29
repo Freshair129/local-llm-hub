@@ -336,6 +336,8 @@ graph TD
 | **Wave 3** | Hardware Observability, Start/Stop Control | Day 4 - Day 5 (เสร็จแล้ว ✅) | **Mellum2 Instruct** (smi parsing)<br/>**Sushi Coder** (VRAM Gauge) | `GATE-FEAT-010`, `GATE-FEAT-001-B` ผ่าน |
 | **Wave 4** | LiteLLM Proxy, Chat Stream, LAN Sharing | Day 6 - Day 7 (เสร็จแล้ว ✅) | **Mellum2 Thinking** (HTTP Range Stream)<br/>**Sushi Coder** (Chat Bubble & QR) | `GATE-FEAT-008`, `009`, `011` ผ่าน |
 | **Wave 5** | MVP Verification & Final Release | Day 8 (เสร็จแล้ว ✅) | Reviewer Agent (Orchestrator) | **TC-MVP-E2E** ผ่าน 100% (44/44 tests) |
+| **Wave 6** | Storage Offload & Auto-Update | Day 9 (เสร็จแล้ว ✅) | **Mellum2 Thinking** (Storage Symlinks)<br/>**Aroow** (Updater Tests) | `GATE-FEAT-017` ผ่าน 100% (FR-014, FR-015) |
+| **Wave 7** | GHT Command Center Architecture & 3D Digital Twin | Day 10 (เสร็จแล้ว ✅) | **Antigravity + Three.js** (WebGL Model)<br/>**Orchestrator** (2-Tier Centered Layout) | `GATE-FEAT-018` ผ่าน 100% (FR-016, 38/38 tests) |
 
 ---
 
