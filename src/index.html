@@ -25,52 +25,10 @@
         });
       };
 
-      window.__toggleLayoutMode = function() {
-        const root = document.documentElement;
-        const current = (localStorage.getItem('local-llm-hub-layout') || 'classic');
-        const next = current === 'classic' ? '2tier' : 'classic';
-        if (next === '2tier') {
-          root.setAttribute('data-nav-layout', '2tier');
-        } else {
-          root.removeAttribute('data-nav-layout');
-        }
-        try { localStorage.setItem('local-llm-hub-layout', next); } catch(e){}
-        
-        const lbl = document.getElementById('header-layout-label');
-        const btn = document.getElementById('header-layout-toggle-btn');
-        if (lbl && btn) {
-          if (next === '2tier') {
-            lbl.textContent = 'Layout: GHT 2-Tier';
-            btn.style.background = 'rgba(124, 242, 107, 0.25)';
-            btn.style.borderColor = '#7cf26b';
-            btn.style.color = '#7cf26b';
-          } else {
-            lbl.textContent = 'Layout: Classic';
-            btn.style.background = '';
-            btn.style.borderColor = '';
-            btn.style.color = '';
-          }
-        }
-        const studioBtn = document.getElementById('btn-toggle-layout-mode');
-        if (studioBtn) {
-          if (next === '2tier') {
-            studioBtn.textContent = '📐 กำลังใช้โหมด: GHT 2-Tier Rail (คลิกเพื่อกลับไปใช้ Classic Sidebar)';
-            studioBtn.style.background = '#7cf26b';
-            studioBtn.style.color = '#000';
-          } else {
-            studioBtn.textContent = '🔀 สลับโหมด Layout: [Classic Sidebar ⟷ GHT 2-Tier]';
-            studioBtn.style.background = '';
-            studioBtn.style.color = '';
-          }
-        }
-      };
-
-      // Auto-apply saved settings immediately
+      // Auto-apply saved theme immediately
       try {
         const t = localStorage.getItem('local-llm-hub-theme');
         if (t && t !== 'default') document.documentElement.setAttribute('data-theme', t);
-        const l = localStorage.getItem('local-llm-hub-layout');
-        if (l === '2tier') document.documentElement.setAttribute('data-nav-layout', '2tier');
       } catch(e){}
     </script>
     <script type="module" src="./main.js"></script>
@@ -548,9 +506,9 @@
                 <p>เปรียบเทียบสถาปัตยกรรม Layout, Nav Bar, Menu และ Sitemap ระหว่างเวอร์ชันปัจจุบัน กับสไตล์ GHT Command Center (จาก Drive G:)</p>
               </div>
               <div class="view-actions" style="display:flex; gap:10px; align-items:center;">
-                <button class="btn btn-primary" id="btn-toggle-layout-mode" onclick="window.__toggleLayoutMode()" style="font-size:12px; padding:6px 14px; background:linear-gradient(135deg, #7cf26b 0%, #00f0ff 100%); color:#000; font-weight:800; cursor:pointer;">
-                  🔀 สลับโหมด Layout: [Classic Sidebar ⟷ GHT 2-Tier]
-                </button>
+                <span class="tag-on" style="font-size:12px; padding:6px 14px;">
+                  <span class="dot"></span> GHT Command Center Layout Locked
+                </span>
               </div>
             </div>
 

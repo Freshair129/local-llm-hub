@@ -46,47 +46,6 @@ export function applyTheme(themeId) {
   });
 }
 
-export function applyNavLayout(layoutMode) {
-  const root = document.documentElement;
-  if (layoutMode === '2tier') {
-    root.setAttribute('data-nav-layout', '2tier');
-  } else {
-    root.removeAttribute('data-nav-layout');
-  }
-  localStorage.setItem('local-llm-hub-layout', layoutMode);
-
-  // Update header layout toggle button
-  const headerLayoutLabel = document.getElementById('header-layout-label');
-  const headerLayoutBtn = document.getElementById('header-layout-toggle-btn');
-  if (headerLayoutLabel && headerLayoutBtn) {
-    if (layoutMode === '2tier') {
-      headerLayoutLabel.textContent = 'Layout: GHT 2-Tier';
-      headerLayoutBtn.style.background = 'rgba(124, 242, 107, 0.2)';
-      headerLayoutBtn.style.borderColor = '#7cf26b';
-      headerLayoutBtn.style.color = '#7cf26b';
-    } else {
-      headerLayoutLabel.textContent = 'Layout: Classic';
-      headerLayoutBtn.style.background = '';
-      headerLayoutBtn.style.borderColor = '';
-      headerLayoutBtn.style.color = '';
-    }
-  }
-
-  // Update design studio toggle button if present
-  const btnToggle = document.getElementById('btn-toggle-layout-mode');
-  if (btnToggle) {
-    if (layoutMode === '2tier') {
-      btnToggle.textContent = '📐 กำลังใช้โหมด: GHT 2-Tier Rail (คลิกเพื่อกลับไปใช้ Classic Sidebar)';
-      btnToggle.style.background = '#7cf26b';
-      btnToggle.style.color = '#000';
-    } else {
-      btnToggle.textContent = '🔀 สลับโหมด Layout: [Classic Sidebar ⟷ GHT 2-Tier]';
-      btnToggle.style.background = '';
-      btnToggle.style.color = '';
-    }
-  }
-}
-
 function setupHeaderControls() {
   // Theme pills
   const container = document.getElementById('header-theme-selector');
@@ -141,18 +100,6 @@ function setupHeaderControls() {
 }
 
 function setupDesignStudioView() {
-  // Wire studio layout toggle button
-  const btnToggleLayout = document.getElementById('btn-toggle-layout-mode');
-  if (btnToggleLayout) {
-    btnToggleLayout.addEventListener('click', (e) => {
-      e.preventDefault();
-      const current = localStorage.getItem('local-llm-hub-layout') || 'classic';
-      const next = current === 'classic' ? '2tier' : 'classic';
-      applyNavLayout(next);
-      showToast(`สลับโครงสร้าง Layout เป็น: ${next === '2tier' ? 'GHT 2-Tier Command Bar' : 'Classic Flat Sidebar'}`);
-    });
-  }
-
   // Choose style cards buttons
   const chooseButtons = document.querySelectorAll('.btn-choose-style');
   chooseButtons.forEach(btn => {
