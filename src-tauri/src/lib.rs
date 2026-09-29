@@ -288,6 +288,31 @@ async fn apply_update(download_url: String) -> Result<String, String> {
     commands::updater::apply_update_package(&download_url).await
 }
 
+// trace:implements FR-015
+#[tauri::command]
+fn get_storage_health(
+    storage_root: Option<String>,
+    blob_pointer_root: Option<String>,
+) -> Result<crate::models::types::SymlinkHealth, String> {
+    let (default_blob, known_storages) = commands::storage::discover_known_storage_roots();
+    let s_root = storage_root.unwrap_or_else(|| known_storages.first().cloned().unwrap_or_default());
+    let b_root = blob_pointer_root.unwrap_or(default_blob);
+    commands::storage::audit_symlinks_and_storage(&s_root, &b_root)
+}
+
+// trace:implements FR-015
+#[tauri::command]
+fn offload_storage_blob(
+    blob_hash: String,
+    blob_pointer_root: Option<String>,
+    storage_root: Option<String>,
+) -> Result<crate::models::types::OffloadResult, String> {
+    let (default_blob, known_storages) = commands::storage::discover_known_storage_roots();
+    let s_root = storage_root.unwrap_or_else(|| known_storages.first().cloned().unwrap_or_default());
+    let b_root = blob_pointer_root.unwrap_or(default_blob);
+    commands::storage::execute_blob_offload(&blob_hash, &b_root, &s_root)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let initial_state = state::create_shared_state();
@@ -317,7 +342,9 @@ pub fn run() {
             get_lan_share_status,
             get_app_version,
             check_for_updates,
-            apply_update
+            apply_update,
+            get_storage_health,
+            offload_storage_blob
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

@@ -882,4 +882,311 @@ body::before {
   display: block;
 }
 
+/* ============================================================
+   🎨 MULTI-THEME DESIGN SYSTEM (Theme A / B / C / D)
+   ============================================================ */
+
+/* Theme B: GHT Command Center (Obsidian + Terminal Neon Green + Amber) */
+[data-theme="ght-command-center"] {
+  --bg-base: #080a08;
+  --bg-surface: #0f1310;
+  --bg-card: rgba(17, 22, 18, 0.72);
+  --bg-card-hover: rgba(24, 32, 26, 0.9);
+  --glass-border: rgba(124, 242, 107, 0.15);
+  --glass-border-hover: rgba(124, 242, 107, 0.5);
+  --glass-glow: 0 12px 36px 0 rgba(0, 0, 0, 0.6);
+
+  --text-main: #e8ede6;
+  --text-muted: #8a968a;
+  --text-dim: #556356;
+
+  --accent-primary: #7cf26b;
+  --accent-primary-hover: #67d657;
+  --accent-gradient: linear-gradient(135deg, #7cf26b 0%, #00f0ff 100%);
+  --accent-cyan: #5bc0eb;
+  --accent-emerald: #7cf26b;
+  --accent-amber: #ff8a1e;
+  --accent-rose: #ff5a4d;
+}
+
+/* Theme C: Cyberpunk Neon HUD (Void Black + Neon Magenta + Electric Cyan) */
+[data-theme="cyberpunk-neon"] {
+  --bg-base: #050508;
+  --bg-surface: #0d0c18;
+  --bg-card: rgba(22, 18, 38, 0.75);
+  --bg-card-hover: rgba(36, 28, 64, 0.95);
+  --glass-border: rgba(244, 63, 94, 0.25);
+  --glass-border-hover: rgba(0, 240, 255, 0.7);
+  --glass-glow: 0 0 25px rgba(244, 63, 94, 0.2);
+
+  --text-main: #fdf2f8;
+  --text-muted: #cbd5e1;
+  --text-dim: #71717a;
+
+  --accent-primary: #f43f5e;
+  --accent-primary-hover: #e11d48;
+  --accent-gradient: linear-gradient(135deg, #f43f5e 0%, #00f0ff 100%);
+  --accent-cyan: #00f0ff;
+  --accent-emerald: #10b981;
+  --accent-amber: #fbbf24;
+  --accent-rose: #f43f5e;
+}
+
+/* Theme D: Nordic Frost Glass (Titanium Dark + Ice Blue) */
+[data-theme="nordic-frost"] {
+  --bg-base: #0b0f19;
+  --bg-surface: #111827;
+  --bg-card: rgba(17, 24, 39, 0.7);
+  --bg-card-hover: rgba(30, 41, 59, 0.9);
+  --glass-border: rgba(56, 189, 248, 0.2);
+  --glass-border-hover: rgba(56, 189, 248, 0.6);
+  --glass-glow: 0 10px 30px rgba(56, 189, 248, 0.15);
+
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-dim: #475569;
+
+  --accent-primary: #38bdf8;
+  --accent-primary-hover: #0284c7;
+  --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+  --accent-cyan: #38bdf8;
+  --accent-emerald: #34d399;
+  --accent-amber: #fbbf24;
+  --accent-rose: #fb7185;
+}
+
+/* === Theme Switcher Bar in Header === */
+.theme-selector-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  padding: 3px 8px;
+}
+
+.theme-pill-btn {
+  background: transparent;
+  border: none;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.theme-pill-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.theme-pill-btn.active-theme {
+  background: var(--accent-primary);
+  color: #000;
+  font-weight: 700;
+  box-shadow: 0 0 12px var(--accent-primary);
+}
+
+/* === GHT Bento & Specular Card Styles === */
+.card-bento-ght {
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), var(--glass-glow);
+  backdrop-filter: blur(24px) saturate(130%);
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-smooth);
+}
+
+.card-bento-ght:hover {
+  border-color: var(--glass-border-hover);
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 16px 36px rgba(0, 0, 0, 0.5);
+}
+
+.card-bento-ght::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent-gradient);
+  opacity: 0.6;
+}
+
+/* === Cyber HUD Card Styles === */
+.card-cyber-hud {
+  background: rgba(12, 10, 20, 0.85);
+  border: 1px solid var(--accent-primary);
+  border-radius: 8px;
+  padding: 20px;
+  position: relative;
+  box-shadow: 0 0 15px rgba(244, 63, 94, 0.18);
+  font-family: var(--font-mono);
+}
+
+.card-cyber-hud::before {
+  content: "[SYS_READY]";
+  position: absolute;
+  top: 6px;
+  right: 12px;
+  font-size: 9px;
+  color: var(--accent-primary);
+  letter-spacing: 1px;
+}
+
+.card-cyber-hud::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  border-bottom: 2px solid var(--accent-cyan);
+  border-left: 2px solid var(--accent-cyan);
+}
+
+/* === Dual Ring Circular Gauge === */
+.circular-gauge-wrapper {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circular-gauge-svg {
+  transform: rotate(-90deg);
+  width: 100%;
+  height: 100%;
+}
+
+.gauge-circle-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 8;
+}
+
+.gauge-circle-fill {
+  fill: none;
+  stroke: var(--accent-primary);
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s ease;
+  filter: drop-shadow(0 0 6px var(--accent-primary));
+}
+
+.circular-gauge-center {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.circular-gauge-val {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text-main);
+  line-height: 1;
+}
+
+.circular-gauge-lbl {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 3px;
+}
+
+/* === Segmented LED Bar Indicator === */
+.led-strip-container {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.led-bar {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+
+.led-bar.active-green {
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+.led-bar.active-amber {
+  background: #f59e0b;
+  box-shadow: 0 0 6px #f59e0b;
+}
+
+.led-bar.active-red {
+  background: #ef4444;
+  box-shadow: 0 0 8px #ef4444;
+}
+
+/* === Side-by-Side Comparison Arena Layout === */
+.design-arena-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 24px;
+  margin-top: 20px;
+}
+
+.style-candidate-card {
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: transform var(--transition-fast);
+}
+
+.style-candidate-card:hover {
+  transform: translateY(-3px);
+}
+
+.style-badge-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  width: fit-content;
+}
+
+.btn-choose-style {
+  margin-top: auto;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 13px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all var(--transition-fast);
+}
+
+
 

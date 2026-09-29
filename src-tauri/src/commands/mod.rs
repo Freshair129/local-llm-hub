@@ -16,6 +16,7 @@ pub mod models;
 pub mod proxy;
 pub mod scanner;
 pub mod share;
+pub mod storage;
 pub mod updater;
 
 pub use backends::*;
@@ -26,4 +27,6 @@ pub use models::*;
 pub use proxy::*;
 pub use scanner::*;
 pub use share::*;
+pub use storage::*;
 pub use updater::*;
+

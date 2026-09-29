@@ -18,6 +18,7 @@ import { renderStatsDashboard } from './js/stats.js';
 import { initArena, populateArenaModelSelectors } from './js/arena.js';
 import { initDownloader } from './js/downloader.js';
 import { initUpdater } from './js/updater.js';
+import { initThemeStudio } from './js/theme_studio.js';
 
 // Safe Tauri Core Invoker
 const invoke = window.__TAURI__?.core?.invoke || (async (cmd, args) => {
@@ -188,6 +189,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   initArena();
   initDownloader();
   initUpdater();
+  initThemeStudio();
   startTelemetryPolling(2000);
   triggerProbe();
   const models = await syncAllModels();

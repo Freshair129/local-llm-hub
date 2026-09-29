@@ -93,6 +93,12 @@
             </svg>
             LAN Drive Share
           </a>
+          <a class="nav-item" id="nav-design-studio" data-view="design-studio">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+            </svg>
+            🎨 Design Studio
+          </a>
         </nav>
 
         <div class="sidebar-footer">
@@ -126,6 +132,9 @@
             <div class="gpu-gauge-group" id="stat-ram" style="display:flex; align-items:center; gap:8px;">
               <span style="color:#a78bfa; font-weight:600; font-size:12px;">RAM:</span>
               <span style="font-size:12px; color:rgba(255,255,255,0.8);">8.2 / 32.0 GB (25%)</span>
+            </div>
+            <div class="theme-selector-group" id="header-theme-selector" title="สลับธีม">
+              <!-- Rendered dynamically by theme_studio.js -->
             </div>
           </div>
 
@@ -312,6 +321,206 @@
           <!-- View 7: In-App Model Downloader -->
           <div class="view-panel" id="view-downloader" style="display:none;">
             <!-- Populated dynamically by downloader.js -->
+          </div>
+
+          <!-- View 8: 🎨 Design & Layout Studio (Side-by-Side Comparison) -->
+          <div class="view-panel" id="view-design-studio" style="display:none; overflow-y:auto; padding-bottom:60px;">
+            <div class="view-header">
+              <div class="view-heading">
+                <h1>🎨 Design & Layout Studio</h1>
+                <p>เปรียบเทียบสไตล์ Components & Layout ระหว่างเวอร์ชันปัจจุบัน กับสไตล์ GHT Command Center (จาก Drive G:) และ Cyberpunk HUD</p>
+              </div>
+              <div class="view-actions">
+                <span class="badge" style="background:var(--accent-gradient); color:#000; font-weight:700;">Live Style Arena</span>
+              </div>
+            </div>
+
+            <!-- Comparison Matrix Grid -->
+            <div class="design-arena-grid">
+              <!-- Style Candidate 1: Current Style -->
+              <div class="style-candidate-card" style="background:rgba(20, 27, 41, 0.65); border:1px solid rgba(255,255,255,0.1);">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span class="style-badge-tag" style="background:rgba(99,102,241,0.2); color:#818cf8; border:1px solid rgba(99,102,241,0.4);">
+                    🔮 สไตล์ 1: Modern Indigo (Current)
+                  </span>
+                  <span style="font-size:11px; color:var(--text-dim);">Raycast / Linear Minimal</span>
+                </div>
+                <p style="font-size:13px; color:var(--text-muted); line-height:1.5;">
+                  โทนสี Indigo เรียบหรู สะอาดตา แบบ Modern Web Application บอร์ดการ์ดโปร่งแสง ขอบบางเฉียบ
+                </p>
+
+                <!-- Sample Component: Card -->
+                <div style="background:rgba(15, 23, 42, 0.8); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:14px;">
+                  <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:700; color:#fff; font-size:14px;">qwen2.5-coder:7b</span>
+                    <span class="badge badge-quant">Q4_K_M</span>
+                  </div>
+                  <div style="margin-top:10px;">
+                    <div style="display:flex; justify-content:space-between; font-size:11px; color:#94a3b8; margin-bottom:4px;">
+                      <span>VRAM Allocation</span>
+                      <span>4.7 / 12.0 GB</span>
+                    </div>
+                    <div class="gauge-track">
+                      <div class="gauge-fill" style="width: 40%; background:#6366f1;"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <button class="btn-choose-style" data-theme-target="default" style="background:#6366f1; color:#fff;">
+                  ✨ ใช้สไตล์ Modern Indigo ทั่วแอป
+                </button>
+              </div>
+
+              <!-- Style Candidate 2: GHT Command Center (From G:\) -->
+              <div class="style-candidate-card card-bento-ght">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span class="style-badge-tag" style="background:rgba(124,242,107,0.15); color:#7cf26b; border:1px solid rgba(124,242,107,0.4);">
+                    🟢 สไตล์ 2: GHT Command Center (จาก Drive G:)
+                  </span>
+                  <span style="font-size:11px; color:#7cf26b; font-family:var(--font-mono);">[LIVE_FEED]</span>
+                </div>
+                <p style="font-size:13px; color:var(--text-muted); line-height:1.5;">
+                  พื้นหลัง Obsidian Jet Black ผสมเส้นสะท้อนแสงด้านบน (Specular Highlight) + สีเขียว Terminal Neon และสีส้ม Amber ให้ความรู้สึกเหมือนศูนย์ควบคุมสถานีอวกาศ
+                </p>
+
+                <!-- Sample Component: Bento Card with Circular VRAM & LED strip -->
+                <div style="background:rgba(10, 14, 11, 0.9); border:1px solid rgba(124,242,107,0.25); border-radius:14px; padding:14px; box-shadow: inset 0 1px 0 rgba(255,255,255,0.15);">
+                  <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <span style="width:8px; height:8px; border-radius:50%; background:#7cf26b; box-shadow:0 0 8px #7cf26b;"></span>
+                      <span style="font-weight:800; color:#e8ede6; font-size:14px; font-family:var(--font-mono);">deepseek-r1:8b</span>
+                    </div>
+                    <span style="background:rgba(255,138,30,0.15); color:#ff8a1e; font-weight:700; font-size:10px; padding:2px 8px; border-radius:4px; border:1px solid rgba(255,138,30,0.3); font-family:var(--font-mono);">
+                      ORCHESTRATOR
+                    </span>
+                  </div>
+
+                  <div style="display:flex; align-items:center; gap:16px; margin-top:14px;">
+                    <!-- Circular Gauge -->
+                    <div class="circular-gauge-wrapper" style="width:80px; height:80px;">
+                      <svg class="circular-gauge-svg" viewBox="0 0 100 100">
+                        <circle class="gauge-circle-bg" cx="50" cy="50" r="40" stroke-width="8"></circle>
+                        <circle class="gauge-circle-fill" cx="50" cy="50" r="40" stroke-width="8" stroke-dasharray="251.2" stroke-dashoffset="100" style="stroke:#7cf26b;"></circle>
+                      </svg>
+                      <div class="circular-gauge-center">
+                        <span class="circular-gauge-val" style="font-size:14px; color:#7cf26b;">60%</span>
+                        <span class="circular-gauge-lbl" style="font-size:8px;">LOAD</span>
+                      </div>
+                    </div>
+                    <!-- Right Metrics -->
+                    <div style="flex:1;">
+                      <span style="font-size:11px; color:#8a968a; font-family:var(--font-mono); display:block;">VRAM: 5.6 / 12.0 GB</span>
+                      <div class="led-strip-container">
+                        <div class="led-bar active-green"></div>
+                        <div class="led-bar active-green"></div>
+                        <div class="led-bar active-green"></div>
+                        <div class="led-bar active-amber"></div>
+                        <div class="led-bar"></div>
+                      </div>
+                      <span style="font-size:10px; color:#556356; font-family:var(--font-mono); margin-top:4px; display:block;">FAN: 1650 RPM | 58°C</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button class="btn-choose-style" data-theme-target="ght-command-center" style="background:#7cf26b; color:#000;">
+                  🟢 ใช้สไตล์ GHT Command Center ทั่วแอป
+                </button>
+              </div>
+
+              <!-- Style Candidate 3: Cyberpunk Neon HUD -->
+              <div class="style-candidate-card card-cyber-hud">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span class="style-badge-tag" style="background:rgba(244,63,94,0.15); color:#f43f5e; border:1px solid rgba(244,63,94,0.4);">
+                    ⚡ สไตล์ 3: Cyberpunk HUD
+                  </span>
+                  <span style="font-size:11px; color:#00f0ff;">[PROTOCOL_V2]</span>
+                </div>
+                <p style="font-size:13px; color:var(--text-muted); line-height:1.5;">
+                  เส้นสายเหลี่ยมคมสไตล์ HUD หน้าจอนักบิน ขอบสะท้อนแสงสีชมพู Magenta ผสมแสงนีออน Cyan ล้ำสมัย
+                </p>
+
+                <!-- Sample Component: Cyberpunk HUD Card -->
+                <div style="background:rgba(20, 16, 32, 0.9); border:1px solid #f43f5e; border-radius:4px; padding:14px; position:relative;">
+                  <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:800; color:#fdf2f8; font-size:14px;">qwen3.5-coder:14b</span>
+                    <span style="color:#00f0ff; font-size:11px; font-weight:700;">88.4 T/S</span>
+                  </div>
+                  <div style="margin-top:12px;">
+                    <div class="led-strip-container">
+                      <div class="led-bar active-green"></div>
+                      <div class="led-bar active-green"></div>
+                      <div class="led-bar active-amber"></div>
+                      <div class="led-bar active-red"></div>
+                      <div class="led-bar"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:10px; color:#cbd5e1; margin-top:6px;">
+                      <span>VRAM BUDGET: 9.2 GB</span>
+                      <span style="color:#00f0ff;">CUDA 0 READY</span>
+                    </div>
+                  </div>
+                </div>
+
+                <button class="btn-choose-style" data-theme-target="cyberpunk-neon" style="background:#f43f5e; color:#fff;">
+                  ⚡ ใช้สไตล์ Cyberpunk HUD ทั่วแอป
+                </button>
+              </div>
+
+              <!-- Style Candidate 4: Nordic Frost -->
+              <div class="style-candidate-card" style="background:rgba(17, 24, 39, 0.7); border:1px solid rgba(56,189,248,0.25); border-radius:18px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                  <span class="style-badge-tag" style="background:rgba(56,189,248,0.15); color:#38bdf8; border:1px solid rgba(56,189,248,0.4);">
+                    ❄️ สไตล์ 4: Nordic Frost Glass
+                  </span>
+                  <span style="font-size:11px; color:#94a3b8;">Frosted Glass</span>
+                </div>
+                <p style="font-size:13px; color:var(--text-muted); line-height:1.5;">
+                  ความเรียบง่ายโทน Ice Blue เย็นตา กระจกฝ้าไฮเอนด์ เหมาะสำหรับการทำงานนาน ๆ ไม่แสบตา
+                </p>
+
+                <!-- Sample Component: Nordic Card -->
+                <div style="background:rgba(30, 41, 59, 0.6); border:1px solid rgba(56,189,248,0.15); border-radius:12px; padding:14px; backdrop-filter:blur(16px);">
+                  <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:700; color:#f8fafc; font-size:14px;">gemma-4-26b-a4b</span>
+                    <span style="color:#38bdf8; font-size:11px; font-weight:600;">Active Gate</span>
+                  </div>
+                  <div style="margin-top:10px;">
+                    <div class="gauge-track">
+                      <div class="gauge-fill" style="width: 55%; background:linear-gradient(90deg, #38bdf8, #818cf8);"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <button class="btn-choose-style" data-theme-target="nordic-frost" style="background:#38bdf8; color:#0b0f19;">
+                  ❄️ ใช้สไตล์ Nordic Frost ทั่วแอป
+                </button>
+              </div>
+            </div>
+
+            <!-- Integrated Storage & Symlink Manager Preview Section (FR-015) -->
+            <div style="margin-top:40px; background:var(--bg-card); border:1px solid var(--glass-border); border-radius:18px; padding:24px; box-shadow:inset 0 1px 0 rgba(255,255,255,0.12);">
+              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                <div>
+                  <h2 style="font-size:18px; font-weight:800; color:var(--text-main); display:flex; align-items:center; gap:8px;">
+                    <span>📦 Storage & Symlink Offloader (FR-015 Integrated Feature)</span>
+                  </h2>
+                  <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">
+                    ฟีเจอร์เด่นจาก G:\.ollama_blobs_root ที่นำมารวมเข้าสู่ระบบหลัก: ย้าย Blobs คืนพื้นที่ C: พร้อมตรวจสอบสุขภาพ Symlinks
+                  </p>
+                </div>
+                <button class="btn btn-primary" id="btn-studio-audit-storage" style="display:flex; align-items:center; gap:8px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 14 14"></polyline>
+                  </svg>
+                  <span>🔍 สแกนพื้นที่และสุขภาพ Blobs เดี๋ยวนี้</span>
+                </button>
+              </div>
+
+              <!-- Storage Result Card -->
+              <div id="studio-storage-result" style="display:none; margin-top:20px; background:rgba(0,0,0,0.3); border:1px solid var(--glass-border); border-radius:12px; padding:16px;">
+                <!-- Filled dynamically by theme_studio.js -->
+              </div>
+            </div>
           </div>
         </section>
       </main>
