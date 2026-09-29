@@ -215,21 +215,24 @@ body::before {
 
 /* === Top Telemetry Bar === */
 #telemetry-bar {
-  height: 64px;
+  min-height: 64px;
   border-bottom: 1px solid var(--glass-border);
-  background: rgba(15, 20, 32, 0.4);
+  background: var(--bg-surface);
   backdrop-filter: blur(12px);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 28px;
+  padding: 8px 20px;
   flex-shrink: 0;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .top-telemetry-left {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
 .gpu-gauge-group {

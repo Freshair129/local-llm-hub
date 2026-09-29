@@ -10,7 +10,70 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css" />
-    <script type="module" src="/main.js" defer></script>
+    <script>
+      // Immediate Global Layout & Theme Controllers (Runs instantly before modules)
+      window.__switchTheme = function(themeId) {
+        const root = document.documentElement;
+        if (themeId === 'default') {
+          root.removeAttribute('data-theme');
+        } else {
+          root.setAttribute('data-theme', themeId);
+        }
+        try { localStorage.setItem('local-llm-hub-theme', themeId); } catch(e){}
+        document.querySelectorAll('.theme-pill-btn').forEach(btn => {
+          btn.classList.toggle('active-theme', btn.getAttribute('data-theme-id') === themeId);
+        });
+      };
+
+      window.__toggleLayoutMode = function() {
+        const root = document.documentElement;
+        const current = (localStorage.getItem('local-llm-hub-layout') || 'classic');
+        const next = current === 'classic' ? '2tier' : 'classic';
+        if (next === '2tier') {
+          root.setAttribute('data-nav-layout', '2tier');
+        } else {
+          root.removeAttribute('data-nav-layout');
+        }
+        try { localStorage.setItem('local-llm-hub-layout', next); } catch(e){}
+        
+        const lbl = document.getElementById('header-layout-label');
+        const btn = document.getElementById('header-layout-toggle-btn');
+        if (lbl && btn) {
+          if (next === '2tier') {
+            lbl.textContent = 'Layout: GHT 2-Tier';
+            btn.style.background = 'rgba(124, 242, 107, 0.25)';
+            btn.style.borderColor = '#7cf26b';
+            btn.style.color = '#7cf26b';
+          } else {
+            lbl.textContent = 'Layout: Classic';
+            btn.style.background = '';
+            btn.style.borderColor = '';
+            btn.style.color = '';
+          }
+        }
+        const studioBtn = document.getElementById('btn-toggle-layout-mode');
+        if (studioBtn) {
+          if (next === '2tier') {
+            studioBtn.textContent = '📐 กำลังใช้โหมด: GHT 2-Tier Rail (คลิกเพื่อกลับไปใช้ Classic Sidebar)';
+            studioBtn.style.background = '#7cf26b';
+            studioBtn.style.color = '#000';
+          } else {
+            studioBtn.textContent = '🔀 สลับโหมด Layout: [Classic Sidebar ⟷ GHT 2-Tier]';
+            studioBtn.style.background = '';
+            studioBtn.style.color = '';
+          }
+        }
+      };
+
+      // Auto-apply saved settings immediately
+      try {
+        const t = localStorage.getItem('local-llm-hub-theme');
+        if (t && t !== 'default') document.documentElement.setAttribute('data-theme', t);
+        const l = localStorage.getItem('local-llm-hub-layout');
+        if (l === '2tier') document.documentElement.setAttribute('data-nav-layout', '2tier');
+      } catch(e){}
+    </script>
+    <script type="module" src="./main.js"></script>
   </head>
 
   <body>
@@ -134,9 +197,12 @@
               <span style="font-size:12px; color:rgba(255,255,255,0.8);">8.2 / 32.0 GB (25%)</span>
             </div>
             <div class="theme-selector-group" id="header-theme-selector" title="สลับธีมสี">
-              <!-- Rendered dynamically by theme_studio.js -->
+              <button class="theme-pill-btn active-theme" data-theme-id="default" onclick="window.__switchTheme('default')">🔮 Modern</button>
+              <button class="theme-pill-btn" data-theme-id="ght-command-center" onclick="window.__switchTheme('ght-command-center')">🟢 GHT</button>
+              <button class="theme-pill-btn" data-theme-id="cyberpunk-neon" onclick="window.__switchTheme('cyberpunk-neon')">⚡ Cyber</button>
+              <button class="theme-pill-btn" data-theme-id="nordic-frost" onclick="window.__switchTheme('nordic-frost')">❄️ Nordic</button>
             </div>
-            <button class="btn btn-ghost" id="header-layout-toggle-btn" style="padding:4px 10px; font-size:11px; border-radius:999px; display:flex; align-items:center; gap:6px; border:1px solid var(--glass-border); cursor:pointer;" title="สลับรูปแบบ Layout ระหว่าง Classic Sidebar กับ GHT 2-Tier Command Bar">
+            <button class="btn btn-ghost" id="header-layout-toggle-btn" onclick="window.__toggleLayoutMode()" style="padding:4px 12px; font-size:11px; border-radius:999px; display:flex; align-items:center; gap:6px; border:1px solid var(--glass-border); cursor:pointer;" title="สลับรูปแบบ Layout ระหว่าง Classic Sidebar กับ GHT 2-Tier Command Bar">
               <span>📐</span> <span id="header-layout-label">Layout: Classic</span>
             </button>
           </div>
@@ -353,7 +419,7 @@
                 <p>เปรียบเทียบสถาปัตยกรรม Layout, Nav Bar, Menu และ Sitemap ระหว่างเวอร์ชันปัจจุบัน กับสไตล์ GHT Command Center (จาก Drive G:)</p>
               </div>
               <div class="view-actions" style="display:flex; gap:10px; align-items:center;">
-                <button class="btn btn-primary" id="btn-toggle-layout-mode" style="font-size:12px; padding:6px 14px; background:linear-gradient(135deg, #7cf26b 0%, #00f0ff 100%); color:#000; font-weight:800;">
+                <button class="btn btn-primary" id="btn-toggle-layout-mode" onclick="window.__toggleLayoutMode()" style="font-size:12px; padding:6px 14px; background:linear-gradient(135deg, #7cf26b 0%, #00f0ff 100%); color:#000; font-weight:800; cursor:pointer;">
                   🔀 สลับโหมด Layout: [Classic Sidebar ⟷ GHT 2-Tier]
                 </button>
               </div>
@@ -494,7 +560,7 @@
                   </div>
                 </div>
 
-                <button class="btn-choose-style" data-theme-target="default" style="background:#6366f1; color:#fff;">
+                <button class="btn-choose-style" data-theme-target="default" onclick="window.__switchTheme('default')" style="background:#6366f1; color:#fff;">
                   ✨ ใช้สไตล์ Modern Indigo ทั่วแอป
                 </button>
               </div>
@@ -550,7 +616,7 @@
                   </div>
                 </div>
 
-                <button class="btn-choose-style" data-theme-target="ght-command-center" style="background:#7cf26b; color:#000;">
+                <button class="btn-choose-style" data-theme-target="ght-command-center" onclick="window.__switchTheme('ght-command-center')" style="background:#7cf26b; color:#000;">
                   🟢 ใช้สไตล์ GHT Command Center ทั่วแอป
                 </button>
               </div>
@@ -588,7 +654,7 @@
                   </div>
                 </div>
 
-                <button class="btn-choose-style" data-theme-target="cyberpunk-neon" style="background:#f43f5e; color:#fff;">
+                <button class="btn-choose-style" data-theme-target="cyberpunk-neon" onclick="window.__switchTheme('cyberpunk-neon')" style="background:#f43f5e; color:#fff;">
                   ⚡ ใช้สไตล์ Cyberpunk HUD ทั่วแอป
                 </button>
               </div>
@@ -618,10 +684,11 @@
                   </div>
                 </div>
 
-                <button class="btn-choose-style" data-theme-target="nordic-frost" style="background:#38bdf8; color:#0b0f19;">
+                <button class="btn-choose-style" data-theme-target="nordic-frost" onclick="window.__switchTheme('nordic-frost')" style="background:#38bdf8; color:#0b0f19;">
                   ❄️ ใช้สไตล์ Nordic Frost ทั่วแอป
                 </button>
               </div>
+            </div>
             </div>
 
             <!-- Integrated Storage & Symlink Manager Preview Section (FR-015) -->
