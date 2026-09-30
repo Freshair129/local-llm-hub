@@ -410,14 +410,15 @@ body::after {
   grid-template-columns: var(--rail-collapsed) minmax(0, 1fr);
 }
 
-/* ── Anchored Glass Sidebar (Dynamic Fit-to-Content Height with Full Labels by Default) ── */
+/* ── Floating Island Glass Sidebar (Centered Vertically on Viewport) ── */
 .sidebar {
   width: var(--rail-expanded);
   align-self: start;
   position: sticky;
-  top: 76px;
+  top: 50vh;
+  transform: translateY(-50%);
   height: auto !important;
-  max-height: calc(100vh - 100px);
+  max-height: calc(100vh - 120px);
   padding: 12px 10px;
   border: 1px solid var(--glass-border);
   border-radius: var(--r-card); /* 24px */
@@ -449,8 +450,6 @@ body::after {
 .sidebar.collapsed.open {
   width: var(--rail-expanded) !important;
   padding: 12px 10px;
-  position: absolute;
-  left: 20px;
   z-index: 90;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85), var(--glass-hi), 0 0 0 1px var(--glass-border-hi);
 }
