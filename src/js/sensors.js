@@ -6,32 +6,7 @@
 //! Connects to LibreHardwareMonitor C# sidecar and sysinfo provider via Tauri IPC `get_sensor_tree`.
 
 import { showToast } from './toast.js';
-
-const invoke = window.__TAURI__?.core?.invoke || (async (cmd, args) => {
-  console.log(`[Mock Dev Invoke] ${cmd}`, args);
-  if (cmd === 'get_lhm_status') {
-    return {
-      available: true,
-      note: "LibreHardwareMonitor sidecar active (102+ deep sensors connected)",
-      sidecar_binary: "D:\\local-llm-hub\\sidecar\\lhm-sidecar.exe"
-    };
-  }
-  if (cmd === 'get_sensor_tree') {
-    return [
-      { id: "/intelcpu/0/load/0", name: "CPU Total", hw: "Intel Core i7-8700K", kind: "load", value: 34.5, unit: "%" },
-      { id: "/intelcpu/0/temperature/0", name: "CPU Package", hw: "Intel Core i7-8700K", kind: "temperature", value: 48.0, unit: "°C" },
-      { id: "/intelcpu/0/power/0", name: "CPU Package Power", hw: "Intel Core i7-8700K", kind: "power", value: 65.4, unit: "W" },
-      { id: "/nvidiagpu/0/temperature/0", name: "GPU Core", hw: "NVIDIA GeForce RTX 3060", kind: "temperature", value: 52.0, unit: "°C" },
-      { id: "/nvidiagpu/0/temperature/1", name: "GPU Hotspot", hw: "NVIDIA GeForce RTX 3060", kind: "temperature", value: 64.2, unit: "°C" },
-      { id: "/nvidiagpu/0/load/0", name: "GPU Core Load", hw: "NVIDIA GeForce RTX 3060", kind: "load", value: 42.0, unit: "%" },
-      { id: "/nvidiagpu/0/fan/0", name: "GPU Fan 1", hw: "NVIDIA GeForce RTX 3060", kind: "fan", value: 1350, unit: "RPM" },
-      { id: "/lpc/nct6795d/voltage/0", name: "+12V Rail", hw: "Nuvoton NCT6795D", kind: "voltage", value: 12.096, unit: "V" },
-      { id: "/lpc/nct6795d/voltage/1", name: "+5V Rail", hw: "Nuvoton NCT6795D", kind: "voltage", value: 5.040, unit: "V" },
-      { id: "/lpc/nct6795d/fan/0", name: "CPU Cooler Fan", hw: "Nuvoton NCT6795D", kind: "fan", value: 1220, unit: "RPM" }
-    ];
-  }
-  return [];
-});
+import { invoke } from './api.js';
 
 let sensorsCache = [];
 let lhmStatusCache = null;

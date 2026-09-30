@@ -6,18 +6,7 @@
  * Connects to Tauri IPC command 'probe_backends' and updates telemetry UI.
  */
 
-const invoke = window.__TAURI__?.core?.invoke || (async (cmd, args) => {
-  console.log(`[Mock Dev Invoke] Command: ${cmd}`, args);
-  if (cmd === 'probe_backends') {
-    return [
-      { backend: 'ollama', status: 'online', latency_ms: 8, version: '0.6.1', error_message: null },
-      { backend: 'vllm', status: 'offline', latency_ms: null, version: null, error_message: 'Connection refused at 127.0.0.1:8000' },
-      { backend: 'hf', status: 'online', latency_ms: 1, version: '14 cached models', error_message: null },
-      { backend: 'gguf', status: 'online', latency_ms: 2, version: '8 .gguf files', error_message: null },
-    ];
-  }
-  return null;
-});
+import { invoke } from './api.js';
 
 /**
  * Probes all configured inference and storage backends

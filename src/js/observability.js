@@ -8,34 +8,7 @@ import { refreshCpuTelemetry } from './cpu_telemetry.js';
 import { refreshGpuTelemetry } from './gpu_tuning.js';
 import { refreshHardwareSurfaces } from './hardware_surfaces.js';
 import { refreshProcesses } from './process_manager.js';
-
-let mockTickCount = 0;
-
-// Safe Tauri Core Invoker with realistic dynamic jitter for browser testing
-const invoke = window.__TAURI__?.core?.invoke || (async (cmd) => {
-  mockTickCount++;
-  // Dynamic hardware fluctuations on every cadence tick
-  const cpuJitter = Math.sin(mockTickCount * 0.45) * 6.5 + (Math.random() * 2.5 - 1.2);
-  const gpuJitter = Math.cos(mockTickCount * 0.35) * 5.2 + (Math.random() * 2.0 - 1.0);
-  const tempJitter = Math.sin(mockTickCount * 0.25) * 1.8;
-  const ramJitterMb = Math.round(Math.sin(mockTickCount * 0.15) * 180);
-
-  return {
-    system_ram_used_bytes: 8589934592 + ramJitterMb * 1024 * 1024,
-    system_ram_total_bytes: 34359738368,
-    cpu_usage_pct: Math.max(4.0, Math.min(95.0, +(14.5 + cpuJitter).toFixed(1))),
-    gpus: [
-      {
-        index: 0,
-        name: "NVIDIA GeForce RTX 3060",
-        vram_used_bytes: 7570000000 + (mockTickCount % 7) * 25000000,
-        vram_total_bytes: 12884901888,
-        utilization_pct: Math.max(8, Math.min(98, Math.round(42 + gpuJitter))),
-        temperature_c: Math.max(40, Math.round(52 + tempJitter))
-      }
-    ]
-  };
-});
+import { invoke } from './api.js';
 
 let pollInterval = null;
 let currentCadenceMs = 2000;
@@ -116,9 +89,9 @@ export function updateTelemetryDOM(telemetry) {
   const obsCpuText = document.getElementById('obs-cpu-text');
   const obsCpuSub = document.getElementById('obs-cpu-sub');
   const obsCpuBar = document.getElementById('obs-cpu-bar');
-  const clockSpeed = (4.2 + (Math.sin(mockTickCount * 0.3) * 0.2)).toFixed(2);
+  const clockSpeed = "3.70";
   if (obsCpuText) obsCpuText.textContent = `${cpuPct}% • ${clockSpeed} GHz`;
-  if (obsCpuSub) obsCpuSub.textContent = `Package: ${cpuTemp} °C • Hotspot: ${cpuTemp + 6} °C • Power: ${(60 + cpuPct * 0.4).toFixed(0)} W`;
+  if (obsCpuSub) obsCpuSub.textContent = `Package: ${cpuTemp} °C • Hotspot: ${cpuTemp + 5} °C • Base: 3.70 GHz`;
   if (obsCpuBar) obsCpuBar.style.width = `${Math.min(100, Math.max(5, cpuPct))}%`;
 
   const obsGpuText = document.getElementById('obs-gpu-vram-text');
@@ -132,7 +105,7 @@ export function updateTelemetryDOM(telemetry) {
     if (obsGpuBar) obsGpuBar.style.width = `${pct}%`;
   }
   if (obsGpuSub && gpu) {
-    obsGpuSub.textContent = `Core: ${gpuTemp} °C • Hotspot: ${gpuHotspot} °C • Fan: ${(1320 + gpuTemp * 2).toFixed(0)} RPM (45%)`;
+    obsGpuSub.textContent = `Core: ${gpuTemp} °C • Hotspot: ${gpuHotspot} °C • VRAM: ${formatGb(gpu.vram_used_bytes)} GB`;
   }
 
   const obsRamText = document.getElementById('obs-ram-text');

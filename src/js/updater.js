@@ -3,36 +3,7 @@
 //! In-App Version Information & Auto-Update Manager
 
 import { showToast } from './toast.js';
-
-const invoke = window.__TAURI__?.core?.invoke || (async (cmd, args) => {
-  console.log(`[Mock Dev Updater] invoke ${cmd}:`, args);
-  if (cmd === 'get_app_version') {
-    return {
-      current_version: "0.1.0",
-      app_name: "Local LLM Hub",
-      target_platform: "windows-x86_64",
-      release_channel: "stable",
-      git_commit: "HEAD",
-      build_date: "2026-09-29"
-    };
-  }
-  if (cmd === 'check_for_updates') {
-    return {
-      has_update: true,
-      current_version: "0.1.0",
-      latest_version: "0.2.0",
-      release_notes: "### What's New in v0.2.0:\n- ⚔️ Multi-Model Arena with side-by-side comparative inference\n- 📥 In-App Model Downloader for GGUF & Ollama weights\n- 🤖 5 System Persona Presets (Rust Architect, UI Specialist, etc.)\n- 🔄 Integrated Auto-Updater with semantic versioning",
-      download_url: "https://github.com/local-llm-hub/releases/download/v0.2.0/local-llm-hub.exe",
-      published_at: "2026-09-29",
-      is_critical: false
-    };
-  }
-  if (cmd === 'apply_update') {
-    await new Promise(r => setTimeout(r, 2500));
-    return "Update staged successfully.";
-  }
-  return null;
-});
+import { invoke } from './api.js';
 
 let currentVersionInfo = null;
 let latestUpdateResult = null;

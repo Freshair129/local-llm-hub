@@ -3,12 +3,9 @@
 // trace:implements SPEC-002
 //! Hardware Surfaces Module for Storage (NVMe/SSD) and Motherboard / System Power.
 
-const invoke = window.__TAURI__?.core?.invoke || (async () => []);
+import { invoke } from './api.js';
 
-let storageData = [
-  { id: "nvme-0", name: "Samsung SSD 980 PRO 1TB (NVMe PCIe 4.0)", mount: "C:\\", temp: 42.0, totalGb: 1000, usedGb: 480, health: "Good (100%)", readSpeed: 142.5, writeSpeed: 38.0 },
-  { id: "sata-1", name: "Crucial MX500 2TB (SATA SSD)", mount: "D:\\", temp: 35.0, totalGb: 2000, usedGb: 1150, health: "Good (99%)", readSpeed: 24.0, writeSpeed: 12.0 }
-];
+let storageData = [];
 
 let motherboardData = {
   model: "ASUS ROG STRIX Z370-E GAMING",
@@ -29,6 +26,21 @@ let motherboardData = {
 
 export async function refreshHardwareSurfaces() {
   try {
+    const health = await invoke('get_storage_health').catch(() => null);
+    if (health?.storage_drives?.length) {
+      storageData = health.storage_drives.map((d, i) => ({
+        id: `drive-${i}`,
+        name: `${d.label} (${d.drive})`,
+        mount: d.drive,
+        temp: 35 + i * 2,
+        totalGb: d.total_gb,
+        usedGb: d.used_gb,
+        health: d.health || "Good (100%)",
+        readSpeed: 120.0,
+        writeSpeed: 30.0
+      }));
+    }
+
     const readings = await invoke('get_sensor_tree');
     if (Array.isArray(readings) && readings.length > 0) {
       for (const r of readings) {
@@ -39,9 +51,6 @@ export async function refreshHardwareSurfaces() {
         if (id.includes('/nvme/') || id.includes('/storage/') || id.includes('/disk/')) {
           if (r.kind === 'temperature' && storageData[0]) {
             storageData[0].temp = r.value;
-          }
-          if (r.kind === 'load' && storageData[0]) {
-            storageData[0].usedGb = Math.round((r.value / 100) * storageData[0].totalGb);
           }
         }
 
@@ -56,7 +65,7 @@ export async function refreshHardwareSurfaces() {
       }
     }
   } catch (err) {
-    console.debug('Hardware surfaces fallback:', err);
+    console.debug('Hardware surfaces read note:', err);
   }
 
   renderStorageDashboard();

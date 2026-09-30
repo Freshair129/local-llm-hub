@@ -6,14 +6,7 @@
 //! interactive clock offsets, power target %, and fan duty control.
 
 import { showToast } from './toast.js';
-
-const invoke = window.__TAURI__?.core?.invoke || (async (cmd, args) => {
-  console.log(`[Mock Dev Invoke] ${cmd}`, args);
-  if (cmd === 'set_fan_duty') {
-    return `Fan ${args.id} set to ${args.percent}%`;
-  }
-  return null;
-});
+import { invoke } from './api.js';
 
 // Current Tuning State
 let tuningState = {
@@ -49,17 +42,14 @@ export async function initGpuTuning() {
   await refreshGpuTelemetry();
 }
 
-let gpuTick = 0;
-
 export async function refreshGpuTelemetry() {
-  gpuTick++;
   try {
     const readings = await invoke('get_sensor_tree');
     if (Array.isArray(readings) && readings.length > 0) {
       for (const r of readings) {
         const id = r.id.toLowerCase();
         const name = r.name.toLowerCase();
-        if (id.includes('/nvidiagpu/0') || id.includes('/gpu/0')) {
+        if (id.includes('/nvidiagpu/0') || id.includes('/gpu/0') || id.includes('gpu')) {
           if (name.includes('core') && r.kind === 'temperature') gpuTelemetryState.coreTemp = r.value;
           if (name.includes('hotspot') && r.kind === 'temperature') gpuTelemetryState.hotspotTemp = r.value;
           if (name.includes('core') && r.kind === 'load') gpuTelemetryState.cudaLoad = r.value;
@@ -69,28 +59,12 @@ export async function refreshGpuTelemetry() {
           if (name.includes('memory') && r.kind === 'clock') gpuTelemetryState.memClock = r.value;
         }
       }
-    } else {
-      simulateDynamicGpu(gpuTick);
     }
   } catch (err) {
-    simulateDynamicGpu(gpuTick);
+    console.debug('GPU telemetry read note:', err);
   }
 
   renderGpuDashboard();
-}
-
-function simulateDynamicGpu(tick) {
-  const clockJitter = Math.round(Math.sin(tick * 0.4) * 35);
-  const tempJitter = +(Math.sin(tick * 0.25) * 1.5).toFixed(1);
-  const loadJitter = Math.round(Math.cos(tick * 0.35) * 6);
-  const powerJitter = Math.round(Math.sin(tick * 0.3) * 8);
-
-  gpuTelemetryState.coreClock = 1777 + clockJitter;
-  gpuTelemetryState.coreTemp = +(52.0 + tempJitter).toFixed(1);
-  gpuTelemetryState.hotspotTemp = +(64.2 + tempJitter * 1.2).toFixed(1);
-  gpuTelemetryState.cudaLoad = Math.max(10, Math.min(99, 44 + loadJitter));
-  gpuTelemetryState.powerDraw = Math.max(90, Math.min(170, 142 + powerJitter));
-  gpuTelemetryState.fanRpm = Math.round(1350 + tempJitter * 25);
 }
 
 export function renderGpuDashboard() {

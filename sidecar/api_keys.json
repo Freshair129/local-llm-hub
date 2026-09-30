@@ -1,0 +1,18 @@
+[
+  {
+    "keyId": "key_master_hub",
+    "keySecret": "sk-local-hub",
+    "name": "Master Hub Key (Admin)",
+    "role": "admin",
+    "allowedModels": [
+      "*"
+    ],
+    "maxBudget": null,
+    "spend": 0,
+    "tpmLimit": null,
+    "rpmLimit": null,
+    "createdAt": 1700000000000,
+    "expiresAt": null,
+    "active": true
+  }
+]

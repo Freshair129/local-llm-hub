@@ -4,25 +4,7 @@
 //! CPU Deep Telemetry Module.
 //! Displays per-core load %, clock frequency (MHz), core thermals (°C), and package power.
 
-const invoke = window.__TAURI__?.core?.invoke || (async () => []);
-
-let cpuTick = 0;
-
-// Mock baseline cores for development fallback
-const DEFAULT_CORES = [
-  { id: 0, clock: 4320, load: 24.5, temp: 47.0 },
-  { id: 1, clock: 4310, load: 38.2, temp: 49.5 },
-  { id: 2, clock: 4290, load: 18.0, temp: 46.0 },
-  { id: 3, clock: 4330, load: 45.1, temp: 51.0 },
-  { id: 4, clock: 4280, load: 12.4, temp: 45.0 },
-  { id: 5, clock: 4340, load: 56.8, temp: 53.5 },
-  { id: 6, clock: 4300, load: 22.0, temp: 46.5 },
-  { id: 7, clock: 4320, load: 31.0, temp: 48.0 },
-  { id: 8, clock: 4270, load: 15.5, temp: 45.5 },
-  { id: 9, clock: 4310, load: 28.4, temp: 47.5 },
-  { id: 10, clock: 4290, load: 19.8, temp: 46.0 },
-  { id: 11, clock: 4350, load: 62.0, temp: 54.0 },
-];
+import { invoke } from './api.js';
 
 let cpuTelemetryCache = {
   modelName: "Intel Core i7-8700K (12 Threads)",
@@ -30,55 +12,23 @@ let cpuTelemetryCache = {
   socket: "LGA1151",
   baseClock: "3.70 GHz",
   turboClock: "4.70 GHz",
-  packageTemp: 48.5,
-  packagePower: 65.4,
+  packageTemp: 45.0,
+  packagePower: 48.2,
   vcore: 1.216,
-  totalLoad: 31.2,
-  cores: [...DEFAULT_CORES]
+  totalLoad: 8.5,
+  cores: Array.from({ length: 12 }, (_, i) => ({ id: i, clock: 3700, load: 8.0, temp: 45.0 }))
 };
 
 export async function refreshCpuTelemetry() {
-  cpuTick++;
   try {
     const readings = await invoke('get_sensor_tree');
     if (Array.isArray(readings) && readings.length > 0) {
       parseCpuSensors(readings);
-    } else {
-      simulateDynamicCpuCores(cpuTick);
     }
   } catch (err) {
-    simulateDynamicCpuCores(cpuTick);
+    console.debug('CPU telemetry read note:', err);
   }
   renderCpuDashboard();
-}
-
-function simulateDynamicCpuCores(tick) {
-  const newCores = [];
-  let totalLoadAcc = 0;
-
-  for (let i = 0; i < 12; i++) {
-    const baseCore = DEFAULT_CORES[i];
-    const jitter = Math.sin((tick + i * 1.5) * 0.5) * 6.5 + (Math.random() * 2 - 1);
-    const clockJitter = Math.round(Math.cos((tick + i) * 0.4) * 35);
-    const tempJitter = Math.sin((tick + i) * 0.3) * 1.2;
-
-    const coreLoad = Math.max(2, Math.min(99, +(baseCore.load + jitter).toFixed(1)));
-    const coreClock = Math.round(baseCore.clock + clockJitter);
-    const coreTemp = +(baseCore.temp + tempJitter).toFixed(1);
-
-    totalLoadAcc += coreLoad;
-    newCores.push({
-      id: i,
-      load: coreLoad,
-      clock: coreClock,
-      temp: coreTemp
-    });
-  }
-
-  cpuTelemetryCache.cores = newCores;
-  cpuTelemetryCache.totalLoad = +(totalLoadAcc / 12).toFixed(1);
-  cpuTelemetryCache.packageTemp = +(48.5 + Math.sin(tick * 0.25) * 1.5).toFixed(1);
-  cpuTelemetryCache.packagePower = +(65.4 + (cpuTelemetryCache.totalLoad - 30) * 0.5).toFixed(1);
 }
 
 function parseCpuSensors(readings) {

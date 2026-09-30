@@ -5,11 +5,7 @@
 import { showToast } from './toast.js';
 import { syncAllModels } from './model.js';
 
-const invoke = window.__TAURI__?.core?.invoke || (async (cmd, args) => {
-  console.log(`[Mock Dev Downloader] invoke ${cmd}:`, args);
-  await new Promise(r => setTimeout(r, 2000));
-  return `Model '${args.model_name}' successfully downloaded!`;
-});
+import { invoke } from './api.js';
 
 export function initDownloader() {
   const container = document.getElementById('view-downloader');

@@ -25,25 +25,7 @@ import { refreshCpuTelemetry } from './js/cpu_telemetry.js';
 import { initGpuTuning, refreshGpuTelemetry } from './js/gpu_tuning.js';
 import { refreshHardwareSurfaces } from './js/hardware_surfaces.js';
 import { initGateway, refreshGatewayView } from './js/gateway.js';
-
-// Safe Tauri Core Invoker
-const invoke = window.__TAURI__?.core?.invoke || (async (cmd, args) => {
-  console.log(`[Mock Dev Invoke] Command: ${cmd}`, args);
-  if (cmd === 'get_app_state') {
-    return {
-      backends: {
-        ollama_url: "http://127.0.0.1:11434",
-        vllm_url: "http://127.0.0.1:8000",
-        hf_cache_dir: "",
-        gguf_dir: ""
-      },
-      models: [],
-      litellm_process: null,
-      litellm_status: "Stopped"
-    };
-  }
-  return null;
-});
+import { invoke } from './js/api.js';
 
 // Navigation Tabs Setup (GHT Command Center 2-Tier Architecture)
 function setupNavigation() {

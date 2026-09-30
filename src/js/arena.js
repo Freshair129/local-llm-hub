@@ -6,15 +6,7 @@ import { store } from './state.js';
 import { PERSONAS, getPersonaById } from './personas.js';
 import { showToast } from './toast.js';
 
-const invoke = window.__TAURI__?.core?.invoke || (async (cmd, args) => {
-  console.log(`[Mock Dev Arena] invoke ${cmd}:`, args);
-  return {
-    model: args.model_id,
-    response: `Simulated response from ${args.model_id} regarding: "${args.prompt}"`,
-    eval_count: 320,
-    eval_duration: 2500000000
-  };
-});
+import { invoke } from './api.js';
 
 export function initArena() {
   const container = document.getElementById('view-arena');

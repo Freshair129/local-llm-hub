@@ -2,14 +2,7 @@
 // trace:implements FR-004
 // Model Card Drawer Component with Markdown Rendering and Esc key dismissal
 
-const invoke = window.__TAURI__?.core?.invoke || (async () => ({
-  model_id: "mock-model",
-  title: "Mock Model",
-  readme_markdown: "# Mock Model\nThis is a mock model card README.",
-  license: "Apache 2.0",
-  parameters: "12B",
-  source: "mock"
-}));
+import { invoke } from './api.js';
 
 let drawerEl = null;
 let overlayEl = null;

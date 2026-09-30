@@ -3,23 +3,19 @@
 // Interactive Chat Playground Frontend Component
 
 import { recordTaskExecution } from './stats.js';
-
-const invoke = window.__TAURI__?.core?.invoke || (async () => ({
-  role: "assistant",
-  content: "Hello! I am your local model running directly on your GPU.",
-  prompt_tokens: 15,
-  completion_tokens: 32,
-  duration_ms: 220,
-  tps: 145.5
-}));
+import { invoke } from './api.js';
 
 let conversationHistory = [];
-let currentModel = 'hf.co/JetBrains/Mellum2-12B-A2.5B-Instruct-GGUF-Q4_K_M:Q4_K_M';
+let currentModel = '';
 let currentBackend = 'ollama';
 
 export function initChat(models = []) {
   const modelSelect = document.getElementById('chat-model-select');
   if (modelSelect && models.length > 0) {
+    if (!currentModel) {
+      currentModel = models[0].name;
+      currentBackend = models[0].backend || 'ollama';
+    }
     modelSelect.innerHTML = models
       .map(m => `<option value="${m.name}" data-backend="${m.backend}">${m.name} (${m.backend})</option>`)
       .join('');

@@ -4,35 +4,7 @@
 //! Ranks active host processes by CPU and Memory usage with live search and sorting.
 
 import { showToast } from './toast.js';
-
-let mockProcTick = 0;
-
-// Safe Tauri Core Invoker with dynamic jitter for browser testing
-const invoke = window.__TAURI__?.core?.invoke || (async (cmd, args) => {
-  if (cmd === 'get_process_telemetry') {
-    mockProcTick++;
-    const delta1 = Math.sin(mockProcTick * 0.6) * 5.2;
-    const delta2 = Math.cos(mockProcTick * 0.5) * 3.8;
-    const delta3 = Math.sin(mockProcTick * 0.7) * 1.5;
-
-    const procs = [
-      { pid: "14820", name: "ollama.exe", cpuUsage: Math.max(5, +(28.4 + delta1).toFixed(1)), memoryBytes: 5242880000 + Math.round(delta1 * 12000000), virtualMemoryBytes: 12884901888, diskReadBytes: 850000000 + (mockProcTick % 5) * 50000000, diskWrittenBytes: 12000000 },
-      { pid: "9824", name: "python.exe", cpuUsage: Math.max(2, +(14.2 + delta2).toFixed(1)), memoryBytes: 2147483648, virtualMemoryBytes: 4294967296, diskReadBytes: 120000000, diskWrittenBytes: 4500000 },
-      { pid: "4112", name: "tauri-app.exe", cpuUsage: Math.max(1, +(3.5 + delta3).toFixed(1)), memoryBytes: 280000000, virtualMemoryBytes: 850000000, diskReadBytes: 24000000, diskWrittenBytes: 2000000 },
-      { pid: "1204", name: "chrome.exe", cpuUsage: Math.max(0.5, +(2.1 + Math.sin(mockProcTick * 0.4)).toFixed(1)), memoryBytes: 650000000, virtualMemoryBytes: 1500000000, diskReadBytes: 5000000, diskWrittenBytes: 1200000 },
-      { pid: "840", name: "Code.exe", cpuUsage: Math.max(0.5, +(1.8 + Math.cos(mockProcTick * 0.4)).toFixed(1)), memoryBytes: 420000000, virtualMemoryBytes: 980000000, diskReadBytes: 15000000, diskWrittenBytes: 800000 },
-      { pid: "112", name: "System", cpuUsage: +(0.8 + Math.random() * 0.4).toFixed(1), memoryBytes: 120000000, virtualMemoryBytes: 450000000, diskReadBytes: 90000000, diskWrittenBytes: 65000000 }
-    ];
-
-    if (args?.sortBy === 'memory') {
-      procs.sort((a, b) => b.memoryBytes - a.memoryBytes);
-    } else {
-      procs.sort((a, b) => b.cpuUsage - a.cpuUsage);
-    }
-    return procs;
-  }
-  return [];
-});
+import { invoke } from './api.js';
 
 let currentSortBy = 'cpu'; // 'cpu' | 'memory'
 let processSearchQuery = '';

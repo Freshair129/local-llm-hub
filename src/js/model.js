@@ -1,4 +1,5 @@
 import { openModelCard } from './card.js';
+import { invoke } from './api.js';
 
 if (typeof window !== 'undefined') {
   window.openModelCard = openModelCard;
@@ -22,103 +23,6 @@ if (typeof window !== 'undefined') {
  * Unified Model Discovery & Presentation Module for Local LLM Hub
  * Connects to Tauri IPC command 'list_all_models' and renders the catalog.
  */
-
-const invoke = window.__TAURI__?.core?.invoke || (async (cmd, args) => {
-  console.log(`[Mock Dev Invoke] Command: ${cmd}`, args);
-  if (cmd === 'list_all_models') {
-    return [
-      {
-        id: "ollama:mellum2-12b",
-        name: "JetBrains Mellum2 12B MoE Instruct",
-        canonical_name: "jetbrains mellum2 12b moe instruct",
-        backend: "ollama",
-        format: "gguf",
-        size_bytes: 8080000000,
-        quantization: "Q4_K_M",
-        is_active: true,
-        stats: {
-          model_id: "ollama:mellum2-12b",
-          total_tasks: 14,
-          successful_tasks: 14,
-          failed_tasks: 0,
-          total_prompt_tokens: 3200,
-          total_completion_tokens: 9650,
-          total_tokens: 12850,
-          total_duration_ms: 65400,
-          avg_tps: 147.4,
-          last_used_timestamp: Date.now() - 60000,
-          last_error: null
-        }
-      },
-      {
-        id: "ollama:sushi-coder-9b",
-        name: "Qwen3.5-9b-Sushi-Coder-RL",
-        canonical_name: "qwen3.5 9b sushi coder rl",
-        backend: "ollama",
-        format: "gguf",
-        size_bytes: 6550000000,
-        quantization: "Q4_K_M",
-        is_active: false,
-        stats: {
-          model_id: "ollama:sushi-coder-9b",
-          total_tasks: 6,
-          successful_tasks: 6,
-          failed_tasks: 0,
-          total_prompt_tokens: 1100,
-          total_completion_tokens: 3220,
-          total_tokens: 4320,
-          total_duration_ms: 59000,
-          avg_tps: 54.5,
-          last_used_timestamp: Date.now() - 360000,
-          last_error: null
-        }
-      },
-      {
-        id: "ollama:qwen-4b-thai-reasoning",
-        name: "Qwen-4B-Thai-Reasoning:latest",
-        canonical_name: "qwen 4b thai reasoning",
-        backend: "ollama",
-        format: "gguf",
-        size_bytes: 2708805515,
-        quantization: "Q4_K_M",
-        is_active: false,
-        is_duplicate: true,
-        is_preferred: true,
-        duplicate_group: "qwen 4b thai reasoning",
-        duplicate_backends: ["ollama", "gguf"],
-        stats: {
-          model_id: "ollama:qwen-4b-thai-reasoning",
-          total_tasks: 2,
-          successful_tasks: 2,
-          failed_tasks: 0,
-          total_prompt_tokens: 350,
-          total_completion_tokens: 850,
-          total_tokens: 1200,
-          total_duration_ms: 10000,
-          avg_tps: 85.0,
-          last_used_timestamp: Date.now() - 720000,
-          last_error: null
-        }
-      },
-      {
-        id: "gguf:qwen-4b-thai-reasoning.gguf",
-        name: "qwen-4b-thai-reasoning.gguf",
-        canonical_name: "qwen 4b thai reasoning",
-        backend: "gguf",
-        format: "gguf",
-        size_bytes: 2700000000,
-        quantization: "Q4_K_M",
-        is_active: false,
-        is_duplicate: true,
-        is_preferred: false,
-        duplicate_group: "qwen 4b thai reasoning",
-        duplicate_backends: ["ollama", "gguf"],
-        stats: null
-      }
-    ];
-  }
-  return [];
-});
 
 export function formatBytes(bytes) {
   if (!bytes || bytes === 0) return '0 B';

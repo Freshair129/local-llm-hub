@@ -5,69 +5,7 @@
 import { showToast } from './toast.js';
 import { store } from './state.js';
 
-let mockKeysList = [
-  {
-    keyId: "key_master_hub",
-    keySecret: "sk-local-hub",
-    name: "Master Hub Key (Admin)",
-    role: "admin",
-    allowedModels: ["*"],
-    maxBudget: null,
-    spend: 0.0,
-    tpmLimit: null,
-    rpmLimit: null,
-    createdAt: Date.now() - 3600000,
-    expiresAt: null,
-    active: true
-  }
-];
-
-const invoke = window.__TAURI__?.core?.invoke || (async (cmd, args) => {
-  console.log(`[Dev Invoke Mock] ${cmd}`, args);
-  if (cmd === 'list_api_keys') {
-    return [...mockKeysList];
-  }
-  if (cmd === 'create_api_key') {
-    const newK = {
-      keyId: `key_${Math.random().toString(36).substring(2, 8)}`,
-      keySecret: `sk-litellm-${Math.random().toString(36).substring(2, 14)}`,
-      name: args.name,
-      role: args.role,
-      allowedModels: args.allowedModels || ["*"],
-      maxBudget: args.maxBudget,
-      spend: 0.0,
-      tpmLimit: args.tpmLimit,
-      rpmLimit: args.rpmLimit,
-      createdAt: Date.now(),
-      expiresAt: args.durationDays ? Date.now() + (args.durationDays * 86400000) : null,
-      active: true
-    };
-    mockKeysList.push(newK);
-    return newK;
-  }
-  if (cmd === 'toggle_api_key') {
-    const k = mockKeysList.find(x => x.keyId === args.keyId);
-    if (k) {
-      k.active = !k.active;
-      return k.active;
-    }
-    return false;
-  }
-  if (cmd === 'delete_api_key') {
-    mockKeysList = mockKeysList.filter(x => x.keyId !== args.keyId);
-    return true;
-  }
-  if (cmd === 'get_proxy_status') {
-    return {
-      running: true,
-      port: 4000,
-      configPath: 'sidecar/config.yaml',
-      registeredModels: ['mellum2', 'qwen2.5'],
-      baseUrl: 'http://127.0.0.1:4000'
-    };
-  }
-  return null;
-});
+import { invoke } from './api.js';
 
 let cachedKeys = [];
 let activeKeyForSnippets = 'sk-local-hub';
