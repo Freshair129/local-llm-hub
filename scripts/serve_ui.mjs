@@ -618,13 +618,45 @@ async function handleApiInvoke(cmd, args) {
     }
 
     case 'check_for_updates': {
+      try {
+        const ghResp = await fetch('https://api.github.com/repos/Freshair129/local-llm-hub/releases/latest', {
+          headers: { 'User-Agent': 'Local-LLM-Hub' }
+        });
+        if (ghResp.ok) {
+          const ghData = await ghResp.json();
+          const latestTag = ghData.tag_name || 'v0.1.0';
+          const cleanLatest = latestTag.replace(/^v/i, '');
+          const currentVer = '0.1.0';
+          const hasUpdate = cleanLatest !== currentVer;
+          const setupAsset = (ghData.assets || []).find(a => a.name.endsWith('.exe'));
+          return {
+            has_update: hasUpdate,
+            update_available: hasUpdate,
+            current_version: currentVer,
+            latest_version: cleanLatest,
+            download_url: setupAsset?.browser_download_url || ghData.html_url,
+            release_notes: ghData.body || "New release available on GitHub.",
+            published_at: ghData.published_at,
+            is_critical: false
+          };
+        }
+      } catch (e) {}
       return {
+        has_update: false,
         update_available: false,
         current_version: "0.1.0",
         latest_version: "0.1.0",
         download_url: null,
-        release_notes: null
+        release_notes: "You are currently running the latest certified build.",
+        published_at: new Date().toISOString(),
+        is_critical: false
       };
+    }
+
+    case 'apply_update': {
+      const url = args?.downloadUrl || 'https://github.com/Freshair129/local-llm-hub/releases/latest';
+      spawn('cmd', ['/c', 'start', url], { detached: true, stdio: 'ignore' });
+      return `Update download initiated from ${url}`;
     }
 
     case 'hide_to_tray': {

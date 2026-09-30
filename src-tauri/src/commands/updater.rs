@@ -7,7 +7,7 @@ use std::time::Duration;
 use crate::models::types::{AppVersionInfo, UpdateCheckResult};
 
 pub const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
-pub const DEFAULT_UPDATE_MANIFEST_URL: &str = "https://raw.githubusercontent.com/local-llm-hub/releases/main/latest.json";
+pub const DEFAULT_UPDATE_MANIFEST_URL: &str = "https://api.github.com/repos/Freshair129/local-llm-hub/releases/latest";
 
 // trace:implements FR-014
 /// Retrieves active application version and runtime metadata
@@ -65,7 +65,8 @@ pub async fn check_for_updates(
     // Attempt to fetch manifest with short timeout
     let resp_res = client
         .get(url)
-        .timeout(Duration::from_secs(4))
+        .header("User-Agent", "Local-LLM-Hub")
+        .timeout(Duration::from_secs(5))
         .send()
         .await;
 
@@ -73,19 +74,33 @@ pub async fn check_for_updates(
         Ok(resp) if resp.status().is_success() => {
             let body_res = resp.json::<serde_json::Value>().await;
             if let Ok(json) = body_res {
-                let latest_ver = json.get("version")
+                let latest_raw = json.get("tag_name")
+                    .or_else(|| json.get("version"))
                     .and_then(|v| v.as_str())
-                    .unwrap_or(CURRENT_VERSION)
-                    .to_string();
+                    .unwrap_or(CURRENT_VERSION);
+                let latest_ver = latest_raw.trim().trim_start_matches('v').trim_start_matches('V').to_string();
 
                 let has_update = is_newer_version(CURRENT_VERSION, &latest_ver);
-                let notes = json.get("notes")
+                let notes = json.get("body")
+                    .or_else(|| json.get("notes"))
                     .and_then(|v| v.as_str())
-                    .unwrap_or("No release notes available")
+                    .unwrap_or("New update is available on GitHub Releases.")
                     .to_string();
 
-                let download_url = json.get("download_url")
-                    .and_then(|v| v.as_str())
+                let download_url = json.get("assets")
+                    .and_then(|a| a.as_array())
+                    .and_then(|arr| {
+                        arr.iter().find(|item| {
+                            item.get("name")
+                                .and_then(|n| n.as_str())
+                                .map(|n| n.ends_with("-setup.exe") || n.ends_with(".exe"))
+                                .unwrap_or(false)
+                        })
+                    })
+                    .and_then(|asset| asset.get("browser_download_url"))
+                    .and_then(|u| u.as_str())
+                    .or_else(|| json.get("download_url").and_then(|u| u.as_str()))
+                    .or_else(|| json.get("html_url").and_then(|u| u.as_str()))
                     .map(|s| s.to_string());
 
                 let published_at = json.get("published_at")
@@ -129,8 +144,16 @@ pub async fn apply_update_package(download_url: &str) -> Result<String, String> 
         return Err("Invalid download URL scheme. Only secure HTTPS/HTTP endpoints allowed.".to_string());
     }
 
-    // Pre-flight validation passed
-    Ok(format!("Update package from '{}' downloaded and staged. Ready to restart application.", download_url))
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        let mut cmd = std::process::Command::new("cmd");
+        cmd.args(["/c", "start", download_url]);
+        cmd.creation_flags(0x0800_0000);
+        let _ = cmd.spawn();
+    }
+
+    Ok(format!("Opening download for update from '{}'...", download_url))
 }
 
 #[cfg(test)]
