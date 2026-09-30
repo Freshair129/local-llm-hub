@@ -5,7 +5,7 @@ src-tauri/target/
 sidecar/*.exe
 
 # Local Model Binaries & Large Weights
-models/
+/models/
 *.gguf
 *.bin
 *.pt

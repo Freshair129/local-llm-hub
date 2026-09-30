@@ -24,6 +24,7 @@ import { initProcessManager, setProcessRefreshRate, refreshProcesses } from './j
 import { refreshCpuTelemetry } from './js/cpu_telemetry.js';
 import { initGpuTuning, refreshGpuTelemetry } from './js/gpu_tuning.js';
 import { refreshHardwareSurfaces } from './js/hardware_surfaces.js';
+import { initGateway, refreshGatewayView } from './js/gateway.js';
 
 // Safe Tauri Core Invoker
 const invoke = window.__TAURI__?.core?.invoke || (async (cmd, args) => {
@@ -188,6 +189,8 @@ function setupNavigation() {
         refreshGpuTelemetry();
       } else if (targetView === 'storage-telemetry' || targetView === 'motherboard-telemetry') {
         refreshHardwareSurfaces();
+      } else if (targetView === 'gateway') {
+        refreshGatewayView();
       }
     });
   });
@@ -330,6 +333,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   initGpuTuning();
   refreshCpuTelemetry();
   refreshHardwareSurfaces();
+  initGateway();
   startTelemetryPolling(2000);
 
   // Setup Refresh Rate Cadence Selector Listener

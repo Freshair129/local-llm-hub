@@ -275,6 +275,75 @@ async fn get_proxy_status(
     Ok(commands::proxy::check_proxy_status(4000, &config_path, &models).await)
 }
 
+// trace:implements FR-008
+#[tauri::command]
+async fn create_api_key(
+    state: State<'_, SharedAppState>,
+    name: String,
+    role: String,
+    allowed_models: Vec<String>,
+    max_budget: Option<f64>,
+    tpm_limit: Option<u64>,
+    rpm_limit: Option<u64>,
+    duration_days: Option<u32>,
+) -> Result<crate::models::types::ApiKeyRecord, String> {
+    commands::proxy::create_api_key_entry(
+        &state,
+        name,
+        role,
+        allowed_models,
+        max_budget,
+        tpm_limit,
+        rpm_limit,
+        duration_days,
+    ).await
+}
+
+// trace:implements FR-008
+#[tauri::command]
+async fn list_api_keys(
+    state: State<'_, SharedAppState>,
+) -> Result<Vec<crate::models::types::ApiKeyRecord>, String> {
+    Ok(commands::proxy::list_api_keys_entries(&state).await)
+}
+
+// trace:implements FR-008
+#[tauri::command]
+async fn toggle_api_key(
+    state: State<'_, SharedAppState>,
+    key_id: String,
+) -> Result<bool, String> {
+    commands::proxy::toggle_api_key_status(&state, &key_id).await
+}
+
+// trace:implements FR-008
+#[tauri::command]
+async fn delete_api_key(
+    state: State<'_, SharedAppState>,
+    key_id: String,
+) -> Result<bool, String> {
+    commands::proxy::delete_api_key_entry(&state, &key_id).await
+}
+
+// trace:implements FR-008
+#[tauri::command]
+async fn open_litellm_console(url: Option<String>) -> Result<String, String> {
+    let target = url.unwrap_or_else(|| "http://127.0.0.1:4000/ui".to_string());
+    #[cfg(target_os = "windows")]
+    {
+        let _ = std::process::Command::new("cmd")
+            .args(["/c", "start", &target])
+            .spawn();
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = std::process::Command::new("xdg-open")
+            .arg(&target)
+            .spawn();
+    }
+    Ok(target)
+}
+
 // trace:implements FR-010
 #[tauri::command]
 async fn start_lan_share(
@@ -417,6 +486,11 @@ pub fn run() {
             send_chat_message,
             generate_proxy_config,
             get_proxy_status,
+            create_api_key,
+            list_api_keys,
+            toggle_api_key,
+            delete_api_key,
+            open_litellm_console,
             start_lan_share,
             stop_lan_share,
             get_lan_share_status,

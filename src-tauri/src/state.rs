@@ -43,7 +43,7 @@ impl Default for BackendConfig {
 }
 
 use std::collections::HashMap;
-pub use crate::models::types::{ModelStats, UnifiedModel};
+pub use crate::models::types::{ApiKeyRecord, ModelStats, UnifiedModel};
 
 /// Lifecycle status of the embedded LiteLLM proxy process
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -68,6 +68,8 @@ pub struct AppState {
     pub model_stats: HashMap<String, ModelStats>,
     pub litellm_process: Option<u32>,
     pub litellm_status: LiteLLMStatus,
+    #[serde(default)]
+    pub api_keys: Vec<ApiKeyRecord>,
 }
 
 impl Default for AppState {
@@ -78,6 +80,22 @@ impl Default for AppState {
             model_stats: HashMap::new(),
             litellm_process: None,
             litellm_status: LiteLLMStatus::default(),
+            api_keys: vec![
+                ApiKeyRecord {
+                    key_id: "key_master_hub".to_string(),
+                    key_secret: "sk-local-hub".to_string(),
+                    name: "Master Hub Key (Admin)".to_string(),
+                    role: "admin".to_string(),
+                    allowed_models: vec!["*".to_string()],
+                    max_budget: None,
+                    spend: 0.0,
+                    tpm_limit: None,
+                    rpm_limit: None,
+                    created_at: 1700000000000,
+                    expires_at: None,
+                    active: true,
+                }
+            ],
         }
     }
 }
@@ -102,6 +120,8 @@ mod tests {
         assert!(state.models.is_empty());
         assert_eq!(state.litellm_process, None);
         assert_eq!(state.litellm_status, LiteLLMStatus::Stopped);
+        assert_eq!(state.api_keys.len(), 1);
+        assert_eq!(state.api_keys[0].key_secret, "sk-local-hub");
     }
 
     #[tokio::test]
