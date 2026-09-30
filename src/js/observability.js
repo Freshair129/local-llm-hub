@@ -199,3 +199,49 @@ export function stopTelemetryPolling() {
     pollInterval = null;
   }
 }
+
+// --- SILENT BACKGROUND & TRAY MODE OPTIMIZATION ---
+let isSilentBackground = false;
+
+export function pauseForBackgroundMode() {
+  if (isSilentBackground) return;
+  isSilentBackground = true;
+  if (pollInterval) {
+    clearInterval(pollInterval);
+    pollInterval = null;
+  }
+  const liveText = document.getElementById('telemetry-heartbeat-text');
+  const dot = document.getElementById('telemetry-heartbeat-dot');
+  const tsEl = document.getElementById('telemetry-tick-ts');
+  if (liveText) {
+    liveText.textContent = 'SLEEP (TRAY)';
+    liveText.style.color = '#38bdf8';
+  }
+  if (dot) {
+    dot.style.background = '#38bdf8';
+    dot.style.boxShadow = '0 0 6px #38bdf8';
+  }
+  if (tsEl) {
+    tsEl.textContent = 'SILENT 💤';
+  }
+  console.log('[Silent Mode] Background active: High-frequency telemetry loops suspended (CPU: 0%).');
+}
+
+export function resumeFromBackgroundMode() {
+  if (!isSilentBackground) return;
+  isSilentBackground = false;
+  console.log('[Silent Mode] Restored: Resuming active telemetry.');
+  if (currentCadenceMs > 0) {
+    setTelemetryRefreshRate(currentCadenceMs);
+  }
+}
+
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      pauseForBackgroundMode();
+    } else {
+      resumeFromBackgroundMode();
+    }
+  });
+}

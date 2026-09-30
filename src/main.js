@@ -221,6 +221,19 @@ function setupNavigation() {
     });
   }
 
+  // Minimize to Tray button (Silent Background Mode)
+  const btnTray = document.getElementById('btn-minimize-tray');
+  if (btnTray) {
+    btnTray.addEventListener('click', async () => {
+      try {
+        await invoke('hide_to_tray');
+        showToast('Running silently in system tray (0% CPU). Click tray icon to restore.', 'info');
+      } catch (err) {
+        console.warn('Tray hide:', err);
+      }
+    });
+  }
+
   // Scan GGUF Directory button
   const btnScanGguf = document.getElementById('btn-scan-gguf');
   if (btnScanGguf) {

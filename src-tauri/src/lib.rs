@@ -10,7 +10,11 @@ use models::types::ProbeResult;
 use sensors::SensorProvider;
 use state::{AppState, BackendConfig, SharedAppState};
 use std::sync::Arc;
-use tauri::State;
+use tauri::{
+    menu::{Menu, MenuItem},
+    tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent},
+    Manager, State, WindowEvent,
+};
 
 pub struct SensorHub {
     pub sysinfo: sensors::sysinfo_provider::SysinfoProvider,
@@ -456,6 +460,30 @@ fn set_fan_duty(
     }
 }
 
+// trace:implements FR-008
+#[tauri::command]
+fn hide_to_tray(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("main") {
+        window.hide().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn show_from_tray(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.show();
+        let _ = window.unminimize();
+        let _ = window.set_focus();
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn is_tray_mode_active() -> bool {
+    true
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let initial_state = state::create_shared_state();
@@ -465,6 +493,70 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .manage(initial_state)
         .manage(sensor_hub)
+        .setup(|app| {
+            // Build Tray Menu items
+            let show_item = MenuItem::with_id(app, "show", "Open Dashboard", true, None::<&str>)?;
+            let hide_item = MenuItem::with_id(app, "hide", "Hide to Tray (Silent)", true, None::<&str>)?;
+            let quit_item = MenuItem::with_id(app, "quit", "Exit Local LLM Hub", true, None::<&str>)?;
+            let menu = Menu::with_items(app, &[&show_item, &hide_item, &quit_item])?;
+
+            // Build Tray Icon
+            let mut builder = TrayIconBuilder::new()
+                .tooltip("Local LLM Hub (Silent Background)")
+                .menu(&menu)
+                .show_menu_on_left_click(false)
+                .on_menu_event(|app, event| match event.id.as_ref() {
+                    "show" => {
+                        if let Some(window) = app.get_webview_window("main") {
+                            let _ = window.show();
+                            let _ = window.unminimize();
+                            let _ = window.set_focus();
+                        }
+                    }
+                    "hide" => {
+                        if let Some(window) = app.get_webview_window("main") {
+                            let _ = window.hide();
+                        }
+                    }
+                    "quit" => {
+                        app.exit(0);
+                    }
+                    _ => {}
+                })
+                .on_tray_icon_event(|tray, event| {
+                    if let TrayIconEvent::Click {
+                        button: MouseButton::Left,
+                        button_state: MouseButtonState::Up,
+                        ..
+                    } = event
+                    {
+                        let app = tray.app_handle();
+                        if let Some(window) = app.get_webview_window("main") {
+                            if window.is_visible().unwrap_or(false) {
+                                let _ = window.hide();
+                            } else {
+                                let _ = window.show();
+                                let _ = window.unminimize();
+                                let _ = window.set_focus();
+                            }
+                        }
+                    }
+                });
+
+            if let Some(icon) = app.default_window_icon() {
+                builder = builder.icon(icon.clone());
+            }
+
+            let _tray = builder.build(app)?;
+            Ok(())
+        })
+        .on_window_event(|window, event| {
+            if let WindowEvent::CloseRequested { api, .. } = event {
+                // Minimize to tray silently instead of killing background processes
+                api.prevent_close();
+                let _ = window.hide();
+            }
+        })
         .invoke_handler(tauri::generate_handler![
             greet,
             get_app_state,
@@ -498,7 +590,10 @@ pub fn run() {
             check_for_updates,
             apply_update,
             get_storage_health,
-            offload_storage_blob
+            offload_storage_blob,
+            hide_to_tray,
+            show_from_tray,
+            is_tray_mode_active
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

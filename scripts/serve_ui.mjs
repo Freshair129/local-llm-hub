@@ -627,6 +627,18 @@ async function handleApiInvoke(cmd, args) {
       };
     }
 
+    case 'hide_to_tray': {
+      return { status: 'hidden_to_tray', message: 'Application minimized to system tray silently' };
+    }
+
+    case 'show_from_tray': {
+      return { status: 'active', message: 'Application restored from system tray' };
+    }
+
+    case 'is_tray_mode_active': {
+      return true;
+    }
+
     default:
       console.warn(`[handleApiInvoke] Unhandled command: ${cmd}`);
       return null;

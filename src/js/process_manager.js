@@ -31,6 +31,7 @@ export function startProcessPolling(intervalMs) {
   if (intervalMs <= 0) return; // 0 = Paused
 
   processTimer = setInterval(async () => {
+    if (typeof document !== 'undefined' && document.hidden) return; // Silent background power saving
     const gpuView = document.getElementById('view-gpu');
     if (gpuView && gpuView.style.display !== 'none') {
       await refreshProcesses();
@@ -39,6 +40,7 @@ export function startProcessPolling(intervalMs) {
 }
 
 export async function refreshProcesses() {
+  if (typeof document !== 'undefined' && document.hidden) return; // Silent background power saving
   try {
     const processes = await invoke('get_process_telemetry', {
       sortBy: currentSortBy,
