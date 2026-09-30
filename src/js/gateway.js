@@ -435,10 +435,9 @@ function setupEventListeners() {
         activeKeyForSnippets = newKey.keySecret;
         updateCodeSnippets();
 
-        // Prompt user with copy modal / alert
-        showToast(`Virtual Key '${newKey.name}' created successfully! 🎉`, 'success');
-        navigator.clipboard.writeText(newKey.keySecret);
-        alert(`🎉 New LiteLLM Virtual Key Created!\n\nKey Alias: ${newKey.name}\nVirtual Secret: ${newKey.keySecret}\nRole: ${newKey.role.toUpperCase()}\nAllowed Models: ${newKey.allowedModels.join(', ')}\n\n(Copied automatically to your clipboard!)`);
+        // Prompt user with copy toast
+        navigator.clipboard?.writeText(newKey.keySecret);
+        showToast(`🎉 Created '${newKey.name}' (${newKey.keySecret}) — Copied to clipboard!`, 'success');
       } catch (err) {
         showToast(`Failed to create API key: ${err}`, 'error');
       }
