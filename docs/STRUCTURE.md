@@ -96,7 +96,8 @@ docs/
 ├── standards/                      ← Repo engineering standards
 │   ├── STD-001-documentation-architecture.md
 │   ├── STD-002-annotation-language.md
-│   └── STD-003-implementation-unit-and-packet.md
+│   ├── STD-003-implementation-unit-and-packet.md
+│   └── STD-004-batch-release-workflow.md
 │
 ├── templates/                      ← Reusable documentation templates (SWE 5-Tier)
 │   └── STRUCTURE-TEMPLATE.md
