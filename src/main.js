@@ -95,6 +95,7 @@ function setupNavigation() {
 
     groupHeaders.forEach(grp => {
       const matches = grp.getAttribute('data-domain') === domainKey;
+      grp.classList.toggle('active-domain', matches);
       grp.style.display = matches ? 'block' : 'none';
     });
 

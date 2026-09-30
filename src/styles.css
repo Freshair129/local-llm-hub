@@ -416,8 +416,7 @@ body::after {
   align-self: start;
   position: sticky;
   top: 76px;
-  height: fit-content;
-  min-height: 220px;
+  height: auto !important;
   max-height: calc(100vh - 100px);
   padding: 12px 10px;
   border: 1px solid var(--glass-border);
@@ -442,6 +441,7 @@ body::after {
 /* Collapsed state only when explicitly unpinned */
 .sidebar.collapsed {
   width: var(--rail-collapsed) !important;
+  height: auto !important;
   padding: 10px 6px;
 }
 
@@ -530,13 +530,18 @@ body::after {
 .sidebar.collapsed:hover .s-crumb,
 .sidebar.collapsed.open .s-crumb,
 #sidebar.collapsed:hover .s-crumb,
-#sidebar.collapsed.open .s-crumb,
-.sidebar.collapsed:hover .s-grp,
-.sidebar.collapsed.open .s-grp,
-#sidebar.collapsed:hover .s-grp,
-#sidebar.collapsed.open .s-grp {
+#sidebar.collapsed.open .s-crumb {
   display: block !important;
   opacity: 1 !important;
+}
+
+.s-grp.active-domain {
+  display: block !important;
+  opacity: 1 !important;
+}
+
+.s-grp:not(.active-domain) {
+  display: none !important;
 }
 
 .sidebar.collapsed:hover .s-lbl,
@@ -759,7 +764,7 @@ body::after {
 
 /* Sidebar Footer & Mascot (Centered and Proportional) */
 .sidebar-footer {
-  margin-top: auto;
+  margin-top: 10px;
   padding-top: 10px;
   border-top: 1px solid var(--line);
   display: flex;
