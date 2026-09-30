@@ -56,7 +56,10 @@ docs/
 │       └── features/
 │           ├── FEAT-010-gpu-monitor.md
 │           ├── FEAT-011-ram-monitor.md
-│           └── FEAT-018-digital-twin.md
+│           ├── FEAT-018-digital-twin.md
+│           ├── FEAT-020-cpu-per-core-telemetry.md
+│           ├── FEAT-021-gpu-afterburner-tuning.md
+│           └── FEAT-022-hardware-surfaces-storage-motherboard.md
 │   │
 │   └── network-distribution/
 │       ├── README.md

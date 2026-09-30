@@ -21,6 +21,9 @@ import { initUpdater } from './js/updater.js';
 import { initDigitalTwin } from './js/digital_twin_3d.js';
 import { initSensors, setupSensorsEvents, refreshSensorTree, setSensorsRefreshRate } from './js/sensors.js';
 import { initProcessManager, setProcessRefreshRate, refreshProcesses } from './js/process_manager.js';
+import { refreshCpuTelemetry } from './js/cpu_telemetry.js';
+import { initGpuTuning, refreshGpuTelemetry } from './js/gpu_tuning.js';
+import { refreshHardwareSurfaces } from './js/hardware_surfaces.js';
 
 // Safe Tauri Core Invoker
 const invoke = window.__TAURI__?.core?.invoke || (async (cmd, args) => {
@@ -179,6 +182,12 @@ function setupNavigation() {
         refreshSensorTree();
       } else if (targetView === 'gpu') {
         refreshProcesses();
+      } else if (targetView === 'cpu') {
+        refreshCpuTelemetry();
+      } else if (targetView === 'gpu-tuning') {
+        refreshGpuTelemetry();
+      } else if (targetView === 'storage-telemetry' || targetView === 'motherboard-telemetry') {
+        refreshHardwareSurfaces();
       }
     });
   });
@@ -318,6 +327,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   initSensors();
   setupSensorsEvents();
   initProcessManager();
+  initGpuTuning();
+  refreshCpuTelemetry();
+  refreshHardwareSurfaces();
   startTelemetryPolling(2000);
 
   // Setup Refresh Rate Cadence Selector Listener

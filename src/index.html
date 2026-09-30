@@ -204,8 +204,8 @@
           </a>
 
           <!-- ══════ DOMAIN 4: OBSERVABILITY ══════ -->
-          <div class="s-grp" data-domain="observability" style="display:none;">OBSERVABILITY</div>
-          <a class="nav-item s-item" id="nav-gpu" data-view="gpu" data-domain="observability" style="display:none;" title="Hardware &amp; VRAM Observability (FR-006)">
+          <div class="s-grp" data-domain="observability" style="display:none;">HARDWARE &amp; TELEMETRY</div>
+          <a class="nav-item s-item" id="nav-gpu" data-view="gpu" data-domain="observability" style="display:none;" title="Hardware &amp; Tasks Overview (Task Manager)">
             <span class="ic">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <rect x="4" y="4" width="16" height="16" rx="2"></rect>
@@ -220,8 +220,50 @@
                 <line x1="1" y1="14" x2="4" y2="14"></line>
               </svg>
             </span>
-            <span class="s-lbl">Hardware &amp; VRAM</span>
-            <span class="ct">12GB</span>
+            <span class="s-lbl">Overview (Task Mgr)</span>
+            <span class="ct">Tasks</span>
+          </a>
+          <a class="nav-item s-item" id="nav-cpu" data-view="cpu" data-domain="observability" style="display:none;" title="CPU Deep Telemetry (Per-Core Load, Clocks, Thermals)">
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="6" x2="12" y2="12"></line>
+                <line x1="12" y1="12" x2="16" y2="14"></line>
+              </svg>
+            </span>
+            <span class="s-lbl">CPU (Per-Core)</span>
+            <span class="ct">Cores</span>
+          </a>
+          <a class="nav-item s-item" id="nav-gpu-tuning" data-view="gpu-tuning" data-domain="observability" style="display:none;" title="GPU Telemetry &amp; MSI Afterburner Tuning Center">
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+              </svg>
+            </span>
+            <span class="s-lbl">GPU &amp; Afterburner</span>
+            <span class="ct">Tuning</span>
+          </a>
+          <a class="nav-item s-item" id="nav-storage-telemetry" data-view="storage-telemetry" data-domain="observability" style="display:none;" title="Storage &amp; NVMe Thermals &amp; Health">
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M 4 20 L 20 20 A 2 2 0 0 0 22 18 L 22 8 A 2 2 0 0 0 20 6 L 13 6 L 11 3 L 4 3 A 2 2 0 0 0 2 5 L 2 18 A 2 2 0 0 0 4 20 Z"></path>
+              </svg>
+            </span>
+            <span class="s-lbl">Storage &amp; NVMe</span>
+            <span class="ct">Drives</span>
+          </a>
+          <a class="nav-item s-item" id="nav-motherboard" data-view="motherboard-telemetry" data-domain="observability" style="display:none;" title="Motherboard, VRM &amp; Power Rails">
+            <span class="ic">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="2"></rect>
+                <line x1="8" y1="2" x2="8" y2="22"></line>
+                <line x1="16" y1="2" x2="16" y2="22"></line>
+                <line x1="2" y1="8" x2="22" y2="8"></line>
+                <line x1="2" y1="16" x2="22" y2="16"></line>
+              </svg>
+            </span>
+            <span class="s-lbl">Motherboard &amp; Power</span>
+            <span class="ct">VRM</span>
           </a>
           <a class="nav-item s-item" id="nav-twin" data-view="twin" data-domain="observability" style="display:none;" title="3D Hardware Digital Twin Simulation">
             <span class="ic">
@@ -318,35 +360,76 @@
             </div>
           </div>
 
-          <!-- View 2: Hardware & VRAM Observability -->
+          <!-- View 2: Hardware & Tasks Overview (Task Manager) -->
           <div class="view-panel" id="view-gpu" style="display:none;">
             <div class="view-header">
               <div class="view-heading">
-                <h1>Hardware & VRAM Observability</h1>
-                <p>Real-time GPU VRAM buffer, temperature, CUDA core utilization, and system memory</p>
+                <h1>Hardware &amp; Tasks Overview (Task Manager)</h1>
+                <p>Complete system telemetry overview: CPU, GPU, RAM, Thermals, Hotspot &amp; Ranked Host Processes</p>
+              </div>
+              <div class="view-actions">
+                <span class="badge" style="background:rgba(124,242,107,0.15); color:var(--green); padding:6px 12px; font-weight:700;">
+                  ● Live Task Manager Telemetry
+                </span>
               </div>
             </div>
-            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap:20px; margin-top:20px;">
-              <div class="model-card" style="padding:20px;">
-                <h3 style="color:#60a5fa; font-size:16px; margin-bottom:12px;">🎮 GPU VRAM Buffer</h3>
-                <div style="font-size:32px; font-weight:700; color:#fff; margin-bottom:8px;" id="obs-gpu-vram-text">7.6 GB</div>
-                <div style="font-size:13px; color:rgba(255,255,255,0.6);" id="obs-gpu-name">NVIDIA GeForce RTX 3060 (12 GB VRAM)</div>
-                <div class="gauge-track" style="height:10px; margin-top:16px;">
-                  <div class="gauge-fill" id="obs-gpu-bar" style="width: 63%;"></div>
+
+            <!-- 4-Card System Telemetry Grid -->
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px; margin-top:20px;">
+              <!-- CPU Card -->
+              <div class="model-card" style="padding:18px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                  <h3 style="color:var(--cyan); font-size:15px; margin:0;">🖥️ CPU (Host Processor)</h3>
+                  <span class="badge" style="background:rgba(56,189,248,0.12); color:var(--cyan); font-size:10.5px;">12 Threads</span>
+                </div>
+                <div style="font-size:28px; font-weight:800; color:#fff; margin-bottom:4px;" id="obs-cpu-text">14.5% • 4.3 GHz</div>
+                <div style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:6px;" id="obs-cpu-name">Intel Core i7-8700K</div>
+                <div style="font-size:11.5px; color:var(--mut);" id="obs-cpu-sub">Package: 48 °C • Hotspot: 54 °C • Power: 65 W</div>
+                <div class="gauge-track" style="height:8px; margin-top:12px;">
+                  <div class="gauge-fill" id="obs-cpu-bar" style="width: 15%; background:linear-gradient(90deg, var(--cyan), #3b82f6);"></div>
                 </div>
               </div>
-              <div class="model-card" style="padding:20px;">
-                <h3 style="color:#a78bfa; font-size:16px; margin-bottom:12px;">🧠 Host System RAM</h3>
-                <div style="font-size:32px; font-weight:700; color:#fff; margin-bottom:8px;" id="obs-ram-text">8.4 GB</div>
-                <div style="font-size:13px; color:rgba(255,255,255,0.6);">Total Allocated: 32.0 GB DDR4</div>
-                <div class="gauge-track" style="height:10px; margin-top:16px;">
+
+              <!-- GPU Card -->
+              <div class="model-card" style="padding:18px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                  <h3 style="color:#60a5fa; font-size:15px; margin:0;">🎮 GPU (RTX 3060 12GB)</h3>
+                  <span class="badge" style="background:rgba(96,165,250,0.12); color:#60a5fa; font-size:10.5px;">CUDA Cores</span>
+                </div>
+                <div style="font-size:28px; font-weight:800; color:#fff; margin-bottom:4px;" id="obs-gpu-vram-text">7.6 / 12.0 GB (63%)</div>
+                <div style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:6px;" id="obs-gpu-name">NVIDIA GeForce RTX 3060</div>
+                <div style="font-size:11.5px; color:var(--mut);" id="obs-gpu-sub">Core: 52 °C • Hotspot: 64.2 °C • Fan: 1,350 RPM (45%)</div>
+                <div class="gauge-track" style="height:8px; margin-top:12px;">
+                  <div class="gauge-fill" id="obs-gpu-bar" style="width: 63%; background:linear-gradient(90deg, #3b82f6, #60a5fa);"></div>
+                </div>
+              </div>
+
+              <!-- RAM Card -->
+              <div class="model-card" style="padding:18px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                  <h3 style="color:#a78bfa; font-size:15px; margin:0;">🧠 Host System RAM</h3>
+                  <span class="badge" style="background:rgba(167,139,250,0.12); color:#a78bfa; font-size:10.5px;">DDR4 3200</span>
+                </div>
+                <div style="font-size:28px; font-weight:800; color:#fff; margin-bottom:4px;" id="obs-ram-text">8.4 / 32.0 GB (26%)</div>
+                <div style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:6px;">Total Allocated: 32.0 GB DDR4</div>
+                <div style="font-size:11.5px; color:var(--mut);" id="obs-ram-sub">In Use: 8.4 GB • Available: 23.6 GB</div>
+                <div class="gauge-track" style="height:8px; margin-top:12px;">
                   <div class="gauge-fill" id="obs-ram-bar" style="width: 26%; background:linear-gradient(90deg, #8b5cf6, #c084fc);"></div>
                 </div>
               </div>
-              <div class="model-card" style="padding:20px;">
-                <h3 style="color:#34d399; font-size:16px; margin-bottom:12px;">🔥 GPU Temperature & Load</h3>
-                <div style="font-size:32px; font-weight:700; color:#fff; margin-bottom:8px;" id="obs-temp-text">52 °C</div>
-                <div style="font-size:13px; color:rgba(255,255,255,0.6);" id="obs-load-text">CUDA Core Utilization: 44%</div>
+
+              <!-- Thermals & Power Card -->
+              <div class="model-card" style="padding:18px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                  <h3 style="color:var(--green); font-size:15px; margin:0;">⚡ System Thermals &amp; Power</h3>
+                  <span class="badge" style="background:rgba(124,242,107,0.12); color:var(--green); font-size:10.5px;">Nominal</span>
+                </div>
+                <div style="font-size:28px; font-weight:800; color:#fff; margin-bottom:4px;" id="obs-power-text">207 W • Nominal</div>
+                <div style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:6px;">Combined Package &amp; Board Load</div>
+                <div style="font-size:11.5px; color:var(--mut);" id="obs-power-sub">GPU: 142 W • CPU: 65 W • NVMe: 42 °C • VRM: 49 °C</div>
+                <div class="gauge-track" style="height:8px; margin-top:12px;">
+                  <div class="gauge-fill" id="obs-power-bar" style="width: 48%; background:linear-gradient(90deg, var(--green), #34d399);"></div>
+                </div>
               </div>
             </div>
 
@@ -390,6 +473,217 @@
                   </tbody>
                 </table>
               </div>
+            </div>
+          </div>
+
+          <!-- View: CPU Deep Telemetry (Per-Core) -->
+          <div class="view-panel" id="view-cpu" style="display:none;">
+            <div class="view-header">
+              <div class="view-heading">
+                <h1>CPU Deep Telemetry — Per-Core Monitoring</h1>
+                <p>Real-time per-core utilization, clock frequencies (MHz), thermals (°C), and package power draw</p>
+              </div>
+              <div class="view-actions">
+                <span class="badge" style="background:rgba(56,189,248,0.15); color:var(--cyan); padding:6px 12px; font-weight:700;">
+                  ● Per-Core Precision
+                </span>
+              </div>
+            </div>
+
+            <!-- CPU Summary Bento -->
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px; margin-top:20px;">
+              <div class="model-card" style="padding:16px;">
+                <div style="font-size:12px; color:var(--mut);">Total CPU Load</div>
+                <div style="font-size:26px; font-weight:800; color:var(--cyan); margin-top:4px;" id="cpu-stat-total-load">31.2%</div>
+                <div style="font-size:11.5px; color:var(--faint); margin-top:4px;">Average Across All Cores</div>
+              </div>
+              <div class="model-card" style="padding:16px;">
+                <div style="font-size:12px; color:var(--mut);">Package Temperature</div>
+                <div style="font-size:26px; font-weight:800; color:#fff; margin-top:4px;" id="cpu-stat-pkg-temp">48.5 °C</div>
+                <div style="font-size:11.5px; color:var(--faint); margin-top:4px;">Max TjMax: 100 °C</div>
+              </div>
+              <div class="model-card" style="padding:16px;">
+                <div style="font-size:12px; color:var(--mut);">Package Power Draw</div>
+                <div style="font-size:26px; font-weight:800; color:var(--amber); margin-top:4px;" id="cpu-stat-pkg-power">65.4 W</div>
+                <div style="font-size:11.5px; color:var(--faint); margin-top:4px;">TDP Limit: 95.0 W</div>
+              </div>
+              <div class="model-card" style="padding:16px;">
+                <div style="font-size:12px; color:var(--mut);">Core VCore Voltage</div>
+                <div style="font-size:26px; font-weight:800; color:var(--green); margin-top:4px;" id="cpu-stat-vcore">1.216 V</div>
+                <div style="font-size:11.5px; color:var(--faint); margin-top:4px;">VID Auto Regulation</div>
+              </div>
+            </div>
+
+            <!-- CPU Cores Grid -->
+            <div style="margin-top:24px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <h3 style="font-size:16px; font-weight:700; color:#fff; margin:0;">🔥 Per-Core Load &amp; Frequency Matrix</h3>
+                <span style="font-size:12px; color:var(--mut);">Intel Core i7-8700K (12 Logical Cores)</span>
+              </div>
+              <div id="cpu-cores-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:14px;">
+                <!-- Populated dynamically by cpu_telemetry.js -->
+              </div>
+            </div>
+          </div>
+
+          <!-- View: GPU Telemetry & MSI Afterburner Control Center -->
+          <div class="view-panel" id="view-gpu-tuning" style="display:none;">
+            <div class="view-header">
+              <div class="view-heading">
+                <h1>GPU Telemetry &amp; MSI Afterburner Control Center</h1>
+                <p>Complete NVIDIA RTX 3060 telemetry with interactive clock offsets, power target %, and fan curve control</p>
+              </div>
+              <div class="view-actions">
+                <span class="badge" style="background:rgba(255,138,30,0.15); color:var(--amber); padding:6px 12px; font-weight:700;">
+                  ● Afterburner Tuning Engine
+                </span>
+              </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-top:20px;">
+              <!-- Left Column: GPU Deep Telemetry -->
+              <div class="model-card" style="padding:22px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                  <h3 style="color:#60a5fa; font-size:16px; margin:0;">🎮 RTX 3060 Live Telemetry</h3>
+                  <span class="badge" style="background:rgba(96,165,250,0.15); color:#60a5fa; font-size:11px;">12GB GDDR6</span>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:16px;">
+                  <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px;">
+                    <div style="font-size:11.5px; color:var(--mut);">GPU Core Clock</div>
+                    <div style="font-size:22px; font-weight:800; color:#fff; margin-top:2px;" id="gpu-val-core-clock">1,777 MHz</div>
+                  </div>
+                  <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px;">
+                    <div style="font-size:11.5px; color:var(--mut);">Memory Clock</div>
+                    <div style="font-size:22px; font-weight:800; color:#fff; margin-top:2px;" id="gpu-val-mem-clock">7,500 MHz</div>
+                  </div>
+                  <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px;">
+                    <div style="font-size:11.5px; color:var(--mut);">GPU Core Temp</div>
+                    <div style="font-size:22px; font-weight:800; color:var(--green); margin-top:2px;" id="gpu-val-core-temp">52.0 °C</div>
+                  </div>
+                  <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px;">
+                    <div style="font-size:11.5px; color:var(--mut);">GPU Hotspot Temp</div>
+                    <div style="font-size:22px; font-weight:800; color:var(--amber); margin-top:2px;" id="gpu-val-hotspot-temp">64.2 °C</div>
+                  </div>
+                  <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px;">
+                    <div style="font-size:11.5px; color:var(--mut);">Board Power Draw</div>
+                    <div style="font-size:22px; font-weight:800; color:#fff; margin-top:2px;" id="gpu-val-power-draw">142 W / 170 W</div>
+                  </div>
+                  <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px;">
+                    <div style="font-size:11.5px; color:var(--mut);">Fan Speed &amp; Duty</div>
+                    <div style="font-size:22px; font-weight:800; color:var(--cyan); margin-top:2px;" id="gpu-val-fan-rpm">1,350 RPM (45%)</div>
+                  </div>
+                </div>
+
+                <div style="font-size:12px; color:var(--faint); line-height:1.6;">
+                  <div>• PCIe Link Speed: <b>PCIe Gen4 x16 @ x16</b></div>
+                  <div>• CUDA Core Utilization: <b id="gpu-val-cuda-load">44.0%</b></div>
+                  <div>• Memory Bandwidth: <b>360.0 GB/s (192-bit)</b></div>
+                </div>
+              </div>
+
+              <!-- Right Column: MSI Afterburner Tuning Center -->
+              <div class="model-card" style="padding:22px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                  <h3 style="color:var(--amber); font-size:16px; margin:0;">🎛️ MSI Afterburner Tuning</h3>
+                  <div style="display:flex; gap:6px;">
+                    <button class="btn btn-secondary active" id="btn-fan-mode-auto" style="padding:3px 8px; font-size:11px;" type="button">Auto Fan</button>
+                    <button class="btn btn-secondary" id="btn-fan-mode-manual" style="padding:3px 8px; font-size:11px;" type="button">Manual</button>
+                  </div>
+                </div>
+
+                <!-- Core Clock Offset Slider -->
+                <div style="margin-bottom:16px;">
+                  <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px;">
+                    <span style="font-weight:600; color:#fff;">Core Clock Offset:</span>
+                    <span style="font-family:var(--mono); font-weight:700; color:var(--cyan);" id="tune-core-val">+0 MHz</span>
+                  </div>
+                  <input type="range" id="tune-core-slider" min="-500" max="500" step="10" value="0" style="width:100%; accent-color:var(--cyan); cursor:pointer;" />
+                </div>
+
+                <!-- Memory Clock Offset Slider -->
+                <div style="margin-bottom:16px;">
+                  <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px;">
+                    <span style="font-weight:600; color:#fff;">Memory Clock Offset:</span>
+                    <span style="font-family:var(--mono); font-weight:700; color:#60a5fa;" id="tune-mem-val">+0 MHz</span>
+                  </div>
+                  <input type="range" id="tune-mem-slider" min="-1000" max="1500" step="25" value="0" style="width:100%; accent-color:#60a5fa; cursor:pointer;" />
+                </div>
+
+                <!-- Power Target Limit Slider -->
+                <div style="margin-bottom:16px;">
+                  <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px;">
+                    <span style="font-weight:600; color:#fff;">Power Limit Target:</span>
+                    <span style="font-family:var(--mono); font-weight:700; color:var(--amber);" id="tune-power-val">100%</span>
+                  </div>
+                  <input type="range" id="tune-power-slider" min="50" max="115" step="1" value="100" style="width:100%; accent-color:var(--amber); cursor:pointer;" />
+                </div>
+
+                <!-- Fan Duty % Slider -->
+                <div style="margin-bottom:20px;">
+                  <div style="display:flex; justify-content:space-between; font-size:12.5px; margin-bottom:6px;">
+                    <span style="font-weight:600; color:#fff;">Fan Duty Speed:</span>
+                    <span style="font-family:var(--mono); font-weight:700; color:var(--green);" id="tune-fan-val">45%</span>
+                  </div>
+                  <input type="range" id="tune-fan-slider" min="0" max="100" step="5" value="45" disabled style="width:100%; accent-color:var(--green); cursor:pointer;" />
+                </div>
+
+                <!-- Quick Presets -->
+                <div style="margin-bottom:18px;">
+                  <div style="font-size:11px; text-transform:uppercase; color:var(--faint); margin-bottom:8px; letter-spacing:0.5px;">Tuning Profiles &amp; Presets</div>
+                  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px;">
+                    <button class="btn btn-secondary" id="btn-preset-ai" style="padding:6px; font-size:11px;" type="button">⚡ AI Inference Boost</button>
+                    <button class="btn btn-secondary" id="btn-preset-quiet" style="padding:6px; font-size:11px;" type="button">🤫 Quiet / Low Temp</button>
+                    <button class="btn btn-secondary" id="btn-preset-oc" style="padding:6px; font-size:11px;" type="button">🚀 Max Overclock</button>
+                    <button class="btn btn-secondary" id="btn-preset-stock" style="padding:6px; font-size:11px;" type="button">🔄 Stock Defaults</button>
+                  </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display:flex; gap:10px;">
+                  <button class="btn btn-primary" id="btn-afterburner-apply" style="flex:1; padding:8px;" type="button">Apply Settings</button>
+                  <button class="btn btn-secondary" id="btn-afterburner-reset" style="padding:8px 14px;" type="button">Reset</button>
+                  <button class="btn btn-secondary" id="btn-afterburner-save" style="padding:8px 14px;" type="button">Save Profile</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- View: Storage & NVMe Drives Telemetry -->
+          <div class="view-panel" id="view-storage-telemetry" style="display:none;">
+            <div class="view-header">
+              <div class="view-heading">
+                <h1>Storage &amp; NVMe Drives Telemetry</h1>
+                <p>Real-time drive thermals, S.M.A.R.T. health, space allocation, and read/write bandwidth</p>
+              </div>
+              <div class="view-actions">
+                <span class="badge" style="background:rgba(56,189,248,0.15); color:var(--cyan); padding:6px 12px; font-weight:700;">
+                  ● NVMe Surface Active
+                </span>
+              </div>
+            </div>
+
+            <div id="storage-drives-list" style="margin-top:20px;">
+              <!-- Populated dynamically by hardware_surfaces.js -->
+            </div>
+          </div>
+
+          <!-- View: Motherboard, VRM & Power Telemetry -->
+          <div class="view-panel" id="view-motherboard-telemetry" style="display:none;">
+            <div class="view-header">
+              <div class="view-heading">
+                <h1>Motherboard, VRM &amp; Power Telemetry</h1>
+                <p>System board thermals, chassis fan headers, and power supply voltage rails</p>
+              </div>
+              <div class="view-actions">
+                <span class="badge" style="background:rgba(124,242,107,0.15); color:var(--green); padding:6px 12px; font-weight:700;">
+                  ● LPC Super I/O Nominal
+                </span>
+              </div>
+            </div>
+
+            <div id="motherboard-details-container" style="margin-top:20px;">
+              <!-- Populated dynamically by hardware_surfaces.js -->
             </div>
           </div>
 
