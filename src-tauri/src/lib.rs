@@ -515,6 +515,14 @@ fn window_close(app: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+fn window_start_dragging(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("main") {
+        window.start_dragging().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let initial_state = state::create_shared_state();
@@ -627,7 +635,8 @@ pub fn run() {
             is_tray_mode_active,
             window_minimize,
             window_maximize,
-            window_close
+            window_close,
+            window_start_dragging
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

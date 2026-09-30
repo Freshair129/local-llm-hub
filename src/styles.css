@@ -141,8 +141,15 @@ body::after {
   justify-content: space-between;
   user-select: none;
   -webkit-user-select: none;
+  -webkit-app-region: drag;
+  app-region: drag;
   z-index: 100;
   padding: 0;
+  cursor: grab;
+}
+
+.window-titlebar:active {
+  cursor: grabbing;
 }
 
 .titlebar-left {
@@ -151,12 +158,15 @@ body::after {
   gap: 10px;
   height: 100%;
   padding-left: 14px;
+  -webkit-app-region: drag;
+  app-region: drag;
 }
 
 .titlebar-brand-icon {
   font-size: 13px;
   color: var(--green);
   filter: drop-shadow(0 0 6px var(--green-glow));
+  pointer-events: none;
 }
 
 .titlebar-title {
@@ -164,6 +174,7 @@ body::after {
   font-weight: 600;
   letter-spacing: 0.02em;
   color: #cbd5e1;
+  pointer-events: none;
 }
 
 .titlebar-version-badge {
@@ -179,6 +190,8 @@ body::after {
   font-family: var(--mono);
   font-weight: 600;
   cursor: pointer;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
   transition: all 0.15s ease;
 }
 
@@ -192,12 +205,40 @@ body::after {
 .titlebar-drag-spacer {
   flex: 1;
   height: 100%;
+  -webkit-app-region: drag;
+  app-region: drag;
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.titlebar-drag-spacer:active {
+  cursor: grabbing;
+}
+
+.titlebar-drag-hint {
+  font-size: 11px;
+  font-family: var(--mono);
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  transition: all 0.2s ease;
+}
+
+.window-titlebar:hover .titlebar-drag-hint {
+  color: rgba(124, 242, 107, 0.8);
 }
 
 .titlebar-window-controls {
   display: flex;
   align-items: center;
   height: 100%;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
 }
 
 .win-btn {
@@ -210,6 +251,8 @@ body::after {
   color: #94a3b8;
   cursor: pointer;
   outline: none;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
   transition: background 0.12s ease, color 0.12s ease;
 }
 

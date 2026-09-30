@@ -686,6 +686,10 @@ async function handleApiInvoke(cmd, args) {
       return { ok: true };
     }
 
+    case 'window_start_dragging': {
+      return { ok: true };
+    }
+
     default:
       console.warn(`[handleApiInvoke] Unhandled command: ${cmd}`);
       return null;

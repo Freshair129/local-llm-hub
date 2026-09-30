@@ -292,6 +292,24 @@ function setupNavigation() {
     });
   }
 
+  // Native Window Dragging Setup for Frameless Window
+  const dragRegions = document.querySelectorAll('[data-tauri-drag-region], #app-titlebar, .titlebar-drag-spacer');
+  dragRegions.forEach(region => {
+    region.addEventListener('mousedown', async (e) => {
+      // Ignore clicks on buttons, inputs, interactive widgets
+      if (e.target.closest('button') || e.target.closest('.win-btn') || e.target.closest('#app-version-badge')) {
+        return;
+      }
+      if (e.button === 0) { // Primary mouse click
+        try {
+          await invoke('window_start_dragging');
+        } catch (err) {
+          console.warn('Native drag invoke error:', err);
+        }
+      }
+    });
+  });
+
   // Scan GGUF Directory button
   const btnScanGguf = document.getElementById('btn-scan-gguf');
   if (btnScanGguf) {
