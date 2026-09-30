@@ -19,38 +19,25 @@ async function fetchAppVersion() {
     currentVersionInfo = await invoke('get_app_version');
   } catch (err) {
     currentVersionInfo = {
-      current_version: "0.1.0",
+      current_version: "0.1.2",
       app_name: "Local LLM Hub",
       target_platform: "windows-x86_64",
       release_channel: "stable",
       git_commit: "HEAD",
-      build_date: "2026-09-29"
+      build_date: "2026-10-01"
     };
   }
 }
 
 function renderVersionBadge() {
-  const footer = document.querySelector('.sidebar-footer');
-  if (!footer) return;
+  const versionBadge = document.getElementById('app-version-badge');
+  if (!versionBadge) return;
 
-  let versionBadge = document.getElementById('app-version-badge');
-  if (!versionBadge) {
-    versionBadge = document.createElement('div');
-    versionBadge.id = 'app-version-badge';
-    versionBadge.className = 'telemetry-badge cursor-pointer';
-    versionBadge.style.cursor = 'pointer';
-    versionBadge.style.marginTop = '8px';
-    footer.appendChild(versionBadge);
+  const ver = currentVersionInfo ? `v${currentVersionInfo.current_version}` : 'v0.1.2';
+  const label = document.getElementById('updater-version-label');
+  if (label) {
+    label.textContent = ver;
   }
-
-  const ver = currentVersionInfo ? `v${currentVersionInfo.current_version}` : 'v0.1.0';
-  versionBadge.innerHTML = `
-    <span>App Version</span>
-    <span class="version-tag">
-      <span class="status-dot dot-online" id="updater-status-dot"></span>
-      <b id="updater-version-label">${ver}</b>
-    </span>
-  `;
 
   versionBadge.addEventListener('click', openUpdateModal);
 }

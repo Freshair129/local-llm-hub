@@ -671,6 +671,21 @@ async function handleApiInvoke(cmd, args) {
       return true;
     }
 
+    case 'window_minimize': {
+      console.log('[Window] Minimize requested');
+      return { ok: true };
+    }
+
+    case 'window_maximize': {
+      console.log('[Window] Maximize/Restore toggle requested');
+      return { ok: true };
+    }
+
+    case 'window_close': {
+      console.log('[Window] Close requested -> hide to tray');
+      return { ok: true };
+    }
+
     default:
       console.warn(`[handleApiInvoke] Unhandled command: ${cmd}`);
       return null;

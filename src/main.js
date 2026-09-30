@@ -49,30 +49,36 @@ function setupNavigation() {
     });
   }
 
-  // Sidebar Pin Toggle
-  if (pinBtn && sidebar && shell) {
+  // Sidebar Pin & Menu Toggle (Toggle button in topbar and rail pin)
+  const btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
+  if (sidebar && shell) {
     const applyPinState = (isPinned) => {
       sidebar.classList.toggle('pinned', isPinned);
       sidebar.classList.toggle('open', isPinned);
       sidebar.classList.toggle('collapsed', !isPinned);
       shell.classList.toggle('rail-pinned', isPinned);
       shell.classList.toggle('rail-collapsed', !isPinned);
-      pinBtn.classList.toggle('on', isPinned);
+      if (pinBtn) pinBtn.classList.toggle('on', isPinned);
+      if (btnToggleSidebar) btnToggleSidebar.classList.toggle('active', isPinned);
     };
 
-    pinBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
+    const toggleSidebar = (e) => {
+      if (e) e.stopPropagation();
       const newState = !sidebar.classList.contains('pinned');
       applyPinState(newState);
       try {
         localStorage.setItem('local-llm-hub-rail-pinned', newState ? 'true' : 'false');
       } catch (err) {}
-    });
+    };
 
-    // Default to PINNED / EXPANDED unless user explicitly saved 'false'
+    if (pinBtn) pinBtn.addEventListener('click', toggleSidebar);
+    if (btnToggleSidebar) btnToggleSidebar.addEventListener('click', toggleSidebar);
+
+    // Default to PINNED / EXPANDED for clean full labels
     let savedPin = 'true';
     try {
-      savedPin = localStorage.getItem('local-llm-hub-rail-pinned') || 'true';
+      const stored = localStorage.getItem('local-llm-hub-rail-pinned');
+      if (stored !== null) savedPin = stored;
     } catch (err) {}
     applyPinState(savedPin !== 'false');
   }
@@ -241,6 +247,50 @@ function setupNavigation() {
     });
   }
 
+  // Frameless Window Controls (Tauri Borderless Mode)
+  const btnWinMin = document.getElementById('btn-win-minimize');
+  if (btnWinMin) {
+    btnWinMin.addEventListener('click', async () => {
+      try {
+        await invoke('window_minimize');
+      } catch (err) {
+        console.warn('Window minimize failed:', err);
+      }
+    });
+  }
+
+  const btnWinMax = document.getElementById('btn-win-maximize');
+  if (btnWinMax) {
+    btnWinMax.addEventListener('click', async () => {
+      try {
+        await invoke('window_maximize');
+      } catch (err) {
+        console.warn('Window maximize failed:', err);
+      }
+    });
+  }
+
+  const btnWinClose = document.getElementById('btn-win-close');
+  if (btnWinClose) {
+    btnWinClose.addEventListener('click', async () => {
+      try {
+        await invoke('window_close');
+        showToast('Running silently in system tray. Click tray icon to restore.', 'info');
+      } catch (err) {
+        console.warn('Window close failed:', err);
+      }
+    });
+  }
+
+  const titlebarDrag = document.querySelector('.titlebar-drag-spacer');
+  if (titlebarDrag) {
+    titlebarDrag.addEventListener('dblclick', async () => {
+      try {
+        await invoke('window_maximize');
+      } catch (err) {}
+    });
+  }
+
   // Scan GGUF Directory button
   const btnScanGguf = document.getElementById('btn-scan-gguf');
   if (btnScanGguf) {
@@ -351,9 +401,37 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  // Expose global backend reconnect handler for UI buttons
+  window.__retryBackendSync = async () => {
+    showToast('Probing backends and syncing models...', 'info');
+    await triggerProbe();
+    const models = await syncAllModels();
+    if (models && models.length > 0) {
+      store.setState({ models });
+      initChat(models);
+      populateArenaModelSelectors();
+      showToast(`Successfully connected! ${models.length} models loaded.`, 'success');
+    } else {
+      showToast('No models detected yet. Please verify Ollama is active on 127.0.0.1:11434', 'warning');
+    }
+  };
+
   triggerProbe();
   const models = await syncAllModels();
-  store.setState({ models });
-  initChat(models);
-  populateArenaModelSelectors();
+  if (models && models.length > 0) {
+    store.setState({ models });
+    initChat(models);
+    populateArenaModelSelectors();
+  } else {
+    // If backend was still starting up, auto-retry once after 1.5s
+    setTimeout(async () => {
+      await triggerProbe();
+      const retried = await syncAllModels();
+      if (retried && retried.length > 0) {
+        store.setState({ models: retried });
+        initChat(retried);
+        populateArenaModelSelectors();
+      }
+    }, 1500);
+  }
 });

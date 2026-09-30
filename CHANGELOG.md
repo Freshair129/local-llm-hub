@@ -4,16 +4,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
----
+## [0.1.2] — 2026-10-01 (Borderless & Titlebar Batch Release)
 
-## [0.1.2] — 2026-10-01 (Hotfix Release)
+### 🎨 UI & Window Management
+- **Frameless Borderless Window (`decorations: false`):**
+  - Configured frameless window in [`src-tauri/tauri.conf.json`](file:///d:/local-llm-hub/src-tauri/tauri.conf.json).
+  - Added dedicated Windows 11 Fluent titlebar with `data-tauri-drag-region` across the top for seamless native window dragging and double-click to maximize/restore.
+  - Implemented custom native window controls:
+    - **Minimize** (`#btn-win-minimize` ➔ `window_minimize`)
+    - **Maximize / Restore** (`#btn-win-maximize` ➔ `window_maximize`)
+    - **Close to Tray** (`#btn-win-close` ➔ `window_close` with red hover styling and silent tray minimization)
+  - Added Rust IPC handlers in [`src-tauri/src/lib.rs`](file:///d:/local-llm-hub/src-tauri/src/lib.rs) and dev mocks in [`scripts/serve_ui.mjs`](file:///d:/local-llm-hub/scripts/serve_ui.mjs).
+- **Relocated Version Badge from Sidebar:**
+  - Removed the version tag from the bottom of the navigation sidebar ([`src/js/updater.js`](file:///d:/local-llm-hub/src/js/updater.js)), leaving the sidebar dedicated exclusively to navigation modules and AI agent avatar.
+  - Relocated the version badge to a glassmorphic pill (`#app-version-badge`) in the top titlebar with live online status dot, hover effect, and instant click access to the System Version & Updates modal.
+- **In-App Auto-Updater Connected to GitHub API:**
+  - Configured endpoint to query `https://api.github.com/repos/Freshair129/local-llm-hub/releases/latest` with user agent header, displaying latest version, release notes, and download progress.
 
 ### 🚨 Hotfixes
 - **Flashing CMD Windows on Polling:** Fixed an issue on Windows where background telemetry commands (`nvidia-smi` and child processes) caused a black console window (`cmd.exe`) to pop up and close every 1–2 seconds. Added Windows-specific flag `creation_flags(0x0800_0000)` (`CREATE_NO_WINDOW`) to all command spawns in [`src-tauri/src/commands/gpu.rs`](src-tauri/src/commands/gpu.rs) and [`src-tauri/src/lib.rs`](src-tauri/src/lib.rs). Subprocesses now execute silently with zero visual flicker.
-- **Disappearing Sidebar on Clean Install:** Fixed an issue where the navigation rail in installed packages collapsed into a 54px strip with zero-opacity text labels, making the sidebar appear completely missing.
-  - Re-anchored `.sidebar` to top below header (`top: 76px; align-self: start`) and expanded by default (`width: 260px`) in [`src/styles.css`](src/styles.css).
-  - Configured default pinned state in [`src/main.js`](src/main.js) so new installations open with all module titles and navigation labels (`Model Catalog`, `Analytics & ROI`, `Model Arena`, `Downloader`, etc.) clearly visible.
-  - Added automatic initialization call to `switchDomain('model-management')` ensuring domain module synchronization on app launch.
+- **Adaptive Sidebar Height & Collapse Hover Fix ("ย่อตาม menu"):**
+  - Changed `.sidebar` height from fixed full-height (`calc(100vh - 100px)`) to content-aware dynamic height (`height: fit-content; min-height: 220px; max-height: calc(100vh - 100px)`), allowing the sidebar card to snugly fit its menu items without massive empty space.
+  - Added dedicated Hamburger Toggle Button (`#btn-toggle-sidebar`) next to the brand in the topbar to easily collapse and expand the sidebar.
+  - Fixed collapsed rail hover bug where text labels (`.s-lbl`), breadcrumbs (`.s-crumb`), headers (`.s-grp`), and count badges (`.ct`) were hidden under `display: none !important`. Now hovering over the 54px rail smoothly floats out a 260px card with all labels readable.
+- **Backend Reconnection & Ollama Service Discovery:**
+  - Resolved `OLLAMA_HOST` IP binding issue (`100.66.206.115:11434` ➔ `0.0.0.0:11434`), restoring Ollama daemon accessibility and live discovery of all 65 local models.
+  - Added empty-state reconnection button (`⚡ Reconnect / Refresh Backends`) and automatic startup retry if Ollama is still initializing.
 
 ### 🔄 Build & Packaging
 - Recompiled Windows Setup Installer (`.exe`), Windows MSI Package (`.msi`), and standalone portable executable (`tauri-app.exe`) with the hotfixes.

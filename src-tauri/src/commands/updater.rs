@@ -200,4 +200,11 @@ mod tests {
         assert!(res.is_err());
         assert!(res.unwrap_err().contains("Invalid download URL scheme"));
     }
+
+    #[tokio::test]
+    async fn test_real_github_api_call() {
+        let client = reqwest::Client::new();
+        let res = check_for_updates(&client, None).await;
+        assert!(res.is_ok());
+    }
 }

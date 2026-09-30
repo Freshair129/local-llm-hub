@@ -486,6 +486,35 @@ fn is_tray_mode_active() -> bool {
     true
 }
 
+#[tauri::command]
+fn window_minimize(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("main") {
+        window.minimize().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn window_maximize(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("main") {
+        if window.is_maximized().unwrap_or(false) {
+            window.unmaximize().map_err(|e| e.to_string())?;
+        } else {
+            window.maximize().map_err(|e| e.to_string())?;
+        }
+    }
+    Ok(())
+}
+
+#[tauri::command]
+fn window_close(app: tauri::AppHandle) -> Result<(), String> {
+    if let Some(window) = app.get_webview_window("main") {
+        // Silently minimize to tray on close
+        window.hide().map_err(|e| e.to_string())?;
+    }
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let initial_state = state::create_shared_state();
@@ -595,7 +624,10 @@ pub fn run() {
             offload_storage_blob,
             hide_to_tray,
             show_from_tray,
-            is_tray_mode_active
+            is_tray_mode_active,
+            window_minimize,
+            window_maximize,
+            window_close
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

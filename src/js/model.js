@@ -83,7 +83,10 @@ export function renderModels(models) {
           <line x1="8" y1="12" x2="16" y2="12"></line>
         </svg>
         <p>No backends available or no models detected.</p>
-        <p style="font-size: 12px; margin-top: 6px; color: var(--text-dim);">Verify that Ollama daemon is active or GGUF models exist in models/gguf</p>
+        <p style="font-size: 12px; margin-top: 6px; color: var(--text-dim);">Verify that Ollama daemon is active on 127.0.0.1:11434 or GGUF models exist in models/gguf</p>
+        <div style="margin-top:16px; display:flex; gap:10px; justify-content:center;">
+          <button class="btn btn-ghost" id="btn-empty-retry" onclick="window.__retryBackendSync && window.__retryBackendSync()" style="padding:6px 16px; font-size:12px; border-color:var(--green); color:var(--green); cursor:pointer;">⚡ Reconnect / Refresh Backends</button>
+        </div>
       </div>
     `;
     return;
