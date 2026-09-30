@@ -14,7 +14,7 @@ pub async fn poll_hardware_telemetry() -> HardwareTelemetry {
         let mut sys = System::new_all();
         sys.refresh_memory();
         sys.refresh_cpu();
-        std::thread::sleep(Duration::from_millis(100));
+        std::thread::sleep(Duration::from_millis(40));
         sys.refresh_cpu();
 
         let total = sys.total_memory();
@@ -41,7 +41,7 @@ async fn query_nvidia_smi() -> Vec<GpuInfo> {
     let mut gpus = Vec::new();
 
     let output_res = tokio::time::timeout(
-        Duration::from_millis(1500),
+        Duration::from_millis(600),
         tokio::process::Command::new("nvidia-smi")
             .args([
                 "--query-gpu=index,name,memory.used,memory.total,utilization.gpu,temperature.gpu",
@@ -98,7 +98,7 @@ pub async fn poll_top_processes(sort_by_mem: bool, limit: usize) -> Vec<ProcessM
     tokio::task::spawn_blocking(move || {
         let mut sys = System::new();
         sys.refresh_processes();
-        std::thread::sleep(Duration::from_millis(80));
+        std::thread::sleep(Duration::from_millis(40));
         sys.refresh_processes();
 
         let mut list: Vec<ProcessMetric> = sys

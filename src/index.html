@@ -69,9 +69,10 @@
             <span id="health-status-text">ALL AGENTS NOMINAL</span>
           </div>
 
-          <!-- Refresh Rate Cadence Selector -->
-          <div class="refresh-rate-control" title="Adjust Telemetry Cadence / Refresh Rate" style="display:flex; align-items:center; gap:6px; background:rgba(255,255,255,0.04); border:1px solid var(--line2); padding:3px 10px; border-radius:var(--r-pill);">
-            <span style="font-size:11px; font-family:var(--mono); color:var(--mut);">⏱️</span>
+          <!-- Refresh Rate Cadence Selector & Live Heartbeat Indicator -->
+          <div class="refresh-rate-control" title="Adjust Telemetry Cadence / Refresh Rate" style="display:flex; align-items:center; gap:8px; background:rgba(255,255,255,0.04); border:1px solid var(--line2); padding:3px 12px; border-radius:var(--r-pill);">
+            <span id="telemetry-heartbeat-dot" style="display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--green); box-shadow:0 0 8px var(--green); transition:transform 0.12s, box-shadow 0.12s;"></span>
+            <span id="telemetry-heartbeat-text" style="font-size:10.5px; font-family:var(--mono); color:var(--green); font-weight:700;">LIVE</span>
             <select id="select-telemetry-rate" style="background:transparent; border:none; color:var(--tx); font-size:11.5px; font-family:var(--mono); font-weight:600; outline:none; cursor:pointer;">
               <option value="500" style="background:#141714; color:#fff;">500ms (2 Hz)</option>
               <option value="1000" style="background:#141714; color:#fff;">1.0s (1 Hz)</option>
@@ -80,6 +81,7 @@
               <option value="5000" style="background:#141714; color:#fff;">5.0s (Low)</option>
               <option value="0" style="background:#141714; color:#ff8a1e;">⏸️ Pause</option>
             </select>
+            <span id="telemetry-tick-ts" style="font-size:10px; font-family:var(--mono); color:var(--mut); min-width:55px; text-align:right;">00:00:00</span>
           </div>
 
           <!-- Sync Models Button -->
