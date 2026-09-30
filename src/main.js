@@ -51,26 +51,30 @@ function setupNavigation() {
 
   // Sidebar Pin Toggle
   if (pinBtn && sidebar && shell) {
+    const applyPinState = (isPinned) => {
+      sidebar.classList.toggle('pinned', isPinned);
+      sidebar.classList.toggle('open', isPinned);
+      sidebar.classList.toggle('collapsed', !isPinned);
+      shell.classList.toggle('rail-pinned', isPinned);
+      shell.classList.toggle('rail-collapsed', !isPinned);
+      pinBtn.classList.toggle('on', isPinned);
+    };
+
     pinBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const isPinned = sidebar.classList.toggle('pinned');
-      sidebar.classList.toggle('open', isPinned);
-      shell.classList.toggle('rail-pinned', isPinned);
-      pinBtn.classList.toggle('on', isPinned);
+      const newState = !sidebar.classList.contains('pinned');
+      applyPinState(newState);
       try {
-        localStorage.setItem('local-llm-hub-rail-pinned', isPinned ? 'true' : 'false');
+        localStorage.setItem('local-llm-hub-rail-pinned', newState ? 'true' : 'false');
       } catch (err) {}
     });
 
-    // Restore saved pin state
+    // Default to PINNED / EXPANDED unless user explicitly saved 'false'
+    let savedPin = 'true';
     try {
-      if (localStorage.getItem('local-llm-hub-rail-pinned') === 'true') {
-        sidebar.classList.add('pinned');
-        sidebar.classList.add('open');
-        shell.classList.add('rail-pinned');
-        pinBtn.classList.add('on');
-      }
+      savedPin = localStorage.getItem('local-llm-hub-rail-pinned') || 'true';
     } catch (err) {}
+    applyPinState(savedPin !== 'false');
   }
 
   const groupHeaders = document.querySelectorAll('.s-grp');
@@ -104,6 +108,9 @@ function setupNavigation() {
       firstItem.click();
     }
   }
+
+  // Set initial active domain on startup
+  switchDomain('model-management');
 
   // Parent Domain Tabs Switching
   parentTabs.forEach(tab => {

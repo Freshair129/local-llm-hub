@@ -297,7 +297,7 @@ body::after {
    ============================================================ */
 .shell {
   display: grid;
-  grid-template-columns: var(--rail-collapsed) minmax(0, 1fr);
+  grid-template-columns: var(--rail-expanded) minmax(0, 1fr);
   gap: 20px;
   flex: 1;
   min-height: 0;
@@ -306,29 +306,28 @@ body::after {
   transition: grid-template-columns 0.28s ease;
 }
 
-.shell.rail-pinned {
-  grid-template-columns: var(--rail-expanded) minmax(0, 1fr);
+.shell.rail-collapsed {
+  grid-template-columns: var(--rail-collapsed) minmax(0, 1fr);
 }
 
-/* ── Floating Collapsible Glass Rail (Centered Vertically in Viewport) ── */
+/* ── Anchored Glass Sidebar (Always Visible with Full Labels by Default) ── */
 .sidebar {
-  width: var(--rail-collapsed);
-  align-self: center;
+  width: var(--rail-expanded);
+  align-self: start;
   position: sticky;
-  top: 50%;
-  transform: translateY(-50%);
+  top: 76px;
+  height: calc(100vh - 100px);
   max-height: calc(100vh - 100px);
-  min-height: auto;
-  padding: 10px 6px;
+  padding: 12px 10px;
   border: 1px solid var(--glass-border);
   border-radius: var(--r-card); /* 24px */
-  background: var(--glass);
+  background: rgba(14, 18, 15, 0.95);
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
-  box-shadow: var(--glass-hi), var(--glass-shadow);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), var(--glass-hi);
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 4px;
   overflow-y: auto;
   overflow-x: hidden;
   transition: width var(--t-mid) cubic-bezier(0.2, 0.9, 0.3, 1),
@@ -338,19 +337,15 @@ body::after {
   z-index: 40;
 }
 
-/* Hover or pinned expands smoothly */
-.sidebar:hover,
-.sidebar.open,
-.sidebar.pinned,
-#sidebar:hover,
-#sidebar.open,
-#sidebar.pinned {
+/* Collapsed state only when explicitly unpinned */
+.sidebar.collapsed {
+  width: var(--rail-collapsed) !important;
+  padding: 10px 6px;
+}
+
+.sidebar.collapsed:hover {
   width: var(--rail-expanded) !important;
   padding: 12px 10px;
-  background: rgba(14, 18, 15, 0.95);
-  border-color: var(--glass-border-hi);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.75), var(--glass-hi);
-  z-index: 50;
 }
 
 .s-railtop {
@@ -369,17 +364,8 @@ body::after {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  opacity: 0;
-  transition: opacity 0.2s;
-}
-
-.sidebar:hover .s-crumb,
-.sidebar.open .s-crumb,
-.sidebar.pinned .s-crumb,
-#sidebar:hover .s-crumb,
-#sidebar.open .s-crumb,
-#sidebar.pinned .s-crumb {
   opacity: 1;
+  transition: opacity 0.2s;
 }
 
 .s-crumb b {
@@ -397,16 +383,6 @@ body::after {
   color: var(--mut);
   cursor: pointer;
   transition: var(--t-fast);
-  opacity: 0;
-  pointer-events: none;
-}
-
-.sidebar:hover .s-pin,
-.sidebar.open .s-pin,
-.sidebar.pinned .s-pin,
-#sidebar:hover .s-pin,
-#sidebar.open .s-pin,
-#sidebar.pinned .s-pin {
   opacity: 1;
   pointer-events: auto;
 }
@@ -427,32 +403,15 @@ body::after {
   white-space: nowrap;
   text-transform: uppercase;
   font-family: var(--mono);
-  opacity: 0;
-  height: 0;
-  overflow: hidden;
-  transition: opacity 0.2s, height 0.25s;
-}
-
-.sidebar:not(.open):not(:hover):not(.pinned) .s-grp,
-#sidebar:not(.open):not(:hover):not(.pinned) .s-grp {
-  opacity: 0;
-  height: 1px;
-  padding: 0;
-  margin: 6px 4px;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.sidebar:hover .s-grp,
-.sidebar.open .s-grp,
-.sidebar.pinned .s-grp,
-#sidebar:hover .s-grp,
-#sidebar.open .s-grp,
-#sidebar.pinned .s-grp {
   opacity: 1;
   height: auto;
-  margin: 0;
-  padding: 10px 10px 4px;
-  background: transparent;
+}
+
+.sidebar.collapsed .s-crumb,
+.sidebar.collapsed .s-grp,
+.sidebar.collapsed .s-lbl,
+.sidebar.collapsed .ct {
+  display: none !important;
 }
 
 /* Sidebar Menu Items — Rigid Proportions (GHT Standard) */

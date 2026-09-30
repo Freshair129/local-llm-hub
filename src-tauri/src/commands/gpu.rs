@@ -40,14 +40,18 @@ pub async fn poll_hardware_telemetry() -> HardwareTelemetry {
 async fn query_nvidia_smi() -> Vec<GpuInfo> {
     let mut gpus = Vec::new();
 
+    let mut cmd = tokio::process::Command::new("nvidia-smi");
+    cmd.args([
+        "--query-gpu=index,name,memory.used,memory.total,utilization.gpu,temperature.gpu",
+        "--format=csv,noheader,nounits",
+    ]);
+
+    #[cfg(target_os = "windows")]
+    cmd.creation_flags(0x0800_0000);
+
     let output_res = tokio::time::timeout(
         Duration::from_millis(600),
-        tokio::process::Command::new("nvidia-smi")
-            .args([
-                "--query-gpu=index,name,memory.used,memory.total,utilization.gpu,temperature.gpu",
-                "--format=csv,noheader,nounits",
-            ])
-            .output(),
+        cmd.output(),
     )
     .await;
 

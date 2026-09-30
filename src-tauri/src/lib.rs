@@ -335,9 +335,11 @@ async fn open_litellm_console(url: Option<String>) -> Result<String, String> {
     let target = url.unwrap_or_else(|| "http://127.0.0.1:4000/ui".to_string());
     #[cfg(target_os = "windows")]
     {
-        let _ = std::process::Command::new("cmd")
-            .args(["/c", "start", &target])
-            .spawn();
+        use std::os::windows::process::CommandExt;
+        let mut cmd = std::process::Command::new("cmd");
+        cmd.args(["/c", "start", &target]);
+        cmd.creation_flags(0x0800_0000);
+        let _ = cmd.spawn();
     }
     #[cfg(not(target_os = "windows"))]
     {
