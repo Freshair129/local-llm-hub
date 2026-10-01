@@ -80,7 +80,13 @@
     {"id": "adr:ADR-007", "type": "architecture", "path": "docs/adr/ADR-007-push-telemetry-events.md", "title": "Single-Source Push Telemetry"},
     {"id": "adr:ADR-008", "type": "architecture", "path": "docs/adr/ADR-008-typed-ipc-contracts.md", "title": "Typed Rust-TypeScript IPC Contracts"},
     {"id": "benchmark:SPEC-REFINE", "type": "benchmark", "path": "docs/benchmarks/BENCH-SPEC-REFINE-001.md", "title": "Spec Refinement & Defect Detection Benchmark"},
-    {"id": "rep:GAP-REFINEMENT", "type": "report", "path": "docs/reports/feature-gap-analysis-refinement-report.md", "title": "Feature Gap Analysis & Refinement Report"}
+    {"id": "rep:GAP-REFINEMENT", "type": "report", "path": "docs/reports/feature-gap-analysis-refinement-report.md", "title": "Feature Gap Analysis & Refinement Report"},
+    {"id": "doc:GAP-ANALYSIS", "type": "analysis", "path": "docs/GAP-ANALYSIS.md", "title": "Master Gap Analysis"},
+    {"id": "adr:ADR-009", "type": "architecture", "path": "docs/adr/ADR-009-feature-gap-remediation-and-p2-roadmap.md", "title": "Feature Gap Remediation & P2 Architecture"},
+    {"id": "feat:FEAT-023", "type": "feature", "path": "docs/domains/inference-gateway/features/FEAT-023-chat-preflight-token-counter.md", "title": "Chat Preflight Token Counter"},
+    {"id": "feat:FEAT-024", "type": "feature", "path": "docs/domains/network-distribution/features/FEAT-024-lan-ephemeral-pin-auth.md", "title": "LAN Ephemeral PIN Auth"},
+    {"id": "feat:FEAT-025", "type": "feature", "path": "docs/domains/model-management/features/FEAT-025-model-tag-taxonomy-filter.md", "title": "Model Tag Taxonomy Filter"},
+    {"id": "doc:ROADMAP", "type": "roadmap", "path": "docs/ROADMAP.md", "title": "Master Development Roadmap v2.0"}
   ],
 
   "edges": [
@@ -188,6 +194,15 @@
     {"from": "domain:observability", "to": "feat:FEAT-011", "relation": "owns"},
     {"from": "feat:FEAT-010", "to": "req:FR-006", "relation": "implements"},
     {"from": "feat:FEAT-011", "to": "req:FR-006", "relation": "implements"},
-    {"from": "rep:GAP-REFINEMENT", "to": "doc:PRD-SDD", "relation": "audits"}
+    {"from": "rep:GAP-REFINEMENT", "to": "doc:PRD-SDD", "relation": "audits"},
+    {"from": "doc:GAP-ANALYSIS", "to": "doc:PRD-SDD", "relation": "audits"},
+    {"from": "doc:ROADMAP", "to": "doc:GAP-ANALYSIS", "relation": "remediates"},
+    {"from": "adr:ADR-009", "to": "doc:GAP-ANALYSIS", "relation": "resolves"},
+    {"from": "feat:FEAT-023", "to": "req:FR-007", "relation": "extends"},
+    {"from": "feat:FEAT-024", "to": "req:FR-010", "relation": "extends"},
+    {"from": "feat:FEAT-025", "to": "req:FR-002", "relation": "extends"},
+    {"from": "domain:inference-gateway", "to": "feat:FEAT-023", "relation": "owns"},
+    {"from": "domain:network-distribution", "to": "feat:FEAT-024", "relation": "owns"},
+    {"from": "domain:model-management", "to": "feat:FEAT-025", "relation": "owns"}
   ]
 }

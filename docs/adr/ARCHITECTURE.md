@@ -168,6 +168,22 @@
 
 ---
 
+## ADR-009: Feature Gap Remediation, Client-Side Preflight Token Counting, and Ephemeral LAN Security
+
+**Status:** Accepted  
+**Date:** 2026-10-02  
+**Full Document:** [ADR-009-feature-gap-remediation-and-p2-roadmap.md](ADR-009-feature-gap-remediation-and-p2-roadmap.md)
+
+**Context:**  
+การวิเคราะห์ช่องว่าง (GAP-001) ชี้ให้เห็นความจำเป็นในการป้องกัน prompt overflow ในหน้า Chat, การรักษาความปลอดภัยบนเครือข่ายแลนสาธารณะ, และการจัดหมวดหมู่คลังโมเดล
+
+**Decision:**  
+1. ใช้ Hybrid Client-Side BPE-Heuristic สำหรับคำนวณ Token แบบ Real-time ไม่หน่วงการพิมพ์
+2. ใช้ Ephemeral 4-Digit PIN & Time-Bounded Tokens สำหรับป้องกันการดาวน์โหลดไฟล์โมเดลขนาดใหญ่ใน LAN Streamer
+3. จัดหมวดหมู่ 5-Tier Tag Taxonomy บน `UnifiedModel` รองรับ Faceted Search ใน Bento Grid
+
+---
+
 ## ADR-100: Code & Component Boundary Guard Rails
 
 **Status:** Accepted  

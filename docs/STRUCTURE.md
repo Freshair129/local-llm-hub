@@ -105,8 +105,14 @@ docs/
 ├── annotations/                    ← Annotation language spec + examples
 │   └── ANN-001-annotation-language.md (STD-002 details)
 │
+├── GAP-ANALYSIS.md                 ← Master Engineering Gap Analysis (GAP-001)
+├── ROADMAP.md                      ← Master Development Roadmap v2.0 (Phase 0 to 7)
+├── ROADMAP-MVP.md                  ← Historical Roadmap to MVP Release
 ├── PLAN-001-implementation-plan.md ← Microtask breakdown implementation plan
 ├── IMPL-WORKFLOW-001-packet-system.md ← Implementation unit & packet workflow guide
+├── reports/                        ← Audit and Gap Analysis Reports
+│   ├── feature-verification-audit-report.md
+│   └── feature-gap-analysis-refinement-report.md
 ├── packets/                        ← Active/completed implementation packets
 │   └── PKT-FR003-SERVICE.md
 ├── lineage/                        ← Lineage ledger records per R6
@@ -129,7 +135,8 @@ docs/
 ├── adr/
 │   ├── ARCHITECTURE.md             ← Includes ADR-001..006, ADR-100, ARCH-001 §4
 │   ├── ADR-007-push-telemetry-events.md
-│   └── ADR-008-typed-ipc-contracts.md
+│   ├── ADR-008-typed-ipc-contracts.md
+│   └── ADR-009-feature-gap-remediation-and-p2-roadmap.md
 │
 └── .doc-graph.json                 ← Auto-maintained relationship graph
 ```
