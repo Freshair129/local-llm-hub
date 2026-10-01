@@ -12,6 +12,9 @@ export async function initUpdater() {
   await fetchAppVersion();
   renderVersionBadge();
   setupUpdaterModal();
+  if (typeof window !== 'undefined') {
+    window.__openUpdater = openUpdateModal;
+  }
 }
 
 async function fetchAppVersion() {

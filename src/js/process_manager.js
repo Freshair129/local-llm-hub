@@ -13,7 +13,7 @@ let processTimer = null;
 let currentRefreshRateMs = 2000;
 let processListCache = [];
 let selectedDevice = 'gpu0';
-let activeTmTab = 'perf'; // 'perf' | 'procs'
+let activeTmTab = 'sectors'; // 'sectors' | 'perf' | 'procs'
 
 // 60-point sliding history buffers for real-time graphs
 const MAX_HISTORY = 60;
@@ -45,18 +45,27 @@ export async function initProcessManager() {
 function exposeGlobalHelpers() {
   window.__switchTmTab = switchTmTab;
   window.__selectPerfDevice = selectPerfDevice;
+  
+  // Ensure updater modal trigger is globally available
+  import('./updater.js').then(({ initUpdater }) => {
+    // updater initialized
+  }).catch(() => {});
 }
 
 export function switchTmTab(tabKey) {
   activeTmTab = tabKey;
+  const btnSectors = document.getElementById('btn-tm-tab-sectors');
   const btnPerf = document.getElementById('btn-tm-tab-perf');
   const btnProcs = document.getElementById('btn-tm-tab-procs');
+  const panelSectors = document.getElementById('tm-panel-sectors');
   const panelPerf = document.getElementById('tm-panel-perf');
   const panelProcs = document.getElementById('tm-panel-procs');
 
+  if (btnSectors) btnSectors.classList.toggle('active', tabKey === 'sectors');
   if (btnPerf) btnPerf.classList.toggle('active', tabKey === 'perf');
   if (btnProcs) btnProcs.classList.toggle('active', tabKey === 'procs');
 
+  if (panelSectors) panelSectors.style.display = tabKey === 'sectors' ? 'flex' : 'none';
   if (panelPerf) panelPerf.style.display = tabKey === 'perf' ? 'grid' : 'none';
   if (panelProcs) panelProcs.style.display = tabKey === 'procs' ? 'block' : 'none';
 
@@ -245,6 +254,33 @@ function buildSvgPath(dataArray, maxVal, width, height) {
 }
 
 function updateHardwareGraphs() {
+  // 0. Hardware Sectors Live Waveform Charts (CPU & GPU)
+  const pSectorCpu = buildSvgPath(history.cpu, 100, 400, 80);
+  setPathD('path-line-sector-cpu', pSectorCpu.line);
+  setPathD('path-fill-sector-cpu', pSectorCpu.fill);
+
+  const pSectorGpu = buildSvgPath(history.gpu3d, 100, 400, 80);
+  setPathD('path-line-sector-gpu', pSectorGpu.line);
+  setPathD('path-fill-sector-gpu', pSectorGpu.fill);
+
+  // Update Sector Labels
+  const lastCpu = history.cpu[history.cpu.length - 1] || 39;
+  const lastGpu = history.gpu3d[history.gpu3d.length - 1] || 13;
+  const lastRam = history.memory[history.memory.length - 1] || 14.1;
+  const lastVram = history.gpuVramDedicated[history.gpuVramDedicated.length - 1] || 0.8;
+
+  const sectorCpuLoad = document.getElementById('sector-cpu-load');
+  const sectorGpuUtil = document.getElementById('sector-gpu-util');
+  const sectorGpuVram = document.getElementById('sector-gpu-vram-text');
+  const sectorRamText = document.getElementById('sector-ram-text');
+  const sectorRamBar = document.getElementById('sector-ram-bar');
+
+  if (sectorCpuLoad) sectorCpuLoad.textContent = `${lastCpu.toFixed(1)}%`;
+  if (sectorGpuUtil) sectorGpuUtil.textContent = `${lastGpu.toFixed(1)}%`;
+  if (sectorGpuVram) sectorGpuVram.textContent = `${lastVram.toFixed(1)} / 12.0 GB VRAM`;
+  if (sectorRamText) sectorRamText.textContent = `${lastRam.toFixed(1)} / 32.0 GB (${Math.round((lastRam / 32) * 100)}%)`;
+  if (sectorRamBar) sectorRamBar.style.width = `${Math.round((lastRam / 32) * 100)}%`;
+
   // 1. GPU 4-Engine 2x2 Sub-charts
   const p3d = buildSvgPath(history.gpu3d, 100, 300, 90);
   setPathD('path-line-3d', p3d.line);
