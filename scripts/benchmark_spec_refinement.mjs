@@ -2,10 +2,33 @@
 // trace:implements BENCH-SPEC-REFINE-001
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 
 const BENCHMARK_ID = 'BENCH-SPEC-REFINE-001';
 const TARGET_FILE = 'feat-01-mellum12b-instruct.md';
 const GROUND_TRUTH_FILE = 'docs/domains/network-distribution/features/FEAT-012-lan-share.md';
+
+const MACHINE_REGISTRY = {
+  'MACH-LOCAL-RTX3060-I7': {
+    id: 'MACH-LOCAL-RTX3060-I7',
+    name: 'Primary Dev Workstation',
+    cpu: 'Intel Core i7-8700K (6C/12T @ 3.70GHz)',
+    gpu: 'NVIDIA GeForce RTX 3060 (12GB GDDR6)',
+    ram: `${Math.round(os.totalmem() / (1024 * 1024 * 1024))} GB`,
+    driver: 'NVIDIA Game Ready Driver 616.92 / CUDA 12.x',
+    os: `${os.type()} ${os.release()} (${os.arch()})`
+  }
+};
+
+const RUNTIME_REGISTRY = {
+  'ENV-OLLAMA-V035-NODE24': {
+    id: 'ENV-OLLAMA-V035-NODE24',
+    name: 'Ollama Daemon & Node Harness',
+    engine: 'Ollama v0.35.0 (CUDA backend)',
+    harness: `Node.js ${process.version} (Native Fetch API)`,
+    appFramework: 'Tauri v2.0 (Rust 2021 Edition)'
+  }
+};
 
 const SETTING_REGISTRY = {
   'SET-MELLUM-THINK-OFFICIAL': {
@@ -77,12 +100,14 @@ async function unloadModel(modelName) {
   }
 }
 
-async function runModelEvaluation(modelConfig, settingConfig, rawDraftContent, runId) {
+async function runModelEvaluation(modelConfig, settingConfig, machineConfig, runtimeConfig, rawDraftContent, runId) {
   console.log(`\n======================================================`);
   console.log(`🚀 Executing Run ID: ${runId}`);
-  console.log(`📌 Benchmark ID: ${BENCHMARK_ID}`);
-  console.log(`🤖 Model ID: ${modelConfig.modelId} (${modelConfig.fullName})`);
-  console.log(`⚙️  Setting ID: ${settingConfig.id} (${JSON.stringify(settingConfig.params)})`);
+  console.log(`📌 Benchmark ID:     ${BENCHMARK_ID}`);
+  console.log(`🤖 Model ID:         ${modelConfig.modelId} (${modelConfig.fullName})`);
+  console.log(`⚙️  Setting ID:       ${settingConfig.id} (${JSON.stringify(settingConfig.params)})`);
+  console.log(`🖥️  Machine ID:       ${machineConfig.id} (${machineConfig.gpu})`);
+  console.log(`📦 Runtime ID:       ${runtimeConfig.id} (${runtimeConfig.engine})`);
   console.log(`======================================================`);
 
   // 1. Ensure clean VRAM state before test
@@ -176,6 +201,10 @@ Output your response in structured Markdown containing:
     modelName: modelConfig.fullName,
     settingId: settingConfig.id,
     settingParams: settingConfig.params,
+    machineId: machineConfig.id,
+    machineInfo: machineConfig,
+    runtimeId: runtimeConfig.id,
+    runtimeInfo: runtimeConfig,
     durationMs,
     promptTokens: promptEvalCount,
     completionTokens: evalCount,
@@ -189,7 +218,9 @@ Output your response in structured Markdown containing:
 
 async function main() {
   const targetModelArg = process.argv[2] || 'MODEL-MELLUM2-THINK';
-  const targetSettingArg = process.argv[3]; // optional custom Setting ID
+  const targetSettingArg = process.argv[3];
+  const targetMachineArg = process.argv[4] || 'MACH-LOCAL-RTX3060-I7';
+  const targetRuntimeArg = process.argv[5] || 'ENV-OLLAMA-V035-NODE24';
 
   const rawDraft = fs.readFileSync(TARGET_FILE, 'utf-8');
   const timestamp = Date.now();
@@ -209,18 +240,39 @@ async function main() {
     params: { temperature: 0.6, top_p: 0.95 }
   };
 
-  const res = await runModelEvaluation(selectedModel, selectedSetting, rawDraft, runId);
+  const selectedMachine = MACHINE_REGISTRY[targetMachineArg] || {
+    id: targetMachineArg,
+    name: 'Generic Host Machine',
+    cpu: os.cpus()[0]?.model || 'Unknown CPU',
+    gpu: 'RTX 3060 (12GB)',
+    ram: `${Math.round(os.totalmem() / (1024 * 1024 * 1024))} GB`,
+    driver: 'N/A',
+    os: `${os.type()} ${os.release()}`
+  };
+
+  const selectedRuntime = RUNTIME_REGISTRY[targetRuntimeArg] || {
+    id: targetRuntimeArg,
+    name: 'Generic Runtime Stack',
+    engine: 'Ollama v0.35.0',
+    harness: `Node.js ${process.version}`,
+    appFramework: 'Tauri v2'
+  };
+
+  const res = await runModelEvaluation(selectedModel, selectedSetting, selectedMachine, selectedRuntime, rawDraft, runId);
 
   // Save detailed benchmark run report
   const runReportPath = path.join('docs', 'benchmarks', 'pipeline_runs', `${runId}.md`);
   let reportContent = `# 🚀 Benchmark Execution Report: ${runId}\n\n`;
-  reportContent += `| 4-Tuple Identifier | Value |\n|---|---|\n`;
-  reportContent += `| **1. Benchmark ID** | \`${BENCHMARK_ID}\` |\n`;
-  reportContent += `| **2. Run ID** | \`${runId}\` |\n`;
-  reportContent += `| **3. Model ID** | \`${res.modelId}\` (${res.modelName}) |\n`;
-  reportContent += `| **4. Setting ID** | \`${res.settingId}\` (\`temp: ${res.settingParams.temperature}, top_p: ${res.settingParams.top_p}\`) |\n`;
-  reportContent += `| **Target File** | [\`${TARGET_FILE}\`](file:///d:/local-llm-hub/${TARGET_FILE}) |\n`;
-  reportContent += `| **Execution Timestamp** | ${new Date(timestamp).toISOString()} |\n\n`;
+  reportContent += `## 6-Tuple Environment Binding\n\n`;
+  reportContent += `| Parameter Dimension | Identifier | Specification Details |\n`;
+  reportContent += `|---|---|---|\n`;
+  reportContent += `| **1. Benchmark ID** | \`${BENCHMARK_ID}\` | Local LLM Technical Spec Review & Gap Refinement |\n`;
+  reportContent += `| **2. Run ID** | \`${runId}\` | Executed at ${new Date(timestamp).toISOString()} |\n`;
+  reportContent += `| **3. Model ID** | \`${res.modelId}\` | ${res.modelName} |\n`;
+  reportContent += `| **4. Setting ID** | \`${res.settingId}\` | \`temp: ${res.settingParams.temperature}, top_p: ${res.settingParams.top_p}, rep: ${res.settingParams.repeat_penalty || 'N/A'}\` |\n`;
+  reportContent += `| **5. Machine ID** | \`${res.machineId}\` | ${res.machineInfo.cpu} • ${res.machineInfo.gpu} • ${res.machineInfo.ram} RAM |\n`;
+  reportContent += `| **6. Runtime ID** | \`${res.runtimeId}\` | ${res.runtimeInfo.engine} • ${res.runtimeInfo.harness} • ${res.runtimeInfo.os || res.machineInfo.os} |\n`;
+  reportContent += `| **Target File** | [\`${TARGET_FILE}\`](file:///d:/local-llm-hub/${TARGET_FILE}) | Raw Draft Specification Baseline |\n\n`;
 
   reportContent += `## Scorecard & Performance Metrics\n\n`;
   reportContent += `| Metric | Result |\n|---|:---:|\n`;
@@ -243,6 +295,8 @@ async function main() {
     BenchmarkID: res.benchmarkId,
     ModelID: res.modelId,
     SettingID: res.settingId,
+    MachineID: res.machineId,
+    RuntimeID: res.runtimeId,
     Score: `${res.defectScore}/100`,
     Speed: `${res.genSpeedTps} t/s`,
     Duration: `${(res.durationMs / 1000).toFixed(1)}s`
