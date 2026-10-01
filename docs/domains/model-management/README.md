@@ -20,9 +20,11 @@ Domain นี้รับผิดชอบ **การประมวลผล�
 
 | Feature ID | Name | Status | Cross-domain? |
 |------------|------|--------|---------------|
-| FEAT-005 | Model Aggregation | Draft | ✅ depends on backend-integration |
-| FEAT-006 | Deduplication Engine | Draft | ✅ depends on backend-integration |
-| FEAT-007 | Model Card Reader | Draft | ❌ |
+| [FEAT-005](features/FEAT-005-model-aggregation.md) | Multi-Source Model Aggregator | Active | ✅ depends on backend-integration |
+| [FEAT-006](features/FEAT-006-deduplication-engine.md) | Deduplication & Normalization Engine | Active | ✅ depends on backend-integration |
+| [FEAT-007](features/FEAT-007-model-card-reader.md) | Model Card Reader & Metadata Parser | Active | ❌ |
+| [FEAT-013](features/FEAT-013-multi-model-arena.md) | Multi-Model Side-by-Side Arena | Active | ✅ depends on inference-gateway |
+| [FEAT-014](features/FEAT-014-token-roi-cost-calculator.md) | Token ROI & Cost Savings Calculator | Active | ❌ |
 
 ## Discovered Cross-Domain Features
 

@@ -22,8 +22,9 @@ LiteLLM proxy ทำหน้าที่เป็น **unified OpenAI-compatibl
 
 | Feature ID | Name | Status | Cross-domain? |
 |------------|------|--------|---------------|
-| FEAT-008 | LiteLLM Proxy Management | Draft | ✅ depends on backend-integration, model-management |
-| FEAT-009 | Chat Interface | Draft | ✅ depends on FEAT-008 |
+| [FEAT-008](features/FEAT-008-litellm-proxy-manager.md) | LiteLLM Proxy Manager & Unified Endpoint | Active | ✅ depends on backend-integration, model-management |
+| [FEAT-009](features/FEAT-009-streaming-chat-playground.md) | Interactive Streaming Chat Playground | Active | ✅ depends on FEAT-008 |
+| [FEAT-016](features/FEAT-016-prompt-presets-manager.md) | System Prompt & Inference Preset Manager | Active | ❌ |
 
 ## Discovered Cross-Domain Features
 

@@ -22,10 +22,12 @@ Domain นี้รับผิดชอบ **การแสดงสถาน�
 
 | Feature ID | Name | Status | Cross-domain? |
 |------------|------|--------|---------------|
-| FEAT-010 | GPU VRAM Monitor | Active | ❌ |
-| FEAT-011 | RAM Monitor | Active | ❌ |
-| FEAT-018 | 3D Hardware Digital Twin | Active | ❌ |
-| FEAT-020 | Deep Hardware Sensors Tree | Active | ❌ |
+| [FEAT-010](features/FEAT-010-gpu-vram-monitor.md) | GPU VRAM Monitor & Hardware Sensor Poller | Active | ❌ |
+| [FEAT-011](features/FEAT-011-ram-cpu-monitor.md) | RAM Monitor & Top Process Ranker | Active | ❌ |
+| [FEAT-018](features/FEAT-018-digital-twin.md) | 3D Hardware Digital Twin Simulation | Active | ❌ |
+| [FEAT-020](features/FEAT-020-cpu-per-core-telemetry.md) | CPU Per-Core Telemetry | Active | ❌ |
+| [FEAT-021](features/FEAT-021-gpu-afterburner-tuning.md) | GPU Fan & Afterburner Curve Tuning | Active | ❌ |
+| [FEAT-022](features/FEAT-022-hardware-surfaces-storage-motherboard.md) | Motherboard & Storage Hardware Surfaces | Active | ❌ |
 
 ---
 

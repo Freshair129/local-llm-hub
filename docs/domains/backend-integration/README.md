@@ -22,10 +22,12 @@ Domain นี้ **ไม่รับผิดชอบ** logic หลังจ�
 
 | Feature ID | Name | Status | Cross-domain? |
 |------------|------|--------|---------------|
-| FEAT-001 | Ollama Adapter | Draft | ❌ |
-| FEAT-002 | vLLM Adapter | Draft | ❌ |
-| FEAT-003 | HuggingFace TGI Adapter | Draft | ❌ |
-| FEAT-004 | GGUF File Scanner | Draft | ❌ |
+| [FEAT-001](features/FEAT-001-ollama-adapter.md) | Ollama Backend Adapter & Model Control | Active | ❌ |
+| [FEAT-002](features/FEAT-002-vllm-adapter.md) | vLLM & OpenAI Adapter | Active | ❌ |
+| FEAT-003 | HuggingFace TGI Adapter | Deferred | ❌ |
+| [FEAT-004](features/FEAT-004-gguf-scanner.md) | GGUF Binary Parser & Scanner | Active | ❌ |
+| [FEAT-014](features/FEAT-014-version-and-autoupdate.md) | In-App Version & Auto-Updater | Active | ❌ |
+| [FEAT-015](features/FEAT-015-storage-symlink-offloader.md) | Storage Symlink & Directory Junction Offloader | Active | ❌ |
 | [FEAT-019](features/FEAT-019-hf-cache-junction-offload.md) | HuggingFace Cache Junction Offloader | Active | ❌ |
 
 ## Discovered Cross-Domain Features
