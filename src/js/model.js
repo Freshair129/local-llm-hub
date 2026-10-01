@@ -105,46 +105,52 @@ export function renderModels(models) {
         <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
           ${m.is_duplicate ? `
             <span class="badge-duplicate" title="Duplicate model detected across multiple backends: ${m.duplicate_backends && m.duplicate_backends.length ? m.duplicate_backends.join(', ') : m.backend}">
-              ⚠️ DUPLICATE
+              <i class="ph ph-warning"></i> DUPLICATE
             </span>
           ` : ''}
           ${m.is_preferred ? `
             <span class="badge-preferred" title="Recommended preferred backend based on BR-001 priority matrix">
-              ★ PREFERRED
+              <i class="ph-fill ph-star"></i> PREFERRED
             </span>
           ` : ''}
           <span class="backend-pill">${m.backend.toUpperCase()}</span>
         </div>
       </div>
       <div class="card-specs">
-        <span class="spec-badge">📦 ${m.format ? m.format.toUpperCase() : 'GGUF'}</span>
-        ${m.size_bytes ? `<span class="spec-badge">💾 ${formatBytes(m.size_bytes)}</span>` : ''}
-        ${m.quantization ? `<span class="spec-badge">⚙️ ${m.quantization}</span>` : ''}
-        ${m.is_active ? `<span class="spec-badge" style="color: var(--accent-emerald);">● ACTIVE</span>` : ''}
+        <span class="spec-badge"><i class="ph ph-package"></i> ${m.format ? m.format.toUpperCase() : 'GGUF'}</span>
+        ${m.size_bytes ? `<span class="spec-badge"><i class="ph ph-hard-drive"></i> ${formatBytes(m.size_bytes)}</span>` : ''}
+        ${m.quantization ? `<span class="spec-badge"><i class="ph ph-cpu"></i> ${m.quantization}</span>` : ''}
+        ${m.is_active ? `<span class="spec-badge" style="color: var(--accent-emerald);"><i class="ph-fill ph-circle text-[8px]"></i> ACTIVE</span>` : ''}
       </div>
 
       <!-- Real-time Task & Token Telemetry -->
       <div class="card-stats">
         <div class="stat-pill" title="${stats ? `${stats.successful_tasks} succeeded, ${stats.failed_tasks} failed` : 'No tasks run yet'}">
-          <span class="stat-icon">🎯</span>
+          <span class="stat-icon"><i class="ph ph-check-square-offset"></i></span>
           <span class="stat-value">${stats ? `${stats.total_tasks} tasks (${taskRate}%)` : '0 tasks'}</span>
         </div>
         <div class="stat-pill" title="${stats ? `Prompt: ${stats.total_prompt_tokens} / Output: ${stats.total_completion_tokens}` : '0 tokens'}">
-          <span class="stat-icon">⚡</span>
+          <span class="stat-icon"><i class="ph ph-lightning"></i></span>
           <span class="stat-value">${stats ? formatTokens(stats.total_tokens) : '0 tokens'}</span>
         </div>
         ${stats && stats.avg_tps > 0 ? `
           <div class="stat-pill" title="Average speed: ${stats.avg_tps} t/s">
-            <span class="stat-icon">🚀</span>
+            <span class="stat-icon"><i class="ph ph-gauge"></i></span>
             <span class="stat-value">${stats.avg_tps} t/s</span>
           </div>
         ` : ''}
       </div>
 
       <div class="card-actions" style="display:flex; gap:8px; align-items:center;">
-        <button class="btn btn-ghost" style="padding: 6px 10px; font-size: 12px;" onclick="window.openModelCard('${m.id}', '${m.backend}')" title="Read Model Card and README">📖 Card</button>
-        <button class="btn btn-ghost" style="padding: 6px 10px; font-size: 12px; color:${m.is_active ? '#ef4444' : '#10b981'}; border-color:${m.is_active ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.3)'};" onclick="window.toggleModelLifecycle('${m.backend}', '${m.name}', ${m.is_active})" title="${m.is_active ? 'Unload model from GPU memory' : 'Load and keep warm in GPU memory'}">${m.is_active ? '⏸️ Stop' : '⚡ Start'}</button>
-        <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="document.getElementById('nav-chat')?.click()">Run Chat</button>
+        <button class="btn btn-ghost" style="padding: 6px 10px; font-size: 12px; display:inline-flex; align-items:center; gap:5px;" onclick="window.openModelCard('${m.id}', '${m.backend}')" title="Open Interactive 3D Model Card & Config">
+          <i class="ph ph-sliders-horizontal" style="color:var(--raycast-coral);"></i> Card
+        </button>
+        <button class="btn btn-ghost" style="padding: 6px 10px; font-size: 12px; color:${m.is_active ? '#ef4444' : '#10b981'}; border-color:${m.is_active ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.3)'}; display:inline-flex; align-items:center; gap:5px;" onclick="window.toggleModelLifecycle('${m.backend}', '${m.name}', ${m.is_active})" title="${m.is_active ? 'Unload model from GPU memory' : 'Load and keep warm in GPU memory'}">
+          <i class="ph ${m.is_active ? 'ph-stop' : 'ph-play'}"></i> ${m.is_active ? 'Stop' : 'Start'}
+        </button>
+        <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px; display:inline-flex; align-items:center; gap:5px;" onclick="document.getElementById('nav-chat')?.click()">
+          <i class="ph ph-chat-circle-dots"></i> Run Chat
+        </button>
       </div>
     </div>
     `;

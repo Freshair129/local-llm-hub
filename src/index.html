@@ -10,6 +10,31 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css" />
+    <!-- Phosphor Icons from reference dashboard -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+      tailwind = {
+        corePlugins: { preflight: false },
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              raycast: {
+                coral: '#FF6363',
+                dark: 'rgba(0, 0, 0, 0.4)',
+              }
+            },
+            backgroundImage: {
+              'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+            }
+          }
+        }
+      };
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
       // Immediate Global Layout & Theme Controllers (Runs instantly before modules)
       window.__switchTheme = function(themeId) {
