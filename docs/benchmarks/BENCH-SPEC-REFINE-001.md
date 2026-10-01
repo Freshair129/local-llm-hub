@@ -109,3 +109,23 @@
 ```bash
 node scripts/benchmark_spec_refinement.mjs <MODEL_ID> [SETTING_ID] [MACHINE_ID] [RUNTIME_ID]
 ```
+
+---
+
+## 5. Official Benchmark Leaderboard & Results (`MACH-LOCAL-RTX3060-I7`)
+
+ผลการทดสอบเปรียบเทียบ Local LLMs ทั้งหมดภายใต้สภาพแวดล้อมควบคุม 6-Tuple บนเครื่อง `MACH-LOCAL-RTX3060-I7` (Intel i7-8700K, RTX 3060 12GB CUDA, 32GB RAM, Ollama v0.35.0):
+
+| Rank | Model ID | Model Name & Quant | Setting ID | Score | Eval Speed | Prompt Speed | Wall Duration | Run Report |
+|:---:|---|---|---|:---:|:---:|:---:|:---:|---|
+| 🥇 | **`MODEL-MELLUM2-INST`** | Mellum2 12B MoE (A2.5B) Q4_K_M | `SET-MELLUM-INST-OFFICIAL` | **100/100** | **127.8 t/s** | 1,732 t/s | **56.5s** | [`RUN-SPEC-1790886265149`](file:///d:/local-llm-hub/docs/benchmarks/pipeline_runs/RUN-SPEC-1790886265149.md) |
+| 🥈 | **`MODEL-MELLUM2-THINK`** | Mellum2 12B MoE (A2.5B) Q4_K_M | `SET-MELLUM-THINK-OFFICIAL` | **100/100** | **116.3 t/s** | 1,842 t/s | **76.1s** | [`RUN-SPEC-1790886753642`](file:///d:/local-llm-hub/docs/benchmarks/pipeline_runs/RUN-SPEC-1790886753642.md) |
+| 🥉 | **`MODEL-SUSHI-CODER`** | Qwen3.5 9B Sushi Coder RL Q4_K_M | `SET-DETERMINISTIC-ZERO` | **100/100** | **52.2 t/s** | 1,510 t/s | **77.5s** | [`RUN-SPEC-1790887501269`](file:///d:/local-llm-hub/docs/benchmarks/pipeline_runs/RUN-SPEC-1790887501269.md) |
+| 4 | **`MODEL-QWEN35-CODER`** | Qwen3.5 9B Coder GGUF Q4_K_M | `SET-CODER-PRECISE-02` | **100/100** | **47.6 t/s** | 1,424 t/s | **129.2s** | [`RUN-SPEC-1790887227424`](file:///d:/local-llm-hub/docs/benchmarks/pipeline_runs/RUN-SPEC-1790887227424.md) |
+| 5 | **`MODEL-GEMMA4-12B`** | Gemma 4 12B IT UD-Q4_K_XL | `SET-GEMMA-SENIOR-03` | **82/100** | **34.2 t/s** | 1,280 t/s | **125.6s** | [`RUN-SPEC-1790887366965`](file:///d:/local-llm-hub/docs/benchmarks/pipeline_runs/RUN-SPEC-1790887366965.md) |
+
+### 🔍 Key Insights & Analysis:
+1. **Mellum2 Architecture (MoE)**: ด้วยโครงสร้าง 12B MoE ที่ active เพียง 2.5B parameters ส่งผลให้ generation throughput สูงสุดถึง **127.8 t/s** (เร็วกว่า Dense models ถึง 2.7x) ในขณะที่จับข้อผิดพลาดและจัด formatting Markdown/Mermaid ได้คะแนนเต็ม 100/100
+2. **Sushi Coder RL vs Qwen 3.5 Coder**: Sushi Coder ซึ่งผ่าน RL alignment ให้ความกระชับและ generate speed ดีกว่า (52.2 t/s vs 47.6 t/s) ใช้เวลาเพียง 77.5s ในการทำ spec audit จบกระบวนการ
+3. **Gemma 4 12B**: ตรวจจับข้อผิดพลาดเชิงตรรกะได้ดีมาก (ให้ technical critique ลึก) แต่มักจะสรุปย่อตัว code contracts ทำให้คะแนนด้าน Full Spec Reconstruction ได้ 82/100 และใช้เวลา 125.6s ด้วยความหนาแน่นของ Dense 12B
+

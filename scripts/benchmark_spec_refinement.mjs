@@ -3,6 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
+import { execSync } from 'node:child_process';
 
 const BENCHMARK_ID = 'BENCH-SPEC-REFINE-001';
 const TARGET_FILE = 'feat-01-mellum12b-instruct.md';
@@ -34,27 +35,27 @@ const SETTING_REGISTRY = {
   'SET-MELLUM-THINK-OFFICIAL': {
     id: 'SET-MELLUM-THINK-OFFICIAL',
     name: 'Official HF Thinking Preset',
-    params: { temperature: 0.6, top_p: 0.95, repeat_penalty: 1.1, min_p: 0.05 }
+    params: { temperature: 0.6, top_p: 0.95, repeat_penalty: 1.1, min_p: 0.05, num_ctx: 8192 }
   },
   'SET-MELLUM-INST-OFFICIAL': {
     id: 'SET-MELLUM-INST-OFFICIAL',
     name: 'Official HF Instruct Preset',
-    params: { temperature: 0.6, top_p: 0.95, repeat_penalty: 1.1, min_p: 0.05 }
+    params: { temperature: 0.6, top_p: 0.95, repeat_penalty: 1.1, min_p: 0.05, num_ctx: 8192 }
   },
   'SET-DETERMINISTIC-ZERO': {
     id: 'SET-DETERMINISTIC-ZERO',
     name: 'Strict Zero-Variance Code Audit',
-    params: { temperature: 0.0, top_p: 1.0, repeat_penalty: 1.0, min_p: 0.0 }
+    params: { temperature: 0.0, top_p: 1.0, repeat_penalty: 1.0, min_p: 0.0, num_ctx: 8192 }
   },
   'SET-CODER-PRECISE-02': {
     id: 'SET-CODER-PRECISE-02',
     name: 'Precise Technical Spec Synthesis',
-    params: { temperature: 0.2, top_p: 0.95, repeat_penalty: 1.1, min_p: 0.05 }
+    params: { temperature: 0.2, top_p: 0.95, repeat_penalty: 1.1, min_p: 0.05, num_ctx: 8192 }
   },
   'SET-GEMMA-SENIOR-03': {
     id: 'SET-GEMMA-SENIOR-03',
     name: 'Senior Engineering Critique',
-    params: { temperature: 0.3, top_p: 0.90, repeat_penalty: 1.05, min_p: 0.05 }
+    params: { temperature: 0.3, top_p: 0.90, repeat_penalty: 1.05, min_p: 0.05, num_ctx: 8192 }
   }
 };
 
@@ -86,15 +87,9 @@ const CANDIDATE_MODELS = [
   }
 ];
 
-async function unloadModel(modelName) {
+function unloadModel(modelName) {
   try {
-    await fetch('http://127.0.0.1:11434/api/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: modelName, keep_alive: 0 })
-    });
-    // CUDA synchronization sleep
-    await new Promise(r => setTimeout(r, 1500));
+    execSync(`ollama stop "${modelName}"`, { stdio: 'ignore', timeout: 3000 });
   } catch (err) {
     // Graceful ignore
   }
@@ -111,7 +106,7 @@ async function runModelEvaluation(modelConfig, settingConfig, machineConfig, run
   console.log(`======================================================`);
 
   // 1. Ensure clean VRAM state before test
-  await unloadModel(modelConfig.fullName);
+  unloadModel(modelConfig.fullName);
 
   const systemPrompt = `You are a Senior Software Systems Architect and Code Reviewer.
 Your task is to thoroughly review and refine the following draft technical specification for a Rust/Tauri application feature.
@@ -139,7 +134,7 @@ Output your response in structured Markdown containing:
         { role: 'user', content: userPrompt }
       ],
       options: settingConfig.params,
-      stream: false
+      stream: true
     })
   });
 
@@ -147,21 +142,49 @@ Output your response in structured Markdown containing:
     throw new Error(`HTTP error ${response.status}: ${await response.text()}`);
   }
 
-  const result = await response.json();
-  const durationMs = Date.now() - startTime;
-  const evalCount = result.eval_count || 0;
-  const evalDurationNs = result.eval_duration || 1;
-  const promptEvalCount = result.prompt_eval_count || 0;
-  const promptDurationNs = result.prompt_eval_duration || 1;
+  let fullReply = '';
+  let evalCount = 0;
+  let evalDurationNs = 1;
+  let promptEvalCount = 0;
+  let promptDurationNs = 1;
 
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder('utf-8');
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!line.trim()) continue;
+      try {
+        const parsed = JSON.parse(line);
+        if (parsed.message?.content) {
+          fullReply += parsed.message.content;
+        }
+        if (parsed.done) {
+          evalCount = parsed.eval_count || 0;
+          evalDurationNs = parsed.eval_duration || 1;
+          promptEvalCount = parsed.prompt_eval_count || 0;
+          promptDurationNs = parsed.prompt_eval_duration || 1;
+        }
+      } catch (e) {
+        // partial line
+      }
+    }
+  }
+
+  const durationMs = Date.now() - startTime;
   const genSpeedTps = (evalCount / (evalDurationNs / 1e9)).toFixed(1);
   const promptSpeedTps = (promptEvalCount / (promptDurationNs / 1e9)).toFixed(1);
 
-  const reply = result.message?.content || '';
-
   // Calculate rubric score
   let defectScore = 0;
-  const replyLower = reply.toLowerCase();
+  const replyLower = fullReply.toLowerCase();
 
   // Defect 1: Catching nvidia-smi hallucination
   const caughtNvidia = replyLower.includes('nvidia') || replyLower.includes('commands/share.rs');
@@ -176,11 +199,11 @@ Output your response in structured Markdown containing:
   if (caughtTelemetry) defectScore += 8;
 
   // Defect 4: Fixing Mermaid diagram syntax
-  const hasMermaidBlock = reply.includes('```mermaid') && reply.includes('sequenceDiagram');
+  const hasMermaidBlock = fullReply.includes('```mermaid') && fullReply.includes('sequenceDiagram');
   if (hasMermaidBlock) defectScore += 15;
 
   // Defect 5: Formatting and line separation
-  const hasProperHeaders = reply.includes('## 1.') || reply.includes('# Feature');
+  const hasProperHeaders = fullReply.includes('## 1.') || fullReply.includes('# Feature');
   if (hasProperHeaders) defectScore += 15;
 
   // Architecture extensions
@@ -188,11 +211,11 @@ Output your response in structured Markdown containing:
   if (hasQrOrPin) defectScore += 20;
 
   // Rust / Contract types
-  const hasRustTypes = reply.includes('LanShareStatus') || reply.includes('LanShareConfig') || reply.includes('commands/share.rs');
+  const hasRustTypes = fullReply.includes('LanShareStatus') || replyLower.includes('lanshareconfig') || fullReply.includes('commands/share.rs');
   if (hasRustTypes) defectScore += 22;
 
   // Cleanup VRAM after test
-  await unloadModel(modelConfig.fullName);
+  unloadModel(modelConfig.fullName);
 
   return {
     runId,
@@ -211,13 +234,13 @@ Output your response in structured Markdown containing:
     genSpeedTps: parseFloat(genSpeedTps),
     promptSpeedTps: parseFloat(promptSpeedTps),
     defectScore: Math.min(100, defectScore),
-    replySnippet: reply.slice(0, 400),
-    fullReply: reply
+    replySnippet: fullReply.slice(0, 400),
+    fullReply
   };
 }
 
 async function main() {
-  const targetModelArg = process.argv[2] || 'MODEL-MELLUM2-THINK';
+  const targetModelArg = process.argv[2] || 'MODEL-GEMMA4-12B';
   const targetSettingArg = process.argv[3];
   const targetMachineArg = process.argv[4] || 'MACH-LOCAL-RTX3060-I7';
   const targetRuntimeArg = process.argv[5] || 'ENV-OLLAMA-V035-NODE24';
@@ -237,7 +260,7 @@ async function main() {
   const selectedSetting = SETTING_REGISTRY[settingId] || {
     id: settingId,
     name: 'Custom User Setting',
-    params: { temperature: 0.6, top_p: 0.95 }
+    params: { temperature: 0.6, top_p: 0.95, num_ctx: 8192 }
   };
 
   const selectedMachine = MACHINE_REGISTRY[targetMachineArg] || {
@@ -288,7 +311,7 @@ async function main() {
   fs.mkdirSync(path.dirname(runReportPath), { recursive: true });
   fs.writeFileSync(runReportPath, reportContent, 'utf-8');
 
-  console.log(`\n✅ Benchmark Run Complete!`);
+  console.log(`\n\n✅ Benchmark Run Complete!`);
   console.log(`📄 Report saved to: ${runReportPath}`);
   console.table([{
     RunID: res.runId,
