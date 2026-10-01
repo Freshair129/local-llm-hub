@@ -50,7 +50,10 @@ pub fn audit_symlinks_and_storage(
             large_real_blob_count: 0,
             large_real_blob_bytes: 0,
             reclaimable_gb: 0.0,
+            default_blobs_gb: 0.0,
+            target_storage_gb: 0.0,
             issues: vec![format!("Blob directory not found: {}", blob_pointer_root)],
+            blobs: Vec::new(),
         });
     }
 
@@ -64,7 +67,9 @@ pub fn audit_symlinks_and_storage(
     let mut bad_symlink_count = 0;
     let mut large_real_blob_count = 0;
     let mut large_real_blob_bytes: u64 = 0;
+    let mut default_blobs_bytes: u64 = 0;
     let mut issues = Vec::new();
+    let mut blobs = Vec::new();
 
     for entry in entries.flatten() {
         let name = entry.file_name().to_string_lossy().to_string();
@@ -83,34 +88,77 @@ pub fn audit_symlinks_and_storage(
             }
         };
 
-        if meta.file_type().is_symlink() {
+        let is_sym = meta.file_type().is_symlink();
+        let size_bytes = meta.len();
+
+        if is_sym {
             symlink_count += 1;
+            let mut sym_status = "Active Symlink".to_string();
+            let mut storage_loc = "Target Storage (Offloaded)".to_string();
+
             match fs::read_link(&path) {
                 Ok(target) => {
                     let target_exists = target.exists();
                     let target_in_storage = target.starts_with(&storage_root_path);
+                    storage_loc = target.display().to_string();
                     if !target_exists || !target_in_storage {
                         bad_symlink_count += 1;
+                        sym_status = "Broken Link".to_string();
                         issues.push(format!("Broken/Divergent link: {} -> {} (exists: {})", name, target.display(), target_exists));
                     }
                 }
                 Err(e) => {
                     bad_symlink_count += 1;
+                    sym_status = "Unreadable Link".to_string();
                     issues.push(format!("{}: failed to read link target ({})", name, e));
                 }
             }
+
+            blobs.push(crate::models::types::BlobItem {
+                hash: name,
+                size_bytes,
+                is_symlink: true,
+                storage_location: storage_loc,
+                symlink_status: sym_status,
+                associated_model: None,
+            });
         } else {
             // Real physical blob on primary drive
-            let len = meta.len();
-            // Count blobs > 50 MB as offload candidates
-            if len > 50 * 1024 * 1024 {
+            default_blobs_bytes += size_bytes;
+            if size_bytes > 50 * 1024 * 1024 {
                 large_real_blob_count += 1;
-                large_real_blob_bytes += len;
+                large_real_blob_bytes += size_bytes;
             }
+
+            blobs.push(crate::models::types::BlobItem {
+                hash: name,
+                size_bytes,
+                is_symlink: false,
+                storage_location: "Drive C: (Local Primary)".to_string(),
+                symlink_status: "Pending Offload".to_string(),
+                associated_model: None,
+            });
         }
     }
 
+    // Sort blobs by size descending (largest model blobs first)
+    blobs.sort_by(|a, b| b.size_bytes.cmp(&a.size_bytes));
+
     let reclaimable_gb = (large_real_blob_bytes as f64 / (1024.0 * 1024.0 * 1024.0) * 100.0).round() / 100.0;
+    let default_blobs_gb = (default_blobs_bytes as f64 / (1024.0 * 1024.0 * 1024.0) * 100.0).round() / 100.0;
+    
+    // Calculate target storage size if directory exists
+    let mut target_storage_bytes: u64 = 0;
+    if storage_root_path.exists() {
+        if let Ok(entries) = fs::read_dir(&storage_root_path) {
+            for entry in entries.flatten() {
+                if let Ok(m) = entry.metadata() {
+                    target_storage_bytes += m.len();
+                }
+            }
+        }
+    }
+    let target_storage_gb = (target_storage_bytes as f64 / (1024.0 * 1024.0 * 1024.0) * 100.0).round() / 100.0;
 
     Ok(SymlinkHealth {
         checked_at: Utc::now().to_rfc3339(),
@@ -122,7 +170,10 @@ pub fn audit_symlinks_and_storage(
         large_real_blob_count,
         large_real_blob_bytes,
         reclaimable_gb,
+        default_blobs_gb,
+        target_storage_gb,
         issues,
+        blobs,
     })
 }
 

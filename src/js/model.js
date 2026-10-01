@@ -1,6 +1,16 @@
 import { openModelCard } from './card.js';
 import { invoke } from './api.js';
 
+// Current view mode: 'grid' | 'list'
+let currentViewMode = 'grid';
+try {
+  const savedMode = localStorage.getItem('local-llm-hub-models-view-mode');
+  if (savedMode === 'list' || savedMode === 'grid') {
+    currentViewMode = savedMode;
+  }
+} catch (e) {}
+
+// Global exposed methods
 if (typeof window !== 'undefined') {
   window.openModelCard = openModelCard;
   window.toggleModelLifecycle = async (backend, modelName, isCurrentlyActive) => {
@@ -15,14 +25,43 @@ if (typeof window !== 'undefined') {
       alert(`Lifecycle error: ${err}`);
     }
   };
+
+  window.toggleModelViewMode = (mode) => {
+    currentViewMode = mode;
+    try {
+      localStorage.setItem('local-llm-hub-models-view-mode', mode);
+    } catch (e) {}
+    
+    const btnGrid = document.getElementById('btn-mode-grid');
+    const btnList = document.getElementById('btn-mode-list');
+    const grid = document.getElementById('model-grid');
+
+    if (btnGrid) btnGrid.classList.toggle('active', mode === 'grid');
+    if (btnList) btnList.classList.toggle('active', mode === 'list');
+    if (grid) grid.classList.toggle('list-view', mode === 'list');
+
+    // Re-render current models
+    import('./state.js').then(({ store }) => {
+      renderModels(store.state.models || []);
+    });
+  };
+
+  window.toggleCardCompact = (modelId) => {
+    const cardEl = document.querySelector(`.model-card-unified[data-id="${modelId}"]`);
+    if (cardEl) {
+      const isCompact = cardEl.classList.toggle('is-compact');
+      const btnCompact = cardEl.querySelector('.btn-card-compact');
+      if (btnCompact) {
+        btnCompact.innerHTML = isCompact 
+          ? '<i class="ph ph-arrows-out"></i> Expand' 
+          : '<i class="ph ph-arrows-in"></i> Compact';
+      }
+    }
+  };
 }
 
 // trace:implements FR-002
-
-/**
- * Unified Model Discovery & Presentation Module for Local LLM Hub
- * Connects to Tauri IPC command 'list_all_models' and renders the catalog.
- */
+// trace:implements FR-004
 
 export function formatBytes(bytes) {
   if (!bytes || bytes === 0) return '0 B';
@@ -59,10 +98,32 @@ export async function recordModelTask(modelId, success, promptTokens, completion
 }
 
 /**
- * Renders the list of unified models into the DOM
+ * Setup View Mode buttons listener
+ */
+function setupViewModeButtons() {
+  const btnGrid = document.getElementById('btn-mode-grid');
+  const btnList = document.getElementById('btn-mode-list');
+  const grid = document.getElementById('model-grid');
+
+  if (btnGrid) {
+    btnGrid.classList.toggle('active', currentViewMode === 'grid');
+    btnGrid.onclick = () => window.toggleModelViewMode('grid');
+  }
+  if (btnList) {
+    btnList.classList.toggle('active', currentViewMode === 'list');
+    btnList.onclick = () => window.toggleModelViewMode('list');
+  }
+  if (grid) {
+    grid.classList.toggle('list-view', currentViewMode === 'list');
+  }
+}
+
+/**
+ * Renders the unified model cards into the DOM
  * @param {Array<Object>} models 
  */
 export function renderModels(models) {
+  setupViewModeButtons();
   const grid = document.getElementById('model-grid');
   const countLabel = document.getElementById('model-count-label');
   const railCount = document.getElementById('rail-model-count');
@@ -77,81 +138,231 @@ export function renderModels(models) {
 
   if (!models || models.length === 0) {
     grid.innerHTML = `
-      <div class="empty-state">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <div class="empty-state" style="grid-column: 1 / -1; padding: 48px 24px; text-align: center;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="width: 48px; height: 48px; margin: 0 auto 16px; color: var(--faint);">
           <circle cx="12" cy="12" r="10"></circle>
           <line x1="8" y1="12" x2="16" y2="12"></line>
         </svg>
-        <p>No backends available or no models detected.</p>
-        <p style="font-size: 12px; margin-top: 6px; color: var(--text-dim);">Verify that Ollama daemon is active on 127.0.0.1:11434 or GGUF models exist in models/gguf</p>
-        <div style="margin-top:16px; display:flex; gap:10px; justify-content:center;">
-          <button class="btn btn-ghost" id="btn-empty-retry" onclick="window.__retryBackendSync && window.__retryBackendSync()" style="padding:6px 16px; font-size:12px; border-color:var(--green); color:var(--green); cursor:pointer;">⚡ Reconnect / Refresh Backends</button>
+        <p style="font-size: 16px; font-weight: 600; color: var(--tx);">No backends available or no models detected.</p>
+        <p style="font-size: 12.5px; margin-top: 6px; color: var(--text-dim);">Verify that Ollama daemon is active on 127.0.0.1:11434 or GGUF models exist in models/gguf</p>
+        <div style="margin-top:18px; display:flex; gap:10px; justify-content:center;">
+          <button class="btn btn-ghost" id="btn-empty-retry" onclick="window.__retryBackendSync && window.__retryBackendSync()" style="padding:8px 20px; font-size:12.5px; border-color:var(--green); color:var(--green); cursor:pointer;">⚡ Reconnect / Refresh Backends</button>
         </div>
       </div>
     `;
     return;
   }
 
+  // ══════════════════════════════════════════════════════════════
+  // LIST VIEW RENDERING
+  // ══════════════════════════════════════════════════════════════
+  if (currentViewMode === 'list') {
+    grid.innerHTML = models.map(m => {
+      const stats = m.stats;
+      const hasStats = stats && stats.total_tasks > 0;
+      const taskRate = hasStats ? ((stats.successful_tasks / stats.total_tasks) * 100).toFixed(0) : 100;
+      
+      const isCoder = /code|coder|deepseek|qwen/i.test(m.name);
+      const isVision = /vision|llava|vl|moondream/i.test(m.name);
+      const isReasoning = /r1|reason|thinking|deepseek-r1/i.test(m.name);
+      const isEmbed = /bge|embed|bert|nomic/i.test(m.name);
+
+      const formatName = (m.format || 'GGUF').toUpperCase();
+      const quantName = m.quantization || (m.backend === 'ollama' ? 'Standard' : '—');
+      const sizeText = m.size_bytes && m.size_bytes > 0 ? formatBytes(m.size_bytes) : '—';
+      const engineTitle = `${m.backend ? m.backend.toUpperCase() : 'OLLAMA'} Engine`;
+      const contextK = /llama3|qwen|deepseek|gemini/i.test(m.name) ? '128k' : /mistral|gemma/i.test(m.name) ? '32k' : '8k';
+
+      return `
+      <div class="model-row-item ${m.is_duplicate ? 'is-duplicate' : ''}" data-id="${m.id}">
+        <!-- Left Column: Avatar + Title + Engine -->
+        <div class="model-row-left">
+          <div class="card-avatar-box" style="width:40px; height:40px; font-size:20px; flex-shrink:0;">
+            ${isEmbed ? '📐' : isVision ? '👁️' : isCoder ? '⚡' : '🤖'}
+            <span class="card-avatar-dot ${m.is_active ? 'active' : ''}"></span>
+          </div>
+          <div class="model-row-info">
+            <div class="model-row-title" title="${m.name}">
+              ${m.name}
+              <span class="card-status-pill ${m.is_active ? 'active' : ''}" style="padding: 2px 8px; font-size: 10px;">
+                <span class="dot" style="width:5px; height:5px;"></span>
+                ${m.is_active ? 'ACTIVE' : 'READY'}
+              </span>
+            </div>
+            <div class="model-row-subtitle">${engineTitle}</div>
+          </div>
+        </div>
+
+        <!-- Specs Column -->
+        <div class="model-row-specs">
+          <span class="card-spec-tag"><i class="ph ph-package"></i> ${formatName}</span>
+          <span class="card-spec-tag"><i class="ph ph-cpu"></i> ${quantName}</span>
+          <span class="card-spec-tag"><i class="ph ph-hard-drive"></i> ${sizeText}</span>
+        </div>
+
+        <!-- Stats & Quota Column -->
+        <div class="model-row-stats">
+          <div style="display:flex; justify-content:space-between; font-size:11px; font-family:var(--mono);">
+            <span style="color:var(--tx);">${hasStats ? `${stats.total_tasks} tasks (${taskRate}%)` : 'Ready • 0 runs'}</span>
+            <span style="color:var(--green); font-weight:700;">${hasStats && stats.avg_tps > 0 ? `${stats.avg_tps} t/s` : 'Nominal'}</span>
+          </div>
+          <div class="card-quota-track" style="height:4px; margin:0;">
+            <div class="card-quota-fill" style="width: ${hasStats ? Math.min(100, Math.max(10, (stats.total_tokens / 131072) * 100)) : 0}%;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:9.5px; font-family:var(--mono); color:rgba(255,255,255,0.4);">
+            <span>${hasStats ? formatTokens(stats.total_tokens) : '0 tokens'}</span>
+            <span>${contextK} Window</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="model-row-actions">
+          <button class="btn-card-runchat" onclick="document.getElementById('nav-chat')?.click()" title="Open in Chat Playground">
+            <i class="ph ph-play-fill"></i> Run Chat
+          </button>
+          <button class="btn-card-config" onclick="window.openModelCard('${m.id}', '${m.backend}')" title="Configure model parameters and prompt">
+            <i class="ph ph-gear"></i> Config
+          </button>
+          <button class="btn btn-ghost" style="padding:6px 10px; font-size:11.5px; color:${m.is_active ? '#ef4444' : '#10b981'}; border-color:${m.is_active ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.3)'};" onclick="window.toggleModelLifecycle('${m.backend}', '${m.name}', ${m.is_active})" title="${m.is_active ? 'Unload model' : 'Load model'}">
+            <i class="ph ${m.is_active ? 'ph-stop' : 'ph-play'}"></i>
+          </button>
+        </div>
+      </div>
+      `;
+    }).join('');
+    return;
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // GRID VIEW (RICH UNIFIED CARD MATCHING SCREENSHOT 1:1)
+  // ══════════════════════════════════════════════════════════════
   grid.innerHTML = models.map(m => {
     const stats = m.stats;
-    const taskRate = stats && stats.total_tasks > 0 
-      ? ((stats.successful_tasks / stats.total_tasks) * 100).toFixed(0) 
-      : 100;
+    const hasStats = stats && stats.total_tasks > 0;
+    const taskRate = hasStats ? ((stats.successful_tasks / stats.total_tasks) * 100).toFixed(0) : 100;
+
+    const isCoder = /code|coder|deepseek|qwen/i.test(m.name);
+    const isVision = /vision|llava|vl|moondream/i.test(m.name);
+    const isReasoning = /r1|reason|thinking|deepseek-r1/i.test(m.name);
+    const isEmbed = /bge|embed|bert|nomic/i.test(m.name);
+    const hasTools = /hermes|mistral|command|llama3|qwen2.5|qwen3/i.test(m.name);
+
+    const formatName = (m.format || 'GGUF').toLowerCase();
+    const quantName = m.quantization || (m.backend === 'ollama' ? 'Standard' : '—');
+    const sizeText = m.size_bytes && m.size_bytes > 0 ? formatBytes(m.size_bytes) : '—';
+    const engineTitle = `${m.backend ? m.backend.toUpperCase() : 'OLLAMA'} Autonomous Engine`;
+    const contextK = /llama3|qwen|deepseek|gemini/i.test(m.name) ? '128k' : /mistral|gemma/i.test(m.name) ? '32k' : '8k';
+    const quotaPct = hasStats ? Math.min(100, Math.max(10, (stats.total_tokens / 131072) * 100)).toFixed(0) : 0;
 
     return `
-    <div class="model-card ${m.is_duplicate ? 'is-duplicate' : ''}" data-id="${m.id}">
-      <div class="card-top">
-        <div class="model-title" title="${m.name}">${m.name}</div>
-        <div style="display: flex; gap: 6px; align-items: center; flex-wrap: wrap;">
-          ${m.is_duplicate ? `
-            <span class="badge-duplicate" title="Duplicate model detected across multiple backends: ${m.duplicate_backends && m.duplicate_backends.length ? m.duplicate_backends.join(', ') : m.backend}">
-              <i class="ph ph-warning"></i> DUPLICATE
-            </span>
-          ` : ''}
-          ${m.is_preferred ? `
-            <span class="badge-preferred" title="Recommended preferred backend based on BR-001 priority matrix">
-              <i class="ph-fill ph-star"></i> PREFERRED
-            </span>
-          ` : ''}
-          <span class="backend-pill">${m.backend.toUpperCase()}</span>
-        </div>
-      </div>
-      <div class="card-specs">
-        <span class="spec-badge"><i class="ph ph-package"></i> ${m.format ? m.format.toUpperCase() : 'GGUF'}</span>
-        ${m.size_bytes ? `<span class="spec-badge"><i class="ph ph-hard-drive"></i> ${formatBytes(m.size_bytes)}</span>` : ''}
-        ${m.quantization ? `<span class="spec-badge"><i class="ph ph-cpu"></i> ${m.quantization}</span>` : ''}
-        ${m.is_active ? `<span class="spec-badge" style="color: var(--accent-emerald);"><i class="ph-fill ph-circle text-[8px]"></i> ACTIVE</span>` : ''}
-      </div>
+    <div class="model-card-unified ${m.is_duplicate ? 'is-duplicate' : ''}" data-id="${m.id}">
+      
+      <!-- ════ LEFT SECTION: AVATAR, TITLE, ENGINE & SPECS ════ -->
+      <div class="card-left-section">
+        <div>
+          <!-- Avatar + Active Status Pill -->
+          <div class="card-avatar-row">
+            <div class="card-avatar-box" title="${m.name}">
+              ${isEmbed ? '📐' : isVision ? '👁️' : isCoder ? '⚡' : '🤖'}
+              <span class="card-avatar-dot ${m.is_active ? 'active' : ''}"></span>
+            </div>
 
-      <!-- Real-time Task & Token Telemetry -->
-      <div class="card-stats">
-        <div class="stat-pill" title="${stats ? `${stats.successful_tasks} succeeded, ${stats.failed_tasks} failed` : 'No tasks run yet'}">
-          <span class="stat-icon"><i class="ph ph-check-square-offset"></i></span>
-          <span class="stat-value">${stats ? `${stats.total_tasks} tasks (${taskRate}%)` : '0 tasks'}</span>
-        </div>
-        <div class="stat-pill" title="${stats ? `Prompt: ${stats.total_prompt_tokens} / Output: ${stats.total_completion_tokens}` : '0 tokens'}">
-          <span class="stat-icon"><i class="ph ph-lightning"></i></span>
-          <span class="stat-value">${stats ? formatTokens(stats.total_tokens) : '0 tokens'}</span>
-        </div>
-        ${stats && stats.avg_tps > 0 ? `
-          <div class="stat-pill" title="Average speed: ${stats.avg_tps} t/s">
-            <span class="stat-icon"><i class="ph ph-gauge"></i></span>
-            <span class="stat-value">${stats.avg_tps} t/s</span>
+            <div class="card-status-pill ${m.is_active ? 'active' : ''}">
+              <span class="dot"></span>
+              <span>${m.is_active ? 'ACTIVE' : 'READY'}</span>
+            </div>
           </div>
-        ` : ''}
+
+          <!-- Model Name & Subtitle -->
+          <h2 class="card-title" title="${m.name}">${m.name}</h2>
+          <p class="card-subtitle">${engineTitle}</p>
+        </div>
+
+        <!-- Spec Badges Row (📁 format, ⚙️ quant, 💾 size) -->
+        <div class="card-spec-badges">
+          <span class="card-spec-tag">
+            <i class="ph ph-folder"></i> ${formatName}
+          </span>
+          <span class="card-spec-tag">
+            <i class="ph ph-gear"></i> ${quantName}
+          </span>
+          <span class="card-spec-tag">
+            <i class="ph ph-hard-drive"></i> ${sizeText}
+          </span>
+          ${m.is_preferred ? `
+            <span class="card-spec-tag" style="border-color: rgba(255, 138, 30, 0.4); color: var(--amber);">
+              <i class="ph-fill ph-star"></i> Preferred
+            </span>
+          ` : ''}
+        </div>
       </div>
 
-      <div class="card-actions" style="display:flex; gap:8px; align-items:center;">
-        <button class="btn btn-ghost" style="padding: 6px 10px; font-size: 12px; display:inline-flex; align-items:center; gap:5px;" onclick="window.openModelCard('${m.id}', '${m.backend}')" title="Open Interactive 3D Model Card & Config">
-          <i class="ph ph-sliders-horizontal" style="color:var(--raycast-coral);"></i> Card
-        </button>
-        <button class="btn btn-ghost" style="padding: 6px 10px; font-size: 12px; color:${m.is_active ? '#ef4444' : '#10b981'}; border-color:${m.is_active ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.3)'}; display:inline-flex; align-items:center; gap:5px;" onclick="window.toggleModelLifecycle('${m.backend}', '${m.name}', ${m.is_active})" title="${m.is_active ? 'Unload model from GPU memory' : 'Load and keep warm in GPU memory'}">
-          <i class="ph ${m.is_active ? 'ph-stop' : 'ph-play'}"></i> ${m.is_active ? 'Stop' : 'Start'}
-        </button>
-        <button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px; display:inline-flex; align-items:center; gap:5px;" onclick="document.getElementById('nav-chat')?.click()">
-          <i class="ph ph-chat-circle-dots"></i> Run Chat
-        </button>
+      <!-- ════ RIGHT SECTION: STATS, QUOTA BAR, CAPABILITIES, ACTIONS ════ -->
+      <div class="card-right-section">
+        <!-- 2 Stat Boxes: TASKS RUN & ACCURACY/SPEED -->
+        <div class="card-stats-grid">
+          <div class="card-stat-box">
+            <div class="card-stat-lbl">Tasks Run</div>
+            <div class="card-stat-val">${hasStats ? stats.total_tasks : 0}</div>
+          </div>
+          <div class="card-stat-box">
+            <div class="card-stat-lbl">${hasStats && stats.avg_tps > 0 ? 'Speed (t/s)' : 'Status'}</div>
+            <div class="card-stat-val highlight">${hasStats && stats.avg_tps > 0 ? `${stats.avg_tps} t/s` : hasStats ? `${taskRate}%` : 'Ready'}</div>
+          </div>
+        </div>
+
+        <!-- Context / Quota Limit Bar with Countdown -->
+        <div class="card-quota-container">
+          <div class="card-quota-header">
+            <span>Context / Quota Limit</span>
+            <span class="card-quota-timer" style="color:${hasStats ? '#ff6363' : 'var(--green)'};">
+              <i class="ph ${hasStats ? 'ph-hourglass' : 'ph-check-circle'}"></i> ${hasStats ? '14:59' : '100% Available'}
+            </span>
+          </div>
+          <div class="card-quota-track">
+            <div class="card-quota-fill" style="width: ${quotaPct}%; background:${quotaPct > 0 ? 'linear-gradient(90deg, #ff6363 0%, #ff8a1e 100%)' : 'rgba(255,255,255,0.1)'};"></div>
+          </div>
+          <div class="card-quota-sub">
+            <span>${hasStats ? formatTokens(stats.total_tokens) : '0 tokens used'}</span>
+            <span>${contextK} Context Window</span>
+          </div>
+        </div>
+
+        <!-- Capabilities Tags -->
+        <div class="card-capabilities-row">
+          <span class="card-cap-pill ${isCoder ? 'active-feat' : ''}">
+            <i class="ph ph-lightning"></i> Code
+          </span>
+          <span class="card-cap-pill ${!isEmbed ? 'active-feat' : ''}">
+            <i class="ph ph-chat-circle-dots"></i> Chat
+          </span>
+          <span class="card-cap-pill ${isReasoning ? 'active-feat' : ''}">
+            <i class="ph ph-brain"></i> Reasoning
+          </span>
+          <span class="card-cap-pill ${isVision ? 'active-feat' : ''}">
+            <i class="ph ph-eye"></i> Vision
+          </span>
+          <span class="card-cap-pill ${hasTools ? 'active-feat' : ''}">
+            <i class="ph ph-globe"></i> Tools
+          </span>
+        </div>
+
+        <!-- Footer Actions (Compact Toggle, Run Chat, Config) -->
+        <div class="card-actions-footer">
+          <button class="btn-card-compact" onclick="window.toggleCardCompact('${m.id}')" title="Toggle Compact / Expanded Aspect">
+            <i class="ph ph-arrows-in"></i> Compact
+          </button>
+
+          <button class="btn-card-runchat" onclick="document.getElementById('nav-chat')?.click()" title="Start Playground Chat with ${m.name}">
+            <i class="ph ph-play-fill"></i> Run Chat
+          </button>
+
+          <button class="btn-card-config" onclick="window.openModelCard('${m.id}', '${m.backend}')" title="Open Interactive 3D Model Card & Configuration">
+            <i class="ph ph-gear"></i> Config
+          </button>
+        </div>
       </div>
+
     </div>
     `;
   }).join('');
@@ -182,3 +393,4 @@ export async function syncAllModels() {
     }
   }
 }
+

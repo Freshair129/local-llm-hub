@@ -928,11 +928,708 @@ body::after {
   opacity: 0.7;
 }
 
-/* Models Grid */
+/* Models Catalog: Grid & List Layouts */
 #model-grid, #models-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(520px, 1fr));
   gap: 20px;
+  width: 100%;
+}
+
+#model-grid.list-view, #models-grid.list-view {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/* View Mode Buttons */
+.view-mode-btn {
+  transition: all 0.15s ease;
+}
+.view-mode-btn.active {
+  background: rgba(124, 242, 107, 0.15) !important;
+  color: var(--green) !important;
+}
+.view-mode-btn:hover:not(.active) {
+  color: var(--tx) !important;
+  background: rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   UNIFIED MODEL CARD DESIGN (MATCHING INTERACTIVE CARD SCREENSHOT)
+   ══════════════════════════════════════════════════════════════ */
+.model-card-unified {
+  background: rgba(14, 18, 16, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(24px);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 24px;
+}
+
+.model-card-unified:hover {
+  border-color: rgba(124, 242, 107, 0.35);
+  transform: translateY(-2px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 20px 48px rgba(0, 0, 0, 0.65);
+}
+
+/* Compact / Vertical Mode for Model Card */
+.model-card-unified.is-compact {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 480px;
+}
+
+.model-card-unified.is-compact .card-stats-grid {
+  grid-template-columns: 1fr 1fr;
+}
+
+/* Card Left Section */
+.card-left-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card-avatar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.card-avatar-box {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(30, 41, 34, 0.9), rgba(15, 20, 17, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: grid;
+  place-items: center;
+  position: relative;
+  font-size: 24px;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.1);
+}
+
+.card-avatar-dot {
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #0a0b0a;
+  background: var(--faint);
+}
+
+.card-avatar-dot.active {
+  background: var(--green);
+  box-shadow: 0 0 8px var(--green);
+}
+
+.card-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: var(--r-pill);
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--mono);
+  letter-spacing: 0.04em;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--faint);
+}
+
+.card-status-pill.active {
+  background: rgba(124, 242, 107, 0.12);
+  border-color: rgba(124, 242, 107, 0.35);
+  color: var(--green);
+}
+
+.card-status-pill .dot {
+  width: 6px;
+  height: 6px;
+}
+
+.card-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  margin: 0 0 4px 0;
+  word-break: break-word;
+}
+
+.card-subtitle {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.45);
+  font-weight: 500;
+  margin: 0 0 16px 0;
+}
+
+.card-spec-badges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.card-spec-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 11.5px;
+  font-family: var(--mono);
+  color: rgba(255, 255, 255, 0.75);
+}
+
+/* Card Right Section */
+.card-right-section {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.card-stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.card-stat-box {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  padding: 12px 14px;
+}
+
+.card-stat-lbl {
+  font-size: 10px;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.card-stat-val {
+  font-size: 22px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-top: 4px;
+  font-family: var(--mono);
+}
+
+.card-stat-val.highlight {
+  color: var(--green);
+  text-shadow: 0 0 12px rgba(124, 242, 107, 0.3);
+}
+
+/* Context / Quota Progress Bar */
+.card-quota-container {
+  margin-bottom: 14px;
+}
+
+.card-quota-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 6px;
+}
+
+.card-quota-timer {
+  color: #ff6363;
+  font-family: var(--mono);
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.card-quota-track {
+  height: 5px;
+  width: 100%;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  position: relative;
+}
+
+.card-quota-fill {
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: linear-gradient(90deg, #ff6363 0%, #ff8a1e 100%);
+  position: relative;
+}
+
+.card-quota-sub {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  font-family: var(--mono);
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 5px;
+}
+
+/* Capability Pills */
+.card-capabilities-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.card-cap-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: var(--r-pill);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 11px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.card-cap-pill.active-feat {
+  border-color: rgba(255, 99, 99, 0.4);
+  color: #ff8a8a;
+  background: rgba(255, 99, 99, 0.08);
+}
+
+/* Actions Footer */
+.card-actions-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.btn-card-compact {
+  padding: 6px 12px;
+  font-size: 11.5px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+}
+
+.btn-card-compact:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+}
+
+.btn-card-runchat {
+  padding: 6px 16px;
+  font-size: 12px;
+  border-radius: var(--r-pill);
+  background: var(--green);
+  color: #0a0b0a;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 0 14px rgba(124, 242, 107, 0.35);
+  transition: all 0.15s ease;
+}
+
+.btn-card-runchat:hover {
+  background: #67d657;
+  transform: translateY(-1px);
+  box-shadow: 0 0 20px rgba(124, 242, 107, 0.55);
+}
+
+.btn-card-config {
+  padding: 6px 14px;
+  font-size: 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.15s ease;
+}
+
+.btn-card-config:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   WINDOWS TASK MANAGER PERFORMANCE OVERVIEW & PROCESS HEATMAP (IMAGE 1 & 2)
+   ══════════════════════════════════════════════════════════════ */
+
+/* Performance 2-Tier Tab Bar */
+.tm-tab-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 4px;
+  border-radius: var(--r-pill);
+  width: fit-content;
+  border: 1px solid var(--glass-border);
+}
+
+.tm-tab-btn {
+  padding: 6px 18px;
+  border-radius: var(--r-pill);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--mut);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.tm-tab-btn:hover {
+  color: var(--tx);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.tm-tab-btn.active {
+  background: var(--green);
+  color: #0a0b0a;
+  font-weight: 700;
+  box-shadow: 0 0 14px rgba(124, 242, 107, 0.35);
+}
+
+/* ── Performance View Shell (Image 2) ── */
+.perf-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 20px;
+  min-height: 580px;
+  background: rgba(14, 18, 16, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 20px;
+  backdrop-filter: blur(20px);
+}
+
+.perf-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  max-height: 720px;
+  padding-right: 4px;
+}
+
+.perf-device-item {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  gap: 12px;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.perf-device-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(56, 189, 248, 0.3);
+}
+
+.perf-device-item.active {
+  background: rgba(56, 189, 248, 0.12);
+  border-color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+}
+
+.perf-mini-sparkline {
+  width: 64px;
+  height: 40px;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.4);
+  background-image: linear-gradient(rgba(56, 189, 248, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(56, 189, 248, 0.08) 1px, transparent 1px);
+  background-size: 8px 8px;
+}
+
+.perf-device-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.perf-device-sub {
+  font-size: 11px;
+  font-family: var(--mono);
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 2px;
+}
+
+/* ── Performance Canvas (Right Area - Image 2) ── */
+.perf-detail-canvas {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.perf-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.perf-main-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.02em;
+}
+
+.perf-device-full-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 2px;
+}
+
+/* 4-Engine 2x2 Grid (Image 2) */
+.perf-engine-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.perf-graph-card {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 6px;
+  padding: 10px 12px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.perf-graph-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 6px;
+}
+
+.perf-graph-val {
+  font-family: var(--mono);
+  font-weight: 700;
+  color: #38bdf8;
+}
+
+.perf-svg-chart {
+  width: 100%;
+  height: 90px;
+  background-image: linear-gradient(rgba(56, 189, 248, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(56, 189, 248, 0.1) 1px, transparent 1px);
+  background-size: 16px 16px;
+  border-radius: 4px;
+}
+
+.perf-svg-chart-tall {
+  width: 100%;
+  height: 180px;
+  background-image: linear-gradient(rgba(56, 189, 248, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(56, 189, 248, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  border-radius: 4px;
+}
+
+/* Spec Matrix Grid */
+.perf-specs-matrix {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.perf-spec-item {
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.perf-spec-label {
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 2px;
+}
+
+.perf-spec-val {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffffff;
+  font-family: var(--mono);
+}
+
+/* ── Windows Task Manager Process Table (Image 1) ── */
+.tm-process-table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(14, 18, 16, 0.85);
+  backdrop-filter: blur(20px);
+}
+
+.tm-process-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 12px;
+}
+
+.tm-process-table th {
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.04);
+  font-weight: 600;
+  color: var(--mut);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.tm-process-table th.highlight-col {
+  background: rgba(255, 138, 30, 0.15);
+  color: var(--amber);
+}
+
+.tm-process-table td {
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  border-right: 1px solid rgba(255, 255, 255, 0.03);
+  font-family: var(--mono);
+  white-space: nowrap;
+}
+
+.tm-process-table tr:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tm-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--ui) !important;
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.tm-app-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.tm-expand-chevron {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 10px;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.tm-group-count {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 11px;
+}
+
+/* Heatmap intensity classes matching Image 1 */
+.tm-heat-very-high {
+  background: rgba(234, 88, 12, 0.45) !important;
+  color: #fff !important;
+  font-weight: 700 !important;
+}
+
+.tm-heat-high {
+  background: rgba(245, 158, 11, 0.35) !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+}
+
+.tm-heat-med {
+  background: rgba(251, 191, 36, 0.2) !important;
+  color: #fff !important;
+}
+
+.tm-heat-low {
+  background: rgba(254, 240, 138, 0.1) !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.tm-power-badge {
+  display: inline-block;
+  font-size: 11px;
+  font-family: var(--ui);
+  font-weight: 600;
+}
+
+.tm-power-badge.very-high {
+  color: #ff5a4d;
+}
+
+.tm-power-badge.moderate {
+  color: var(--amber);
+}
+
+.tm-power-badge.low {
+  color: var(--mut);
+}
+
+.tm-power-badge.very-low {
+  color: var(--faint);
+}
+
+@media (max-width: 1024px) {
+  .perf-shell {
+    grid-template-columns: 1fr;
+  }
+  .perf-engine-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Hardware Gauges & Metrics */

@@ -402,6 +402,15 @@
                 <p>Discover, probe, and orchestrate local LLMs across Ollama, GGUF, and HuggingFace</p>
               </div>
               <div class="view-actions" style="display: flex; gap: 12px; align-items: center;">
+                <!-- View Mode Switcher (Grid / List) -->
+                <div class="view-mode-toggle-group" style="display:flex; align-items:center; background:rgba(255,255,255,0.04); border:1px solid var(--line2); border-radius:var(--r-pill); padding:2px;">
+                  <button type="button" class="view-mode-btn active" id="btn-mode-grid" title="Grid View (Rich Bento Cards)" style="padding:5px 12px; font-size:12px; border-radius:var(--r-pill); border:none; background:rgba(124,242,107,0.15); color:var(--green); font-weight:600; cursor:pointer; display:flex; align-items:center; gap:5px;">
+                    <i class="ph ph-squares-four"></i> Grid
+                  </button>
+                  <button type="button" class="view-mode-btn" id="btn-mode-list" title="List View (Horizontal Row List)" style="padding:5px 12px; font-size:12px; border-radius:var(--r-pill); border:none; background:transparent; color:var(--mut); font-weight:600; cursor:pointer; display:flex; align-items:center; gap:5px;">
+                    <i class="ph ph-list-bullets"></i> List
+                  </button>
+                </div>
                 <button class="btn btn-ghost" id="btn-scan-gguf" style="padding: 6px 14px; font-size: 13px;" title="Scan a directory for .gguf model files">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
@@ -440,116 +449,310 @@
 
           <!-- View 2: Hardware & Tasks Overview (Task Manager) -->
           <div class="view-panel" id="view-gpu" style="display:none;">
-            <div class="view-header">
+            <div class="view-header" style="margin-bottom:12px;">
               <div class="view-heading">
-                <h1>Hardware &amp; Tasks Overview (Task Manager)</h1>
-                <p>Complete system telemetry overview: CPU, GPU, RAM, Thermals, Hotspot &amp; Ranked Host Processes</p>
+                <h1>Task Manager &amp; System Performance</h1>
+                <p>Real-time Windows 11 hardware graphs, GPU sub-engines, and process resource heatmaps</p>
               </div>
               <div class="view-actions">
                 <span class="badge" style="background:rgba(124,242,107,0.15); color:var(--green); padding:6px 12px; font-weight:700;">
-                  ● Live Task Manager Telemetry
+                  ● Live Hardware &amp; Tasks
                 </span>
               </div>
             </div>
 
-            <!-- 4-Card System Telemetry Grid -->
-            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:16px; margin-top:20px;">
-              <!-- CPU Card -->
-              <div class="model-card" style="padding:18px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                  <h3 style="color:var(--cyan); font-size:15px; margin:0;">🖥️ CPU (Host Processor)</h3>
-                  <span class="badge" style="background:rgba(56,189,248,0.12); color:var(--cyan); font-size:10.5px;">12 Threads</span>
+            <!-- Task Manager Sub-Tab Bar -->
+            <div class="tm-tab-bar">
+              <button type="button" class="tm-tab-btn active" id="btn-tm-tab-perf" onclick="window.__switchTmTab('perf')">
+                <i class="ph ph-chart-line-up"></i> Performance (Overview)
+              </button>
+              <button type="button" class="tm-tab-btn" id="btn-tm-tab-procs" onclick="window.__switchTmTab('procs')">
+                <i class="ph ph-list-dashes"></i> Processes (Tasks)
+              </button>
+            </div>
+
+            <!-- ══════════════════════════════════════════════════════════════
+                 TAB 1: PERFORMANCE OVERVIEW WITH LIVE GRAPHS (IMAGE 2)
+                 ══════════════════════════════════════════════════════════════ -->
+            <div id="tm-panel-perf" class="perf-shell">
+              <!-- Left Sidebar Device Selector -->
+              <div class="perf-sidebar" id="perf-device-sidebar">
+                <!-- CPU Item -->
+                <div class="perf-device-item" data-device="cpu" onclick="window.__selectPerfDevice('cpu')">
+                  <div class="perf-mini-sparkline" id="spark-cpu"></div>
+                  <div>
+                    <div class="perf-device-name">CPU</div>
+                    <div class="perf-device-sub" id="perf-sub-cpu">14% 4.29 GHz</div>
+                  </div>
                 </div>
-                <div style="font-size:28px; font-weight:800; color:#fff; margin-bottom:4px;" id="obs-cpu-text">14.5% • 4.3 GHz</div>
-                <div style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:6px;" id="obs-cpu-name">Intel Core i7-8700K</div>
-                <div style="font-size:11.5px; color:var(--mut);" id="obs-cpu-sub">Package: 48 °C • Hotspot: 54 °C • Power: 65 W</div>
-                <div class="gauge-track" style="height:8px; margin-top:12px;">
-                  <div class="gauge-fill" id="obs-cpu-bar" style="width: 15%; background:linear-gradient(90deg, var(--cyan), #3b82f6);"></div>
+
+                <!-- Memory Item -->
+                <div class="perf-device-item" data-device="memory" onclick="window.__selectPerfDevice('memory')">
+                  <div class="perf-mini-sparkline" id="spark-memory"></div>
+                  <div>
+                    <div class="perf-device-name">Memory</div>
+                    <div class="perf-device-sub" id="perf-sub-memory">8.4/32.0 GB (26%)</div>
+                  </div>
+                </div>
+
+                <!-- Disk 0 (C:) Item -->
+                <div class="perf-device-item" data-device="disk0" onclick="window.__selectPerfDevice('disk0')">
+                  <div class="perf-mini-sparkline" id="spark-disk0"></div>
+                  <div>
+                    <div class="perf-device-name">Disk 0 (C:)</div>
+                    <div class="perf-device-sub" id="perf-sub-disk0">SSD 5%</div>
+                  </div>
+                </div>
+
+                <!-- Disk 1 (G:) Item -->
+                <div class="perf-device-item" data-device="disk1" onclick="window.__selectPerfDevice('disk1')">
+                  <div class="perf-mini-sparkline" id="spark-disk1"></div>
+                  <div>
+                    <div class="perf-device-name">Disk 1 (G:)</div>
+                    <div class="perf-device-sub" id="perf-sub-disk1">NVMe 0%</div>
+                  </div>
+                </div>
+
+                <!-- Disk 2 (D:) Item -->
+                <div class="perf-device-item" data-device="disk2" onclick="window.__selectPerfDevice('disk2')">
+                  <div class="perf-mini-sparkline" id="spark-disk2"></div>
+                  <div>
+                    <div class="perf-device-name">Disk 2 (D:)</div>
+                    <div class="perf-device-sub" id="perf-sub-disk2">HDD 0%</div>
+                  </div>
+                </div>
+
+                <!-- Disk 3 (O:) Item -->
+                <div class="perf-device-item" data-device="disk3" onclick="window.__selectPerfDevice('disk3')">
+                  <div class="perf-mini-sparkline" id="spark-disk3"></div>
+                  <div>
+                    <div class="perf-device-name">Disk 3 (O:)</div>
+                    <div class="perf-device-sub" id="perf-sub-disk3">HDD 23%</div>
+                  </div>
+                </div>
+
+                <!-- Ethernet Tailscale -->
+                <div class="perf-device-item" data-device="eth-tailscale" onclick="window.__selectPerfDevice('eth-tailscale')">
+                  <div class="perf-mini-sparkline" id="spark-eth-tailscale"></div>
+                  <div>
+                    <div class="perf-device-name">Ethernet</div>
+                    <div class="perf-device-sub">Tailscale<br><span id="perf-sub-tailscale">S: 0 R: 0 Kbps</span></div>
+                  </div>
+                </div>
+
+                <!-- Ethernet Primary -->
+                <div class="perf-device-item" data-device="eth-primary" onclick="window.__selectPerfDevice('eth-primary')">
+                  <div class="perf-mini-sparkline" id="spark-eth-primary"></div>
+                  <div>
+                    <div class="perf-device-name">Ethernet</div>
+                    <div class="perf-device-sub">Ethernet<br><span id="perf-sub-eth-primary">S: 1.8 R: 96.5 Mbps</span></div>
+                  </div>
+                </div>
+
+                <!-- GPU 0 Item (Active by Default) -->
+                <div class="perf-device-item active" data-device="gpu0" onclick="window.__selectPerfDevice('gpu0')">
+                  <div class="perf-mini-sparkline" id="spark-gpu0"></div>
+                  <div>
+                    <div class="perf-device-name">GPU 0</div>
+                    <div class="perf-device-sub" id="perf-sub-gpu0">NVIDIA GeForce...<br><span id="perf-sub-gpu0-val">13% (35 °C)</span></div>
+                  </div>
                 </div>
               </div>
 
-              <!-- GPU Card -->
-              <div class="model-card" style="padding:18px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                  <h3 style="color:#60a5fa; font-size:15px; margin:0;">🎮 GPU (RTX 3060 12GB)</h3>
-                  <span class="badge" style="background:rgba(96,165,250,0.12); color:#60a5fa; font-size:10.5px;">CUDA Cores</span>
+              <!-- Right Canvas Detail Area (Image 2) -->
+              <div class="perf-detail-canvas" id="perf-main-canvas">
+                <!-- Top Device Header -->
+                <div class="perf-header-row">
+                  <div>
+                    <div class="perf-main-title" id="perf-view-title">GPU</div>
+                  </div>
+                  <div class="perf-device-full-name" id="perf-view-fullname">NVIDIA GeForce RTX 3060</div>
                 </div>
-                <div style="font-size:28px; font-weight:800; color:#fff; margin-bottom:4px;" id="obs-gpu-vram-text">7.6 / 12.0 GB (63%)</div>
-                <div style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:6px;" id="obs-gpu-name">NVIDIA GeForce RTX 3060</div>
-                <div style="font-size:11.5px; color:var(--mut);" id="obs-gpu-sub">Core: 52 °C • Hotspot: 64.2 °C • Fan: 1,350 RPM (45%)</div>
-                <div class="gauge-track" style="height:8px; margin-top:12px;">
-                  <div class="gauge-fill" id="obs-gpu-bar" style="width: 63%; background:linear-gradient(90deg, #3b82f6, #60a5fa);"></div>
-                </div>
-              </div>
 
-              <!-- RAM Card -->
-              <div class="model-card" style="padding:18px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                  <h3 style="color:#a78bfa; font-size:15px; margin:0;">🧠 Host System RAM</h3>
-                  <span class="badge" style="background:rgba(167,139,250,0.12); color:#a78bfa; font-size:10.5px;">DDR4 3200</span>
-                </div>
-                <div style="font-size:28px; font-weight:800; color:#fff; margin-bottom:4px;" id="obs-ram-text">8.4 / 32.0 GB (26%)</div>
-                <div style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:6px;">Total Allocated: 32.0 GB DDR4</div>
-                <div style="font-size:11.5px; color:var(--mut);" id="obs-ram-sub">In Use: 8.4 GB • Available: 23.6 GB</div>
-                <div class="gauge-track" style="height:8px; margin-top:12px;">
-                  <div class="gauge-fill" id="obs-ram-bar" style="width: 26%; background:linear-gradient(90deg, #8b5cf6, #c084fc);"></div>
-                </div>
-              </div>
+                <!-- 4 Sub-Engines 2x2 Grid (3D, Copy, Video Encode, Video Decode) -->
+                <div class="perf-engine-grid" id="perf-gpu-engine-grid">
+                  <!-- 3D Engine Card -->
+                  <div class="perf-graph-card">
+                    <div class="perf-graph-title-row">
+                      <span>∨ 3D</span>
+                      <span class="perf-graph-val" id="perf-val-3d">13%</span>
+                    </div>
+                    <svg class="perf-svg-chart" id="svg-chart-3d" viewBox="0 0 300 90" preserveAspectRatio="none">
+                      <path id="path-fill-3d" fill="rgba(56,189,248,0.18)" d="M0,90 L300,90 Z"></path>
+                      <path id="path-line-3d" fill="none" stroke="#38bdf8" stroke-width="1.8" d="M0,75 L300,75"></path>
+                    </svg>
+                  </div>
 
-              <!-- Thermals & Power Card -->
-              <div class="model-card" style="padding:18px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                  <h3 style="color:var(--green); font-size:15px; margin:0;">⚡ System Thermals &amp; Power</h3>
-                  <span class="badge" style="background:rgba(124,242,107,0.12); color:var(--green); font-size:10.5px;">Nominal</span>
+                  <!-- Copy Engine Card -->
+                  <div class="perf-graph-card">
+                    <div class="perf-graph-title-row">
+                      <span>∨ Copy</span>
+                      <span class="perf-graph-val" id="perf-val-copy">0%</span>
+                    </div>
+                    <svg class="perf-svg-chart" id="svg-chart-copy" viewBox="0 0 300 90" preserveAspectRatio="none">
+                      <path id="path-fill-copy" fill="rgba(56,189,248,0.18)" d="M0,90 L300,90 Z"></path>
+                      <path id="path-line-copy" fill="none" stroke="#38bdf8" stroke-width="1.8" d="M0,89 L300,89"></path>
+                    </svg>
+                  </div>
+
+                  <!-- Video Encode Engine Card -->
+                  <div class="perf-graph-card">
+                    <div class="perf-graph-title-row">
+                      <span>∨ Video Encode</span>
+                      <span class="perf-graph-val" id="perf-val-encode">0%</span>
+                    </div>
+                    <svg class="perf-svg-chart" id="svg-chart-encode" viewBox="0 0 300 90" preserveAspectRatio="none">
+                      <path id="path-fill-encode" fill="rgba(56,189,248,0.18)" d="M0,90 L300,90 Z"></path>
+                      <path id="path-line-encode" fill="none" stroke="#38bdf8" stroke-width="1.8" d="M0,89 L300,89"></path>
+                    </svg>
+                  </div>
+
+                  <!-- Video Decode Engine Card -->
+                  <div class="perf-graph-card">
+                    <div class="perf-graph-title-row">
+                      <span>∨ Video Decode</span>
+                      <span class="perf-graph-val" id="perf-val-decode">0%</span>
+                    </div>
+                    <svg class="perf-svg-chart" id="svg-chart-decode" viewBox="0 0 300 90" preserveAspectRatio="none">
+                      <path id="path-fill-decode" fill="rgba(56,189,248,0.18)" d="M0,90 L300,90 Z"></path>
+                      <path id="path-line-decode" fill="none" stroke="#38bdf8" stroke-width="1.8" d="M0,89 L300,89"></path>
+                    </svg>
+                  </div>
                 </div>
-                <div style="font-size:28px; font-weight:800; color:#fff; margin-bottom:4px;" id="obs-power-text">207 W • Nominal</div>
-                <div style="font-size:12px; color:rgba(255,255,255,0.7); margin-bottom:6px;">Combined Package &amp; Board Load</div>
-                <div style="font-size:11.5px; color:var(--mut);" id="obs-power-sub">GPU: 142 W • CPU: 65 W • NVMe: 42 °C • VRM: 49 °C</div>
-                <div class="gauge-track" style="height:8px; margin-top:12px;">
-                  <div class="gauge-fill" id="obs-power-bar" style="width: 48%; background:linear-gradient(90deg, var(--green), #34d399);"></div>
+
+                <!-- Memory Usage Graphs (Dedicated & Shared) -->
+                <div style="display:flex; flex-direction:column; gap:12px;" id="perf-gpu-memory-section">
+                  <!-- Dedicated Memory Graph -->
+                  <div class="perf-graph-card">
+                    <div class="perf-graph-title-row">
+                      <span>Dedicated GPU memory usage</span>
+                      <span class="perf-graph-val" style="color:#60a5fa;">12.0 GB</span>
+                    </div>
+                    <svg class="perf-svg-chart" id="svg-chart-vram" viewBox="0 0 600 90" preserveAspectRatio="none">
+                      <path id="path-fill-vram" fill="rgba(96,165,250,0.2)" d="M0,90 L600,90 Z"></path>
+                      <path id="path-line-vram" fill="none" stroke="#60a5fa" stroke-width="1.8" d="M0,84 L600,84"></path>
+                    </svg>
+                  </div>
+
+                  <!-- Shared Memory Graph -->
+                  <div class="perf-graph-card">
+                    <div class="perf-graph-title-row">
+                      <span>Shared GPU memory usage</span>
+                      <span class="perf-graph-val" style="color:#a78bfa;">16.0 GB</span>
+                    </div>
+                    <svg class="perf-svg-chart" id="svg-chart-shared-mem" viewBox="0 0 600 90" preserveAspectRatio="none">
+                      <path id="path-fill-shared-mem" fill="rgba(167,139,250,0.2)" d="M0,90 L600,90 Z"></path>
+                      <path id="path-line-shared-mem" fill="none" stroke="#a78bfa" stroke-width="1.8" d="M0,89 L600,89"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Single Large Graph (For CPU / RAM / Disk when selected) -->
+                <div id="perf-single-graph-section" style="display:none;">
+                  <div class="perf-graph-card">
+                    <div class="perf-graph-title-row">
+                      <span id="perf-single-graph-title">% Utilization Over 60 Seconds</span>
+                      <span class="perf-graph-val" id="perf-single-graph-val">100%</span>
+                    </div>
+                    <svg class="perf-svg-chart-tall" id="svg-chart-single" viewBox="0 0 600 180" preserveAspectRatio="none">
+                      <path id="path-fill-single" fill="rgba(56,189,248,0.2)" d="M0,180 L600,180 Z"></path>
+                      <path id="path-line-single" fill="none" stroke="#38bdf8" stroke-width="2" d="M0,150 L600,150"></path>
+                    </svg>
+                  </div>
+                </div>
+
+                <!-- Bottom Hardware Spec Grid (Image 2) -->
+                <div class="perf-specs-matrix" id="perf-specs-matrix">
+                  <div class="perf-spec-item">
+                    <div class="perf-spec-label">Utilization</div>
+                    <div class="perf-spec-val" id="spec-gpu-util">13%</div>
+                  </div>
+                  <div class="perf-spec-item">
+                    <div class="perf-spec-label">Dedicated GPU memory</div>
+                    <div class="perf-spec-val" id="spec-gpu-dedicated">0.8/12.0 GB</div>
+                  </div>
+                  <div class="perf-spec-item">
+                    <div class="perf-spec-label">Driver version:</div>
+                    <div class="perf-spec-val" style="font-size:13px;">32.0.16.1692</div>
+                  </div>
+                  <div class="perf-spec-item">
+                    <div class="perf-spec-label">Driver date:</div>
+                    <div class="perf-spec-val" style="font-size:13px;">9/4/2026</div>
+                  </div>
+                  <div class="perf-spec-item">
+                    <div class="perf-spec-label">GPU Memory</div>
+                    <div class="perf-spec-val" id="spec-gpu-total-mem">0.9/28.0 GB</div>
+                  </div>
+                  <div class="perf-spec-item">
+                    <div class="perf-spec-label">Shared GPU memory</div>
+                    <div class="perf-spec-val" id="spec-gpu-shared">0.0/16.0 GB</div>
+                  </div>
+                  <div class="perf-spec-item">
+                    <div class="perf-spec-label">DirectX version:</div>
+                    <div class="perf-spec-val" style="font-size:13px;">12 (FL 12.1)</div>
+                  </div>
+                  <div class="perf-spec-item">
+                    <div class="perf-spec-label">Physical location:</div>
+                    <div class="perf-spec-val" style="font-size:12px;">PCI bus 1, device 0, function 0</div>
+                  </div>
+                  <div class="perf-spec-item">
+                    <div class="perf-spec-label">GPU Temperature</div>
+                    <div class="perf-spec-val" style="color:var(--green);" id="spec-gpu-temp">35 °C</div>
+                  </div>
+                  <div class="perf-spec-item">
+                    <div class="perf-spec-label">Hardware reserved memory:</div>
+                    <div class="perf-spec-val" style="font-size:13px;">173 MB</div>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <!-- Windows Task Manager Process Resource Ranker -->
-            <div class="model-card" style="margin-top:24px; padding:20px;">
-              <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
-                <div style="display:flex; align-items:center; gap:10px;">
-                  <span style="font-size:18px;">📊</span>
-                  <div>
-                    <h3 style="font-size:16px; font-weight:700; color:#fff; margin:0;">Task Manager — Process Resource Ranker</h3>
-                    <p style="font-size:12px; color:var(--mut); margin:2px 0 0 0;">Host process telemetry ranked by active compute &amp; memory consumption</p>
+            <!-- ══════════════════════════════════════════════════════════════
+                 TAB 2: PROCESSES HEATMAP TABLE (IMAGE 1)
+                 ══════════════════════════════════════════════════════════════ -->
+            <div id="tm-panel-procs" style="display:none;">
+              <div class="model-card" style="padding:18px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
+                  <div style="display:flex; align-items:center; gap:10px;">
+                    <span style="font-size:18px;">📋</span>
+                    <div>
+                      <h3 style="font-size:16px; font-weight:700; color:#fff; margin:0;">Running Processes &amp; Resource Heatmap</h3>
+                      <p style="font-size:12px; color:var(--mut); margin:2px 0 0 0;">Live per-process compute, memory footprint, disk throughput, network bandwidth &amp; power usage</p>
+                    </div>
+                    <span class="badge" id="taskmanager-active-count" style="background:rgba(255,255,255,0.08); color:var(--tx); font-family:var(--mono); font-size:11px; margin-left:8px;">0 Processes</span>
                   </div>
-                  <span class="badge" id="taskmanager-active-count" style="background:rgba(255,255,255,0.08); color:var(--tx); font-family:var(--mono); font-size:11px; margin-left:8px;">0 Processes</span>
-                </div>
-                <div style="display:flex; align-items:center; gap:8px;">
-                  <div style="position:relative;">
+                  <div style="display:flex; align-items:center; gap:8px;">
                     <input type="text" id="proc-search-input" placeholder="Search processes..." style="background:rgba(255,255,255,0.05); border:1px solid var(--line2); border-radius:6px; color:#fff; font-size:12px; padding:6px 12px; width:180px; outline:none;" />
+                    <button class="btn btn-secondary active" id="btn-sort-proc-cpu" style="padding:5px 12px; font-size:11px;" type="button">Sort: CPU %</button>
+                    <button class="btn btn-secondary" id="btn-sort-proc-mem" style="padding:5px 12px; font-size:11px;" type="button">Sort: RAM</button>
+                    <button class="btn btn-secondary" id="btn-refresh-proc" style="padding:5px 12px; font-size:11px;" type="button">🔄 Refresh</button>
                   </div>
-                  <div style="display:flex; background:rgba(255,255,255,0.05); border:1px solid var(--line2); border-radius:6px; padding:2px;">
-                    <button class="btn btn-secondary active" id="btn-sort-proc-cpu" style="padding:4px 10px; font-size:11px; border-radius:4px; font-weight:600; cursor:pointer;" type="button">Sort: CPU %</button>
-                    <button class="btn btn-secondary" id="btn-sort-proc-mem" style="padding:4px 10px; font-size:11px; border-radius:4px; font-weight:600; cursor:pointer;" type="button">Sort: RAM</button>
-                  </div>
-                  <button class="btn btn-secondary" id="btn-refresh-proc" style="padding:4px 10px; font-size:11px; border-radius:4px; font-weight:600; cursor:pointer;" type="button" title="Refresh Host Processes">🔄 Refresh</button>
                 </div>
-              </div>
 
-              <!-- Process Table -->
-              <div style="overflow-x:auto; max-height:420px; overflow-y:auto; border:1px solid rgba(255,255,255,0.06); border-radius:8px;">
-                <table style="width:100%; border-collapse:collapse; text-align:left;">
-                  <thead>
-                    <tr style="background:rgba(255,255,255,0.03); border-bottom:1px solid rgba(255,255,255,0.08); font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--faint);">
-                      <th style="padding:10px 12px; font-weight:600;">Process Name</th>
-                      <th style="padding:10px 12px; font-weight:600; width:90px;">PID</th>
-                      <th style="padding:10px 12px; font-weight:600; width:170px;">CPU Usage</th>
-                      <th style="padding:10px 12px; font-weight:600; width:130px;">Memory (RAM)</th>
-                      <th style="padding:10px 12px; font-weight:600; width:180px;">Disk I/O (Read / Write)</th>
-                    </tr>
-                  </thead>
-                  <tbody id="taskmanager-process-tbody">
-                    <!-- Populated by src/js/process_manager.js -->
-                  </tbody>
-                </table>
+                <!-- Windows 11 Task Manager Table with Heatmap Columns -->
+                <div class="tm-process-table-container">
+                  <table class="tm-process-table">
+                    <thead>
+                      <tr>
+                        <th style="min-width:240px;">Name</th>
+                        <th style="width:100px;">Status</th>
+                        <th style="width:110px; text-align:right;" id="th-tm-cpu">39%<br><span style="font-weight:400; font-size:10px;">CPU</span></th>
+                        <th style="width:120px; text-align:right;" id="th-tm-mem">42%<br><span style="font-weight:400; font-size:10px;">Memory</span></th>
+                        <th style="width:110px; text-align:right;" id="th-tm-disk">3%<br><span style="font-weight:400; font-size:10px;">Disk</span></th>
+                        <th style="width:120px; text-align:right;" class="highlight-col" id="th-tm-net">100%<br><span style="font-weight:400; font-size:10px;">Network</span></th>
+                        <th style="width:120px;">Power usage</th>
+                        <th style="width:130px;">Power usage t...</th>
+                      </tr>
+                    </thead>
+                    <tbody id="taskmanager-process-tbody">
+                      <tr>
+                        <td colspan="8" style="text-align:center; padding:24px; color:var(--mut);">
+                          Scanning host processes...
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
@@ -1208,15 +1411,15 @@
             <div class="storage-kpi-grid">
               <div class="storage-kpi-tile">
                 <span class="metric-label">C: DEFAULT OLLAMA BLOBS</span>
-                <span class="metric-val amber">42.5 GB</span>
+                <span class="metric-val amber" id="storage-kpi-default-blobs">Calculating...</span>
                 <div style="font-size:12px; color:var(--mut); margin-top:4px;">
-                  High Storage Pressure on OS Disk
+                  Storage Footprint on OS Disk
                 </div>
               </div>
 
               <div class="storage-kpi-tile">
                 <span class="metric-label">STORAGE TARGET (G:\.ollama_blobs_root)</span>
-                <span class="metric-val green">480.2 GB</span>
+                <span class="metric-val green" id="storage-kpi-target">Scanning...</span>
                 <div style="font-size:12px; color:var(--mut); margin-top:4px;">
                   NVMe Fast Storage Ready
                 </div>
@@ -1224,9 +1427,9 @@
 
               <div class="storage-kpi-tile">
                 <span class="metric-label">SYMLINK HEALTH AUDIT</span>
-                <span class="metric-val cyan">100% HEALTHY</span>
-                <div style="font-size:12px; color:var(--mut); margin-top:4px;">
-                  18 Verified Symlinks, 0 Broken
+                <span class="metric-val cyan" id="storage-kpi-health">AUDITING</span>
+                <div style="font-size:12px; color:var(--mut); margin-top:4px;" id="storage-kpi-health-sub">
+                  Checking Verified Symlinks...
                 </div>
               </div>
             </div>
@@ -1235,8 +1438,8 @@
             <div class="storage-table-card">
               <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:16px;">
                 <div style="display:flex; align-items:center; gap:8px;">
-                  <span style="font-weight:700; font-size:15px; color:var(--tx);">Discovered Large Model Blobs</span>
-                  <span class="badge" style="background:rgba(124,242,107,0.15); color:var(--green);">5 Candidates</span>
+                  <span style="font-weight:700; font-size:15px; color:var(--tx);">Discovered Model Blobs</span>
+                  <span class="badge" id="storage-candidate-count" style="background:rgba(124,242,107,0.15); color:var(--green);">Scanning Candidates...</span>
                 </div>
                 <button class="btn btn-ghost" id="btn-quick-offload" style="font-size:12px; padding:6px 14px;">
                   🚀 1-Click Safe Offload to G:\
@@ -1254,53 +1457,10 @@
                     <th>Action</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody id="storage-blobs-tbody">
                   <tr>
-                    <td>
-                      <div style="font-weight:600;">deepseek-r1:8b (sha256:7c38f...)</div>
-                      <div style="font-size:11px; color:var(--faint); font-family:var(--mono);">C:\Users\freshair\.ollama\models\blobs\sha256-7c38...</div>
-                    </td>
-                    <td style="font-family:var(--mono); color:var(--tx);">4.92 GB</td>
-                    <td><span class="badge role">Drive C: (Local)</span></td>
-                    <td><span class="badge" style="color:var(--amber);">Pending Offload</span></td>
-                    <td>
-                      <button class="btn btn-ghost" style="padding:4px 10px; font-size:11px;" onclick="showToast('Initiating safe symlink offload for deepseek-r1...', 'info')">Offload</button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div style="font-weight:600;">qwen2.5-coder:14b (sha256:8b41a...)</div>
-                      <div style="font-size:11px; color:var(--faint); font-family:var(--mono);">G:\.ollama_blobs_root\models\blobs\sha256-8b41...</div>
-                    </td>
-                    <td style="font-family:var(--mono); color:var(--tx);">8.98 GB</td>
-                    <td><span class="badge quant">Drive G: (Offloaded)</span></td>
-                    <td><span class="badge" style="color:var(--green); border-color:rgba(124,242,107,0.3);">✓ Active Symlink</span></td>
-                    <td>
-                      <button class="btn btn-ghost" style="padding:4px 10px; font-size:11px;" disabled>Verified</button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div style="font-weight:600;">qwen2.5-coder:7b (sha256:6e12c...)</div>
-                      <div style="font-size:11px; color:var(--faint); font-family:var(--mono);">G:\.ollama_blobs_root\models\blobs\sha256-6e12...</div>
-                    </td>
-                    <td style="font-family:var(--mono); color:var(--tx);">4.68 GB</td>
-                    <td><span class="badge quant">Drive G: (Offloaded)</span></td>
-                    <td><span class="badge" style="color:var(--green); border-color:rgba(124,242,107,0.3);">✓ Active Symlink</span></td>
-                    <td>
-                      <button class="btn btn-ghost" style="padding:4px 10px; font-size:11px;" disabled>Verified</button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <div style="font-weight:600;">gemma-2-9b (sha256:3a91b...)</div>
-                      <div style="font-size:11px; color:var(--faint); font-family:var(--mono);">C:\Users\freshair\.ollama\models\blobs\sha256-3a91...</div>
-                    </td>
-                    <td style="font-family:var(--mono); color:var(--tx);">5.44 GB</td>
-                    <td><span class="badge role">Drive C: (Local)</span></td>
-                    <td><span class="badge" style="color:var(--amber);">Pending Offload</span></td>
-                    <td>
-                      <button class="btn btn-ghost" style="padding:4px 10px; font-size:11px;" onclick="showToast('Initiating safe symlink offload for gemma-2-9b...', 'info')">Offload</button>
+                    <td colspan="5" style="text-align:center; padding:24px; color:var(--mut);">
+                      Connecting to live Ollama blob directory...
                     </td>
                   </tr>
                 </tbody>

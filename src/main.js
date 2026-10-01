@@ -25,6 +25,7 @@ import { refreshCpuTelemetry } from './js/cpu_telemetry.js';
 import { initGpuTuning, refreshGpuTelemetry } from './js/gpu_tuning.js';
 import { refreshHardwareSurfaces } from './js/hardware_surfaces.js';
 import { initGateway, refreshGatewayView } from './js/gateway.js';
+import { initStorage, refreshStorageView } from './js/storage.js';
 import { invoke } from './js/api.js';
 
 // Navigation Tabs Setup (GHT Command Center 2-Tier Architecture)
@@ -187,6 +188,8 @@ function setupNavigation() {
         refreshHardwareSurfaces();
       } else if (targetView === 'gateway') {
         refreshGatewayView();
+      } else if (targetView === 'storage') {
+        refreshStorageView();
       }
     });
   });
@@ -405,6 +408,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   refreshCpuTelemetry();
   refreshHardwareSurfaces();
   initGateway();
+  initStorage();
   startTelemetryPolling(2000);
 
   // Setup Refresh Rate Cadence Selector Listener

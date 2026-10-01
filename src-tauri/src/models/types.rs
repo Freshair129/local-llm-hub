@@ -409,6 +409,18 @@ pub struct UpdateCheckResult {
 }
 
 // trace:implements FR-015
+/// Detailed descriptor for a single Ollama model blob file
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct BlobItem {
+    pub hash: String,
+    pub size_bytes: u64,
+    pub is_symlink: bool,
+    pub storage_location: String,
+    pub symlink_status: String,
+    pub associated_model: Option<String>,
+}
+
+// trace:implements FR-015
 /// Storage health analysis and symlink offload summary
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SymlinkHealth {
@@ -421,7 +433,10 @@ pub struct SymlinkHealth {
     pub large_real_blob_count: usize,
     pub large_real_blob_bytes: u64,
     pub reclaimable_gb: f64,
+    pub default_blobs_gb: f64,
+    pub target_storage_gb: f64,
     pub issues: Vec<String>,
+    pub blobs: Vec<BlobItem>,
 }
 
 // trace:implements FR-015
@@ -453,7 +468,17 @@ mod tests {
             large_real_blob_count: 5,
             large_real_blob_bytes: 18_500_000_000,
             reclaimable_gb: 18.5,
+            default_blobs_gb: 18.5,
+            target_storage_gb: 120.0,
             issues: vec![],
+            blobs: vec![BlobItem {
+                hash: "sha256-mock123".to_string(),
+                size_bytes: 4_000_000_000,
+                is_symlink: true,
+                storage_location: "G:\\.ollama_blobs_root".to_string(),
+                symlink_status: "Active Symlink".to_string(),
+                associated_model: Some("llama3:latest".to_string()),
+            }],
         };
 
         let json = serde_json::to_string(&health).expect("serialize symlink health");
