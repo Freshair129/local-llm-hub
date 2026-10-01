@@ -63,10 +63,12 @@
     {"id": "spec:SPEC-002", "type": "spec", "path": "docs/domains/observability/SPEC-002-hardware-telemetry-sensors.md", "title": "Hardware Telemetry Sensors Topology"},
     {"id": "benchmark:LLM-HARNESS", "type": "benchmark", "path": "docs/benchmarks/SPEC-LLM-Benchmark-Harness.md", "title": "LLM Benchmark Harness Protocol"},
     {"id": "adr:ADR-007", "type": "architecture", "path": "docs/adr/ADR-007-push-telemetry-events.md", "title": "Single-Source Push Telemetry"},
-    {"id": "adr:ADR-008", "type": "architecture", "path": "docs/adr/ADR-008-typed-ipc-contracts.md", "title": "Typed Rust-TypeScript IPC Contracts"}
+    {"id": "adr:ADR-008", "type": "architecture", "path": "docs/adr/ADR-008-typed-ipc-contracts.md", "title": "Typed Rust-TypeScript IPC Contracts"},
+    {"id": "benchmark:SPEC-REFINE", "type": "benchmark", "path": "docs/benchmarks/BENCH-SPEC-REFINE-001.md", "title": "Spec Refinement & Defect Detection Benchmark"}
   ],
 
   "edges": [
+    {"from": "benchmark:SPEC-REFINE", "to": "feat:FEAT-012", "relation": "evaluates"},
     {"from": "domain:backend-integration", "to": "req:FR-017", "relation": "owns"},
     {"from": "domain:backend-integration", "to": "feat:FEAT-019", "relation": "owns"},
     {"from": "feat:FEAT-019", "to": "req:FR-017", "relation": "implements"},
