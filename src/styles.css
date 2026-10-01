@@ -76,14 +76,15 @@
   -webkit-font-smoothing: antialiased;
 }
 
-body {
-  min-height: 100vh;
+html, body {
+  height: 100vh;
+  max-height: 100vh;
   background-color: var(--bg);
   color: var(--tx);
   font-family: var(--ui);
   font-size: 13px;
   line-height: 1.5;
-  overflow-x: hidden;
+  overflow: hidden;
   user-select: none;
 }
 
@@ -117,9 +118,11 @@ body::after {
 /* === App Shell Container === */
 #app-root, .appFrame {
   position: relative;
-  min-height: 100vh;
+  height: 100vh;
+  max-height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   z-index: 1;
 }
 
@@ -127,11 +130,10 @@ body::after {
    BORDERLESS WINDOW TITLEBAR & CUSTOM CONTROLS (Tauri Frameless)
    ============================================================ */
 .window-titlebar {
-  position: sticky;
-  top: 0;
-  left: 0;
-  right: 0;
+  position: relative;
   height: 32px;
+  min-height: 32px;
+  flex-shrink: 0;
   background: rgba(12, 15, 13, 0.94);
   -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(20px);
@@ -851,14 +853,53 @@ body::after {
 #main-content, .main-viewport {
   flex: 1;
   min-width: 0;
+  min-height: 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 #views-container {
   flex: 1;
+  min-height: 0;
+  height: 100%;
   overflow-y: auto;
-  padding-bottom: 40px;
+  overflow-x: hidden;
+  padding-bottom: 32px;
+  padding-right: 6px;
+}
+
+/* Custom Sleek Scrollbars (Confined to view panel, never penetrating titlebar) */
+#views-container::-webkit-scrollbar,
+.perf-sidebar::-webkit-scrollbar,
+.tm-process-table-container::-webkit-scrollbar,
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+#views-container::-webkit-scrollbar-track,
+.perf-sidebar::-webkit-scrollbar-track,
+.tm-process-table-container::-webkit-scrollbar-track,
+.sidebar::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: var(--r-pill);
+}
+
+#views-container::-webkit-scrollbar-thumb,
+.perf-sidebar::-webkit-scrollbar-thumb,
+.tm-process-table-container::-webkit-scrollbar-thumb,
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: var(--r-pill);
+}
+
+#views-container::-webkit-scrollbar-thumb:hover,
+.perf-sidebar::-webkit-scrollbar-thumb:hover,
+.tm-process-table-container::-webkit-scrollbar-thumb:hover,
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 242, 107, 0.4);
 }
 
 .view-panel {

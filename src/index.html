@@ -69,7 +69,7 @@
           <!-- Version Badge relocated from sidebar to titlebar -->
           <div class="titlebar-version-badge" id="app-version-badge" title="Click to view release notes and check for updates">
             <span class="status-dot dot-online" id="updater-status-dot"></span>
-            <span id="updater-version-label">v0.1.2</span>
+            <span id="updater-version-label">v0.1.3</span>
           </div>
         </div>
         <div class="titlebar-drag-spacer" data-tauri-drag-region title="Click and drag here to move the window • Double-click to maximize">
@@ -403,11 +403,11 @@
               </div>
               <div class="view-actions" style="display: flex; gap: 12px; align-items: center;">
                 <!-- View Mode Switcher (Grid / List) -->
-                <div class="view-mode-toggle-group" style="display:flex; align-items:center; background:rgba(255,255,255,0.04); border:1px solid var(--line2); border-radius:var(--r-pill); padding:2px;">
-                  <button type="button" class="view-mode-btn active" id="btn-mode-grid" title="Grid View (Rich Bento Cards)" style="padding:5px 12px; font-size:12px; border-radius:var(--r-pill); border:none; background:rgba(124,242,107,0.15); color:var(--green); font-weight:600; cursor:pointer; display:flex; align-items:center; gap:5px;">
+                <div class="view-mode-toggle-group" style="display:flex; align-items:center; background:rgba(255,255,255,0.06); border:1px solid var(--line2); border-radius:var(--r-pill); padding:2px;">
+                  <button type="button" class="view-mode-btn active" id="btn-mode-grid" onclick="window.toggleModelViewMode('grid')" title="Grid View (Rich Bento Cards)" style="padding:5px 12px; font-size:12px; border-radius:var(--r-pill); border:none; background:rgba(124,242,107,0.15); color:var(--green); font-weight:600; cursor:pointer; display:flex; align-items:center; gap:5px;">
                     <i class="ph ph-squares-four"></i> Grid
                   </button>
-                  <button type="button" class="view-mode-btn" id="btn-mode-list" title="List View (Horizontal Row List)" style="padding:5px 12px; font-size:12px; border-radius:var(--r-pill); border:none; background:transparent; color:var(--mut); font-weight:600; cursor:pointer; display:flex; align-items:center; gap:5px;">
+                  <button type="button" class="view-mode-btn" id="btn-mode-list" onclick="window.toggleModelViewMode('list')" title="List View (Horizontal Row List)" style="padding:5px 12px; font-size:12px; border-radius:var(--r-pill); border:none; background:transparent; color:var(--mut); font-weight:600; cursor:pointer; display:flex; align-items:center; gap:5px;">
                     <i class="ph ph-list-bullets"></i> List
                   </button>
                 </div>
