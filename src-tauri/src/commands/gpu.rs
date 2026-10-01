@@ -4,39 +4,55 @@
 //! Compliant with ADR-100 (Safe Error Handling, Zero Panics, Non-blocking async).
 
 use crate::models::types::{GpuInfo, HardwareTelemetry, ProcessMetric};
+use std::sync::{Mutex, OnceLock};
 use std::time::Duration;
-use sysinfo::System;
+use sysinfo::{CpuRefreshKind, MemoryRefreshKind, RefreshKind, System};
 
-/// Polls system RAM, CPU load, and NVIDIA GPU stats safely
-pub async fn poll_hardware_telemetry() -> HardwareTelemetry {
-    // 1. Collect System RAM and CPU via sysinfo
-    let (ram_total, ram_used, cpu_pct) = tokio::task::spawn_blocking(|| {
-        let mut sys = System::new_all();
+/// Global persistent System instance for continuous delta-based CPU & Memory telemetry.
+/// Eliminates redundant allocations and unnecessary thread sleeping on every poll cycle.
+static GLOBAL_SYSTEM: OnceLock<Mutex<System>> = OnceLock::new();
+
+fn get_global_system() -> &'static Mutex<System> {
+    GLOBAL_SYSTEM.get_or_init(|| {
+        let mut sys = System::new_with_specifics(
+            RefreshKind::new()
+                .with_cpu(CpuRefreshKind::everything())
+                .with_memory(MemoryRefreshKind::everything()),
+        );
         sys.refresh_memory();
         sys.refresh_cpu();
-        std::thread::sleep(Duration::from_millis(40));
+        Mutex::new(sys)
+    })
+}
+
+/// Collects live Host RAM (total, used) and continuous delta-based CPU utilization %
+async fn collect_system_resources() -> (u64, u64, f32) {
+    tokio::task::spawn_blocking(|| {
+        let mut sys = match get_global_system().lock() {
+            Ok(guard) => guard,
+            Err(poisoned) => {
+                eprintln!("[WARN:telemetry] Global system mutex poisoned, recovering inner lock.");
+                poisoned.into_inner()
+            }
+        };
+
+        sys.refresh_memory();
         sys.refresh_cpu();
 
         let total = sys.total_memory();
         let used = sys.used_memory();
         let cpu_usage = sys.global_cpu_info().cpu_usage();
+
         (total, used, cpu_usage)
     })
     .await
-    .unwrap_or((16 * 1024 * 1024 * 1024, 8 * 1024 * 1024 * 1024, 15.0));
-
-    // 2. Query NVIDIA GPUs via nvidia-smi CLI
-    let gpus = query_nvidia_smi().await;
-
-    HardwareTelemetry {
-        system_ram_used_bytes: ram_used,
-        system_ram_total_bytes: ram_total,
-        cpu_usage_pct: cpu_pct,
-        gpus,
-    }
+    .unwrap_or_else(|err| {
+        eprintln!("[ERROR:telemetry] Failed to collect host system resources: {err}");
+        (0, 0, 0.0)
+    })
 }
 
-/// Runs nvidia-smi with a strict timeout and parses CSV output
+/// Runs nvidia-smi with a strict timeout and parses CSV output into structured GpuInfo models
 async fn query_nvidia_smi() -> Vec<GpuInfo> {
     let mut gpus = Vec::new();
 
@@ -47,7 +63,7 @@ async fn query_nvidia_smi() -> Vec<GpuInfo> {
     ]);
 
     #[cfg(target_os = "windows")]
-    cmd.creation_flags(0x0800_0000);
+    cmd.creation_flags(0x0800_0000); // CREATE_NO_WINDOW
 
     let output_res = tokio::time::timeout(
         Duration::from_millis(600),
@@ -55,8 +71,8 @@ async fn query_nvidia_smi() -> Vec<GpuInfo> {
     )
     .await;
 
-    if let Ok(Ok(output)) = output_res {
-        if output.status.success() {
+    match output_res {
+        Ok(Ok(output)) if output.status.success() => {
             let stdout_str = String::from_utf8_lossy(&output.stdout);
             for line in stdout_str.lines() {
                 let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
@@ -79,9 +95,22 @@ async fn query_nvidia_smi() -> Vec<GpuInfo> {
                 }
             }
         }
+        Ok(Ok(output)) => {
+            eprintln!(
+                "[WARN:telemetry] nvidia-smi exited with status {}: {}",
+                output.status,
+                String::from_utf8_lossy(&output.stderr)
+            );
+        }
+        Ok(Err(e)) => {
+            eprintln!("[INFO:telemetry] nvidia-smi unavailable on host ({e}), falling back to default GPU definition.");
+        }
+        Err(_) => {
+            eprintln!("[WARN:telemetry] nvidia-smi call timed out after 600ms.");
+        }
     }
 
-    // Fallback default GPU if nvidia-smi wasn't available
+    // Fallback default GPU if nvidia-smi wasn't available or empty
     if gpus.is_empty() {
         gpus.push(GpuInfo {
             index: 0,
@@ -96,13 +125,30 @@ async fn query_nvidia_smi() -> Vec<GpuInfo> {
     gpus
 }
 
+/// Polls system RAM, CPU load, and NVIDIA GPU stats safely by aggregating helper routines
+pub async fn poll_hardware_telemetry() -> HardwareTelemetry {
+    // 1. Collect System RAM and CPU via separate routine
+    let (ram_total, ram_used, cpu_pct) = collect_system_resources().await;
+
+    // 2. Query NVIDIA GPUs via dedicated nvidia-smi CLI routine
+    let gpus = query_nvidia_smi().await;
+
+    HardwareTelemetry {
+        system_ram_used_bytes: ram_used,
+        system_ram_total_bytes: ram_total,
+        cpu_usage_pct: cpu_pct,
+        gpus,
+    }
+}
+
 // trace:implements FR-006
 /// Collects and ranks active processes by CPU or Memory usage (Task Manager style)
 pub async fn poll_top_processes(sort_by_mem: bool, limit: usize) -> Vec<ProcessMetric> {
     tokio::task::spawn_blocking(move || {
         let mut sys = System::new();
         sys.refresh_processes();
-        std::thread::sleep(Duration::from_millis(40));
+        // Minimal sampling interval for process CPU ticks
+        std::thread::sleep(Duration::from_millis(25));
         sys.refresh_processes();
 
         let mut list: Vec<ProcessMetric> = sys
@@ -132,7 +178,10 @@ pub async fn poll_top_processes(sort_by_mem: bool, limit: usize) -> Vec<ProcessM
         list
     })
     .await
-    .unwrap_or_default()
+    .unwrap_or_else(|err| {
+        eprintln!("[ERROR:telemetry] Failed to poll top processes: {err}");
+        Vec::new()
+    })
 }
 
 #[cfg(test)]
@@ -151,10 +200,19 @@ mod tests {
 
     // trace:verifies FR-006
     #[tokio::test]
+    async fn test_collect_system_resources() {
+        let (total, used, _cpu) = collect_system_resources().await;
+        assert!(total > 0, "Total RAM should be greater than 0");
+        assert!(used > 0, "Used RAM should be greater than 0");
+    }
+
+    // trace:verifies FR-006
+    #[tokio::test]
     async fn test_poll_top_processes() {
         let processes = poll_top_processes(false, 10).await;
         assert!(!processes.is_empty(), "should capture running host processes");
         assert!(processes.len() <= 10);
     }
 }
+
 
