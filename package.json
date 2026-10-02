@@ -6,7 +6,9 @@
   "scripts": {
     "tauri": "tauri",
     "packet": "node scripts/packet.mjs",
-    "ai-review": "node scripts/ai_code_review.mjs"
+    "ai-review": "node scripts/ai_code_review.mjs",
+    "eval:test": "node eval/tests/eval_harness.test.mjs",
+    "eval:smoke": "node eval/harness/smoke-test.mjs"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2"

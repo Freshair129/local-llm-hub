@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "EvalTask",
+  "description": "Standardized task contract for Local LLM Hub evaluation framework (SPEC-EVAL-002)",
+  "type": "object",
+  "required": ["task_id", "benchmark_id", "repo", "base_commit", "request", "allowed_paths", "risk_level"],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+$"
+    },
+    "benchmark_id": {
+      "type": "string",
+      "enum": ["BASE-1", "BASE-2", "BASE-3", "BASE-4", "BASE-5", "BASE-6", "PIPELINE"]
+    },
+    "category": {
+      "type": "string"
+    },
+    "repo": {
+      "type": "string"
+    },
+    "base_commit": {
+      "type": "string"
+    },
+    "request": {
+      "type": "string"
+    },
+    "context_symbols": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "target_files": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "allowed_paths": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "description"],
+        "properties": {
+          "id": { "type": "string" },
+          "description": { "type": "string" },
+          "critical": { "type": "boolean" }
+        }
+      }
+    },
+    "visible_test_command": {
+      "type": "string"
+    },
+    "hidden_test_command": {
+      "type": "string"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": ["LOW", "MEDIUM", "HIGH", "CRITICAL"]
+    },
+    "metadata": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": false
+}

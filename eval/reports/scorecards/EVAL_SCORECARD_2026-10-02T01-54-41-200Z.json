@@ -1,0 +1,130 @@
+{
+  "scorecard": {
+    "total_runs": 2,
+    "passed_runs": 2,
+    "failed_runs": 0,
+    "raw_pass_summary": "2 / 2 tasks passed",
+    "pass_rate_pct": 100,
+    "compile_rate_pct": 100,
+    "regression_rate_pct": 0,
+    "scope_violation_rate_pct": 0,
+    "avg_retries": 0,
+    "avg_duration_sec": 0.3,
+    "total_tokens": 1660,
+    "composite_score": 97.7,
+    "breakdown": {
+      "correctness": 100,
+      "repo_success": 100,
+      "regression_safety": 100,
+      "efficiency": 100
+    }
+  },
+  "machineManifest": {
+    "machine_id": "MACH-LOCAL-RTX3060-I7",
+    "cpu": "Intel(R) Core(TM) i7-8700K CPU @ 3.70GHz (6C/12T)",
+    "ram_gb": 32,
+    "gpu": "NVIDIA GeForce RTX 3060 (12GB GDDR6, GA106)",
+    "vram_gb": 12,
+    "driver": "576.28",
+    "cuda_version": "12.8",
+    "os": "Windows 11 Pro 64-bit",
+    "target_repository": "Freshair129/local-llm-hub",
+    "updated_at": "2026-10-02T08:50:00Z"
+  },
+  "runResults": [
+    {
+      "run_id": "RUN-1790906080642-2e63",
+      "benchmark_id": "BASE-1",
+      "task_id": "SMOKE-001",
+      "model": {
+        "id": "mellum2-instruct",
+        "quant": "Q4_K_M",
+        "family": "Mellum2"
+      },
+      "machine": {
+        "machine_id": "MACH-LOCAL-RTX3060-I7",
+        "cpu": "Intel(R) Core(TM) i7-8700K CPU @ 3.70GHz (6C/12T)",
+        "ram_gb": 32,
+        "gpu": "NVIDIA GeForce RTX 3060 (12GB GDDR6, GA106)",
+        "vram_gb": 12,
+        "driver": "576.28",
+        "cuda_version": "12.8",
+        "os": "Windows 11 Pro 64-bit",
+        "target_repository": "Freshair129/local-llm-hub",
+        "updated_at": "2026-10-02T08:50:00Z"
+      },
+      "runtime": {
+        "engine": "Ollama",
+        "version": "0.5.12"
+      },
+      "repo_commit": "HEAD",
+      "started_at": "2026-10-02T01:54:40.642Z",
+      "finished_at": "2026-10-02T01:54:40.923Z",
+      "duration_seconds": 0.28,
+      "retry_count": 0,
+      "tokens": {
+        "prompt_tokens": 450,
+        "completion_tokens": 380,
+        "total_tokens": 830,
+        "tokens_per_second": 58.4
+      },
+      "hard_gates": {
+        "hg_01_patch_valid": true,
+        "hg_02_compile": true,
+        "hg_03_existing_tests": true,
+        "hg_04_hidden_tests": true,
+        "hg_05_security_checks": true,
+        "hg_06_scope_clean": true
+      },
+      "verdict": "PASS",
+      "failure_labels": []
+    },
+    {
+      "run_id": "RUN-1790906080923-f4gu",
+      "benchmark_id": "BASE-5",
+      "task_id": "SMOKE-002",
+      "model": {
+        "id": "mellum2-instruct",
+        "quant": "Q4_K_M",
+        "family": "Mellum2"
+      },
+      "machine": {
+        "machine_id": "MACH-LOCAL-RTX3060-I7",
+        "cpu": "Intel(R) Core(TM) i7-8700K CPU @ 3.70GHz (6C/12T)",
+        "ram_gb": 32,
+        "gpu": "NVIDIA GeForce RTX 3060 (12GB GDDR6, GA106)",
+        "vram_gb": 12,
+        "driver": "576.28",
+        "cuda_version": "12.8",
+        "os": "Windows 11 Pro 64-bit",
+        "target_repository": "Freshair129/local-llm-hub",
+        "updated_at": "2026-10-02T08:50:00Z"
+      },
+      "runtime": {
+        "engine": "Ollama",
+        "version": "0.5.12"
+      },
+      "repo_commit": "HEAD",
+      "started_at": "2026-10-02T01:54:40.923Z",
+      "finished_at": "2026-10-02T01:54:41.199Z",
+      "duration_seconds": 0.28,
+      "retry_count": 0,
+      "tokens": {
+        "prompt_tokens": 450,
+        "completion_tokens": 380,
+        "total_tokens": 830,
+        "tokens_per_second": 58.4
+      },
+      "hard_gates": {
+        "hg_01_patch_valid": true,
+        "hg_02_compile": true,
+        "hg_03_existing_tests": true,
+        "hg_04_hidden_tests": true,
+        "hg_05_security_checks": true,
+        "hg_06_scope_clean": true
+      },
+      "verdict": "PASS",
+      "failure_labels": []
+    }
+  ]
+}

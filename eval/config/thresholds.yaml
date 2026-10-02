@@ -1,0 +1,42 @@
+# eval/config/thresholds.yaml
+# trace:implements SPEC-EVAL-002
+# Six-Benchmark Qualification Thresholds
+
+base_1_function_correctness:
+  compile_rate_min: 0.95
+  hidden_test_pass_rate_min: 0.80
+  max_avg_retries: 2.0
+
+base_2_code_composition:
+  pass_at_1_min: 0.70
+  api_hallucination_rate_max: 0.05
+  forbidden_api_rate_max: 0.00
+
+base_3_contamination_resistant:
+  pass_at_1_easy_min: 0.85
+  pass_at_1_medium_min: 0.65
+  pass_at_1_hard_min: 0.40
+
+base_4_repo_issue_resolution:
+  issue_resolved_rate_min: 0.40
+  patch_apply_rate_min: 0.95
+  regression_rate_max: 0.05
+
+base_5_private_hidden_regression:
+  task_success_rate_min: 0.85
+  regression_free_rate_min: 0.98
+  scope_violation_rate_max: 0.00
+
+base_6_reviewer_defect_detection:
+  overall_recall_min: 0.85
+  critical_recall_min: 0.95
+  precision_min: 0.75
+  false_positive_rate_max: 0.15
+
+composite_weights:
+  correctness: 0.30
+  repo_success: 0.25
+  regression_safety: 0.15
+  review_accuracy: 0.15
+  efficiency_cost: 0.10
+  latency: 0.05

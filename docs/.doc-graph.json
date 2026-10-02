@@ -89,7 +89,8 @@
     {"id": "doc:ROADMAP", "type": "roadmap", "path": "docs/ROADMAP.md", "title": "Master Development Roadmap v2.0"},
     {"id": "spec:EXEC-DAG-WAVE-001", "type": "spec", "path": "docs/ai-system/EXECUTION_DAG_WAVES.md", "title": "Wave-Based Implementation Execution DAG"},
     {"id": "spec:MICROTASKS-P2-001", "type": "spec", "path": "docs/ai-system/MICROTASKS_BREAKDOWN_P2.md", "title": "Microtasks & Subtasks Breakdown (P2)"},
-    {"id": "spec:TAXONOMY-001", "type": "spec", "path": "docs/ai-system/FLEET_WORKSTREAM_LANE_TAXONOMY.md", "title": "Fleet, Workstream, Lane Taxonomy"}
+    {"id": "spec:TAXONOMY-001", "type": "spec", "path": "docs/ai-system/FLEET_WORKSTREAM_LANE_TAXONOMY.md", "title": "Fleet, Workstream, Lane Taxonomy"},
+    {"id": "spec:SPEC-EVAL-002", "type": "spec", "path": "docs/benchmarks/SPEC-EVAL-002-evaluation-hardening.md", "title": "Evaluation Hardening & Six-Benchmark Specification"}
   ],
 
   "edges": [
@@ -210,6 +211,9 @@
     {"from": "spec:EXEC-DAG-WAVE-001", "to": "doc:ROADMAP", "relation": "sequences"},
     {"from": "spec:EXEC-DAG-WAVE-001", "to": "spec:SPEC-WORKFLOW-001", "relation": "implements"},
     {"from": "spec:MICROTASKS-P2-001", "to": "spec:EXEC-DAG-WAVE-001", "relation": "decomposes"},
-    {"from": "spec:TAXONOMY-001", "to": "spec:SPEC-WORKFLOW-001", "relation": "defines"}
+    {"from": "spec:TAXONOMY-001", "to": "spec:SPEC-WORKFLOW-001", "relation": "defines"},
+    {"from": "spec:SPEC-EVAL-002", "to": "doc:ROADMAP", "relation": "specifies"},
+    {"from": "spec:SPEC-EVAL-002", "to": "spec:SPEC-WORKFLOW-001", "relation": "hardens"}
   ]
 }
+

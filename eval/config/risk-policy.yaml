@@ -1,0 +1,35 @@
+# eval/config/risk-policy.yaml
+# trace:implements SPEC-EVAL-002
+# Risk Score Calculation and Model Routing Policy
+
+weights:
+  touches_auth_or_security: 25
+  database_migration: 20
+  concurrency_or_async: 15
+  files_changed_gt_5: 15
+  loc_changed_gt_500: 10
+  cross_domain_boundary: 10
+  tests_missing: 10
+  local_retry_gte_2: 10
+  reviewer_disagreement: 10
+
+routing_tiers:
+  l0_local_only:
+    score_range: [0, 24]
+    description: "Low risk tasks suitable for autonomous local execution"
+    allowed_actions: ["local_implement", "local_verify", "local_commit"]
+  
+  l1_codex_plan_local_implement:
+    score_range: [25, 49]
+    description: "Medium complexity tasks; Codex plans & decomposes AC, Local implements"
+    allowed_actions: ["codex_plan", "local_implement", "local_verify"]
+  
+  l2_codex_plan_local_codex_review:
+    score_range: [50, 74]
+    description: "High blast radius tasks; Codex plans, Local implements, Codex reviews"
+    allowed_actions: ["codex_plan", "local_implement", "codex_review"]
+  
+  l3_codex_owns_task:
+    score_range: [75, 100]
+    description: "Novel architecture, incident, or repeated failure; Frontier agent owns end-to-end"
+    allowed_actions: ["codex_full_ownership"]
