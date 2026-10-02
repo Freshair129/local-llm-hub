@@ -91,7 +91,8 @@
     {"id": "spec:MICROTASKS-P2-001", "type": "spec", "path": "docs/ai-system/MICROTASKS_BREAKDOWN_P2.md", "title": "Microtasks & Subtasks Breakdown (P2)"},
     {"id": "spec:TAXONOMY-001", "type": "spec", "path": "docs/ai-system/FLEET_WORKSTREAM_LANE_TAXONOMY.md", "title": "Fleet, Workstream, Lane Taxonomy"},
     {"id": "spec:SPEC-EVAL-002", "type": "spec", "path": "docs/benchmarks/SPEC-EVAL-002-evaluation-hardening.md", "title": "Evaluation Hardening & Six-Benchmark Specification"},
-    {"id": "feat:FEAT-029", "type": "feature", "path": "docs/domains/observability/features/FEAT-029-hw-telemetry-benchmark-logger.md", "title": "HW Telemetry Benchmark Recorder & Error Logger"}
+    {"id": "feat:FEAT-029", "type": "feature", "path": "docs/domains/observability/features/FEAT-029-hw-telemetry-benchmark-logger.md", "title": "HW Telemetry Benchmark Recorder & Error Logger"},
+    {"id": "feat:FEAT-030", "type": "feature", "path": "docs/domains/ai-system/features/FEAT-030-autonomous-spec-auditor.md", "title": "Autonomous Technical Spec Auditor Daemon"}
   ],
 
   "edges": [
@@ -216,7 +217,8 @@
     {"from": "spec:SPEC-EVAL-002", "to": "doc:ROADMAP", "relation": "specifies"},
     {"from": "spec:SPEC-EVAL-002", "to": "spec:SPEC-WORKFLOW-001", "relation": "hardens"},
     {"from": "domain:observability", "to": "feat:FEAT-029", "relation": "owns"},
-    {"from": "feat:FEAT-029", "to": "req:FR-006", "relation": "implements"}
+    {"from": "feat:FEAT-029", "to": "req:FR-006", "relation": "implements"},
+    {"from": "spec:SPEC-WORKFLOW-001", "to": "feat:FEAT-030", "relation": "owns"}
   ]
 }
 
