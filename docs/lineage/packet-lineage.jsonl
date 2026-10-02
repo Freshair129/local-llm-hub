@@ -32,6 +32,8 @@
 {"packet_id":"PKT-FR-010-ALL","fr_id":"FR-010","layer":"full","cmp":"src-tauri/src/commands/share.rs::start_lan_server,safe_resolve_path","model":"Mellum2-12B-A2.5B-Thinking","timestamp":"2026-09-28T10:50:00Z","test_result":{"status":"PASSED","tests_run":5,"duration_ms":20},"target_tc":"test_lan_share.rs","git_commit":"HEAD","reviewed_by":"reviewer-agent"}
 {"gate_id":"GATE-FEAT-011","fr_id":"FR-010","target_tc":"test_lan_share.rs","status":"PASSED","timestamp":"2026-09-28T10:50:30Z","evidence":{"http_206_partial_content":true,"path_traversal_blocked":true,"test_suite":"test_lan_share.rs","status":"100% passed"}}
 {"gate_id":"GATE-MVP-E2E","fr_id":"ALL-10-FRS","target_tc":"test_mvp_e2e.rs","status":"PASSED","timestamp":"2026-09-28T11:00:00Z","evidence":{"full_roadmap_dag_completed":true,"all_tests_passed":44,"failed":0,"zero_panics_verified":true,"status":"100% GREEN"}}
+{"packet_id":"PKT-F027-UI","fr_id":"FEAT-027","layer":"ui","cmp":"src/js/chat.js,src/js/personas.js","model":"Mellum2-12B-A2.5B-Thinking","timestamp":"2026-10-02T08:16:00Z","test_result":{"status":"PASSED","tests_run":1,"duration_ms":12},"target_tc":"RUN-1790928754354.md","git_commit":"HEAD","reviewed_by":"reviewer-agent"}
+{"packet_id":"PKT-F028-UI","fr_id":"FEAT-028","layer":"ui","cmp":"src/js/stats.js","model":"Mellum2-12B-A2.5B-Thinking","timestamp":"2026-10-02T08:23:00Z","test_result":{"status":"PASSED","tests_run":1,"duration_ms":10},"target_tc":"RUN-1790929195628.md","git_commit":"HEAD","reviewed_by":"reviewer-agent"}
 
 
 
