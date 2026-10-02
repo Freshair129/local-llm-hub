@@ -17,6 +17,7 @@ pub mod proxy;
 pub mod scanner;
 pub mod share;
 pub mod storage;
+pub mod swarm;
 pub mod updater;
 
 pub use backends::*;
@@ -28,5 +29,7 @@ pub use proxy::*;
 pub use scanner::*;
 pub use share::*;
 pub use storage::*;
+pub use swarm::*;
 pub use updater::*;
+
 

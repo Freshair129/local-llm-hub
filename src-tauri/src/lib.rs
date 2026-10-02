@@ -676,7 +676,10 @@ pub fn run() {
             window_minimize,
             window_maximize,
             window_close,
-            window_start_dragging
+            window_start_dragging,
+            commands::swarm::register_worker_node,
+            commands::swarm::list_worker_nodes,
+            commands::swarm::offload_swarm_task
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

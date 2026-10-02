@@ -588,6 +588,30 @@ impl ModelCategoryTag {
     }
 }
 
+// trace:implements FEAT-031
+/// Configuration and health descriptor for a secondary Swarm worker node over LAN
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct WorkerNodeConfig {
+    pub node_id: String,
+    pub host: String,
+    pub port: u16,
+    pub status: String,
+    pub vram_free_mb: u64,
+    pub active_tasks: u32,
+    pub last_seen_timestamp: u64,
+}
+
+// trace:implements FEAT-031
+/// Swarm task offload payload sent to secondary node
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SwarmTaskPayload {
+    pub task_id: String,
+    pub model: String,
+    pub prompt: String,
+    pub max_tokens: Option<u32>,
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;

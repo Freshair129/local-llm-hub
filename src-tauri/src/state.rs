@@ -43,7 +43,7 @@ impl Default for BackendConfig {
 }
 
 use std::collections::HashMap;
-pub use crate::models::types::{ApiKeyRecord, ModelStats, UnifiedModel};
+pub use crate::models::types::{ApiKeyRecord, ModelStats, UnifiedModel, WorkerNodeConfig};
 
 /// Lifecycle status of the embedded LiteLLM proxy process
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -70,6 +70,8 @@ pub struct AppState {
     pub litellm_status: LiteLLMStatus,
     #[serde(default)]
     pub api_keys: Vec<ApiKeyRecord>,
+    #[serde(default)]
+    pub worker_nodes: Vec<WorkerNodeConfig>,
 }
 
 impl Default for AppState {
@@ -94,6 +96,17 @@ impl Default for AppState {
                     created_at: 1700000000000,
                     expires_at: None,
                     active: true,
+                }
+            ],
+            worker_nodes: vec![
+                WorkerNodeConfig {
+                    node_id: "node_master_01".to_string(),
+                    host: "127.0.0.1".to_string(),
+                    port: 11434,
+                    status: "online".to_string(),
+                    vram_free_mb: 12288,
+                    active_tasks: 0,
+                    last_seen_timestamp: 1700000000000,
                 }
             ],
         }
