@@ -1,7 +1,10 @@
 // src/js/stats.js
 // trace:implements FR-006
+// trace:implements FEAT-028
 // trace:implements SPEC-WORKFLOW-001
 // Model Execution Statistics & ROI Tracker
+
+import { showToast } from './toast.js';
 
 const STATS_STORAGE_KEY = 'local_llm_hub_model_stats';
 
@@ -116,6 +119,47 @@ export function recordTaskExecution(modelId, { success = true, tokens = 0, tps =
   renderStatsDashboard();
 }
 
+// trace:implements FEAT-028
+
+export function exportStatsCSV() {
+  const stats = loadAllStats();
+  const list = Object.entries(stats).map(([id, data]) => ({ id, ...data }));
+  
+  let csv = 'Model ID,Model Name,Total Tasks,Successful Tasks,Failed Tasks,Total Tokens,Avg Speed (t/s),VRAM Footprint,Last Used\n';
+  list.forEach(m => {
+    csv += `"${m.id}","${m.name}",${m.total_tasks || 0},${m.successful_tasks || 0},${m.failed_tasks || 0},${m.total_tokens || 0},${m.avg_tps || 0},"${m.last_vram || ''}","${m.last_used || ''}"\n`;
+  });
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', `local_llm_hub_stats_${Date.now()}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showToast('Exported Analytics & ROI report as CSV! 📊', 'success');
+}
+
+export function exportStatsJSON() {
+  const stats = loadAllStats();
+  const jsonStr = JSON.stringify(stats, null, 2);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', `local_llm_hub_stats_${Date.now()}.json`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showToast('Exported Analytics & ROI report as JSON! 📄', 'success');
+}
+
+if (typeof window !== 'undefined') {
+  window.exportStatsCSV = exportStatsCSV;
+  window.exportStatsJSON = exportStatsJSON;
+}
+
 export function renderStatsDashboard() {
   const container = document.getElementById('model-stats-dashboard-container');
   if (!container) return;
@@ -133,6 +177,19 @@ export function renderStatsDashboard() {
   const champion = [...list].sort((a,b) => (b.avg_tps || 0) - (a.avg_tps || 0))[0];
 
   container.innerHTML = `
+    <!-- Top Action Bar (Export CSV / JSON) -->
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:12px;">
+      <div style="font-size:14px; font-weight:700; color:#fff;">📊 Performance Summary &amp; ROI Impact</div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-ghost" onclick="window.exportStatsCSV()" style="padding:6px 14px; font-size:12px; border-color:rgba(56,189,248,0.4); color:#38bdf8; cursor:pointer;" title="Export report to CSV spreadsheet">
+          📊 Export CSV
+        </button>
+        <button class="btn btn-ghost" onclick="window.exportStatsJSON()" style="padding:6px 14px; font-size:12px; border-color:rgba(124,242,107,0.4); color:#7cf26b; cursor:pointer;" title="Export raw JSON stats payload">
+          📄 Export JSON
+        </button>
+      </div>
+    </div>
+
     <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:20px;">
       <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:16px;">
         <span style="font-size:12px; color:rgba(255,255,255,0.5);">Total Local Tasks</span>
