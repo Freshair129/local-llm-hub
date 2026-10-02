@@ -1,23 +1,23 @@
 {
   "hf.co/JetBrains/Mellum2-12B-A2.5B-Instruct-GGUF-Q4_K_M:Q4_K_M": {
     "model_id": "hf.co/JetBrains/Mellum2-12B-A2.5B-Instruct-GGUF-Q4_K_M:Q4_K_M",
-    "total_tasks": 10,
-    "successful_tasks": 10,
+    "total_tasks": 13,
+    "successful_tasks": 13,
     "failed_tasks": 0,
-    "total_tokens": 11429,
-    "total_prompt_tokens": 26803,
-    "last_used": "2026-10-02T08:15:11.316Z",
-    "last_tps": 129.7
+    "total_tokens": 17573,
+    "total_prompt_tokens": 40912,
+    "last_used": "2026-10-02T08:22:53.291Z",
+    "last_tps": 127.7
   },
   "hf.co/bigatuna/Qwen3.5-9b-Sushi-Coder-RL-GGUF:Q4_K_M": {
     "model_id": "hf.co/bigatuna/Qwen3.5-9b-Sushi-Coder-RL-GGUF:Q4_K_M",
-    "total_tasks": 8,
-    "successful_tasks": 8,
+    "total_tasks": 11,
+    "successful_tasks": 11,
     "failed_tasks": 0,
-    "total_tokens": 5948,
-    "total_prompt_tokens": 10777,
-    "last_used": "2026-10-02T08:15:33.224Z",
-    "last_tps": 53.2
+    "total_tokens": 8199,
+    "total_prompt_tokens": 17879,
+    "last_used": "2026-10-02T08:23:12.004Z",
+    "last_tps": 54.9
   },
   "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL": {
     "model_id": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
@@ -31,12 +31,12 @@
   },
   "hf.co/JetBrains/Mellum2-12B-A2.5B-Thinking-GGUF-Q4_K_M:Q4_K_M": {
     "model_id": "hf.co/JetBrains/Mellum2-12B-A2.5B-Thinking-GGUF-Q4_K_M:Q4_K_M",
-    "total_tasks": 4,
-    "successful_tasks": 4,
+    "total_tasks": 5,
+    "successful_tasks": 5,
     "failed_tasks": 0,
-    "total_tokens": 6258,
-    "total_prompt_tokens": 2252,
-    "last_used": "2026-10-02T08:16:11.643Z",
-    "last_tps": 132.3
+    "total_tokens": 7136,
+    "total_prompt_tokens": 2444,
+    "last_used": "2026-10-02T08:23:49.545Z",
+    "last_tps": 132.9
   }
 }
