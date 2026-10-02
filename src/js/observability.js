@@ -59,6 +59,14 @@ export function updateTelemetryDOM(telemetry) {
     ramTotal: Number(formatGb(telemetry.system_ram_total_bytes || 34359738368))
   });
 
+  recordTelemetrySample({
+    cpu_pct: cpuPct,
+    vram_used: gpu?.vram_used_bytes || 0,
+    gpu_util: gpu?.utilization_pct || 0,
+    gpu_temp: gpuTemp
+  });
+
+
   // 3. Topbar Status Pills
   const vramPill = document.getElementById('stat-gpu-vram');
   if (vramPill && gpu) {
@@ -245,3 +253,44 @@ if (typeof document !== 'undefined') {
     }
   });
 }
+
+// --- FEAT-029: HW Telemetry TimeSeries Recorder & Error Logger ---
+let isHwRecording = false;
+let hwRecordLogs = [];
+
+export function startHwRecording() {
+  isHwRecording = true;
+  hwRecordLogs = [];
+  console.log('[INFO:telemetry] Started FEAT-029 HW Telemetry TimeSeries Recording.');
+  return true;
+}
+
+export function stopHwRecording(format = 'json') {
+  isHwRecording = false;
+  console.log(`[INFO:telemetry] Stopped HW Telemetry Recording. Total samples: ${hwRecordLogs.length}`);
+  
+  if (hwRecordLogs.length === 0) {
+    return format === 'csv' ? 'timestamp,cpu_pct,gpu_vram_mb,gpu_util_pct,gpu_temp_c\n' : JSON.stringify([], null, 2);
+  }
+
+  if (format === 'csv') {
+    const headers = Object.keys(hwRecordLogs[0]).join(',');
+    const rows = hwRecordLogs.map(row => Object.values(row).join(','));
+    const csvContent = [headers, ...rows].join('\n');
+    return csvContent;
+  }
+
+  return JSON.stringify(hwRecordLogs, null, 2);
+}
+
+export function recordTelemetrySample(sample) {
+  if (!isHwRecording) return;
+  hwRecordLogs.push({
+    timestamp: new Date().toISOString(),
+    cpu_pct: sample.cpu_pct || 0,
+    gpu_vram_used_mb: Math.round((sample.vram_used || 0) / (1024 * 1024)),
+    gpu_util_pct: sample.gpu_util || 0,
+    gpu_temp_c: sample.gpu_temp || 0
+  });
+}
+
