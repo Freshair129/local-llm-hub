@@ -1,16 +1,34 @@
 // src/js/chat.js
 // trace:implements FR-007
+// trace:implements FEAT-027
 // Interactive Chat Playground Frontend Component
 
 import { recordTaskExecution } from './stats.js';
 import { invoke } from './api.js';
+import { PERSONAS, getPersonaById } from './personas.js';
 
 let conversationHistory = [];
 let currentModel = '';
 let currentBackend = 'ollama';
+let currentPersonaId = 'default';
 
 export function initChat(models = []) {
   const modelSelect = document.getElementById('chat-model-select');
+  const personaSelect = document.getElementById('chat-persona-select');
+
+  if (personaSelect) {
+    personaSelect.innerHTML = PERSONAS.map(p => 
+      `<option value="${p.id}">${p.icon} ${p.name}</option>`
+    ).join('');
+
+    personaSelect.addEventListener('change', (e) => {
+      currentPersonaId = e.target.value;
+      const persona = getPersonaById(currentPersonaId);
+      // Reset conversation history with new system prompt
+      conversationHistory = [{ role: 'system', content: persona.systemPrompt }];
+    });
+  }
+
   if (modelSelect && models.length > 0) {
     if (!currentModel) {
       currentModel = models[0].name;
@@ -129,6 +147,14 @@ export async function sendMessage() {
 
   const text = inputEl.value.trim();
   if (!text) return;
+
+  // Ensure active persona system prompt is prepended
+  const persona = getPersonaById(currentPersonaId);
+  if (conversationHistory.length === 0 || conversationHistory[0].role !== 'system') {
+    conversationHistory.unshift({ role: 'system', content: persona.systemPrompt });
+  } else {
+    conversationHistory[0] = { role: 'system', content: persona.systemPrompt };
+  }
 
   // Add User Message
   conversationHistory.push({ role: 'user', content: text });
