@@ -101,6 +101,48 @@ export async function recordModelTask(modelId, success, promptTokens, completion
 }
 
 /**
+ * Updates dynamic counts inside tag filter pill buttons
+ */
+function updateTagPillCounts(allModels) {
+  const filterBar = document.getElementById('model-tag-filter-bar');
+  if (!filterBar) return;
+
+  const counts = {
+    all: allModels.length,
+    Coding: 0,
+    Reasoning: 0,
+    Chat: 0,
+    Vision: 0,
+    Edge: 0
+  };
+
+  allModels.forEach(m => {
+    if (Array.isArray(m.tags)) {
+      m.tags.forEach(t => {
+        if (counts[t] !== undefined) counts[t]++;
+      });
+    }
+  });
+
+  const labels = {
+    all: `All Models (${counts.all})`,
+    Coding: `🏷️ Coding (${counts.Coding})`,
+    Reasoning: `🧠 Reasoning (${counts.Reasoning})`,
+    Chat: `💬 Chat (${counts.Chat})`,
+    Vision: `👁️ Vision (${counts.Vision})`,
+    Edge: `📐 Edge (${counts.Edge})`
+  };
+
+  const pills = filterBar.querySelectorAll('.tag-filter-pill');
+  pills.forEach(pill => {
+    const tag = pill.getAttribute('data-tag');
+    if (labels[tag]) {
+      pill.textContent = labels[tag];
+    }
+  });
+}
+
+/**
  * Setup Tag Filter Bar Buttons
  */
 function setupTagFilterButtons() {
@@ -155,6 +197,8 @@ export function renderModels(allModels) {
   if (!grid) return;
 
   // Filter models by active taxonomy tag
+  updateTagPillCounts(allModels || []);
+
   const models = (!allModels || activeTagFilter === 'all')
     ? (allModels || [])
     : allModels.filter(m => Array.isArray(m.tags) && m.tags.includes(activeTagFilter));
