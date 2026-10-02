@@ -372,6 +372,41 @@ fn get_lan_share_status(current_path: String, port: Option<u16>) -> Result<crate
     Ok(commands::share::get_lan_share_status(&current_path, port.unwrap_or(8080)))
 }
 
+// trace:implements FEAT-024
+#[tauri::command]
+fn generate_lan_pin(duration_secs: Option<u64>) -> Result<crate::models::types::LanSharePinSession, String> {
+    Ok(commands::share::generate_ephemeral_pin(duration_secs))
+}
+
+// trace:implements FEAT-024
+#[tauri::command]
+fn verify_lan_pin(candidate: String) -> Result<crate::models::types::LanPinVerificationResult, String> {
+    Ok(commands::share::verify_ephemeral_pin(&candidate))
+}
+
+// trace:implements FEAT-024
+#[tauri::command]
+fn clear_lan_pin() -> Result<bool, String> {
+    commands::share::clear_ephemeral_pin();
+    Ok(true)
+}
+
+// trace:implements FEAT-024
+#[tauri::command]
+fn get_active_lan_pin() -> Result<Option<crate::models::types::LanSharePinSession>, String> {
+    Ok(commands::share::get_active_pin_session())
+}
+
+// trace:implements FEAT-023
+#[tauri::command]
+fn estimate_chat_tokens(
+    prompt: String,
+    max_context_length: Option<usize>,
+) -> Result<crate::models::types::TokenEstimateResult, String> {
+    Ok(commands::chat::estimate_chat_tokens(&prompt, max_context_length))
+}
+
+
 // trace:implements FR-014
 #[tauri::command]
 fn get_app_version() -> Result<crate::models::types::AppVersionInfo, String> {
@@ -625,6 +660,11 @@ pub fn run() {
             start_lan_share,
             stop_lan_share,
             get_lan_share_status,
+            generate_lan_pin,
+            verify_lan_pin,
+            clear_lan_pin,
+            get_active_lan_pin,
+            estimate_chat_tokens,
             get_app_version,
             check_for_updates,
             apply_update,

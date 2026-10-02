@@ -84,6 +84,8 @@ pub struct UnifiedModel {
     pub duplicate_backends: Vec<String>,
     #[serde(default)]
     pub stats: Option<ModelStats>,
+    #[serde(default)]
+    pub tags: Vec<String>,
 }
 
 impl UnifiedModel {
@@ -111,6 +113,7 @@ impl UnifiedModel {
             duplicate_group: None,
             duplicate_backends: Vec::new(),
             stats: None,
+            tags: Vec::new(),
         }
     }
 }
@@ -451,6 +454,140 @@ pub struct OffloadResult {
     pub message: String,
 }
 
+// trace:implements FEAT-023
+/// Context threshold levels for prompt token warnings
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub enum ContextThresholdLevel {
+    Safe,    // < 70% of context window
+    Warning, // 70% - 90% of context window
+    Danger,  // > 90% of context window
+}
+
+// trace:implements FEAT-023
+/// Request for pre-flight prompt token estimation
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct TokenEstimateRequest {
+    pub prompt: String,
+    pub model_id: Option<String>,
+    pub max_context_length: Option<usize>,
+}
+
+// trace:implements FEAT-023
+/// Real-time token estimation result returned to UI
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct TokenEstimateResult {
+    pub estimated_tokens: usize,
+    pub max_context_length: usize,
+    pub usage_percentage: f32,
+    pub threshold: ContextThresholdLevel,
+    pub is_overflow_risk: bool,
+}
+
+impl TokenEstimateResult {
+    pub fn new(estimated_tokens: usize, max_context_length: usize) -> Self {
+        let max_ctx = if max_context_length == 0 { 8192 } else { max_context_length };
+        let ratio = (estimated_tokens as f32 / max_ctx as f32).min(1.0);
+        let threshold = if ratio > 0.90 {
+            ContextThresholdLevel::Danger
+        } else if ratio > 0.70 {
+            ContextThresholdLevel::Warning
+        } else {
+            ContextThresholdLevel::Safe
+        };
+        Self {
+            estimated_tokens,
+            max_context_length: max_ctx,
+            usage_percentage: (ratio * 100.0).round(),
+            threshold,
+            is_overflow_risk: ratio > 0.90,
+        }
+    }
+}
+
+// trace:implements FEAT-024
+/// In-memory Ephemeral PIN session for LAN model sharing
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct LanSharePinSession {
+    pub pin: String,
+    pub created_at: u64,
+    pub expires_at: u64,
+    pub failed_attempts: u32,
+    pub max_failed_attempts: u32,
+    pub is_locked: bool,
+    pub lock_until: Option<u64>,
+}
+
+impl LanSharePinSession {
+    pub fn new(pin: impl Into<String>, now: u64, duration_secs: u64) -> Self {
+        Self {
+            pin: pin.into(),
+            created_at: now,
+            expires_at: now + duration_secs,
+            failed_attempts: 0,
+            max_failed_attempts: 5,
+            is_locked: false,
+            lock_until: None,
+        }
+    }
+
+    /// Constant-time comparison to prevent timing attacks
+    pub fn is_valid(&self, candidate_pin: &str, now: u64) -> bool {
+        if self.is_locked(now) || now > self.expires_at {
+            return false;
+        }
+        let a = self.pin.as_bytes();
+        let b = candidate_pin.as_bytes();
+        if a.len() != b.len() {
+            return false;
+        }
+        let mut diff = 0u8;
+        for (x, y) in a.iter().zip(b.iter()) {
+            diff |= x ^ y;
+        }
+        diff == 0
+    }
+
+    pub fn is_locked(&self, now: u64) -> bool {
+        if let Some(until) = self.lock_until {
+            now < until
+        } else {
+            false
+        }
+    }
+}
+
+// trace:implements FEAT-024
+/// Result of LAN share PIN verification
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct LanPinVerificationResult {
+    pub is_valid: bool,
+    pub message: String,
+    pub remaining_attempts: Option<u32>,
+}
+
+// trace:implements FEAT-025
+/// Standard 5-tier classification tags for local models
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+pub enum ModelCategoryTag {
+    Coding,
+    Reasoning,
+    Chat,
+    Vision,
+    Edge,
+}
+
+impl ModelCategoryTag {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Coding => "Coding",
+            Self::Reasoning => "Reasoning",
+            Self::Chat => "Chat",
+            Self::Vision => "Vision",
+            Self::Edge => "Edge",
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -576,6 +713,7 @@ mod tests {
             duplicate_group: Some("llama3".to_string()),
             duplicate_backends: vec!["ollama".to_string(), "gguf".to_string()],
             stats: None,
+            tags: vec![],
         };
 
         let m2 = UnifiedModel {
@@ -592,6 +730,7 @@ mod tests {
             duplicate_group: Some("llama3".to_string()),
             duplicate_backends: vec!["ollama".to_string(), "gguf".to_string()],
             stats: None,
+            tags: vec![],
         };
 
         let group = DedupGroup {
@@ -708,6 +847,78 @@ mod tests {
         let json = serde_json::to_string(&key).expect("serialize ApiKeyRecord");
         let deserialized: ApiKeyRecord = serde_json::from_str(&json).expect("deserialize ApiKeyRecord");
         assert_eq!(deserialized, key);
+    }
+
+    // trace:verifies FEAT-023
+    #[test]
+    fn test_token_estimate_result_serde() {
+        let safe = TokenEstimateResult::new(2000, 8192);
+        assert_eq!(safe.threshold, ContextThresholdLevel::Safe);
+        assert!(!safe.is_overflow_risk);
+        assert_eq!(safe.usage_percentage, 24.0);
+
+        let warn = TokenEstimateResult::new(6500, 8192);
+        assert_eq!(warn.threshold, ContextThresholdLevel::Warning);
+        assert!(!warn.is_overflow_risk);
+        assert_eq!(warn.usage_percentage, 79.0);
+
+        let danger = TokenEstimateResult::new(7800, 8192);
+        assert_eq!(danger.threshold, ContextThresholdLevel::Danger);
+        assert!(danger.is_overflow_risk);
+        assert_eq!(danger.usage_percentage, 95.0);
+
+        let json = serde_json::to_string(&safe).expect("serialize TokenEstimateResult");
+        let deserialized: TokenEstimateResult = serde_json::from_str(&json).expect("deserialize TokenEstimateResult");
+        assert_eq!(deserialized, safe);
+    }
+
+    // trace:verifies FEAT-024
+    #[test]
+    fn test_lan_pin_session_expiration_and_constant_time() {
+        let session = LanSharePinSession::new("4829", 1000, 1800); // 30 min duration
+        assert_eq!(session.pin, "4829");
+        assert_eq!(session.expires_at, 2800);
+        assert!(!session.is_locked(1500));
+
+        // Valid pin within time window
+        assert!(session.is_valid("4829", 1500));
+
+        // Invalid pin
+        assert!(!session.is_valid("0000", 1500));
+        assert!(!session.is_valid("482", 1500));
+
+        // Expired pin
+        assert!(!session.is_valid("4829", 3000));
+
+        let json = serde_json::to_string(&session).expect("serialize LanSharePinSession");
+        let deserialized: LanSharePinSession = serde_json::from_str(&json).expect("deserialize LanSharePinSession");
+        assert_eq!(deserialized, session);
+    }
+
+    // trace:verifies FEAT-025
+    #[test]
+    fn test_model_category_tags_serialization() {
+        let tag = ModelCategoryTag::Coding;
+        assert_eq!(tag.as_str(), "Coding");
+        let json = serde_json::to_string(&tag).expect("serialize ModelCategoryTag");
+        let deserialized: ModelCategoryTag = serde_json::from_str(&json).expect("deserialize ModelCategoryTag");
+        assert_eq!(deserialized, tag);
+
+        let mut model = UnifiedModel::new(
+            "ollama:qwen3.5-coder",
+            "qwen3.5:9b-coder",
+            "qwen3.5 coder",
+            "ollama",
+            "gguf",
+            6000000000,
+            Some("Q4_K_M".to_string()),
+            true,
+        );
+        model.tags = vec!["Coding".to_string(), "Reasoning".to_string()];
+
+        let model_json = serde_json::to_string(&model).expect("serialize UnifiedModel with tags");
+        let deserialized_model: UnifiedModel = serde_json::from_str(&model_json).expect("deserialize UnifiedModel with tags");
+        assert_eq!(deserialized_model.tags, vec!["Coding", "Reasoning"]);
     }
 }
 

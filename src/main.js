@@ -26,6 +26,7 @@ import { initGpuTuning, refreshGpuTelemetry } from './js/gpu_tuning.js';
 import { refreshHardwareSurfaces } from './js/hardware_surfaces.js';
 import { initGateway, refreshGatewayView } from './js/gateway.js';
 import { initStorage, refreshStorageView } from './js/storage.js';
+import { initShare } from './js/share.js';
 import { invoke } from './js/api.js';
 
 // Navigation Tabs Setup (GHT Command Center 2-Tier Architecture)
@@ -356,42 +357,6 @@ function setupNavigation() {
       }
     });
   }
-
-  // LAN Sharing Toggle button
-  const btnToggleLan = document.getElementById('btn-toggle-lan-share');
-  if (btnToggleLan) {
-    btnToggleLan.addEventListener('click', async () => {
-      const currentState = store.state.lanSharingActive;
-      btnToggleLan.disabled = true;
-      try {
-        if (!currentState) {
-          const status = await invoke('start_lan_share', { rootPath: store.state.lanSharedPath, port: store.state.lanPort });
-          store.setState({ lanSharingActive: true });
-          btnToggleLan.textContent = 'Stop LAN Share 🛑';
-          btnToggleLan.style.background = '#ef4444';
-          const networkUrlEl = document.getElementById('share-network-url');
-          if (networkUrlEl && status?.download_urls?.length) {
-            networkUrlEl.textContent = status.download_urls[0];
-          }
-          showToast('LAN Sharing started on port 8080', 'success');
-        } else {
-          await invoke('stop_lan_share');
-          store.setState({ lanSharingActive: false });
-          btnToggleLan.textContent = 'Start LAN Share 📡';
-          btnToggleLan.style.background = '';
-          showToast('LAN Sharing stopped', 'info');
-        }
-      } catch (err) {
-        store.setState({ lanSharingActive: false });
-        btnToggleLan.textContent = 'Start LAN Share 📡';
-        btnToggleLan.style.background = '';
-        console.error('LAN Share error:', err);
-        showToast(`LAN Share error: ${err}`, 'error');
-      } finally {
-        btnToggleLan.disabled = false;
-      }
-    });
-  }
 }
 
 // Initialize Application
@@ -409,6 +374,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   refreshHardwareSurfaces();
   initGateway();
   initStorage();
+  initShare();
   startTelemetryPolling(2000);
 
   // Setup Refresh Rate Cadence Selector Listener

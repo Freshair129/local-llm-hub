@@ -38,8 +38,89 @@ export function initChat(models = []) {
         sendMessage();
       }
     };
+    // trace:implements FEAT-023
+    chatInput.addEventListener('input', (e) => {
+      updateTokenPreflight(e.target.value);
+    });
   }
 }
+
+// trace:implements FEAT-023
+/**
+ * Real-time preflight token estimation with Hybrid BPE Heuristic & Overflow Guard
+ */
+let debounceTimer = null;
+export async function updateTokenPreflight(promptText) {
+  const badgeEl = document.getElementById('chat-token-badge');
+  const labelEl = document.getElementById('chat-token-count-label');
+  const barEl = document.getElementById('chat-token-progress-bar');
+  const warningEl = document.getElementById('chat-token-overflow-warning');
+  if (!badgeEl || !labelEl || !barEl) return;
+
+  const maxCtx = 8192;
+  const text = promptText || '';
+
+  // 1. Instant 0ms Client-Side BPE Heuristic (Option C)
+  let asciiCount = 0;
+  let unicodeCount = 0;
+  for (let i = 0; i < text.length; i++) {
+    if (text.charCodeAt(i) < 128) asciiCount++;
+    else unicodeCount++;
+  }
+  const estimated = Math.ceil(asciiCount / 3.8) + Math.ceil(unicodeCount / 1.7);
+  const ratio = Math.min(1.0, estimated / maxCtx);
+  const pct = Math.round(ratio * 100);
+
+  renderPreflightGauge(estimated, maxCtx, pct);
+
+  // 2. Debounced Backend IPC verification for exact parity
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(async () => {
+    try {
+      const res = await invoke('estimate_chat_tokens', {
+        prompt: text,
+        maxContextLength: maxCtx
+      });
+      if (res) {
+        renderPreflightGauge(res.estimated_tokens, res.max_context_length, res.usage_percentage);
+      }
+    } catch (e) {
+      // Keep heuristic estimate on any error
+    }
+  }, 250);
+}
+
+function renderPreflightGauge(tokens, maxTokens, pct) {
+  const badgeEl = document.getElementById('chat-token-badge');
+  const labelEl = document.getElementById('chat-token-count-label');
+  const barEl = document.getElementById('chat-token-progress-bar');
+  const warningEl = document.getElementById('chat-token-overflow-warning');
+  if (!badgeEl || !labelEl || !barEl) return;
+
+  labelEl.textContent = `Estimated: ${tokens.toLocaleString()} / ${maxTokens.toLocaleString()} tokens (${pct}%)`;
+  barEl.style.width = `${Math.min(100, pct)}%`;
+
+  if (pct > 90) {
+    badgeEl.style.background = 'rgba(239, 68, 68, 0.2)';
+    badgeEl.style.color = '#ef4444';
+    badgeEl.textContent = '🔴 Overflow Danger (>90%)';
+    barEl.style.backgroundColor = '#ef4444';
+    if (warningEl) warningEl.style.display = 'inline-block';
+  } else if (pct > 70) {
+    badgeEl.style.background = 'rgba(245, 158, 11, 0.2)';
+    badgeEl.style.color = '#f59e0b';
+    badgeEl.textContent = '🟡 Warning (70-90%)';
+    barEl.style.backgroundColor = '#f59e0b';
+    if (warningEl) warningEl.style.display = 'none';
+  } else {
+    badgeEl.style.background = 'rgba(52, 211, 153, 0.15)';
+    badgeEl.style.color = '#34d399';
+    badgeEl.textContent = '🟢 Safe (<70%)';
+    barEl.style.backgroundColor = '#34d399';
+    if (warningEl) warningEl.style.display = 'none';
+  }
+}
+
 
 export async function sendMessage() {
   const inputEl = document.getElementById('chat-user-input');

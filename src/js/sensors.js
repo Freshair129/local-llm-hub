@@ -114,6 +114,36 @@ export function renderSensorsView() {
   if (kpiV12) kpiV12.textContent = `${v12Rail.toFixed(2)} V`;
   if (kpiFans) kpiFans.textContent = `${fansCount} Active`;
 
+  // trace:implements GAP-OBS-01
+  // Thermal Threshold Warning for GPU Hotspot / VRAM (Safe limit <= 88°C)
+  const vramTemp = sensorsCache.find(s => s.kind === 'temperature' && (s.name.includes('VRAM') || s.name.includes('Memory')) && s.hw.includes('NVIDIA'))?.value || 0.0;
+  const isThermalWarning = gpuHotspot >= 88.0 || vramTemp >= 90.0;
+
+  const thermalBanner = document.getElementById('thermal-throttle-warning-banner');
+  if (thermalBanner) {
+    if (isThermalWarning) {
+      thermalBanner.style.display = 'flex';
+      thermalBanner.innerHTML = `
+        <span style="font-size:20px;">🔥</span>
+        <div>
+          <strong style="color:#ef4444; font-weight:700;">THERMAL THROTTLE ALERT:</strong> 
+          GPU Hotspot temperature is <strong>${gpuHotspot.toFixed(1)} °C</strong> (Threshold: 88.0 °C). 
+          CUDA inference performance may be throttled to prevent silicon degradation. Increasing fan curve recommended.
+        </div>
+      `;
+      if (kpiGpuHotspot) {
+        kpiGpuHotspot.style.color = '#ef4444';
+        kpiGpuHotspot.style.textShadow = '0 0 12px rgba(239,68,68,0.6)';
+      }
+    } else {
+      thermalBanner.style.display = 'none';
+      if (kpiGpuHotspot) {
+        kpiGpuHotspot.style.color = '';
+        kpiGpuHotspot.style.textShadow = '';
+      }
+    }
+  }
+
   // 2. Filter readings
   let filtered = sensorsCache;
 

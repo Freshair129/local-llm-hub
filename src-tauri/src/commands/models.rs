@@ -146,7 +146,7 @@ pub async fn fetch_ollama_models(client: &reqwest::Client, base_url: &str) -> Ve
             let fmt = m.details.as_ref().and_then(|d| d.format.clone())
                 .unwrap_or_else(|| "gguf".to_string());
 
-            results.push(UnifiedModel::new(
+            let mut model = UnifiedModel::new(
                 format!("ollama:{}", m.name),
                 m.name,
                 canonical,
@@ -155,7 +155,9 @@ pub async fn fetch_ollama_models(client: &reqwest::Client, base_url: &str) -> Ve
                 m.size.unwrap_or(0),
                 quant,
                 false,
-            ));
+            );
+            model.tags = classify_model_tags(&model.name, &model.format, model.size_bytes);
+            results.push(model);
         }
     }
 
@@ -193,7 +195,7 @@ pub async fn fetch_vllm_models(client: &reqwest::Client, base_url: &str) -> Vec<
             let canonical = normalize_model_name(&m.id);
             let quant = extract_quantization(&m.id);
 
-            results.push(UnifiedModel::new(
+            let mut model = UnifiedModel::new(
                 format!("vllm:{}", m.id),
                 m.id,
                 canonical,
@@ -202,7 +204,9 @@ pub async fn fetch_vllm_models(client: &reqwest::Client, base_url: &str) -> Vec<
                 0,
                 quant,
                 false,
-            ));
+            );
+            model.tags = classify_model_tags(&model.name, &model.format, model.size_bytes);
+            results.push(model);
         }
     }
 
@@ -231,7 +235,7 @@ pub fn scan_gguf_models(gguf_dir: &str) -> Vec<UnifiedModel> {
                         let canonical = normalize_model_name(&filename);
                         let quant = extract_quantization(&filename);
 
-                        results.push(UnifiedModel::new(
+                        let mut model = UnifiedModel::new(
                             format!("gguf:{}", filename),
                             filename,
                             canonical,
@@ -240,13 +244,42 @@ pub fn scan_gguf_models(gguf_dir: &str) -> Vec<UnifiedModel> {
                             size,
                             quant,
                             false,
-                        ));
+                        );
+                        model.tags = classify_model_tags(&model.name, &model.format, model.size_bytes);
+                        results.push(model);
                     }
                 }
             }
         }
     }
     results
+}
+
+// trace:implements FEAT-025
+/// Automatically classify model tags based on naming patterns, metadata, and byte size
+pub fn classify_model_tags(name: &str, _format: &str, size_bytes: u64) -> Vec<String> {
+    let lower = name.to_lowercase();
+    let mut tags = Vec::new();
+
+    if lower.contains("coder") || lower.contains("code") || lower.contains("starcoder") || lower.contains("rust") || lower.contains("dev") {
+        tags.push("Coding".to_string());
+    }
+    if lower.contains("think") || lower.contains("reason") || lower.contains("r1") || lower.contains("qwq") || lower.contains("cot") {
+        tags.push("Reasoning".to_string());
+    }
+    if lower.contains("vision") || lower.contains("vl") || lower.contains("visual") || lower.contains("multimodal") {
+        tags.push("Vision".to_string());
+    }
+    if lower.contains("instruct") || lower.contains("chat") || lower.contains("conversation") || lower.contains("-it") || lower.contains(":it") {
+        tags.push("Chat".to_string());
+    }
+    if size_bytes > 0 && size_bytes <= 3_500_000_000 {
+        tags.push("Edge".to_string());
+    }
+    if tags.is_empty() {
+        tags.push("General".to_string());
+    }
+    tags
 }
 
 // trace:implements FR-003
@@ -469,5 +502,22 @@ mod tests {
         let unique = deduped.iter().find(|m| m.canonical_name == "mellum2").unwrap();
         assert!(!unique.is_duplicate);
         assert!(!unique.is_preferred);
+    }
+
+    // trace:verifies FEAT-025
+    #[test]
+    fn test_classify_model_tags() {
+        let coder_tags = classify_model_tags("qwen3.5:9b-coder-q4_k_m", "gguf", 6000000000);
+        assert!(coder_tags.contains(&"Coding".to_string()));
+
+        let think_tags = classify_model_tags("mellum2-12b-thinking", "gguf", 7000000000);
+        assert!(think_tags.contains(&"Reasoning".to_string()));
+
+        let edge_tags = classify_model_tags("llama-3.2-1b-instruct", "gguf", 1200000000);
+        assert!(edge_tags.contains(&"Edge".to_string()));
+        assert!(edge_tags.contains(&"Chat".to_string()));
+
+        let vision_tags = classify_model_tags("qwen2-vl-7b-instruct", "gguf", 5000000000);
+        assert!(vision_tags.contains(&"Vision".to_string()));
     }
 }

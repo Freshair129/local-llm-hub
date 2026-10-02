@@ -162,10 +162,35 @@ pub async fn execute_chat(
     }
 }
 
+// trace:implements FEAT-023
+/// Real-time token estimation using fast hybrid BPE heuristic
+pub fn estimate_chat_tokens(prompt: &str, max_context_length: Option<usize>) -> crate::models::types::TokenEstimateResult {
+    let mut ascii_len = 0usize;
+    let mut cjk_unicode_len = 0usize;
+
+    for ch in prompt.chars() {
+        if ch.is_ascii() {
+            ascii_len += 1;
+        } else {
+            cjk_unicode_len += 1;
+        }
+    }
+
+    // Heuristic:
+    // ASCII / English / Code ~ 3.8-4.0 chars per token
+    // Unicode / CJK / Thai ~ 1.5-2.0 chars per token
+    let ascii_tokens = (ascii_len as f32 / 3.8).ceil() as usize;
+    let unicode_tokens = (cjk_unicode_len as f32 / 1.7).ceil() as usize;
+    let total_estimated = ascii_tokens + unicode_tokens;
+
+    let max_ctx = max_context_length.unwrap_or(8192);
+    crate::models::types::TokenEstimateResult::new(total_estimated, max_ctx)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::models::types::ChatMessage;
+    use crate::models::types::{ChatMessage, ContextThresholdLevel};
 
     // trace:verifies FR-007
     #[tokio::test]
@@ -187,4 +212,28 @@ mod tests {
         assert!(res.is_err());
         assert!(res.unwrap_err().contains("Direct chat not supported"));
     }
+
+    // trace:verifies FEAT-023
+    #[test]
+    fn test_estimate_chat_tokens_thresholds() {
+        // Safe range
+        let prompt_safe = "Hello world, this is a test prompt.";
+        let res_safe = estimate_chat_tokens(prompt_safe, Some(4096));
+        assert_eq!(res_safe.threshold, ContextThresholdLevel::Safe);
+        assert!(!res_safe.is_overflow_risk);
+        assert!(res_safe.estimated_tokens > 0);
+
+        // Warning range (e.g. ~75% of 100 max tokens)
+        let prompt_medium = "a".repeat(300); // 300 / 3.8 ~ 79 tokens
+        let res_warning = estimate_chat_tokens(&prompt_medium, Some(100));
+        assert_eq!(res_warning.threshold, ContextThresholdLevel::Warning);
+        assert!(!res_warning.is_overflow_risk);
+
+        // Danger range (>90% of 100 max tokens)
+        let prompt_overflow = "a".repeat(400); // 400 / 3.8 ~ 106 tokens
+        let res_danger = estimate_chat_tokens(&prompt_overflow, Some(100));
+        assert_eq!(res_danger.threshold, ContextThresholdLevel::Danger);
+        assert!(res_danger.is_overflow_risk);
+    }
 }
+

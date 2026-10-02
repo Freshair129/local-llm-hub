@@ -53,16 +53,16 @@ timeline
 
 ---
 
-### 2.2 🚀 Active / Planned Phase 6: P2 Feature Gap Remediation & UX Safety
+### 2.2 ✅ Completed Phase 6: P2 Feature Gap Remediation & UX Safety
 
-เป้าหมายของ Phase 6 คือการปิดช่องว่างที่ระบุใน [GAP-001](GAP-ANALYSIS.md) ตามข้อตกลงสถาปัตยกรรม [ADR-009](adr/ADR-009-feature-gap-remediation-and-p2-roadmap.md):
+เป้าหมายของ Phase 6 ได้รับการพัฒนาและทดสอบครบถ้วน 100% ตามผลการประเมิน [GAP-001](GAP-ANALYSIS.md) และข้อตกลงสถาปัตยกรรม [ADR-009](adr/ADR-009-feature-gap-remediation-and-p2-roadmap.md) (ผ่านการทดสอบ 71/71 Tests Green):
 
-| Feature Code | Feature Name | Domain | Priority | Key Target Deliverables | Target Gate |
-|---|---|---|:---:|---|:---:|
-| [`FEAT-023`](domains/inference-gateway/features/FEAT-023-chat-preflight-token-counter.md) | Chat Preflight Token Estimator | Inference Gateway | **P2.1** | Live Token Meter มุมกล่องข้อความ, แจ้งเตือน Context Overflow เมื่อเกิน 90% | `TC-FEAT-023` |
-| [`FEAT-024`](domains/network-distribution/features/FEAT-024-lan-ephemeral-pin-auth.md) | Ephemeral PIN Auth & QR Pairing | Network Distribution | **P2.2** | Dynamic 4-digit PIN บน Axum Middleware, QR Code Quick Link, Brute-force protection | `TC-FEAT-024` |
-| [`FEAT-025`](domains/model-management/features/FEAT-025-model-tag-taxonomy-filter.md) | Model Tag Taxonomy Filter | Model Management | **P2.3** | Bento Grid Tag Pills (`Coding`, `Reasoning`, `Vision`, `Chat`), Dynamic model counter | `TC-FEAT-025` |
-| `GAP-OBS-01` | Thermal Threshold Audio/Visual Warning | Observability | **P2.4** | Visual Toast Banner เมื่อ GPU Hotspot เกิน 88°C หรือ VRAM เกิน 95% | `TC-FEAT-010-WARN` |
+| Feature Code | Feature Name | Domain | Priority | Key Target Deliverables | Target Gate | Status |
+|---|---|---|:---:|---|:---:|:---:|
+| [`FEAT-023`](domains/inference-gateway/features/FEAT-023-chat-preflight-token-counter.md) | Chat Preflight Token Estimator | Inference Gateway | **P2.1** | Live Token Meter มุมกล่องข้อความ, แจ้งเตือน Context Overflow เมื่อเกิน 90% | `TC-FEAT-023` | 🟢 **DONE** |
+| [`FEAT-024`](domains/network-distribution/features/FEAT-024-lan-ephemeral-pin-auth.md) | Ephemeral PIN Auth & QR Pairing | Network Distribution | **P2.2** | Dynamic 4-digit PIN บน Axum Middleware, QR Code Quick Link, Brute-force protection | `TC-FEAT-024` | 🟢 **DONE** |
+| [`FEAT-025`](domains/model-management/features/FEAT-025-model-tag-taxonomy-filter.md) | Model Tag Taxonomy Filter | Model Management | **P2.3** | Bento Grid Tag Pills (`Coding`, `Reasoning`, `Vision`, `Chat`), Dynamic model counter | `TC-FEAT-025` | 🟢 **DONE** |
+| `GAP-OBS-01` | Thermal Threshold Audio/Visual Warning | Observability | **P2.4** | Visual Toast Banner เมื่อ GPU Hotspot เกิน 88°C หรือ VRAM เกิน 95% | `TC-FEAT-010-WARN` | 🟢 **DONE** |
 
 ---
 

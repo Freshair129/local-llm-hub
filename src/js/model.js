@@ -3,6 +3,8 @@ import { invoke } from './api.js';
 
 // Current view mode: 'grid' | 'list'
 let currentViewMode = 'grid';
+let activeTagFilter = 'all';
+
 try {
   const savedMode = localStorage.getItem('local-llm-hub-models-view-mode');
   if (savedMode === 'list' || savedMode === 'grid') {
@@ -62,6 +64,7 @@ if (typeof window !== 'undefined') {
 
 // trace:implements FR-002
 // trace:implements FR-004
+// trace:implements FEAT-025
 
 export function formatBytes(bytes) {
   if (!bytes || bytes === 0) return '0 B';
@@ -98,6 +101,27 @@ export async function recordModelTask(modelId, success, promptTokens, completion
 }
 
 /**
+ * Setup Tag Filter Bar Buttons
+ */
+function setupTagFilterButtons() {
+  const filterBar = document.getElementById('model-tag-filter-bar');
+  if (!filterBar) return;
+
+  const pills = filterBar.querySelectorAll('.tag-filter-pill');
+  pills.forEach(pill => {
+    pill.onclick = () => {
+      pills.forEach(p => p.classList.remove('active'));
+      pill.classList.add('active');
+      activeTagFilter = pill.getAttribute('data-tag') || 'all';
+
+      import('./state.js').then(({ store }) => {
+        renderModels(store.state.models || []);
+      });
+    };
+  });
+}
+
+/**
  * Setup View Mode buttons listener
  */
 function setupViewModeButtons() {
@@ -120,20 +144,26 @@ function setupViewModeButtons() {
 
 /**
  * Renders the unified model cards into the DOM
- * @param {Array<Object>} models 
+ * @param {Array<Object>} allModels 
  */
-export function renderModels(models) {
+export function renderModels(allModels) {
   setupViewModeButtons();
+  setupTagFilterButtons();
   const grid = document.getElementById('model-grid');
   const countLabel = document.getElementById('model-count-label');
   const railCount = document.getElementById('rail-model-count');
   if (!grid) return;
 
+  // Filter models by active taxonomy tag
+  const models = (!allModels || activeTagFilter === 'all')
+    ? (allModels || [])
+    : allModels.filter(m => Array.isArray(m.tags) && m.tags.includes(activeTagFilter));
+
   if (countLabel) {
-    countLabel.textContent = `Loaded: ${models ? models.length : 0} models`;
+    countLabel.textContent = `Showing: ${models.length} of ${allModels ? allModels.length : 0} models`;
   }
   if (railCount) {
-    railCount.textContent = models ? models.length : 0;
+    railCount.textContent = allModels ? allModels.length : 0;
   }
 
   if (!models || models.length === 0) {
@@ -143,10 +173,10 @@ export function renderModels(models) {
           <circle cx="12" cy="12" r="10"></circle>
           <line x1="8" y1="12" x2="16" y2="12"></line>
         </svg>
-        <p style="font-size: 16px; font-weight: 600; color: var(--tx);">No backends available or no models detected.</p>
-        <p style="font-size: 12.5px; margin-top: 6px; color: var(--text-dim);">Verify that Ollama daemon is active on 127.0.0.1:11434 or GGUF models exist in models/gguf</p>
+        <p style="font-size: 16px; font-weight: 600; color: var(--tx);">No models matched the selected filter (${activeTagFilter}).</p>
+        <p style="font-size: 12.5px; margin-top: 6px; color: var(--text-dim);">Try selecting 'All Models' or verify backends are active.</p>
         <div style="margin-top:18px; display:flex; gap:10px; justify-content:center;">
-          <button class="btn btn-ghost" id="btn-empty-retry" onclick="window.__retryBackendSync && window.__retryBackendSync()" style="padding:8px 20px; font-size:12.5px; border-color:var(--green); color:var(--green); cursor:pointer;">⚡ Reconnect / Refresh Backends</button>
+          <button class="btn btn-ghost" onclick="document.querySelector('.tag-filter-pill[data-tag=all]')?.click()" style="padding:8px 20px; font-size:12.5px; border-color:var(--green); color:var(--green); cursor:pointer;">Show All Models</button>
         </div>
       </div>
     `;
@@ -172,6 +202,9 @@ export function renderModels(models) {
       const sizeText = m.size_bytes && m.size_bytes > 0 ? formatBytes(m.size_bytes) : '—';
       const engineTitle = `${m.backend ? m.backend.toUpperCase() : 'OLLAMA'} Engine`;
       const contextK = /llama3|qwen|deepseek|gemini/i.test(m.name) ? '128k' : /mistral|gemma/i.test(m.name) ? '32k' : '8k';
+      const tagsListHtml = (m.tags && m.tags.length > 0)
+        ? m.tags.map(t => `<span class="tag-badge-pill">🏷️ ${t}</span>`).join(' ')
+        : '';
 
       return `
       <div class="model-row-item ${m.is_duplicate ? 'is-duplicate' : ''}" data-id="${m.id}">
@@ -198,6 +231,7 @@ export function renderModels(models) {
           <span class="card-spec-tag"><i class="ph ph-package"></i> ${formatName}</span>
           <span class="card-spec-tag"><i class="ph ph-cpu"></i> ${quantName}</span>
           <span class="card-spec-tag"><i class="ph ph-hard-drive"></i> ${sizeText}</span>
+          ${tagsListHtml}
         </div>
 
         <!-- Stats & Quota Column -->
@@ -253,6 +287,9 @@ export function renderModels(models) {
     const engineTitle = `${m.backend ? m.backend.toUpperCase() : 'OLLAMA'} Autonomous Engine`;
     const contextK = /llama3|qwen|deepseek|gemini/i.test(m.name) ? '128k' : /mistral|gemma/i.test(m.name) ? '32k' : '8k';
     const quotaPct = hasStats ? Math.min(100, Math.max(10, (stats.total_tokens / 131072) * 100)).toFixed(0) : 0;
+    const tagsListHtml = (m.tags && m.tags.length > 0)
+      ? m.tags.map(t => `<span class="tag-badge-pill">🏷️ ${t}</span>`).join(' ')
+      : '';
 
     return `
     <div class="model-card-unified ${m.is_duplicate ? 'is-duplicate' : ''}" data-id="${m.id}">
@@ -278,7 +315,7 @@ export function renderModels(models) {
           <p class="card-subtitle">${engineTitle}</p>
         </div>
 
-        <!-- Spec Badges Row (📁 format, ⚙️ quant, 💾 size) -->
+        <!-- Spec Badges Row (📁 format, ⚙️ quant, 💾 size, tags) -->
         <div class="card-spec-badges">
           <span class="card-spec-tag">
             <i class="ph ph-folder"></i> ${formatName}
@@ -294,6 +331,7 @@ export function renderModels(models) {
               <i class="ph-fill ph-star"></i> Preferred
             </span>
           ` : ''}
+          ${tagsListHtml}
         </div>
       </div>
 
