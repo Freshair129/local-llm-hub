@@ -14,6 +14,7 @@ let pollTimer = null;
 let selectedHwFilter = 'all';
 let selectedKindFilter = 'all';
 let searchQuery = '';
+let lastThermalToastTime = 0;
 
 export async function initSensors() {
   const container = document.getElementById('view-sensors');
@@ -115,9 +116,18 @@ export function renderSensorsView() {
   if (kpiFans) kpiFans.textContent = `${fansCount} Active`;
 
   // trace:implements GAP-OBS-01
+  // trace:implements MT-OBS-4.1
   // Thermal Threshold Warning for GPU Hotspot / VRAM (Safe limit <= 88°C)
   const vramTemp = sensorsCache.find(s => s.kind === 'temperature' && (s.name.includes('VRAM') || s.name.includes('Memory')) && s.hw.includes('NVIDIA'))?.value || 0.0;
   const isThermalWarning = gpuHotspot >= 88.0 || vramTemp >= 90.0;
+
+  if (isThermalWarning) {
+    const now = Date.now();
+    if (now - lastThermalToastTime > 60000) { // 60s debounce
+      lastThermalToastTime = now;
+      showToast(`🔥 THERMAL THROTTLE ALERT: GPU Hotspot is ${gpuHotspot.toFixed(1)}°C! Performance may throttle.`, 'error', 6000);
+    }
+  }
 
   const thermalBanner = document.getElementById('thermal-throttle-warning-banner');
   if (thermalBanner) {

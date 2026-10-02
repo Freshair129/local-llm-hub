@@ -600,10 +600,10 @@ interface AppError {
 - Full flow: launch app → detect Ollama → list models → open model card → chat
 
 ### Manual Test Checklist
-- [ ] App เริ่มต้น < 3s บน Windows 11
-- [ ] Ollama online/offline state เปลี่ยนแบบ real-time
-- [ ] Duplicate detection แสดงถูกต้องกับ llama3.2 ใน Ollama + GGUF
-- [ ] Model card drawer เปิด/ปิด smooth
-- [ ] Chat streaming ไม่ lag
-- [ ] GPU gauge update สม่ำเสมอ
-- [ ] LiteLLM start/stop ไม่มี orphan process
+- [x] App เริ่มต้น < 3s บน Windows 11
+- [x] Ollama online/offline state เปลี่ยนแบบ real-time
+- [x] Duplicate detection แสดงถูกต้องกับ llama3.2 ใน Ollama + GGUF
+- [x] Model card drawer เปิด/ปิด smooth
+- [x] Chat streaming ไม่ lag
+- [x] GPU gauge update สม่ำเสมอ
+- [x] LiteLLM start/stop ไม่มี orphan process

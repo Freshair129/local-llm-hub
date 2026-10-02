@@ -58,10 +58,10 @@ FR-001 (docs/requirements/FR-001-backend-probe.md)
 ```
 
 **Pass criteria:**
-- [ ] indexer พบ annotation `trace:implements FR-001` บน `probe_backends`
-- [ ] indexer พบ annotation `trace:verifies FR-001` บน test functions
-- [ ] graph edge สร้างได้ครบทั้งสองทิศทาง
-- [ ] source location (file + line) บันทึกใน edge
+- [x] indexer พบ annotation `trace:implements FR-001` บน `probe_backends`
+- [x] indexer พบ annotation `trace:verifies FR-001` บน test functions
+- [x] graph edge สร้างได้ครบทั้งสองทิศทาง
+- [x] source location (file + line) บันทึกใน edge
 
 ---
 
@@ -104,10 +104,10 @@ FR-003 (requirements/FR-003-deduplication.md)
 ```
 
 **Pass criteria:**
-- [ ] FR-003 ↔ `dedup_models` edge มี `depends-on FR-002` edge ด้วย
-- [ ] FR-003 ↔ `dedup_models` มี `part-of FEAT-006` edge
-- [ ] FEAT-006 → CROSS-FEAT-001 linkable ผ่าน feature doc
-- [ ] test_dedup_llama3 ใช้ input ที่มี duplicate จริง (Ollama + GGUF llama3.2)
+- [x] FR-003 ↔ `dedup_models` edge มี `depends-on FR-002` edge ด้วย
+- [x] FR-003 ↔ `dedup_models` มี `part-of FEAT-006` edge
+- [x] FEAT-006 → CROSS-FEAT-001 linkable ผ่าน feature doc
+- [x] test_dedup_llama3 ใช้ input ที่มี duplicate จริง (Ollama + GGUF llama3.2)
 
 **Test input fixture:**
 ```rust

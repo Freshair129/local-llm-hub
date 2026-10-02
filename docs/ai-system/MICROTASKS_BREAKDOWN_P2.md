@@ -43,7 +43,7 @@
 
 #### 📦 Packet 1: `PKT-F023-SCHEMA` (Chat Token Counter DTOs)
 - **ST-023-1.1**: โครงสร้างข้อมูลประเมินบริบทข้อความและเกณฑ์ความจุ
-  - [ ] **MT-023-1.1.1 [Architect Lock]**: กำหนด struct `TokenEstimateRequest`, `TokenEstimateResult`, `ContextThresholdLevel` ใน [`src-tauri/src/models/types.rs`](file:///d:/local-llm-hub/src-tauri/src/models/types.rs)
+  - [x] **MT-023-1.1.1 [Architect Lock]**: กำหนด struct `TokenEstimateRequest`, `TokenEstimateResult`, `ContextThresholdLevel` ใน [`src-tauri/src/models/types.rs`](file:///d:/local-llm-hub/src-tauri/src/models/types.rs)
     - *Signature*:
       ```rust
       pub struct TokenEstimateResult {
@@ -55,18 +55,18 @@
       ```
     - *Target File*: `src-tauri/src/models/types.rs`
     - *Assigned Model*: `MODEL-MELLUM2-INST` (Prompt Budget: 450 tokens)
-  - [ ] **MT-023-1.1.2 [Tester TDD Red]**: เขียน Unit Test ตรวจสอบ Serde JSON Serialization/Deserialization
+  - [x] **MT-023-1.1.2 [Tester TDD Red]**: เขียน Unit Test ตรวจสอบ Serde JSON Serialization/Deserialization
     - *Test Name*: `test_token_estimate_result_serde`
     - *Target File*: `src-tauri/src/models/types.rs` (in `mod tests`)
     - *Verification*: `cargo test test_token_estimate_result_serde`
-  - [ ] **MT-023-1.1.3 [Coder Green]**: สั่ง Worker สร้าง Code ตาม struct และ derive `(Debug, Clone, Serialize, Deserialize)`
+  - [x] **MT-023-1.1.3 [Coder Green]**: สั่ง Worker สร้าง Code ตาม struct และ derive `(Debug, Clone, Serialize, Deserialize)`
     - *Assigned Model*: `MODEL-MELLUM2-INST`
-  - [ ] **MT-023-1.1.4 [Verifier DoD]**: ตรวจสอบ Zero Panic, zero compiler warning, AC-01 match
+  - [x] **MT-023-1.1.4 [Verifier DoD]**: ตรวจสอบ Zero Panic, zero compiler warning, AC-01 match
     - *Assigned Model*: `MODEL-SUSHI-CODER` (@ temp: 0.0)
 
 #### 📦 Packet 2: `PKT-F024-SCHEMA` (LAN Ephemeral PIN & Session Record)
 - **ST-024-1.1**: โครงสร้างสถานะ Session และรหัส PIN ชั่วคราว
-  - [ ] **MT-024-1.1.1 [Architect Lock]**: กำหนด struct `LanSharePinSession`, `LanPinVerificationResult` ใน [`src-tauri/src/models/types.rs`](file:///d:/local-llm-hub/src-tauri/src/models/types.rs)
+  - [x] **MT-024-1.1.1 [Architect Lock]**: กำหนด struct `LanSharePinSession`, `LanPinVerificationResult` ใน [`src-tauri/src/models/types.rs`](file:///d:/local-llm-hub/src-tauri/src/models/types.rs)
     - *Signature*:
       ```rust
       pub struct LanSharePinSession {
@@ -76,17 +76,17 @@
           pub is_locked: bool,
       }
       ```
-  - [ ] **MT-024-1.1.2 [Tester TDD Red]**: เขียน Unit Test ตรวจสอบสถานะการหมดอายุและความถูกต้องของ PIN
+  - [x] **MT-024-1.1.2 [Tester TDD Red]**: เขียน Unit Test ตรวจสอบสถานะการหมดอายุและความถูกต้องของ PIN
     - *Test Name*: `test_lan_pin_session_expiration_logic`
-  - [ ] **MT-024-1.1.3 [Coder Green]**: สร้างโค้ด struct พร้อมฟังก์ชัน `is_valid(&self, candidate_pin: &str, now: u64) -> bool`
-  - [ ] **MT-024-1.1.4 [Verifier DoD]**: ตรวจสอบ Constant-Time comparison ป้องกัน Timing Attacks
+  - [x] **MT-024-1.1.3 [Coder Green]**: สร้างโค้ด struct พร้อมฟังก์ชัน `is_valid(&self, candidate_pin: &str, now: u64) -> bool`
+  - [x] **MT-024-1.1.4 [Verifier DoD]**: ตรวจสอบ Constant-Time comparison ป้องกัน Timing Attacks
 
 #### 📦 Packet 3: `PKT-F025-SCHEMA` (Model Tag Taxonomy Schema)
 - **ST-025-1.1**: แท็กหมวดหมู่โมเดลและฟิลด์ขยายใน UnifiedModel
-  - [ ] **MT-025-1.1.1 [Architect Lock]**: เพิ่ม Enum `ModelCategoryTag` (`Coding`, `Reasoning`, `Chat`, `Vision`, `Edge`) และเพิ่ม field `pub tags: Vec<String>` ใน `UnifiedModel`
-  - [ ] **MT-025-1.1.2 [Tester TDD Red]**: อัปเดต unit test `test_unified_model_serialization` ให้รองรับ field `tags`
-  - [ ] **MT-025-1.1.3 [Coder Green]**: อัปเดต `src-tauri/src/models/types.rs` ให้ backwards-compatible ด้วย `#[serde(default)]`
-  - [ ] **MT-025-1.1.4 [Verifier DoD]**: รัน `cargo test --lib` ยืนยันว่า 48 unit tests เดิมไม่พัง
+  - [x] **MT-025-1.1.1 [Architect Lock]**: เพิ่ม Enum `ModelCategoryTag` (`Coding`, `Reasoning`, `Chat`, `Vision`, `Edge`) และเพิ่ม field `pub tags: Vec<String>` ใน `UnifiedModel`
+  - [x] **MT-025-1.1.2 [Tester TDD Red]**: อัปเดต unit test `test_unified_model_serialization` ให้รองรับ field `tags`
+  - [x] **MT-025-1.1.3 [Coder Green]**: อัปเดต `src-tauri/src/models/types.rs` ให้ backwards-compatible ด้วย `#[serde(default)]`
+  - [x] **MT-025-1.1.4 [Verifier DoD]**: รัน `cargo test --lib` ยืนยันว่า 48 unit tests เดิมไม่พัง
 
 ---
 
@@ -94,27 +94,27 @@
 
 #### 📦 Packet 4: `PKT-F023-SERVICE` (Token Estimator Algorithm)
 - **ST-023-2.1**: Hybrid BPE Token Counting Logic
-  - [ ] **MT-023-2.1.1 [Architect Lock]**: กำหนด signature บริสุทธิ์ `estimate_tokens_heuristic(text: &str, context_window: usize) -> TokenEstimateResult`
-  - [ ] **MT-023-2.1.2 [Tester TDD Red]**: เขียน Unit Test ทดสอบข้อความภาษาอังกฤษ (code snippet) และข้อความภาษาไทย
-  - [ ] **MT-023-2.1.3 [Coder Green]**: สร้าง logic คำนวณอัตราส่วน ~3.9 chars/token (Latin) และ ~1.8 chars/token (Thai/CJK)
-  - [ ] **MT-023-2.1.4 [Verifier DoD]**: ตรวจสอบ Bounds Checking ไม่เกิด integer overflow
+  - [x] **MT-023-2.1.1 [Architect Lock]**: กำหนด signature บริสุทธิ์ `estimate_tokens_heuristic(text: &str, context_window: usize) -> TokenEstimateResult`
+  - [x] **MT-023-2.1.2 [Tester TDD Red]**: เขียน Unit Test ทดสอบข้อความภาษาอังกฤษ (code snippet) และข้อความภาษาไทย
+  - [x] **MT-023-2.1.3 [Coder Green]**: สร้าง logic คำนวณอัตราส่วน ~3.9 chars/token (Latin) และ ~1.8 chars/token (Thai/CJK)
+  - [x] **MT-023-2.1.4 [Verifier DoD]**: ตรวจสอบ Bounds Checking ไม่เกิด integer overflow
 
 #### 📦 Packet 5: `PKT-F024-SERVICE` (Axum Ephemeral PIN Middleware)
 - **ST-024-2.1**: Axum Middleware & In-Memory Rate Limiting
-  - [ ] **MT-024-2.1.1 [Architect Lock]**: กำหนด Axum middleware handler `validate_lan_pin_middleware` ใน [`src-tauri/src/commands/share.rs`](file:///d:/local-llm-hub/src-tauri/src/commands/share.rs)
-  - [ ] **MT-024-2.1.2 [Tester TDD Red]**: เพิ่ม Integration Test `test_lan_pin_auth_rejection_and_success` ใน `tests/test_lan_share.rs`
-  - [ ] **MT-024-2.1.3 [Coder Green]**: สร้างฟังก์ชันสุ่ม PIN 4 หลัก (`rand` or pseudo-entropy), rate limiter พยายามผิดเกิน 5 ครั้งล็อก 60s
-  - [ ] **MT-024-2.1.4 [Verifier DoD]**: ยืนยัน Zero Panic และ HTTP 401 Unauthorized ตอบกลับอย่างถูกต้อง
+  - [x] **MT-024-2.1.1 [Architect Lock]**: กำหนด Axum middleware handler `validate_lan_pin_middleware` ใน [`src-tauri/src/commands/share.rs`](file:///d:/local-llm-hub/src-tauri/src/commands/share.rs)
+  - [x] **MT-024-2.1.2 [Tester TDD Red]**: เพิ่ม Integration Test `test_lan_pin_auth_rejection_and_success` ใน `tests/test_lan_share.rs`
+  - [x] **MT-024-2.1.3 [Coder Green]**: สร้างฟังก์ชันสุ่ม PIN 4 หลัก (`rand` or pseudo-entropy), rate limiter พยายามผิดเกิน 5 ครั้งล็อก 60s
+  - [x] **MT-024-2.1.4 [Verifier DoD]**: ยืนยัน Zero Panic และ HTTP 401 Unauthorized ตอบกลับอย่างถูกต้อง
 
 #### 📦 Packet 6: `PKT-F025-SERVICE` (Model Tag Heuristic Classifier)
 - **ST-025-2.1**: Automatic Model Tag Classifier
-  - [ ] **MT-025-2.1.1 [Architect Lock]**: กำหนดฟังก์ชัน `classify_model_tags(model_name: &str, raw_info: &str) -> Vec<String>` ใน [`src-tauri/src/commands/models.rs`](file:///d:/local-llm-hub/src-tauri/src/commands/models.rs)
-  - [ ] **MT-025-2.1.2 [Tester TDD Red]**: เขียน Unit Test ตรวจสอบโมเดลยอดนิยม:
+  - [x] **MT-025-2.1.1 [Architect Lock]**: กำหนดฟังก์ชัน `classify_model_tags(model_name: &str, raw_info: &str) -> Vec<String>` ใน [`src-tauri/src/commands/models.rs`](file:///d:/local-llm-hub/src-tauri/src/commands/models.rs)
+  - [x] **MT-025-2.1.2 [Tester TDD Red]**: เขียน Unit Test ตรวจสอบโมเดลยอดนิยม:
     - `qwen3.5-9b-coder` $\rightarrow$ `["Coding"]`
     - `mellum2-12b-thinking` $\rightarrow$ `["Reasoning", "Coding"]`
     - `llama-3.2-1b` $\rightarrow$ `["Edge", "Chat"]`
-  - [ ] **MT-025-2.1.3 [Coder Green]**: Implement regex keyword pattern matcher
-  - [ ] **MT-025-2.1.4 [Verifier DoD]**: ตรวจสอบ Case-Insensitive matching
+  - [x] **MT-025-2.1.3 [Coder Green]**: Implement regex keyword pattern matcher
+  - [x] **MT-025-2.1.4 [Verifier DoD]**: ตรวจสอบ Case-Insensitive matching
 
 ---
 
@@ -122,15 +122,15 @@
 
 #### 📦 Packet 7: `PKT-F023-ROUTE` (Chat Token Counter IPC)
 - **ST-023-3.1**: Tauri Command Exposure
-  - [ ] **MT-023-3.1.1 [Architect Lock]**: ประกาศ command `#[tauri::command] pub async fn estimate_chat_tokens(prompt: String, model_id: String, state: State<'_, AppState>) -> Result<TokenEstimateResult, String>`
-  - [ ] **MT-023-3.1.2 [Coder Green]**: เชื่อมต่อ command เข้ากับ logic ใน Layer 2 และลงทะเบียนใน `src-tauri/src/lib.rs`
-  - [ ] **MT-023-3.1.3 [Verifier DoD]**: ตรวจสอบ IPC error isolation
+  - [x] **MT-023-3.1.1 [Architect Lock]**: ประกาศ command `#[tauri::command] pub async fn estimate_chat_tokens(prompt: String, model_id: String, state: State<'_, AppState>) -> Result<TokenEstimateResult, String>`
+  - [x] **MT-023-3.1.2 [Coder Green]**: เชื่อมต่อ command เข้ากับ logic ใน Layer 2 และลงทะเบียนใน `src-tauri/src/lib.rs`
+  - [x] **MT-023-3.1.3 [Verifier DoD]**: ตรวจสอบ IPC error isolation
 
 #### 📦 Packet 8: `PKT-F024-ROUTE` (LAN Share PIN IPC)
 - **ST-024-3.1**: LAN PIN Management Commands
-  - [ ] **MT-024-3.1.1 [Architect Lock]**: ประกาศ command `generate_lan_pin()`, `verify_lan_pin()`, `get_lan_share_status()`
-  - [ ] **MT-024-3.1.2 [Coder Green]**: สั่ง Worker สร้าง Tauri commands ใน `src-tauri/src/commands/share.rs`
-  - [ ] **MT-024-3.1.3 [Verifier DoD]**: ตรวจสอบการห่อหุ้ม Shared State ด้วย `Mutex` ไม่เกิด Deadlock
+  - [x] **MT-024-3.1.1 [Architect Lock]**: ประกาศ command `generate_lan_pin()`, `verify_lan_pin()`, `get_lan_share_status()`
+  - [x] **MT-024-3.1.2 [Coder Green]**: สั่ง Worker สร้าง Tauri commands ใน `src-tauri/src/commands/share.rs`
+  - [x] **MT-024-3.1.3 [Verifier DoD]**: ตรวจสอบการห่อหุ้ม Shared State ด้วย `Mutex` ไม่เกิด Deadlock
 
 ---
 
@@ -138,33 +138,33 @@
 
 #### 📦 Packet 9: `PKT-F023-UI` (Chat Live Token Meter)
 - **ST-023-4.1**: Frontend Live Token Meter & Badges
-  - [ ] **MT-023-4.1.1 [Architect Lock]**: ออกแบบ HTML structure และ CSS Badge ใน [`src/index.html`](file:///d:/local-llm-hub/src/index.html) (`view-chat`)
-  - [ ] **MT-023-4.1.2 [Coder Green]**: เพิ่ม Event Listener `input` ใน [`src/js/chat.js`](file:///d:/local-llm-hub/src/js/chat.js) เรียก `estimateTokenCount(text)` แบบ 0ms latency
-  - [ ] **MT-023-4.1.3 [Verifier DoD]**: ทดสอบการสลับสี 🟢 (<70%), 🟡 (70-90%), 🔴 (>90%)
+  - [x] **MT-023-4.1.1 [Architect Lock]**: ออกแบบ HTML structure และ CSS Badge ใน [`src/index.html`](file:///d:/local-llm-hub/src/index.html) (`view-chat`)
+  - [x] **MT-023-4.1.2 [Coder Green]**: เพิ่ม Event Listener `input` ใน [`src/js/chat.js`](file:///d:/local-llm-hub/src/js/chat.js) เรียก `estimateTokenCount(text)` แบบ 0ms latency
+  - [x] **MT-023-4.1.3 [Verifier DoD]**: ทดสอบการสลับสี 🟢 (<70%), 🟡 (70-90%), 🔴 (>90%)
 
 #### 📦 Packet 10: `PKT-F024-UI` (LAN Share PIN & QR Dialog)
 - **ST-024-4.1**: PIN Display & QR Modal
-  - [ ] **MT-024-4.1.1 [Architect Lock]**: ออกแบบปุ่มสลับ "Require PIN", ป้าย PIN 4 หลักตัวหนา, และ QR SVG Modal ใน `view-share`
-  - [ ] **MT-024-4.1.2 [Coder Green]**: เชื่อมต่อ JavaScript controller ใน [`src/js/share.js`](file:///d:/local-llm-hub/src/js/share.js)
-  - [ ] **MT-024-4.1.3 [Verifier DoD]**: ตรวจสอบปุ่ม "Copy PIN" และการแสดงผลบน mobile view
+  - [x] **MT-024-4.1.1 [Architect Lock]**: ออกแบบปุ่มสลับ "Require PIN", ป้าย PIN 4 หลักตัวหนา, และ QR SVG Modal ใน `view-share`
+  - [x] **MT-024-4.1.2 [Coder Green]**: เชื่อมต่อ JavaScript controller ใน [`src/js/share.js`](file:///d:/local-llm-hub/src/js/share.js)
+  - [x] **MT-024-4.1.3 [Verifier DoD]**: ตรวจสอบปุ่ม "Copy PIN" และการแสดงผลบน mobile view
 
 #### 📦 Packet 11: `PKT-F025-UI` (Bento Model Tag Filter Bar)
 - **ST-025-4.1**: Tag Pills Filter UI
-  - [ ] **MT-025-4.1.1 [Architect Lock]**: ออกแบบ Filter Bar: `[All]`, `[💻 Coding]`, `[🧠 Reasoning]`, `[💬 Chat]`, `[👁️ Vision]`, `[⚡ Small]`
-  - [ ] **MT-025-4.1.2 [Coder Green]**: เพิ่ม filter predicate ใน `renderModelGrid()` ใน [`src/js/model.js`](file:///d:/local-llm-hub/src/js/model.js)
-  - [ ] **MT-025-4.1.3 [Verifier DoD]**: ตรวจสอบ dynamic count badge แสดงจำนวนโมเดลถูกต้อง
+  - [x] **MT-025-4.1.1 [Architect Lock]**: ออกแบบ Filter Bar: `[All]`, `[💻 Coding]`, `[🧠 Reasoning]`, `[💬 Chat]`, `[👁️ Vision]`, `[⚡ Small]`
+  - [x] **MT-025-4.1.2 [Coder Green]**: เพิ่ม filter predicate ใน `renderModelGrid()` ใน [`src/js/model.js`](file:///d:/local-llm-hub/src/js/model.js)
+  - [x] **MT-025-4.1.3 [Verifier DoD]**: ตรวจสอบ dynamic count badge แสดงจำนวนโมเดลถูกต้อง
 
 #### 📦 Packet 12: `PKT-OBS-UI` (Thermal Hotspot Alert Toast)
 - **ST-OBS-4.1**: Thermal Threshold Banner
-  - [ ] **MT-OBS-4.1.1 [Architect Lock]**: กำหนดเกณฑ์เตือน: GPU Hotspot > 88°C หรือ VRAM > 95%
-  - [ ] **MT-OBS-4.1.2 [Coder Green]**: เพิ่ม event listener ตรวจสอบ `telemetry://snapshot` ใน [`src/js/sensors.js`](file:///d:/local-llm-hub/src/js/sensors.js) แสดง toast สีส้ม/แดง
-  - [ ] **MT-OBS-4.1.3 [Verifier DoD]**: ตรวจสอบ debounce toast ไม่ให้แสดงซ้ำรัวๆ
+  - [x] **MT-OBS-4.1.1 [Architect Lock]**: กำหนดเกณฑ์เตือน: GPU Hotspot > 88°C หรือ VRAM > 95%
+  - [x] **MT-OBS-4.1.2 [Coder Green]**: เพิ่ม event listener ตรวจสอบ `telemetry://snapshot` ใน [`src/js/sensors.js`](file:///d:/local-llm-hub/src/js/sensors.js) แสดง toast สีส้ม/แดง
+  - [x] **MT-OBS-4.1.3 [Verifier DoD]**: ตรวจสอบ debounce toast ไม่ให้แสดงซ้ำรัวๆ
 
 ---
 
 ### 🌊 WAVE 5: Integration Gates & Verification Harness
 
-- [ ] **MT-INT-5.1 [Test Gate]**: รัน `cargo test --tests` และ `cargo test --lib` (ต้องผ่าน 100% Green, 0 errors)
-- [ ] **MT-INT-5.2 [Review Gate]**: รัน `Mellum2 12B Thinking` ตรวจสอบ concurrency, deadlocks และ zero-panic guarantees
-- [ ] **MT-INT-5.3 [Lineage Ledger]**: บันทึก hash ของทุก packet ลงใน [`docs/lineage/packet-lineage.jsonl`](file:///d:/local-llm-hub/docs/lineage/packet-lineage.jsonl)
-- [ ] **MT-INT-5.4 [Git Release]**: Commit ตรงเข้า branch `main` โดยไม่สร้าง release tag
+- [x] **MT-INT-5.1 [Test Gate]**: รัน `cargo test --tests` และ `cargo test --lib` (ต้องผ่าน 100% Green, 0 errors)
+- [x] **MT-INT-5.2 [Review Gate]**: รัน `Mellum2 12B Thinking` ตรวจสอบ concurrency, deadlocks และ zero-panic guarantees
+- [x] **MT-INT-5.3 [Lineage Ledger]**: บันทึก hash ของทุก packet ลงใน [`docs/lineage/packet-lineage.jsonl`](file:///d:/local-llm-hub/docs/lineage/packet-lineage.jsonl)
+- [x] **MT-INT-5.4 [Git Release]**: Commit ตรงเข้า branch `main` โดยไม่สร้าง release tag
