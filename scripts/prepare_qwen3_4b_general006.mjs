@@ -31,6 +31,11 @@ async function api(endpoint, body) {
 function requireOk(result, label) {
   if (result.status !== 0) throw new Error(label + ' failed: ' + (result.stderr || result.stdout || result.error));
 }
+function normalizeDigest(value) {
+  const digest = String(value || '').replace(/^sha256:/i, '');
+  if (!/^[a-f0-9]{64}$/i.test(digest)) throw new Error('Invalid SHA-256 digest representation: ' + value);
+  return digest.toLowerCase();
+}
 function assertCleanWorktree() {
   const status = run('git', ['status', '--porcelain=v1', '--untracked-files=all']);
   requireOk(status, 'git status');
@@ -92,7 +97,7 @@ async function prepare() {
   await assertEmptyResidency();
   const tags = await api('tags');
   const sourceTag = tags.models.find(model => model.name === profile.source.ollama_tag);
-  if (!sourceTag || sourceTag.digest !== profile.source.ollama_digest) throw new Error('Source tag digest does not match the frozen profile.');
+  if (!sourceTag || normalizeDigest(sourceTag.digest) !== normalizeDigest(profile.source.ollama_digest)) throw new Error('Source tag digest does not match the frozen profile.');
   if (tags.models.some(model => model.name === profile.candidate.alias)) throw new Error('Alias already exists; refusing overwrite: ' + profile.candidate.alias);
   const sourceShow = await api('show', { model: profile.source.ollama_tag });
   if (sourceShow.details?.format !== profile.source.format || sourceShow.details?.quantization_level !== profile.source.quantization || sourceShow.details?.parameter_size !== profile.source.parameter_size) {
@@ -119,7 +124,7 @@ async function prepare() {
     const tagsAfter = await api('tags');
     const sourceAfter = tagsAfter.models.find(model => model.name === profile.source.ollama_tag);
     const aliasTag = tagsAfter.models.find(model => model.name === profile.candidate.alias);
-    if (!sourceAfter || sourceAfter.digest !== profile.source.ollama_digest) throw new Error('Source model digest changed during alias creation.');
+    if (!sourceAfter || normalizeDigest(sourceAfter.digest) !== normalizeDigest(profile.source.ollama_digest)) throw new Error('Source model digest changed during alias creation.');
     if (!aliasTag) throw new Error('Ollama did not register the new alias.');
     const aliasShow = await api('show', { model: profile.candidate.alias });
     if (!aliasShow.capabilities?.includes('thinking')) throw new Error('Registered alias does not advertise thinking capability.');
