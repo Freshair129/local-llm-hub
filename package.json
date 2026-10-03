@@ -8,7 +8,10 @@
     "packet": "node scripts/packet.mjs",
     "ai-review": "node scripts/ai_code_review.mjs",
     "eval:test": "node eval/tests/eval_harness.test.mjs",
-    "eval:smoke": "node eval/harness/smoke-test.mjs"
+    "eval:smoke": "node eval/harness/smoke-test.mjs",
+    "bench:export-catalog-sources": "node scripts/export_benchmark_catalog_sources.mjs",
+    "bench:catalog": "node scripts/build_benchmark_catalog.mjs",
+    "test:advisor": "node --test eval/tests/benchmark_catalog.test.mjs eval/tests/model_advisor.test.mjs"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2"

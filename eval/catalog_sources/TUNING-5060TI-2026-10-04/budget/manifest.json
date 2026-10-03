@@ -1,0 +1,90 @@
+{
+  "benchmark": "BENCH-5060TI-TUNING-006",
+  "started_at": "2026-10-03T17:03:27.360Z",
+  "tasks_sha256": "d6d002412637430b86c3e9e57cee9f8ef042d7803d62034d67b285efee8c0297",
+  "heldout_sha256": "85c56847c96a5422f73306c907fbccf880e75e0cbbfe55a63e3fae4b1bae9115",
+  "node": "v24.19.0",
+  "ollama": {
+    "version": "0.35.1"
+  },
+  "machine": {
+    "id": "MACH-RTX5060TI-I714700KF",
+    "cpu": "Intel(R) Core(TM) i7-14700KF",
+    "ram_bytes": 34104127488,
+    "gpu": {
+      "stdout": "NVIDIA GeForce RTX 5060 Ti, 617.14, 16311 MiB"
+    }
+  },
+  "candidates": [
+    {
+      "alias": "llh-tune-ornith:budget32k",
+      "slug": "ornith-budget32k",
+      "label": "hf.co/ornith-ai/Ornith-1.5-9B-GGUF:Q4_K_M",
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "repeat_last_n": 64,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "num_ctx": 40960,
+        "num_predict": 32768
+      },
+      "mode": "think=true",
+      "think": true,
+      "files": [
+        {
+          "role": "model",
+          "file": "Ornith-1.5-9B.Q4_K_M.gguf",
+          "sha256": "70c112196e0b7023803c9762752e46d29e612a92c83f995bc3ba1ceb07e8fab6",
+          "bytes": 5780090816
+        },
+        {
+          "role": "projector",
+          "file": "mmproj-Ornith-1.5-9B.gguf",
+          "sha256": "626f9f90627402a6bf4a999111d0fbd69b5fcca7aa8ba089d69e5f10e8858e1d",
+          "bytes": 921704672
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://huggingface.co/ornith-ai/Ornith-1.5-9B-GGUF/tree/abdd624b12ebf020b767fff532ff44fe552b28c3"
+        }
+      ]
+    },
+    {
+      "alias": "llh-tune-qwen35:budget32k",
+      "slug": "qwen35-budget32k",
+      "label": "qwen3.5:9b",
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "repeat_last_n": 64,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "num_ctx": 40960,
+        "num_predict": 32768
+      },
+      "mode": "think=true",
+      "think": true,
+      "files": [
+        {
+          "role": "model",
+          "file": "qwen3.5.9b.gguf",
+          "sha256": "dec52a44569a2a25341c4e4d3fee25846eed4f6f0b936278e3a3c900bb99d37c",
+          "bytes": 6594462816
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://huggingface.co/Qwen/Qwen3.5-9B/tree/c202236235762e1c871ad0ccb60c8ee5ba337b9a"
+        }
+      ]
+    }
+  ]
+}

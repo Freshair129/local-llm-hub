@@ -1,0 +1,80 @@
+[
+  {
+    "alias": "llh-general-typhoon-q4-chat:bench005",
+    "planned": 6,
+    "received": 6,
+    "functional": 3,
+    "combined": 1,
+    "code_gate": 1,
+    "raw_format": 6,
+    "truncated": 0,
+    "rows": [
+      {
+        "task": "FR-002",
+        "seed": 42,
+        "combined": false,
+        "code_gate": false,
+        "functional": false,
+        "truncated": false,
+        "seconds": 4.3814803,
+        "tps": 119.77230383528948,
+        "peak_vram_mib": 4581
+      },
+      {
+        "task": "FR-002",
+        "seed": 43,
+        "combined": false,
+        "code_gate": false,
+        "functional": false,
+        "truncated": false,
+        "seconds": 1.9551063999999996,
+        "tps": 119.63752006647495,
+        "peak_vram_mib": 4582
+      },
+      {
+        "task": "FR-002",
+        "seed": 44,
+        "combined": false,
+        "code_gate": false,
+        "functional": false,
+        "truncated": false,
+        "seconds": 1.7946007999999993,
+        "tps": 120.57531651020584,
+        "peak_vram_mib": 4581
+      },
+      {
+        "task": "FR-006",
+        "seed": 42,
+        "combined": false,
+        "code_gate": false,
+        "functional": true,
+        "truncated": false,
+        "seconds": 4.9231371,
+        "tps": 118.66365735631611,
+        "peak_vram_mib": 4585
+      },
+      {
+        "task": "FR-006",
+        "seed": 43,
+        "combined": true,
+        "code_gate": true,
+        "functional": true,
+        "truncated": false,
+        "seconds": 3.007910899999999,
+        "tps": 119.11114004249913,
+        "peak_vram_mib": 4585
+      },
+      {
+        "task": "FR-006",
+        "seed": 44,
+        "combined": false,
+        "code_gate": false,
+        "functional": true,
+        "truncated": false,
+        "seconds": 3.0696484999999973,
+        "tps": 118.89732386174444,
+        "peak_vram_mib": 4585
+      }
+    ]
+  }
+]

@@ -1,0 +1,28 @@
+{
+  "rows": [
+    {
+      "slug": "ornith-budget32k",
+      "status": "PASS"
+    },
+    {
+      "slug": "ornith-budget32k",
+      "status": "PASS"
+    },
+    {
+      "slug": "ornith-budget32k",
+      "status": "NOT_EXECUTABLE"
+    },
+    {
+      "slug": "qwen35-budget32k",
+      "status": "NOT_EXECUTABLE"
+    },
+    {
+      "slug": "qwen35-budget32k",
+      "status": "NOT_EXECUTABLE"
+    },
+    {
+      "slug": "qwen35-budget32k",
+      "status": "PASS"
+    }
+  ]
+}

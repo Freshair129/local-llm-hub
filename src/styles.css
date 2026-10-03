@@ -2418,3 +2418,280 @@ body::after {
   font-weight: 600;
   font-family: var(--mono);
 }
+
+/* trace:implements FEAT-GPU-MODEL-ADVISOR */
+.advisor-view {
+  padding: 4px 8px 36px 0;
+  color: var(--tx);
+}
+
+.advisor-header {
+  margin-bottom: 14px;
+}
+
+.advisor-evidence-summary,
+.advisor-section-heading,
+.advisor-card-title,
+.advisor-gpu-slot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.advisor-evidence-summary {
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.advisor-badge {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--line2);
+  border-radius: var(--r-pill);
+  padding: 3px 10px;
+  background: rgba(255, 255, 255, 0.045);
+  color: var(--tx);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.advisor-note,
+.advisor-conditions {
+  color: var(--mut);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.advisor-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(165px, 1fr));
+  align-items: end;
+  gap: 10px;
+  padding: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-card);
+}
+
+.advisor-field {
+  display: grid;
+  gap: 5px;
+  color: var(--mut);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.advisor-input,
+.advisor-select {
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  padding: 7px 10px;
+  border: 1px solid var(--line2);
+  border-radius: var(--r-s);
+  background: #141815;
+  color: var(--tx);
+  font: inherit;
+}
+
+.advisor-input:focus,
+.advisor-select:focus,
+.advisor-button:focus-visible,
+.advisor-icon-button:focus-visible {
+  outline: 2px solid var(--cyan);
+  outline-offset: 2px;
+}
+
+.advisor-section {
+  margin-top: 22px;
+}
+
+.advisor-section h2 {
+  margin-bottom: 5px;
+  font-size: 17px;
+}
+
+.advisor-section-heading {
+  margin-bottom: 5px;
+}
+
+.advisor-model-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.advisor-model-card,
+.advisor-compare-card {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-card);
+  background: var(--bg-card);
+}
+
+.advisor-model-card.is-selected {
+  border-color: rgba(91, 192, 235, 0.65);
+  box-shadow: 0 0 0 1px rgba(91, 192, 235, 0.18);
+}
+
+.advisor-card-title {
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  margin-bottom: 5px;
+}
+
+.advisor-card-title h3,
+.advisor-compare-card h3 {
+  min-width: 0;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.advisor-status {
+  margin: 9px 0;
+  color: var(--cyan);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.advisor-status.is-success {
+  color: var(--green);
+}
+
+.advisor-status.is-warning {
+  color: var(--amber);
+}
+
+.advisor-metrics {
+  display: grid;
+  grid-template-columns: minmax(105px, 0.8fr) minmax(0, 1fr);
+  gap: 4px 12px;
+  margin: 10px 0;
+  font-size: 11px;
+}
+
+.advisor-metrics dt {
+  color: var(--mut);
+}
+
+.advisor-metrics dd {
+  min-width: 0;
+  color: var(--tx);
+  font-family: var(--mono);
+  overflow-wrap: anywhere;
+}
+
+.advisor-conditions {
+  margin: 7px 0;
+  font-family: var(--mono);
+}
+
+.advisor-condition-details {
+  margin-top: 8px;
+  color: var(--mut);
+  font-size: 11px;
+}
+
+.advisor-condition-details summary {
+  cursor: pointer;
+}
+
+.advisor-condition-json {
+  max-height: 220px;
+  margin-top: 6px;
+  padding: 8px;
+  overflow: auto;
+  border-radius: var(--r-s);
+  background: rgba(0, 0, 0, 0.24);
+  color: var(--tx);
+  font: 10px/1.5 var(--mono);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.advisor-evidence-link {
+  display: inline-block;
+  margin-top: 7px;
+  color: var(--cyan);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.advisor-button,
+.advisor-icon-button {
+  min-height: 34px;
+  padding: 6px 11px;
+  border: 1px solid var(--line2);
+  border-radius: var(--r-s);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--tx);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.advisor-button:hover,
+.advisor-icon-button:hover {
+  border-color: var(--cyan);
+}
+
+.advisor-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.advisor-select-run {
+  margin-top: 9px;
+}
+
+.advisor-gpu-slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.advisor-gpu-slot {
+  justify-content: flex-start;
+}
+
+.advisor-gpu-slot .advisor-select {
+  flex: 1;
+}
+
+.advisor-comparison-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.advisor-comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(var(--advisor-columns, 1), minmax(215px, 1fr));
+  gap: 10px;
+  min-width: max-content;
+}
+
+.advisor-compare-card {
+  width: 235px;
+}
+
+.advisor-empty {
+  padding: 14px;
+  color: var(--mut);
+  border: 1px dashed var(--line2);
+  border-radius: var(--r-s);
+}
+
+@media (max-width: 900px) {
+  .advisor-model-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .advisor-gpu-slots {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  }
+}

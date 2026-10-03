@@ -1,0 +1,53 @@
+{
+  "benchmark": "BENCH-5060TI-GENERAL-005",
+  "started_at": "2026-10-03T16:42:36.273Z",
+  "tasks_sha256": "d6d002412637430b86c3e9e57cee9f8ef042d7803d62034d67b285efee8c0297",
+  "heldout_sha256": "85c56847c96a5422f73306c907fbccf880e75e0cbbfe55a63e3fae4b1bae9115",
+  "node": "v24.19.0",
+  "ollama": {
+    "version": "0.35.1"
+  },
+  "machine": {
+    "id": "MACH-RTX5060TI-I714700KF",
+    "cpu": "Intel(R) Core(TM) i7-14700KF",
+    "ram_bytes": 34104127488,
+    "gpu": {
+      "stdout": "NVIDIA GeForce RTX 5060 Ti, 617.14, 16311 MiB"
+    }
+  },
+  "candidates": [
+    {
+      "alias": "llh-general-typhoon-q4-chat:bench005",
+      "slug": "typhoon2.5-qwen3-4b-q4_k_m",
+      "label": "typhoon2.5-qwen3-4b Q4_K_M (GGUF)",
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "repeat_penalty": 1.05,
+        "repeat_last_n": 64,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "num_ctx": 8192,
+        "num_predict": 4096
+      },
+      "mode": "author text-role ChatML; no extra system",
+      "files": [
+        {
+          "file": "typhoon2.5-qwen3-4b-q4_k_m.gguf",
+          "sha256": "b365302922688f3a3c9ac8e3c00ab97a152cac0cdbf4eb5a734ecb483ae3e511",
+          "bytes": 2497276128
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://huggingface.co/typhoon-ai/typhoon2.5-qwen3-4b-gguf/tree/386874d02430a544367cb0878687f8983751bbd2"
+        },
+        {
+          "url": "https://huggingface.co/typhoon-ai/typhoon2.5-qwen3-4b/tree/ce0a7416fe82d4404b2b4a253ce3ac095ab1252c"
+        }
+      ]
+    }
+  ]
+}

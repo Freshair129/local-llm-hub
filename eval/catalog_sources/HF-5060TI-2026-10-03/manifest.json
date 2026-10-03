@@ -1,0 +1,130 @@
+{
+  "benchmark": "BENCH-5060TI-HF-002",
+  "started_at": "2026-10-03T14:10:02.783Z",
+  "tasks_sha256": "d6d002412637430b86c3e9e57cee9f8ef042d7803d62034d67b285efee8c0297",
+  "heldout_sha256": "85c56847c96a5422f73306c907fbccf880e75e0cbbfe55a63e3fae4b1bae9115",
+  "options": null,
+  "node": "v24.19.0",
+  "ollama": {
+    "version": "0.35.1"
+  },
+  "machine": {
+    "id": "MACH-RTX5060TI-I714700KF",
+    "cpu": "Intel(R) Core(TM) i7-14700KF",
+    "ram_bytes": 34104127488,
+    "gpu": {
+      "stdout": "NVIDIA GeForce RTX 5060 Ti, 617.14, 16311 MiB"
+    }
+  },
+  "candidates": [
+    {
+      "alias": "llh-hf-mellum-instruct:q4",
+      "slug": "mellum2-12b-a2.5b-instruct-q4_k_m",
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "num_ctx": 131072,
+        "num_predict": 81920,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "mode": "native-template",
+      "source": {
+        "url": "https://huggingface.co/JetBrains/Mellum2-12B-A2.5B-Instruct-GGUF-Q4_K_M/tree/1236b4166ed6ab1d57e4be9bcc19f4899c190cbf",
+        "repo": "JetBrains/Mellum2-12B-A2.5B-Instruct-GGUF-Q4_K_M",
+        "revision": "1236b4166ed6ab1d57e4be9bcc19f4899c190cbf"
+      }
+    },
+    {
+      "alias": "llh-hf-omnicoder:q4",
+      "slug": "omnicoder-9b-q4_k_m",
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "num_ctx": 8192,
+        "num_predict": 2048,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "mode": "think=true",
+      "think": true,
+      "source": {
+        "url": "https://huggingface.co/Tesslate/OmniCoder-9B-GGUF/tree/c06117a99179f36962d782946970726b9fc9e533",
+        "repo": "Tesslate/OmniCoder-9B-GGUF",
+        "revision": "c06117a99179f36962d782946970726b9fc9e533"
+      }
+    },
+    {
+      "alias": "llh-hf-coding-monkey:q4",
+      "slug": "coding-monkey-gemma-q4_k_m",
+      "options": {
+        "temperature": 1,
+        "top_p": 0.95,
+        "top_k": 64,
+        "num_ctx": 32768,
+        "num_predict": 1024,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "mode": "think=false",
+      "think": false,
+      "source": {
+        "url": "https://huggingface.co/TheOneWhoWill/Coding-Monkey-Gemma-GGUF/tree/4d94f0b9b9ff997cdce5b93318a73437f17d726e",
+        "repo": "TheOneWhoWill/Coding-Monkey-Gemma-GGUF",
+        "revision": "4d94f0b9b9ff997cdce5b93318a73437f17d726e"
+      }
+    },
+    {
+      "alias": "llh-hf-mellum-thinking:q4",
+      "slug": "mellum2-12b-a2.5b-thinking-q4_k_m",
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "num_ctx": 131072,
+        "num_predict": 81920,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "mode": "think=true",
+      "think": true,
+      "source": {
+        "url": "https://huggingface.co/JetBrains/Mellum2-12B-A2.5B-Thinking-GGUF-Q4_K_M/tree/71a489e7b95efacf89feaaa6fe3b2995f3542409",
+        "repo": "JetBrains/Mellum2-12B-A2.5B-Thinking-GGUF-Q4_K_M",
+        "revision": "71a489e7b95efacf89feaaa6fe3b2995f3542409"
+      }
+    },
+    {
+      "alias": "llh-hf-mellum-thinking:q6",
+      "slug": "mellum2-12b-a2.5b-thinking-q6_k",
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "num_ctx": 131072,
+        "num_predict": 81920,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0
+      },
+      "mode": "think=true",
+      "think": true,
+      "source": {
+        "url": "https://huggingface.co/JetBrains/Mellum2-12B-A2.5B-Thinking-GGUF-Q6_K/tree/929c9925650a6a90f8b87c7266b7be5512de15c6",
+        "repo": "JetBrains/Mellum2-12B-A2.5B-Thinking-GGUF-Q6_K",
+        "revision": "929c9925650a6a90f8b87c7266b7be5512de15c6"
+      }
+    }
+  ]
+}

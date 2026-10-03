@@ -1,0 +1,267 @@
+{
+  "benchmark": "BENCH-5060TI-TUNING-006",
+  "started_at": "2026-10-03T18:14:23.622Z",
+  "tasks_sha256": "d6d002412637430b86c3e9e57cee9f8ef042d7803d62034d67b285efee8c0297",
+  "heldout_sha256": "85c56847c96a5422f73306c907fbccf880e75e0cbbfe55a63e3fae4b1bae9115",
+  "node": "v24.19.0",
+  "ollama": {
+    "version": "0.35.1"
+  },
+  "machine": {
+    "id": "MACH-RTX5060TI-I714700KF",
+    "cpu": "Intel(R) Core(TM) i7-14700KF",
+    "ram_bytes": 34104127488,
+    "gpu": {
+      "stdout": "NVIDIA GeForce RTX 5060 Ti, 617.14, 16311 MiB"
+    }
+  },
+  "candidates": [
+    {
+      "alias": "llh-general-gemma-agentic:bench005",
+      "slug": "gemma-control",
+      "label": "gemma4-v2-agentic:Q4_K_M",
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "repeat_last_n": 64,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "num_ctx": 16384,
+        "num_predict": 8192
+      },
+      "mode": "think=true",
+      "think": true,
+      "files": [
+        {
+          "role": "model",
+          "file": "gemma4-v2-Q4_K_M.gguf",
+          "sha256": "0b9506cab36f7f818e34f9c0f5a3d6568d0b37100f3a3e1092e2eec3c4c96791",
+          "bytes": 7381381664
+        }
+      ],
+      "sources": []
+    },
+    {
+      "alias": "llh-tune-gemma:hf",
+      "slug": "gemma-selected",
+      "label": "gemma4-v2-agentic:Q4_K_M",
+      "options": {
+        "temperature": 1,
+        "top_p": 0.95,
+        "top_k": 64,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "repeat_last_n": 64,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "num_ctx": 16384,
+        "num_predict": 8192
+      },
+      "mode": "think=true",
+      "think": true,
+      "files": [
+        {
+          "role": "model",
+          "file": "gemma4-v2-Q4_K_M.gguf",
+          "sha256": "0b9506cab36f7f818e34f9c0f5a3d6568d0b37100f3a3e1092e2eec3c4c96791",
+          "bytes": 7381381664
+        }
+      ]
+    },
+    {
+      "alias": "llh-general-thaidoc:bench005",
+      "slug": "thaidoc-control",
+      "label": "hf.co/dearxoasis/thaidoc-finetune-gguf:Q4_K_M",
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "repeat_last_n": 64,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "num_ctx": 16384,
+        "num_predict": 8192
+      },
+      "mode": "native-template",
+      "files": [
+        {
+          "role": "model",
+          "file": "thaidoc-finetune.Q4_K_M.gguf",
+          "sha256": "d6c0d0595f06c8fbc9b190bdefb3f8ecfe01f589692fd23d92526338a8980256",
+          "bytes": 5027782048
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://huggingface.co/dearxoasis/thaidoc-finetune-gguf/tree/d71cee94adfca53507e2f07981a5752a9d1061b7"
+        }
+      ]
+    },
+    {
+      "alias": "llh-tune-thaidoc:upstream",
+      "slug": "thaidoc-selected",
+      "label": "hf.co/dearxoasis/thaidoc-finetune-gguf:Q4_K_M",
+      "options": {
+        "temperature": 0.4,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "repeat_penalty": 1.05,
+        "repeat_last_n": 64,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "num_ctx": 16384,
+        "num_predict": 8192
+      },
+      "mode": "native-template",
+      "files": [
+        {
+          "role": "model",
+          "file": "thaidoc-finetune.Q4_K_M.gguf",
+          "sha256": "d6c0d0595f06c8fbc9b190bdefb3f8ecfe01f589692fd23d92526338a8980256",
+          "bytes": 5027782048
+        }
+      ]
+    },
+    {
+      "alias": "llh-general-qwen35:bench005",
+      "slug": "qwen35-control",
+      "label": "qwen3.5:9b",
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "repeat_last_n": 64,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "num_ctx": 16384,
+        "num_predict": 8192
+      },
+      "mode": "think=true",
+      "think": true,
+      "files": [
+        {
+          "role": "model",
+          "file": "qwen3.5.9b.gguf",
+          "sha256": "dec52a44569a2a25341c4e4d3fee25846eed4f6f0b936278e3a3c900bb99d37c",
+          "bytes": 6594462816
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://huggingface.co/Qwen/Qwen3.5-9B/tree/c202236235762e1c871ad0ccb60c8ee5ba337b9a"
+        }
+      ]
+    },
+    {
+      "alias": "llh-tune-qwen35:presence15",
+      "slug": "qwen35-selected",
+      "label": "qwen3.5:9b",
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "repeat_last_n": 64,
+        "presence_penalty": 1.5,
+        "frequency_penalty": 0,
+        "num_ctx": 40960,
+        "num_predict": 32768
+      },
+      "mode": "think=true",
+      "think": true,
+      "files": [
+        {
+          "role": "model",
+          "file": "qwen3.5.9b.gguf",
+          "sha256": "dec52a44569a2a25341c4e4d3fee25846eed4f6f0b936278e3a3c900bb99d37c",
+          "bytes": 6594462816
+        }
+      ]
+    },
+    {
+      "alias": "llh-general-ornith:bench005",
+      "slug": "ornith-control",
+      "label": "hf.co/ornith-ai/Ornith-1.5-9B-GGUF:Q4_K_M",
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "repeat_last_n": 64,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "num_ctx": 16384,
+        "num_predict": 8192
+      },
+      "mode": "think=true",
+      "think": true,
+      "files": [
+        {
+          "role": "model",
+          "file": "Ornith-1.5-9B.Q4_K_M.gguf",
+          "sha256": "70c112196e0b7023803c9762752e46d29e612a92c83f995bc3ba1ceb07e8fab6",
+          "bytes": 5780090816
+        },
+        {
+          "role": "projector",
+          "file": "mmproj-Ornith-1.5-9B.gguf",
+          "sha256": "626f9f90627402a6bf4a999111d0fbd69b5fcca7aa8ba089d69e5f10e8858e1d",
+          "bytes": 921704672
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://huggingface.co/ornith-ai/Ornith-1.5-9B-GGUF/tree/abdd624b12ebf020b767fff532ff44fe552b28c3"
+        }
+      ]
+    },
+    {
+      "alias": "llh-tune-ornith:budget32k",
+      "slug": "ornith-selected",
+      "label": "hf.co/ornith-ai/Ornith-1.5-9B-GGUF:Q4_K_M",
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "repeat_last_n": 64,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "num_ctx": 40960,
+        "num_predict": 32768
+      },
+      "mode": "think=true",
+      "think": true,
+      "files": [
+        {
+          "role": "model",
+          "file": "Ornith-1.5-9B.Q4_K_M.gguf",
+          "sha256": "70c112196e0b7023803c9762752e46d29e612a92c83f995bc3ba1ceb07e8fab6",
+          "bytes": 5780090816
+        },
+        {
+          "role": "projector",
+          "file": "mmproj-Ornith-1.5-9B.gguf",
+          "sha256": "626f9f90627402a6bf4a999111d0fbd69b5fcca7aa8ba089d69e5f10e8858e1d",
+          "bytes": 921704672
+        }
+      ],
+      "sources": [
+        {
+          "url": "https://huggingface.co/ornith-ai/Ornith-1.5-9B-GGUF/tree/abdd624b12ebf020b767fff532ff44fe552b28c3"
+        }
+      ]
+    }
+  ]
+}

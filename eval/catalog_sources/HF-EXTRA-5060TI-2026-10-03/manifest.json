@@ -1,0 +1,144 @@
+{
+  "benchmark": "BENCH-5060TI-HF-003",
+  "started_at": "2026-10-03T14:45:34.366Z",
+  "tasks_sha256": "d6d002412637430b86c3e9e57cee9f8ef042d7803d62034d67b285efee8c0297",
+  "heldout_sha256": "85c56847c96a5422f73306c907fbccf880e75e0cbbfe55a63e3fae4b1bae9115",
+  "node": "v24.19.0",
+  "ollama": {
+    "version": "0.35.1"
+  },
+  "machine": {
+    "id": "MACH-RTX5060TI-I714700KF",
+    "cpu": "Intel(R) Core(TM) i7-14700KF",
+    "ram_bytes": 34104127488,
+    "gpu": {
+      "stdout": "NVIDIA GeForce RTX 5060 Ti, 617.14, 16311 MiB"
+    }
+  },
+  "candidates": [
+    {
+      "alias": "llh-extra-sushi:q4",
+      "slug": "qwen3.5-9b-sushi-coder-rl-q4_k_m",
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "num_ctx": 4096,
+        "num_predict": 1024
+      },
+      "mode": "think=true",
+      "think": true,
+      "files": [
+        {
+          "role": "model",
+          "file": "Qwen3.5-9b-Sushi-Coder-RL.Q4_K_M.gguf",
+          "sha256": "ab7493b9fa7c21441044e2e5755faddfe8cf13064ce319d5fcaa2213e2e4cec8",
+          "bytes": 5629109056
+        },
+        {
+          "role": "projector",
+          "file": "mmproj-Qwen3.5-9b-Sushi-Coder-RL.gguf",
+          "sha256": "002e0f739eb83dd3a2bd8d9bb58909c0a85aa571ca0b3b140bece1c010535d6c",
+          "bytes": 921704832
+        }
+      ],
+      "source": {
+        "url": "https://huggingface.co/bigatuna/Qwen3.5-9b-Sushi-Coder-RL-GGUF/tree/c29d1417c6fead5838a928ccf3c5735a2604d0e2",
+        "repo": "bigatuna/Qwen3.5-9b-Sushi-Coder-RL-GGUF",
+        "revision": "c29d1417c6fead5838a928ccf3c5735a2604d0e2"
+      }
+    },
+    {
+      "alias": "llh-extra-intelligence:q4",
+      "slug": "intelligence-cod-rag-7b-v2-i1-q4_k_m",
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "num_ctx": 8192,
+        "num_predict": 4096
+      },
+      "mode": "native-template",
+      "files": [
+        {
+          "role": "model",
+          "file": "Intelligence-Cod-Rag-7B-V2-i1.Q4_K_M.gguf",
+          "sha256": "04969020a3b5ae56ac4c54d59d96aeae1c1d87577a53a44097acaf94b7d16e14",
+          "bytes": 4683072928
+        }
+      ],
+      "source": {
+        "url": "https://huggingface.co/mradermacher/Intelligence-Cod-Rag-7B-V2-i1-GGUF/tree/6a49baa72e13b0b8919578de5329834e7a8f7a54",
+        "repo": "mradermacher/Intelligence-Cod-Rag-7B-V2-i1-GGUF",
+        "revision": "6a49baa72e13b0b8919578de5329834e7a8f7a54"
+      }
+    },
+    {
+      "alias": "llh-extra-jack:iq2_m",
+      "slug": "jack-3.8-27b-coder",
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "num_ctx": 32768,
+        "num_predict": 4096
+      },
+      "mode": "think=false",
+      "think": false,
+      "files": [
+        {
+          "role": "model",
+          "file": "Jack-3.8-27B-Coder-16GB-VRAM.gguf",
+          "sha256": "e7fecb29086afb4f6ca054b0f1469f2704a24e56db27c5980827f5f32d26f041",
+          "bytes": 12599204320
+        }
+      ],
+      "source": {
+        "url": "https://huggingface.co/JackAgentLead/Jack-3.8-27B-Coder-16GB-VRAM/tree/996b50828fc910ac7d0a96953674995f79b428a1",
+        "repo": "JackAgentLead/Jack-3.8-27B-Coder-16GB-VRAM",
+        "revision": "996b50828fc910ac7d0a96953674995f79b428a1"
+      }
+    },
+    {
+      "alias": "llh-extra-thai-sql:q4",
+      "slug": "llama3.2_3b_text2sql_thai-q4_k_m",
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "num_ctx": 8192,
+        "num_predict": 4096
+      },
+      "mode": "native-template",
+      "files": [
+        {
+          "role": "model",
+          "file": "llama3.2_3B_text2sql_Thai.Q4_K_M.gguf",
+          "sha256": "d659dd336e8004efc7a6bcaa34bb194e60669482037fdd6b0574702b306806b3",
+          "bytes": 2019378048
+        }
+      ],
+      "source": {
+        "url": "https://huggingface.co/new5558/llama3.2_3B_text2sql_Thai_GGUF/tree/c159574428b8f309d4adcc3c70e6bf6f3f8ce53e",
+        "repo": "new5558/llama3.2_3B_text2sql_Thai_GGUF",
+        "revision": "c159574428b8f309d4adcc3c70e6bf6f3f8ce53e"
+      }
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "allRequestsMatchProfiles": true,
+  "requestsVerified": 24,
+  "plannedSlots": 24,
+  "accountedSlots": 24,
+  "sourceArtifactSha256": {
+    "manifest.json": "a3b6c03c0814337744dec094cfb98ebd2a6e9eb5c6f1a9794a0a9405d2e54cac",
+    "summary.json": "e9e4ebef7e7ba93f0b1a1ad14a694b0d389c8c57a3c17ac5b2be499a33b3507f",
+    "verification.json": "04f2e7949f042680a1f28fcf615f1846d0ae019e2121ce9ebd98c2e12d609231"
+  }
+}

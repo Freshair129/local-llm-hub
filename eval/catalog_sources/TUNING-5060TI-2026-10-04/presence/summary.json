@@ -1,0 +1,186 @@
+[
+  {
+    "alias": "llh-tune-ornith:presence15",
+    "slug": "ornith-presence15",
+    "source_slug": "ornith-1.5-9b-q4_k_m",
+    "options": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "min_p": 0,
+      "repeat_penalty": 1,
+      "repeat_last_n": 64,
+      "presence_penalty": 1.5,
+      "frequency_penalty": 0,
+      "num_ctx": 40960,
+      "num_predict": 32768
+    },
+    "think": true,
+    "slots": 6,
+    "functional": 3,
+    "combined": 2,
+    "truncated": 0,
+    "errors": 0,
+    "peakMiB": 8471,
+    "rows": [
+      {
+        "task": "FR-002",
+        "seed": 42,
+        "combined": false,
+        "functional": false,
+        "truncated": false,
+        "error": false,
+        "seconds": 152.6211239,
+        "peakMiB": 8471,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-002",
+        "seed": 43,
+        "combined": false,
+        "functional": false,
+        "truncated": false,
+        "error": false,
+        "seconds": 160.39893820000003,
+        "peakMiB": 8471,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-002",
+        "seed": 44,
+        "combined": false,
+        "functional": false,
+        "truncated": false,
+        "error": false,
+        "seconds": 389.4168483,
+        "peakMiB": 8468,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-006",
+        "seed": 42,
+        "combined": false,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 30.64599060000002,
+        "peakMiB": 8442,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-006",
+        "seed": 43,
+        "combined": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 20.92846649999998,
+        "peakMiB": 8442,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-006",
+        "seed": 44,
+        "combined": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 42.913272,
+        "peakMiB": 8442,
+        "gpuOnly": true
+      }
+    ]
+  },
+  {
+    "alias": "llh-tune-qwen35:presence15",
+    "slug": "qwen35-presence15",
+    "source_slug": "qwen3.5-9b",
+    "options": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "min_p": 0,
+      "repeat_penalty": 1,
+      "repeat_last_n": 64,
+      "presence_penalty": 1.5,
+      "frequency_penalty": 0,
+      "num_ctx": 40960,
+      "num_predict": 32768
+    },
+    "think": true,
+    "slots": 6,
+    "functional": 6,
+    "combined": 6,
+    "truncated": 0,
+    "errors": 0,
+    "peakMiB": 8736,
+    "rows": [
+      {
+        "task": "FR-002",
+        "seed": 42,
+        "combined": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 63.36566639999999,
+        "peakMiB": 8736,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-002",
+        "seed": 43,
+        "combined": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 111.3010791000001,
+        "peakMiB": 8736,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-002",
+        "seed": 44,
+        "combined": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 110.64281129999995,
+        "peakMiB": 8736,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-006",
+        "seed": 42,
+        "combined": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 39.85522130000009,
+        "peakMiB": 8736,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-006",
+        "seed": 43,
+        "combined": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 56.288947900000025,
+        "peakMiB": 8736,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-006",
+        "seed": 44,
+        "combined": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 43.97418050000002,
+        "peakMiB": 8736,
+        "gpuOnly": true
+      }
+    ]
+  }
+]

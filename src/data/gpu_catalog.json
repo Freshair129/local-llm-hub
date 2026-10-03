@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "sourceDate": "2026-10-04",
+  "variants": [
+    {
+      "id": "geforce-rtx-3060-12gb",
+      "name": "NVIDIA GeForce RTX 3060",
+      "variant": "Desktop, 12 GB",
+      "vramBytes": 12884901888,
+      "sourceUrl": "https://www.nvidia.com/en-us/geforce/graphics-cards/30-series/rtx-3060-3060ti/",
+      "sourceLabel": "NVIDIA official specifications",
+      "tested": false
+    },
+    {
+      "id": "geforce-rtx-4060-ti-8gb",
+      "name": "NVIDIA GeForce RTX 4060 Ti",
+      "variant": "Desktop, 8 GB",
+      "vramBytes": 8589934592,
+      "sourceUrl": "https://www.nvidia.com/en-us/geforce/graphics-cards/40-series/rtx-4060-4060ti/",
+      "sourceLabel": "NVIDIA official specifications",
+      "tested": false
+    },
+    {
+      "id": "geforce-rtx-4060-ti-16gb",
+      "name": "NVIDIA GeForce RTX 4060 Ti",
+      "variant": "Desktop, 16 GB",
+      "vramBytes": 17179869184,
+      "sourceUrl": "https://www.nvidia.com/en-us/geforce/graphics-cards/40-series/rtx-4060-4060ti/",
+      "sourceLabel": "NVIDIA official specifications",
+      "tested": false
+    },
+    {
+      "id": "geforce-rtx-5060-ti-8gb",
+      "name": "NVIDIA GeForce RTX 5060 Ti",
+      "variant": "Desktop, 8 GB",
+      "vramBytes": 8589934592,
+      "sourceUrl": "https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5060-family/",
+      "sourceLabel": "NVIDIA official specifications",
+      "tested": false
+    },
+    {
+      "id": "geforce-rtx-5060-ti-16gb",
+      "name": "NVIDIA GeForce RTX 5060 Ti",
+      "variant": "Desktop, 16 GB",
+      "vramBytes": 17179869184,
+      "sourceUrl": "https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5060-family/",
+      "sourceLabel": "NVIDIA official specifications",
+      "tested": true,
+      "observedMemoryMiB": 16311
+    },
+    {
+      "id": "geforce-rtx-5070-ti-16gb",
+      "name": "NVIDIA GeForce RTX 5070 Ti",
+      "variant": "Desktop, 16 GB",
+      "vramBytes": 17179869184,
+      "sourceUrl": "https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5070-family/",
+      "sourceLabel": "NVIDIA official specifications",
+      "tested": false
+    },
+    {
+      "id": "geforce-rtx-5080-16gb",
+      "name": "NVIDIA GeForce RTX 5080",
+      "variant": "Desktop, 16 GB",
+      "vramBytes": 17179869184,
+      "sourceUrl": "https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5080/",
+      "sourceLabel": "NVIDIA official specifications",
+      "tested": false
+    },
+    {
+      "id": "geforce-rtx-5090-32gb",
+      "name": "NVIDIA GeForce RTX 5090",
+      "variant": "Desktop, 32 GB",
+      "vramBytes": 34359738368,
+      "sourceUrl": "https://www.nvidia.com/en-us/geforce/graphics-cards/50-series/rtx-5090/",
+      "sourceLabel": "NVIDIA official specifications",
+      "tested": false
+    }
+  ]
+}

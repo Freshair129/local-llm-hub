@@ -15,6 +15,7 @@ import { initChat } from './js/chat.js';
 import { showToast } from './js/toast.js';
 import { store } from './js/state.js';
 import { renderStatsDashboard } from './js/stats.js';
+import { initModelAdvisor } from './js/model_advisor.js';
 import { initArena, populateArenaModelSelectors } from './js/arena.js';
 import { initDownloader } from './js/downloader.js';
 import { initUpdater } from './js/updater.js';
@@ -173,6 +174,8 @@ function setupNavigation() {
 
       if (targetView === 'stats') {
         renderStatsDashboard();
+      } else if (targetView === 'model-advisor') {
+        initModelAdvisor();
       } else if (targetView === 'arena') {
         populateArenaModelSelectors();
       } else if (targetView === 'twin') {

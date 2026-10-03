@@ -1,0 +1,8 @@
+{
+  "requests_and_source_hashes": 6,
+  "sourceArtifactSha256": {
+    "manifest.json": "bad0898bc7ba9945a3b41ed3ef900eeb8d76794c4ec975be616fb1248f88c59b",
+    "summary.json": "d84a08de41cb020e06069b2d4a35e7f4ebde28412a97ad9b467990d5957337df",
+    "verification.json": "e2fd23dd0b4fb678f7074930a5a5e6b3970fb0684658fc5c0b189e6f67909134"
+  }
+}
