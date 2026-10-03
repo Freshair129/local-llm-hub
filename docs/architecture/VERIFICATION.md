@@ -83,3 +83,7 @@ Known boundaries: one service worker; trusted local operator; exact-command poli
 Partially implemented: MCP has an adapter interface and fake adapter verification, without a shipped live transport; Docker packaging is written but not executed. Planned: streaming/TTFT, model tokenizers/summarization, capability probing, alternative routing/memory backends, distributed coordination and durable session resumption. Existing unrelated frontend streaming claims and historical generated reports are not acceptance evidence. No UI redesign or GPU model lifecycle migration was attempted.
 
 Next highest-value task: run the opt-in real-provider acceptance matrix against one explicitly configured, already served local model, validating tool calls, structured output, cancellation and concurrency using its actual capability/context settings.
+
+## Source and receipt identity
+
+Implementation commit: `2349906a7f5f4c71f0badd3f542d3295b8abf3d9`. The append-only [packet lineage](../lineage/packet-lineage.jsonl) references this source and records the shared executed suite (63 collected, 61 PASS, 2 SKIP, zero failures/errors; 6,131 ms JUnit suite time). These are local-checkpoint receipts, not merged/released packet closure or independent review. The final repository diff is relative to baseline `12e84fc`. The original main checkout remained clean at that baseline.
