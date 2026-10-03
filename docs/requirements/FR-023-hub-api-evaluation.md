@@ -1,0 +1,34 @@
+---
+id: FR-023
+domain: inference-gateway
+owner: Boss
+status: active
+superseded_by: null
+version: 0.2.0
+priority: P0
+features: [CROSS-FEAT-002]
+depends_on:
+  - FR-018
+  - FR-019
+  - FR-020
+  - FR-021
+  - FR-022
+---
+
+# Hub API, packaging and truthful evaluation
+
+Deliver the corresponding approved [target contracts](../architecture/TARGET-ARCHITECTURE.md) with acceptance criteria H19 H21 H22 H25 H26 H27 H28 H29 H30 in the [acceptance plan](../architecture/IMPLEMENTATION-PLAN.md). No full OpenAI parity, public multi-tenancy, arbitrary sandbox claim or hidden cloud fallback.
+
+## Interface lock
+
+create_app(config: HubConfig, runtime: AgentRuntime | None = None) -> FastAPI; routes and payloads in approved target; Rust send_chat_message(request: ChatRequest) -> Result<ChatResponse,String> preserved; new run_hub_agent(agent_id,input,session_id) returns JSON Result
+
+Component scope: runtime/local_llm_hub/api.py; runtime/local_llm_hub/cli.py; runtime/local_llm_hub/evaluation.py; runtime/local_llm_hub/logging.py; src-tauri/src/commands/hub.rs; src-tauri/src/commands/mod.rs; src-tauri/src/lib.rs; scripts/run_local_llm_uat.mjs; runtime/Dockerfile; compose.yaml; .dockerignore; README.md; docs/*.md. Tests live in runtime/tests/test_hub_api_evaluation.py and focused integration fixtures.
+
+## Verification
+
+Map the listed H criteria to executed deterministic tests, including failure paths. Record actual results in the verification report; source presence is not acceptance.
+
+## Version diff
+
+New requirement derived from the approved 0.2.0 architecture.

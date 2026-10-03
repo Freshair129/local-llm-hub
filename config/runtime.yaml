@@ -1,0 +1,17 @@
+runtime:
+  host: 127.0.0.1
+  port: 8787
+  auth_env: LOCAL_LLM_HUB_TOKEN
+  state_path: ../.hub/memory.sqlite3
+  agent_concurrency: 4
+  queue_timeout: 10
+  run_timeout: 120
+  max_depth: 3
+  max_delegations: 16
+  max_model_requests: 16
+  max_tool_calls: 24
+  max_sessions: 1000
+  session_ttl: 3600
+  tool_timeout: 10
+  tool_output_bytes: 16384
+  health_interval: 30

@@ -19,6 +19,19 @@ dist-ssr/
 package-lock.json
 
 # Logs & Temporary Files
+.venv/
+.uv-cache/
+.hub/
+.env
+.env.*
+!.env.example
+config/private/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+build/
 logs/
 *.log
 npm-debug.log*

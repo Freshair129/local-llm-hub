@@ -238,7 +238,10 @@ async fn send_chat_message(
         let guard = state.lock().await;
         (guard.backends.clone(), reqwest::Client::new())
     };
-    let res = commands::chat::execute_chat(&client, &cfg, &request).await?;
+    let res = match commands::hub::HubBridge::from_env()? {
+        Some(hub) => hub.chat(&request).await?,
+        None => commands::chat::execute_chat(&client, &cfg, &request).await?,
+    };
 
     let now = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -251,6 +254,17 @@ async fn send_chat_message(
     }
 
     Ok(res)
+}
+
+// trace:implements FR-023
+#[tauri::command]
+async fn run_hub_agent(
+    agent_id: String,
+    input: String,
+    session_id: Option<String>,
+) -> Result<serde_json::Value, String> {
+    let hub = commands::hub::HubBridge::from_env()?.ok_or("HUB_DISABLED")?;
+    hub.run(&agent_id, &input, session_id.as_deref()).await
 }
 
 // trace:implements FR-008
@@ -650,6 +664,7 @@ pub fn run() {
             get_lhm_status,
             set_fan_duty,
             send_chat_message,
+            run_hub_agent,
             generate_proxy_config,
             get_proxy_status,
             create_api_key,
