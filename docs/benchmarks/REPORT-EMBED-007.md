@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | Report ID | REPORT-EMBED-007 |
-| Version | 0.3 |
-| Status | Interim; E5-small completed all 11 cells; full task matrix in progress |
-| Protocol | [BENCH-SPEC-EMBEDDINGS-001 v1.0.4](BENCH-SPEC-EMBEDDINGS-001.md) |
+| Version | 0.4 |
+| Status | Interim; E5-small complete; BGE-small first pass complete; full task matrix in progress |
+| Protocol | [BENCH-SPEC-EMBEDDINGS-001 v1.0.5](BENCH-SPEC-EMBEDDINGS-001.md) |
 | Run | EMBED-007, MTEB 2.22.2 |
 | Host context (verified live during this run) | NVIDIA GeForce RTX 5060 Ti 16 GB; Intel Core i7-14700KF; 31.76 GiB visible system RAM; Windows 11 Pro build 26300; NVIDIA driver 617.14; CUDA UMD 13.4 |
 
@@ -69,6 +69,23 @@ E5-small used the card-required `query: ` and `passage: ` prefixes, 512-token li
 
 These results follow the frozen E5-small profile, including the `query: ` and `passage: ` prefixes. CodeSearchNet language rows use the frozen test split and should be read as separate language-specific retrieval results.
 
+## BGE-small follow-up retrieval quality
+
+| Candidate | Task and split | Status | nDCG@10 | MRR@10 | Recall@100 | Evaluation seconds |
+|---|---|---:|---:|---:|---:|---:|
+| `bge-small-en-v1.5-q4_k_m` | MIRACL Thai hard negatives, `dev` | FAIL | — | — | — | — |
+| `bge-small-en-v1.5-q4_k_m` | MIRACL German hard negatives, `dev` | FAIL | — | — | — | — |
+| `bge-small-en-v1.5-q4_k_m` | Belebele Thai, `test` | PASS | 0.11692 | 0.11215 | 0.32222 | 14.687 |
+| `bge-small-en-v1.5-q4_k_m` | NFCorpus, `test` | PASS | 0.33901 | 0.52951 | 0.30566 | 52.157 |
+| `bge-small-en-v1.5-q4_k_m` | CodeSearchNet Python, `test` | PASS | 0.89052 | 0.86544 | 0.99200 | 36.602 |
+| `bge-small-en-v1.5-q4_k_m` | CodeSearchNet JavaScript, `test` | PASS | 0.73611 | 0.70318 | 0.91300 | 33.803 |
+| `bge-small-en-v1.5-q4_k_m` | CodeSearchNet Go, `test` | PASS | 0.94442 | 0.93056 | 0.99500 | 32.794 |
+| `bge-small-en-v1.5-q4_k_m` | CodeSearchNet Ruby, `test` | PASS | 0.79576 | 0.76379 | 0.96000 | 33.461 |
+| `bge-small-en-v1.5-q4_k_m` | CodeSearchNet Java, `test` | FAIL | — | — | — | — |
+| `bge-small-en-v1.5-q4_k_m` | CodeSearchNet PHP, `test` | PASS | 0.87281 | 0.84811 | 0.97200 | 31.882 |
+
+The first BGE-small pass produced three socket-pressure failures on the local Ollama backend. See the linked RCA for the error and prevention; these cells are eligible for a paced retry. The English-only model's Thai retrieval scores are out-of-domain.
+
 ## Local latency and memory screening
 
 Latency is single-query embedding latency over 20 samples (`p50`/`p95`). Query/document throughput uses batch size 32. GPU delta and runner RSS are the observed peaks during MTEB plus the performance smoke check, not isolated load-only measurements. Host memory is the minimum available during the run. These numbers describe this one PC and are not MTEB quality metrics.
@@ -102,7 +119,7 @@ Detailed evidence and prevention actions are recorded in [RCA EMBED-007](../../.
 
 ## Completion status and next work
 
-At this report revision, 49 of 165 candidate-task cells have terminal results: 27 PASS with scores and 22 FAIL at performance smoke; 116 cells remain nonterminal, including the currently running BGE-small MIRACL Thai cell. All 15 candidates have a SciFact screen: 13 returned scores and E5 IQ4 / Voyage F16 failed before MTEB. The updated runner records 11 task-specific performance-smoke failures for each incompatible candidate. E5-small has completed all 11 cells; E5-small, BGE-M3, and BGE-M3 Q4 each passed both selected Thai tasks. Do not interpret the report as completion of the full matrix.
+At this report revision, 59 of 165 candidate-task cells have terminal results: 34 PASS with scores and 25 FAIL; 106 cells remain nonterminal, including the active Jina retrieval-tuned GGUF run. All 15 candidates have a SciFact screen: 13 returned scores and E5 IQ4 / Voyage F16 failed before MTEB. The updated runner records 11 task-specific performance-smoke failures for each incompatible candidate. E5-small completed all 11 cells; BGE-small's initial pass completed all 11 with three local socket-pressure failures pending paced retries. Do not interpret the report as completion of the full matrix.
 
 Next, continue the remaining model/task cells serially as resource guards permit. Keep raw task artifacts and absolute paths outside the public report and repository.
 
@@ -111,3 +128,4 @@ Next, continue the remaining model/task cells serially as resource guards permit
 - 0.1 — initial interim screen: all 15 SciFact cells, E5-small Thai cells, latency/memory smoke data, loader compatibility findings, and pending matrix status.
 - 0.2 — added full-precision and Q4 BGE-M3 Thai results, task-specific failure rows for both incompatible GGUF candidates, verified live host metadata, and corrected terminal/pending cell counts.
 - 0.3 — recorded all 11 E5-small task results, refreshed E5-small and BGE-small latency/memory measurements, and updated the current matrix count while the full run continues.
+- 0.4 — added BGE-small's first complete task pass, recorded its socket-pressure failures and successful retrieval scores, and updated the matrix status and protocol reference.
