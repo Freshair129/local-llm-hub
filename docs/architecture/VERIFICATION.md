@@ -1,14 +1,43 @@
 ---
 id: HUB-VERIFICATION
-version: 0.3.0
+version: 0.4.0
 status: active
 superseded_by: null
-date: 2026-10-04
+date: 2026-10-05
 baseline_commit: 12e84fc87c0bbccac3bccf0405382db541d7ef85
 scope: local engineering checkpoint
 ---
 
 # Implemented checkpoint and verification receipt
+
+## Approved repair checkpoint, 2026-10-05
+
+Current repair source: `6c62285` on `feat/local-llm-agent-harness`; isolated mechanical formatting: `1dabe42`. User approval covers [HUB-ACCEPTANCE-REPAIR](../plans/HUB-ACCEPTANCE-REPAIR.md). Overall status is **PARTIAL: desktop repairs verified; container acceptance BLOCKED**. The historical 2026-10-04 formatting and native-GUI failures below are superseded by this section, not silently erased.
+
+| Gate | Current outcome and scope |
+|---|---|
+| R1 Rust formatting | PASS; 23 files normalized in their own commit; `cargo fmt --all -- --check` clean |
+| Rust library | PASS 61/61, including logical/legacy catalog mapping, malformed catalog and unavailable Hub |
+| Focused JS | PASS 7/7: canonical Arena payload/response, unavailable usage, fail-closed Chat/catalog, refresh race, duplicate send, concurrent error guard and non-overlapping telemetry batches |
+| Existing Node suite | PASS 7 runner entries (evaluation wrapper includes its existing five assertions) |
+| Python | PASS 61, SKIP 6: five explicitly opt-in real-provider cases and one Windows symlink privilege condition. Ruff and strict mypy (20 modules) PASS |
+| Documentation | PASS: metadata/links/fences for 36 documents, graph/dependency checks and source trace annotations |
+| Native Tauri | PASS seven real WebDriver checks through native IPC and authenticated Hub HTTP, explicit CPU mock provider; Chat, Arena, both outage paths and fail-closed catalog. This is desktop functional evidence, not real-model/GPU or installer evidence |
+| R5 Docker | BLOCKED / NOT_RUN: WSL VHD is on C:, with approximately 353 MiB host capacity available at initial preflight and 292,356,096 bytes (279 MiB) at final recheck. No Docker packages, images or containers installed/started. Linux-container symlink acceptance remains NOT_RUN |
+| R6 Cancellation | Preserved Ollama log correlates cancelled task 674, slot stop/release and successful recovery task 704. GPU kernel stop latency NOT_MEASURED; no inference rerun for documentation |
+| Model metadata | Exact existing local 407-byte SHA-256 copy restored; real Ollama `/api/show` returns 200 for MaralGPT. `/api/ps` empty: no 9B inference or weights download. Owned listener subsequently verified closed |
+
+The native test uses tauri-driver 2.1.0 and Microsoft EdgeDriver/WebView2 154.0.4258.53, a separate app identifier and an explicit task-local profile. Run9 and run10 pass; earlier failed receipts are preserved. The canonical source-linked final receipt is `.hub/desktop/acceptance-final/receipt.json`, with executable SHA-256, elapsed checkpoints, screenshots and process/port cleanup. Raw receipts are local ignored artifacts; hashes and source identity are appended to [packet lineage](../lineage/packet-lineage.jsonl).
+
+Native testing uncovered two additional causes documented in [RCA-002](../../.brain/rca/RCA-002-DESKTOP-ACCEPTANCE-GAPS.md): a missing Hardware subpanel closing tag hid subsequent peer views, and synchronous sensor reads combined with overlapping polling starved IPC. The markup now gives every peer view the same parent. Sensor reads run on a blocking worker behind async IPC; a telemetry batch completes before another poll begins. The two-second cadence, sensor payloads and backend contracts remain intact. Run7 previously timed out on Arena outage; run9 completes all seven checks at 21.48 seconds from launch. These are functional observations, not a latency benchmark.
+
+Architecture review: the new catalog derives selection from the same Hub/legacy mode as execution, exposes no endpoint URL or token, and fails closed. Physical inventory stays separate. Buffering remains explicit; TTFT, missing tokens and GPU activity are not fabricated by Chat/Arena. Original source/installed application remain untouched; this is a local branch, with no merge, push, deployment or release.
+
+Known remaining limits: Docker and Linux-container acceptance require host capacity; Windows true symlink still needs the existing privilege; streaming, live MCP, other providers and signed installer remain deferred/unverified. The pre-existing topbar overflows at a 1200-pixel window (native refresh check widens to 1600); responsive redesign and legacy simulated hardware/seeded analytics surfaces are outside this approved repair and are not accepted as measurements. LHM pipe reads still lack an intrinsic deadline; the worker isolation prevents them blocking the UI, but sidecar recovery is separate work.
+
+Version diff 0.3.0 -> 0.4.0: implement and verify approved repairs; add source-linked native evidence, successful exact metadata recovery and explicit host-capacity blocker. The previous checkpoint history follows.
+
+## Historical runtime checkpoint
 
 The approved runtime is implemented on local branch `feat/local-llm-agent-harness` in the isolated checkout `O:\local-llm-hub-worktrees\harness-design`. The original source checkout is `D:\local-llm-hub`; the installed application in `O:\local-llm-hub` was not replaced. No pull, reset, merge, deployment or remote publication occurred. User approval was recorded on 2026-10-03 after architecture/RCA review.
 
