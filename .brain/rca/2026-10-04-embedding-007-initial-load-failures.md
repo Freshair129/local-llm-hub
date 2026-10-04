@@ -16,10 +16,12 @@ The first common MTEB SciFact test attempted all 15 local embedding candidates. 
 - Voyage F16 GGUF returned 1,024 dimensions by default and also returned 1,024 after `/api/embed` requests with `dimensions=1024` and `dimensions=2048`. Its frozen HF profile expects 2,048.
 - The original runner had no exception-to-ledger handler around `make_encoder`; the model-load exception occurred before the performance-smoke handler. Runtime versions were also absent from result rows.
 - The first corrected runner wrote model-load exceptions per selected task, but a performance-smoke exception still produced only a model-level row. The E5 IQ4_XS and Voyage F16 ledger records contain model/status/stage/error but no task identity, so their 22 matrix cells were not explicitly terminalized.
+- Before the 124-cell continuation, review of the runner found that its OOM branch recorded the current cell and immediately broke, leaving later cells for that model without a status.
 
 ## Root Cause
 
 - **Runner ledger gap — confirmed and resolved for this matrix:** model-construction exceptions bypassed terminal result recording, and performance-smoke exceptions were recorded only at model level. The external benchmark runner now writes one task-identified failure row per selected task for either stage and records runtime versions. Reruns wrote 11 failure rows each for E5 IQ4_XS and Voyage F16, covering their frozen task matrix.
+- **Post-OOM matrix gap — confirmed and resolved before continuation:** fail-fast correctly stopped more work for a model after OOM, but did not mark remaining tasks. The runner now writes `NOT_RUN` rows with `stopped-after-oom` evidence for remaining non-PASS cells before leaving that model.
 - **CodeRankEmbed — confirmed and resolved for this run:** two Python class identities were loaded for the same custom Nomic-BERT config source, and the trust-remote-code flag was not forwarded through the SentenceTransformer constructor as required by the model-card loading path. The card-aligned isolated runtime and corrected flag resolved model loading.
 - **Voyage-4-Nano HF — confirmed and resolved for this run:** the local model code and its config's recorded Transformers version do not match; 4.51.3 lacks an imported module required by the local code. The local code loaded and scored under Transformers 4.57.1 with Sentence Transformers 5.3.0.
 - **E5 GGUF — confirmed backend cause:** the local GGUF does not supply the token-type-count metadata required by Ollama's BERT executor.
@@ -28,14 +30,16 @@ The first common MTEB SciFact test attempted all 15 local embedding candidates. 
 ## Why the issue escaped detection
 
 The preflight verified weight hashes but did not validate each custom loader or actual output dimension. Earlier smoke checks covered BGE-M3 and HF E5, not the custom Transformers loader or these GGUF variants. The runner caught inference and task errors but not model-construction errors, and the first E5 error record omitted Ollama's response body.
+The initial 165-cell schedule had not exercised an OOM branch, so the missing post-OOM terminal rows were not visible before the full-matrix run.
 
 ## Proposed Prevention
 
 - Run audited custom-code models in isolated environments that match the loaded local code, and record actual library versions with every result.
 - Keep a model-load exception boundary that writes terminal statuses while cleanup remains in `finally`.
+- When fail-fast stops a model after OOM, write `NOT_RUN` evidence for its remaining unpassed tasks before cleanup.
 - Validate actual vector dimension against the frozen profile before scoring; preserve backend errors without storing input text or corpus rows.
 - Do not alter or repair GGUF artifacts without source conversion metadata and an explicit compatibility test.
 
 ## Resolution
 
-The external benchmark runner now forwards `trust_remote_code` using the SentenceTransformer constructor parameter, catches model-load and performance-smoke errors into task-identified ledger rows, and records runtime versions. The updated runner passes `py_compile`. Card-compatible runs produced valid SciFact scores for CodeRankEmbed and Voyage-4-Nano HF. The E5 and Voyage GGUF candidates remain failed compatibility checks; reruns wrote task-specific failure records across their full frozen task matrix. No model files or application source were changed. German, NFCorpus, and CodeSearchNet cells remain pending; Thai E5-small, BGE-M3, and BGE-M3 Q4 have each completed both selected Thai tasks.
+The external benchmark runner now forwards `trust_remote_code` using the SentenceTransformer constructor parameter, catches model-load and performance-smoke errors into task-identified ledger rows, records runtime versions, and terminalizes remaining unpassed cells after OOM. The updated runner passes `py_compile`. Card-compatible runs produced valid SciFact scores for CodeRankEmbed and Voyage-4-Nano HF. The E5 and Voyage GGUF candidates remain failed compatibility checks; reruns wrote task-specific failure records across their full frozen task matrix. No model files or application source were changed. German, NFCorpus, and CodeSearchNet cells remain pending; Thai E5-small, BGE-M3, and BGE-M3 Q4 have each completed both selected Thai tasks.
