@@ -46,26 +46,34 @@ pub fn generate_litellm_config(
         let _ = std::fs::create_dir_all(parent);
     }
 
-    let mut file = File::create(output_path).map_err(|e| format!("Failed to create config file: {}", e))?;
-    file.write_all(yaml.as_bytes()).map_err(|e| format!("Failed to write config: {}", e))?;
+    let mut file =
+        File::create(output_path).map_err(|e| format!("Failed to create config file: {}", e))?;
+    file.write_all(yaml.as_bytes())
+        .map_err(|e| format!("Failed to write config: {}", e))?;
 
     Ok(yaml)
 }
 
 /// Checks current status of LiteLLM proxy
-pub async fn check_proxy_status(port: u16, config_path: &str, models: &[UnifiedModel]) -> ProxyStatus {
+pub async fn check_proxy_status(
+    port: u16,
+    config_path: &str,
+    models: &[UnifiedModel],
+) -> ProxyStatus {
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_millis(800))
         .build()
         .unwrap_or_default();
 
     let health_url = format!("http://127.0.0.1:{}/health", port);
-    let running = client.get(&health_url).send().await.map(|r| r.status().is_success()).unwrap_or(false);
+    let running = client
+        .get(&health_url)
+        .send()
+        .await
+        .map(|r| r.status().is_success())
+        .unwrap_or(false);
 
-    let registered_names = models
-        .iter()
-        .map(|m| m.name.clone())
-        .collect::<Vec<_>>();
+    let registered_names = models.iter().map(|m| m.name.clone()).collect::<Vec<_>>();
 
     ProxyStatus {
         running,
@@ -159,10 +167,33 @@ mod tests {
         let _ = std::fs::create_dir_all(&temp_dir);
         let config_file = temp_dir.join("config.yaml");
 
-        let m1 = UnifiedModel::new("ollama:test", "llama3:latest", "llama3", "ollama", "gguf", 4000000000, None, true);
-        let m2 = UnifiedModel::new("vllm:qwen", "qwen2.5", "qwen2.5", "vllm", "safetensors", 7000000000, None, true);
+        let m1 = UnifiedModel::new(
+            "ollama:test",
+            "llama3:latest",
+            "llama3",
+            "ollama",
+            "gguf",
+            4000000000,
+            None,
+            true,
+        );
+        let m2 = UnifiedModel::new(
+            "vllm:qwen",
+            "qwen2.5",
+            "qwen2.5",
+            "vllm",
+            "safetensors",
+            7000000000,
+            None,
+            true,
+        );
 
-        let res = generate_litellm_config(&[m1, m2], "http://127.0.0.1:11434", "http://127.0.0.1:8000", &config_file);
+        let res = generate_litellm_config(
+            &[m1, m2],
+            "http://127.0.0.1:11434",
+            "http://127.0.0.1:8000",
+            &config_file,
+        );
         assert!(res.is_ok());
 
         let content = std::fs::read_to_string(&config_file).expect("read generated config");
@@ -194,7 +225,9 @@ mod tests {
             Some(30000),
             Some(30),
             Some(30),
-        ).await.expect("create key");
+        )
+        .await
+        .expect("create key");
 
         assert_eq!(created.name, "test-worker");
         assert_eq!(created.role, "developer");
@@ -207,11 +240,15 @@ mod tests {
         assert_eq!(keys_after.len(), 2);
 
         // 4. Toggle active status (revoke)
-        let toggled = toggle_api_key_status(&shared, &created.key_id).await.expect("toggle status");
+        let toggled = toggle_api_key_status(&shared, &created.key_id)
+            .await
+            .expect("toggle status");
         assert!(!toggled); // now false (revoked)
 
         // 5. Delete key
-        let deleted = delete_api_key_entry(&shared, &created.key_id).await.expect("delete key");
+        let deleted = delete_api_key_entry(&shared, &created.key_id)
+            .await
+            .expect("delete key");
         assert!(deleted);
         let keys_final = list_api_keys_entries(&shared).await;
         assert_eq!(keys_final.len(), 1);
@@ -230,7 +267,8 @@ mod tests {
             None,
             None,
             None,
-        ).await;
+        )
+        .await;
         assert!(res.is_err());
         assert_eq!(res.unwrap_err(), "API Key name cannot be empty");
     }

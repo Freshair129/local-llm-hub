@@ -37,7 +37,11 @@ pub async fn read_model_card(
                 if candidate_path.exists() && candidate_path.is_file() {
                     if let Ok(mut f) = File::open(&candidate_path) {
                         let mut buf = Vec::new();
-                        if f.by_ref().take(MAX_README_BYTES as u64).read_to_end(&mut buf).is_ok() {
+                        if f.by_ref()
+                            .take(MAX_README_BYTES as u64)
+                            .read_to_end(&mut buf)
+                            .is_ok()
+                        {
                             let text = String::from_utf8_lossy(&buf).to_string();
                             let is_truncated = f.take(1).read(&mut [0u8; 1]).unwrap_or(0) > 0;
                             let content = if is_truncated {
@@ -48,7 +52,11 @@ pub async fn read_model_card(
 
                             return Ok(ModelCardInfo {
                                 model_id: model_id.to_string(),
-                                title: p.file_stem().unwrap_or_default().to_string_lossy().to_string(),
+                                title: p
+                                    .file_stem()
+                                    .unwrap_or_default()
+                                    .to_string_lossy()
+                                    .to_string(),
                                 readme_markdown: content,
                                 license: None,
                                 parameters: None,
@@ -127,10 +135,16 @@ mod tests {
         let readme_file = temp_dir.join("README.md");
         {
             let mut f = File::create(&readme_file).expect("create readme");
-            f.write_all(b"# Test Model Card\nThis is a test documentation.").expect("write readme");
+            f.write_all(b"# Test Model Card\nThis is a test documentation.")
+                .expect("write readme");
         }
 
-        let res = read_model_card("gguf:test_model", "gguf", Some(readme_file.to_str().unwrap())).await;
+        let res = read_model_card(
+            "gguf:test_model",
+            "gguf",
+            Some(readme_file.to_str().unwrap()),
+        )
+        .await;
         assert!(res.is_ok());
         let card = res.unwrap();
         assert!(card.readme_markdown.contains("Test Model Card"));

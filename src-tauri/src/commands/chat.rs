@@ -54,7 +54,11 @@ pub async fn execute_chat(
             let duration_ms = start.elapsed().as_millis() as u64;
 
             if !resp.status().is_success() {
-                return Err(format!("Ollama error HTTP {}: {}", resp.status(), resp.text().await.unwrap_or_default()));
+                return Err(format!(
+                    "Ollama error HTTP {}: {}",
+                    resp.status(),
+                    resp.text().await.unwrap_or_default()
+                ));
             }
 
             #[derive(serde::Deserialize)]
@@ -69,7 +73,10 @@ pub async fn execute_chat(
                 content: Option<String>,
             }
 
-            let data = resp.json::<OllamaChatReply>().await.map_err(|e| format!("Failed to parse response: {}", e))?;
+            let data = resp
+                .json::<OllamaChatReply>()
+                .await
+                .map_err(|e| format!("Failed to parse response: {}", e))?;
             let content = data.message.and_then(|m| m.content).unwrap_or_default();
             let prompt_tokens = data.prompt_eval_count.unwrap_or(0);
             let completion_tokens = data.eval_count.unwrap_or(0);
@@ -111,7 +118,11 @@ pub async fn execute_chat(
             let duration_ms = start.elapsed().as_millis() as u64;
 
             if !resp.status().is_success() {
-                return Err(format!("vLLM error HTTP {}: {}", resp.status(), resp.text().await.unwrap_or_default()));
+                return Err(format!(
+                    "vLLM error HTTP {}: {}",
+                    resp.status(),
+                    resp.text().await.unwrap_or_default()
+                ));
             }
 
             #[derive(serde::Deserialize)]
@@ -133,15 +144,27 @@ pub async fn execute_chat(
                 usage: Option<VllmUsage>,
             }
 
-            let data = resp.json::<VllmReply>().await.map_err(|e| format!("Failed to parse vLLM reply: {}", e))?;
-            let content = data.choices
+            let data = resp
+                .json::<VllmReply>()
+                .await
+                .map_err(|e| format!("Failed to parse vLLM reply: {}", e))?;
+            let content = data
+                .choices
                 .and_then(|c| c.into_iter().next())
                 .and_then(|c| c.message)
                 .and_then(|m| m.content)
                 .unwrap_or_default();
 
-            let prompt_tokens = data.usage.as_ref().and_then(|u| u.prompt_tokens).unwrap_or(0);
-            let completion_tokens = data.usage.as_ref().and_then(|u| u.completion_tokens).unwrap_or(0);
+            let prompt_tokens = data
+                .usage
+                .as_ref()
+                .and_then(|u| u.prompt_tokens)
+                .unwrap_or(0);
+            let completion_tokens = data
+                .usage
+                .as_ref()
+                .and_then(|u| u.completion_tokens)
+                .unwrap_or(0);
             let dur_s = duration_ms as f64 / 1000.0;
             let tps = if dur_s > 0.0 && completion_tokens > 0 {
                 (completion_tokens as f64 / dur_s * 10.0).round() / 10.0
@@ -158,13 +181,19 @@ pub async fn execute_chat(
                 tps,
             })
         }
-        _ => Err(format!("Direct chat not supported for backend '{}'", backend)),
+        _ => Err(format!(
+            "Direct chat not supported for backend '{}'",
+            backend
+        )),
     }
 }
 
 // trace:implements FEAT-023
 /// Real-time token estimation using fast hybrid BPE heuristic
-pub fn estimate_chat_tokens(prompt: &str, max_context_length: Option<usize>) -> crate::models::types::TokenEstimateResult {
+pub fn estimate_chat_tokens(
+    prompt: &str,
+    max_context_length: Option<usize>,
+) -> crate::models::types::TokenEstimateResult {
     let mut ascii_len = 0usize;
     let mut cjk_unicode_len = 0usize;
 
@@ -236,4 +265,3 @@ mod tests {
         assert!(res_danger.is_overflow_risk);
     }
 }
-

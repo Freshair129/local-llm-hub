@@ -66,11 +66,13 @@ pub fn verify_ephemeral_pin(candidate: &str) -> LanPinVerificationResult {
 
     let mut lock = match ACTIVE_PIN_SESSION.lock() {
         Ok(l) => l,
-        Err(_) => return LanPinVerificationResult {
-            is_valid: false,
-            message: "System lock error".to_string(),
-            remaining_attempts: None,
-        },
+        Err(_) => {
+            return LanPinVerificationResult {
+                is_valid: false,
+                message: "System lock error".to_string(),
+                remaining_attempts: None,
+            }
+        }
     };
 
     if let Some(session) = lock.as_mut() {
@@ -78,7 +80,10 @@ pub fn verify_ephemeral_pin(candidate: &str) -> LanPinVerificationResult {
             let wait_secs = session.lock_until.unwrap_or(now).saturating_sub(now);
             return LanPinVerificationResult {
                 is_valid: false,
-                message: format!("Session locked due to excessive failed attempts. Please retry in {}s.", wait_secs),
+                message: format!(
+                    "Session locked due to excessive failed attempts. Please retry in {}s.",
+                    wait_secs
+                ),
                 remaining_attempts: Some(0),
             };
         }
@@ -109,7 +114,9 @@ pub fn verify_ephemeral_pin(candidate: &str) -> LanPinVerificationResult {
                     remaining_attempts: Some(0),
                 }
             } else {
-                let remaining = session.max_failed_attempts.saturating_sub(session.failed_attempts);
+                let remaining = session
+                    .max_failed_attempts
+                    .saturating_sub(session.failed_attempts);
                 LanPinVerificationResult {
                     is_valid: false,
                     message: format!("Invalid PIN. {} attempts remaining.", remaining),
@@ -145,7 +152,9 @@ pub fn discover_lan_ips() -> Vec<String> {
 
 /// Validates that a requested subpath does not escape the designated share root (Path Traversal Guard)
 pub fn safe_resolve_path(root: &Path, requested_rel_path: &str) -> Result<PathBuf, String> {
-    let clean_rel = requested_rel_path.trim_start_matches('/').trim_start_matches('\\');
+    let clean_rel = requested_rel_path
+        .trim_start_matches('/')
+        .trim_start_matches('\\');
     let target = root.join(clean_rel);
 
     // Canonicalize both if exists
@@ -180,7 +189,10 @@ pub fn parse_range_header(header_val: &str, total_size: u64) -> Option<(u64, u64
 
     let start = parts[0].parse::<u64>().ok()?;
     let end = if parts.len() > 1 && !parts[1].is_empty() {
-        parts[1].parse::<u64>().ok()?.min(total_size.saturating_sub(1))
+        parts[1]
+            .parse::<u64>()
+            .ok()?
+            .min(total_size.saturating_sub(1))
     } else {
         total_size.saturating_sub(1)
     };
@@ -227,7 +239,10 @@ pub async fn start_lan_server(root_path: String, port: u16) -> Result<LanShareSt
 
     SHARING_ACTIVE.store(true, Ordering::SeqCst);
     let lan_ips = discover_lan_ips();
-    let download_urls = lan_ips.iter().map(|ip| format!("http://{}:{}/", ip, port)).collect();
+    let download_urls = lan_ips
+        .iter()
+        .map(|ip| format!("http://{}:{}/", ip, port))
+        .collect();
     let total_files = count_shared_files(&root);
 
     let root_arc = Arc::new(root);
@@ -251,7 +266,9 @@ pub async fn start_lan_server(root_path: String, port: u16) -> Result<LanShareSt
                             let uri = parts.next().unwrap_or("/");
 
                             if method != "GET" && method != "HEAD" {
-                                let _ = socket.write_all(b"HTTP/1.1 405 Method Not Allowed\r\n\r\n").await;
+                                let _ = socket
+                                    .write_all(b"HTTP/1.1 405 Method Not Allowed\r\n\r\n")
+                                    .await;
                                 return;
                             }
 
@@ -331,7 +348,9 @@ pub async fn start_lan_server(root_path: String, port: u16) -> Result<LanShareSt
                                     Ok(file_path) if file_path.is_file() => {
                                         if let Ok(metadata) = std::fs::metadata(&file_path) {
                                             let file_len = metadata.len();
-                                            if let Some((start, end)) = parse_range_header(range_header, file_len) {
+                                            if let Some((start, end)) =
+                                                parse_range_header(range_header, file_len)
+                                            {
                                                 // HTTP 206 Partial Content
                                                 let chunk_len = (end - start) + 1;
                                                 let header = format!(
@@ -346,12 +365,20 @@ pub async fn start_lan_server(root_path: String, port: u16) -> Result<LanShareSt
                                                         let mut chunk = vec![0u8; 64 * 1024];
                                                         let mut remaining = chunk_len;
                                                         while remaining > 0 {
-                                                            let to_read = remaining.min(chunk.len() as u64) as usize;
-                                                            if let Ok(read_bytes) = f.read(&mut chunk[..to_read]) {
+                                                            let to_read = remaining
+                                                                .min(chunk.len() as u64)
+                                                                as usize;
+                                                            if let Ok(read_bytes) =
+                                                                f.read(&mut chunk[..to_read])
+                                                            {
                                                                 if read_bytes == 0 {
                                                                     break;
                                                                 }
-                                                                if socket.write_all(&chunk[..read_bytes]).await.is_err() {
+                                                                if socket
+                                                                    .write_all(&chunk[..read_bytes])
+                                                                    .await
+                                                                    .is_err()
+                                                                {
                                                                     break;
                                                                 }
                                                                 remaining -= read_bytes as u64;
@@ -371,11 +398,17 @@ pub async fn start_lan_server(root_path: String, port: u16) -> Result<LanShareSt
                                                 if method == "GET" {
                                                     if let Ok(mut f) = File::open(&file_path) {
                                                         let mut chunk = vec![0u8; 64 * 1024];
-                                                        while let Ok(read_bytes) = f.read(&mut chunk) {
+                                                        while let Ok(read_bytes) =
+                                                            f.read(&mut chunk)
+                                                        {
                                                             if read_bytes == 0 {
                                                                 break;
                                                             }
-                                                            if socket.write_all(&chunk[..read_bytes]).await.is_err() {
+                                                            if socket
+                                                                .write_all(&chunk[..read_bytes])
+                                                                .await
+                                                                .is_err()
+                                                            {
                                                                 break;
                                                             }
                                                         }
@@ -385,7 +418,9 @@ pub async fn start_lan_server(root_path: String, port: u16) -> Result<LanShareSt
                                         }
                                     }
                                     _ => {
-                                        let _ = socket.write_all(b"HTTP/1.1 404 Not Found\r\n\r\n").await;
+                                        let _ = socket
+                                            .write_all(b"HTTP/1.1 404 Not Found\r\n\r\n")
+                                            .await;
                                     }
                                 }
                             }
@@ -419,7 +454,10 @@ pub fn get_lan_share_status(current_path: &str, port: u16) -> LanShareStatus {
     let active = SHARING_ACTIVE.load(Ordering::SeqCst);
     let lan_ips = discover_lan_ips();
     let download_urls = if active {
-        lan_ips.iter().map(|ip| format!("http://{}:{}/", ip, port)).collect()
+        lan_ips
+            .iter()
+            .map(|ip| format!("http://{}:{}/", ip, port))
+            .collect()
     } else {
         Vec::new()
     };
@@ -491,7 +529,11 @@ mod tests {
     fn test_ephemeral_pin_lockout() {
         clear_ephemeral_pin();
         let session = generate_ephemeral_pin(Some(300));
-        let bad_candidate = if session.pin == "9999" { "8888" } else { "9999" };
+        let bad_candidate = if session.pin == "9999" {
+            "8888"
+        } else {
+            "9999"
+        };
 
         for _ in 0..5 {
             let _ = verify_ephemeral_pin(bad_candidate);
@@ -503,4 +545,3 @@ mod tests {
         clear_ephemeral_pin();
     }
 }
-

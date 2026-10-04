@@ -14,7 +14,10 @@ async fn test_modelcard_local_readme() {
     let readme_path = temp_dir.join("README.md");
     {
         let mut f = File::create(&readme_path).expect("create file");
-        f.write_all(b"# Llama 3 8B Instruct\nLicense: Apache-2.0\nDetailed description of model weights.").expect("write");
+        f.write_all(
+            b"# Llama 3 8B Instruct\nLicense: Apache-2.0\nDetailed description of model weights.",
+        )
+        .expect("write");
     }
 
     let result = read_model_card("gguf:llama-3", "gguf", Some(readme_path.to_str().unwrap())).await;

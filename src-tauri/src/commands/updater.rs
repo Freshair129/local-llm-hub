@@ -3,11 +3,12 @@
 //! In-App Version Registry & Auto-Updater Engine
 //! Complies with ADR-100 (Safe Error Handling, Zero Panics).
 
-use std::time::Duration;
 use crate::models::types::{AppVersionInfo, UpdateCheckResult};
+use std::time::Duration;
 
 pub const CURRENT_VERSION: &str = env!("CARGO_PKG_VERSION");
-pub const DEFAULT_UPDATE_MANIFEST_URL: &str = "https://api.github.com/repos/Freshair129/local-llm-hub/releases/latest";
+pub const DEFAULT_UPDATE_MANIFEST_URL: &str =
+    "https://api.github.com/repos/Freshair129/local-llm-hub/releases/latest";
 
 // trace:implements FR-014
 /// Retrieves active application version and runtime metadata
@@ -74,20 +75,27 @@ pub async fn check_for_updates(
         Ok(resp) if resp.status().is_success() => {
             let body_res = resp.json::<serde_json::Value>().await;
             if let Ok(json) = body_res {
-                let latest_raw = json.get("tag_name")
+                let latest_raw = json
+                    .get("tag_name")
                     .or_else(|| json.get("version"))
                     .and_then(|v| v.as_str())
                     .unwrap_or(CURRENT_VERSION);
-                let latest_ver = latest_raw.trim().trim_start_matches('v').trim_start_matches('V').to_string();
+                let latest_ver = latest_raw
+                    .trim()
+                    .trim_start_matches('v')
+                    .trim_start_matches('V')
+                    .to_string();
 
                 let has_update = is_newer_version(CURRENT_VERSION, &latest_ver);
-                let notes = json.get("body")
+                let notes = json
+                    .get("body")
                     .or_else(|| json.get("notes"))
                     .and_then(|v| v.as_str())
                     .unwrap_or("New update is available on GitHub Releases.")
                     .to_string();
 
-                let download_url = json.get("assets")
+                let download_url = json
+                    .get("assets")
                     .and_then(|a| a.as_array())
                     .and_then(|arr| {
                         arr.iter().find(|item| {
@@ -103,11 +111,13 @@ pub async fn check_for_updates(
                     .or_else(|| json.get("html_url").and_then(|u| u.as_str()))
                     .map(|s| s.to_string());
 
-                let published_at = json.get("published_at")
+                let published_at = json
+                    .get("published_at")
                     .and_then(|v| v.as_str())
                     .map(|s| s.to_string());
 
-                let is_critical = json.get("critical")
+                let is_critical = json
+                    .get("critical")
                     .and_then(|v| v.as_bool())
                     .unwrap_or(false);
 
@@ -141,7 +151,9 @@ pub async fn check_for_updates(
 /// Simulates or applies desktop installer package with ADR-100 zero panic safety
 pub async fn apply_update_package(download_url: &str) -> Result<String, String> {
     if !download_url.starts_with("https://") && !download_url.starts_with("http://") {
-        return Err("Invalid download URL scheme. Only secure HTTPS/HTTP endpoints allowed.".to_string());
+        return Err(
+            "Invalid download URL scheme. Only secure HTTPS/HTTP endpoints allowed.".to_string(),
+        );
     }
 
     #[cfg(target_os = "windows")]
@@ -153,7 +165,10 @@ pub async fn apply_update_package(download_url: &str) -> Result<String, String> 
         let _ = cmd.spawn();
     }
 
-    Ok(format!("Opening download for update from '{}'...", download_url))
+    Ok(format!(
+        "Opening download for update from '{}'...",
+        download_url
+    ))
 }
 
 #[cfg(test)]

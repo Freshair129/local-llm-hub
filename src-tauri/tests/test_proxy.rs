@@ -11,9 +11,23 @@ async fn test_proxy_config_generation_and_status() {
     let _ = std::fs::create_dir_all(&temp_dir);
     let config_path = temp_dir.join("proxy_config.yaml");
 
-    let model = UnifiedModel::new("ollama:mellum2", "mellum2:12b", "mellum2 12b", "ollama", "gguf", 8000000000, None, true);
+    let model = UnifiedModel::new(
+        "ollama:mellum2",
+        "mellum2:12b",
+        "mellum2 12b",
+        "ollama",
+        "gguf",
+        8000000000,
+        None,
+        true,
+    );
 
-    let gen_res = generate_litellm_config(&[model.clone()], "http://127.0.0.1:11434", "http://127.0.0.1:8000", &config_path);
+    let gen_res = generate_litellm_config(
+        &[model.clone()],
+        "http://127.0.0.1:11434",
+        "http://127.0.0.1:8000",
+        &config_path,
+    );
     assert!(gen_res.is_ok(), "Config generation should succeed");
 
     let status = check_proxy_status(4000, config_path.to_str().unwrap(), &[model]).await;

@@ -177,7 +177,8 @@ impl ModelStats {
 
         if self.total_duration_ms > 0 && self.total_completion_tokens > 0 {
             let duration_sec = self.total_duration_ms as f64 / 1000.0;
-            self.avg_tps = (self.total_completion_tokens as f64 / duration_sec * 10.0).round() / 10.0;
+            self.avg_tps =
+                (self.total_completion_tokens as f64 / duration_sec * 10.0).round() / 10.0;
         }
     }
 
@@ -336,7 +337,12 @@ impl ApiKeyRecord {
 
         let seq = API_KEY_COUNTER.fetch_add(1, Ordering::Relaxed);
         let key_id = format!("key_{:x}{:04x}", (now & 0xffffff) as u32, seq % 0xffff);
-        let key_secret = format!("sk-litellm-{:08x}{:04x}{:04x}", (now & 0xffffffff) as u32, seq % 0xffff, ((now >> 16) ^ (seq as u64)) & 0xffff);
+        let key_secret = format!(
+            "sk-litellm-{:08x}{:04x}{:04x}",
+            (now & 0xffffffff) as u32,
+            seq % 0xffff,
+            ((now >> 16) ^ (seq as u64)) & 0xffff
+        );
 
         let expires_at = duration_days.map(|days| now + (days as u64 * 86_400_000));
 
@@ -367,10 +373,16 @@ impl ApiKeyRecord {
         if !self.active {
             return false;
         }
-        if self.allowed_models.iter().any(|m| m == "*" || m.eq_ignore_ascii_case("all")) {
+        if self
+            .allowed_models
+            .iter()
+            .any(|m| m == "*" || m.eq_ignore_ascii_case("all"))
+        {
             return true;
         }
-        self.allowed_models.iter().any(|m| m.eq_ignore_ascii_case(model))
+        self.allowed_models
+            .iter()
+            .any(|m| m.eq_ignore_ascii_case(model))
     }
 }
 
@@ -485,7 +497,11 @@ pub struct TokenEstimateResult {
 
 impl TokenEstimateResult {
     pub fn new(estimated_tokens: usize, max_context_length: usize) -> Self {
-        let max_ctx = if max_context_length == 0 { 8192 } else { max_context_length };
+        let max_ctx = if max_context_length == 0 {
+            8192
+        } else {
+            max_context_length
+        };
         let ratio = (estimated_tokens as f32 / max_ctx as f32).min(1.0);
         let threshold = if ratio > 0.90 {
             ContextThresholdLevel::Danger
@@ -611,7 +627,6 @@ pub struct SwarmTaskPayload {
     pub max_tokens: Option<u32>,
 }
 
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -643,7 +658,8 @@ mod tests {
         };
 
         let json = serde_json::to_string(&health).expect("serialize symlink health");
-        let parsed: SymlinkHealth = serde_json::from_str(&json).expect("deserialize symlink health");
+        let parsed: SymlinkHealth =
+            serde_json::from_str(&json).expect("deserialize symlink health");
         assert_eq!(parsed, health);
         assert_eq!(parsed.reclaimable_gb, 18.5);
     }
@@ -678,7 +694,10 @@ mod tests {
         assert_eq!(res.status, "offline");
         assert_eq!(res.latency_ms, None);
         assert_eq!(res.version, None);
-        assert_eq!(res.error_message, Some("Connection refused on port 8000".to_string()));
+        assert_eq!(
+            res.error_message,
+            Some("Connection refused on port 8000".to_string())
+        );
 
         let json = serde_json::to_string(&res).map_err(|e| e.to_string());
         assert!(json.is_ok());
@@ -770,11 +789,13 @@ mod tests {
         };
 
         let group_json = serde_json::to_string(&group).expect("serialize group");
-        let parsed_group: DedupGroup = serde_json::from_str(&group_json).expect("deserialize group");
+        let parsed_group: DedupGroup =
+            serde_json::from_str(&group_json).expect("deserialize group");
         assert_eq!(parsed_group, group);
 
         let info_json = serde_json::to_string(&info).expect("serialize info");
-        let parsed_info: DuplicateInfo = serde_json::from_str(&info_json).expect("deserialize info");
+        let parsed_info: DuplicateInfo =
+            serde_json::from_str(&info_json).expect("deserialize info");
         assert_eq!(parsed_info, info);
     }
 
@@ -790,7 +811,8 @@ mod tests {
         };
 
         let json = serde_json::to_string(&meta).expect("serialize gguf metadata");
-        let deserialized: GgufMetadata = serde_json::from_str(&json).expect("deserialize gguf metadata");
+        let deserialized: GgufMetadata =
+            serde_json::from_str(&json).expect("deserialize gguf metadata");
         assert_eq!(deserialized, meta);
         assert_eq!(deserialized.architecture, "qwen2");
         assert_eq!(deserialized.context_length, Some(32768));
@@ -815,7 +837,14 @@ mod tests {
         assert_eq!(stats.avg_tps, 147.1);
 
         // Task 2: Failure
-        stats.record_execution(false, 30, 0, 500, Some("VRAM Out of Memory".to_string()), 1700001000);
+        stats.record_execution(
+            false,
+            30,
+            0,
+            500,
+            Some("VRAM Out of Memory".to_string()),
+            1700001000,
+        );
         assert_eq!(stats.total_tasks, 2);
         assert_eq!(stats.successful_tasks, 1);
         assert_eq!(stats.failed_tasks, 1);
@@ -869,7 +898,8 @@ mod tests {
         assert!(key.is_expired(key.created_at + (8 * 86_400_000)));
 
         let json = serde_json::to_string(&key).expect("serialize ApiKeyRecord");
-        let deserialized: ApiKeyRecord = serde_json::from_str(&json).expect("deserialize ApiKeyRecord");
+        let deserialized: ApiKeyRecord =
+            serde_json::from_str(&json).expect("deserialize ApiKeyRecord");
         assert_eq!(deserialized, key);
     }
 
@@ -892,7 +922,8 @@ mod tests {
         assert_eq!(danger.usage_percentage, 95.0);
 
         let json = serde_json::to_string(&safe).expect("serialize TokenEstimateResult");
-        let deserialized: TokenEstimateResult = serde_json::from_str(&json).expect("deserialize TokenEstimateResult");
+        let deserialized: TokenEstimateResult =
+            serde_json::from_str(&json).expect("deserialize TokenEstimateResult");
         assert_eq!(deserialized, safe);
     }
 
@@ -915,7 +946,8 @@ mod tests {
         assert!(!session.is_valid("4829", 3000));
 
         let json = serde_json::to_string(&session).expect("serialize LanSharePinSession");
-        let deserialized: LanSharePinSession = serde_json::from_str(&json).expect("deserialize LanSharePinSession");
+        let deserialized: LanSharePinSession =
+            serde_json::from_str(&json).expect("deserialize LanSharePinSession");
         assert_eq!(deserialized, session);
     }
 
@@ -925,7 +957,8 @@ mod tests {
         let tag = ModelCategoryTag::Coding;
         assert_eq!(tag.as_str(), "Coding");
         let json = serde_json::to_string(&tag).expect("serialize ModelCategoryTag");
-        let deserialized: ModelCategoryTag = serde_json::from_str(&json).expect("deserialize ModelCategoryTag");
+        let deserialized: ModelCategoryTag =
+            serde_json::from_str(&json).expect("deserialize ModelCategoryTag");
         assert_eq!(deserialized, tag);
 
         let mut model = UnifiedModel::new(
@@ -941,8 +974,8 @@ mod tests {
         model.tags = vec!["Coding".to_string(), "Reasoning".to_string()];
 
         let model_json = serde_json::to_string(&model).expect("serialize UnifiedModel with tags");
-        let deserialized_model: UnifiedModel = serde_json::from_str(&model_json).expect("deserialize UnifiedModel with tags");
+        let deserialized_model: UnifiedModel =
+            serde_json::from_str(&model_json).expect("deserialize UnifiedModel with tags");
         assert_eq!(deserialized_model.tags, vec!["Coding", "Reasoning"]);
     }
 }
-
