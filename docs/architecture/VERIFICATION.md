@@ -1,9 +1,9 @@
 ---
 id: HUB-VERIFICATION
-version: 0.1.0
+version: 0.2.0
 status: active
 superseded_by: null
-date: 2026-10-03
+date: 2026-10-04
 baseline_commit: 12e84fc87c0bbccac3bccf0405382db541d7ef85
 scope: local engineering checkpoint
 ---
@@ -16,7 +16,7 @@ Runtime flow: authorized HTTP client or opt-in desktop bridge -> native API -> i
 
 Implemented: portable validated YAML/env config; model/capability registry; alias/role/capability/load/fallback routing; bounded retries/queues/timeouts; health metrics; configurable agents; temporary sessions; bounded context; native file/search/shell/HTTP/memory/delegation tools; inherited deny-first permissions; persistent SQLite project/agent memory; authenticated API; limited text chat-completions compatibility; opt-in Tauri bridge; mock evaluation and truthful UAT failure reporting. The MCP boundary, summarization, capability-probe and routing-policy protocols are extension points with only the stated initial implementation.
 
-## Executed checks
+## Initial checkpoint checks (2026-10-03)
 
 Commands run from the isolated checkout. Python commands used `.venv\Scripts\python.exe`, `ruff.exe` and `mypy.exe`; the documented `uv run --locked` form selects the same locked environment. Python 3.13.7, uv 0.11.2, Pydantic AI slim 2.54.0. Final test counts include documentation graph/link/trace checks.
 
@@ -44,6 +44,30 @@ Commands run from the isolated checkout. Python commands used `.venv\Scripts\pyt
 
 The loopback smoke invoked curl via `curl.exe --config -`, sending `header = "Authorization: Bearer <private token>"` through stdin and posting `{"input":"echo:hello from hub"}` to `/v1/agents/assistant/run`. Tokens were not included in captured output. Smoke output was `CURL_AGENT_PASS mock-local`, then API passes for coder/orchestrator/structured. The generated UAT JSON reports real executed/skipped denominators.
 
+## Real-provider continuation (2026-10-04)
+
+User authorized the next live acceptance step and explicitly selected a temporary loopback Ollama server with the existing `qwen3.5:4b` model. No product runtime or desktop code changed in this continuation. The previous direct-provider greeting test was replaced by five cases through a real authenticated HTTP Hub API, the Pydantic driver, router and OpenAI-compatible provider. Fixtures use temporary roots/database/token and grant only filesystem.read where needed.
+
+Result: **5 PASS, 0 FAIL, 0 SKIP**, exit 0, JUnit suite time **115.561 seconds**. Command: `.venv\Scripts\python.exe -m pytest runtime/tests/test_live_integration.py -v --tb=short -o junit_family=xunit1 --junitxml=.hub/live/2026-10-04-run1.xml`. Raw local metadata and lifecycle receipt: `.hub/live/2026-10-04-run1-metadata.json`. The appended packet-lineage entry preserves the result summary and raw receipt hashes; local `.hub` artifacts remain ignored.
+
+| Case | Result | Observed evidence | JUnit case time |
+|---|---|---|---|
+| Text | PASS | Actual answer contains READY; one provider request; reported usage 39 input / 136 output tokens | 99.271 s |
+| Filesystem tool round trip | PASS | Model calls filesystem__read for a fresh nonce.txt; matching tool-call ID/result contains the nonce; second model request consumes it and returns it; usage totals 757 / 196 | 4.153 s |
+| Structured output | PASS | Output tool returns the validated object `{"answer":42,"label":"ready"}`; one provider request; usage 325 / 112 | 2.696 s |
+| Shared endpoint concurrency | PASS | Two simultaneous agent requests use distinct model IDs on the same endpoint; provider/scheduler peak active 1, observed queued 1, both complete and counters return to zero; usages 39 / 127 and 39 / 92 | 4.420 s |
+| Disconnect and recovery | PASS | A real HTTP request is cancelled while the provider is active; transport task cancels, permits return, session busy clears and history remains empty; same session then answers READY, usage 39 / 135 | 3.575 s |
+
+Disconnect-to-Hub-cleanup measurement was **29.21 ms**. This is client/transport/task cleanup, not a measurement of GPU cancellation latency. No usage is fabricated for the aborted generation. Structured output exercises the SDK output tool and Hub schema checking, not provider-native `response_format`. Case times include test setup/teardown; the first case includes a cold model load. They are not TTFT, decode throughput or a controlled performance comparison. There was other GPU activity on this host.
+
+Observed server: **Ollama 0.35.1**, model family qwen35, **4.7B / Q4_K_M**, manifest digest `2a654d98e6fba55d452b7043684e9b57a947e393bbffa62485a7aac05ee4eefd`. Advertised capabilities were completion, vision, tools and thinking; only behavior in the five executed cases was validated. Model metadata reports a 262,144-token maximum; the actual loaded model from `/api/ps` reports **8,192 context**, matching the test configuration. Output budget was 2,048 tokens per request, endpoint concurrency one. `/api/ps` reported 3,341,958,511 bytes of VRAM for the loaded model; this is a server-reported snapshot, not a peak process measurement.
+
+Lifecycle verification: the owned server bound only `127.0.0.1:11435`, began with no loaded models and ended with only the selected model loaded. Its process environment disabled cloud access and startup pruning. Closing the task-owned Windows Job Object stopped the server/runner; the listener was absent afterwards and no Ollama inference process remained in the GPU process inventory. Existing process/user `OLLAMA_HOST=0.0.0.0:11434` values were unchanged. No models were downloaded; no global environment, firewall, startup task, installed application or production catalog was modified. The original `D:\local-llm-hub` main checkout remains clean.
+
+Current regression checks: default Python suite **61 PASS / 6 SKIP / 0 FAIL** (five live tests intentionally disabled plus one privileged symlink fixture); lint PASS; strict typecheck PASS for 20 runtime source files. An enabled live test with missing endpoint/model/context was also executed and failed at setup as required; the outer negative check PASS confirms fail-closed behavior. Rust/Node/build results above are retained from the initial checkpoint and were not rerun because this continuation changes only tests and documentation. Docker, live MCP, interactive GUI, other providers/models, and backend GPU cancellation timing remain NOT_RUN. The baseline Rust formatting failure remains unresolved and out of scope.
+
+Out-of-scope observations: model discovery emitted warnings about missing templates on some unrelated installed models and a missing blob for `hf.co/MaralGPT/MaralGPT-Mythos-9B-2606-GGUF:Q4_K_M`. The selected qwen3.5:4b files and executed cases succeeded; unrelated models were not repaired or removed. The absent pre-existing inference listener and the current global bind preference were recorded but not diagnosed or changed.
+
 ## Acceptance mapping
 
 | Criteria | Proof and limit |
@@ -62,7 +86,7 @@ The loopback smoke invoked curl via `curl.exe --config -`, sending `header = "Au
 | H26 | Locked environment, lint/typecheck/tests/wheel and real CLI/curl launch |
 | H27 | Runtime-only container/volumes/loopback publishing defined. Image/start/restart acceptance NOT_RUN |
 | H28-H29 | Assertion-derived five-case evaluation; six UAT regression cases plus real mock-service acceptance. Old hardware/UI scenarios remain SKIP |
-| H30 | Live integration exists behind explicit env flag; it was NOT_RUN, never counted as a passed real model test |
+| H30 | Five opt-in real-provider cases PASS on the explicitly selected Ollama/qwen3.5:4b profile; other models/backends and native structured decoding remain unverified |
 
 ## Architecture review
 
@@ -82,8 +106,12 @@ Known boundaries: one service worker; trusted local operator; exact-command poli
 
 Partially implemented: MCP has an adapter interface and fake adapter verification, without a shipped live transport; Docker packaging is written but not executed. Planned: streaming/TTFT, model tokenizers/summarization, capability probing, alternative routing/memory backends, distributed coordination and durable session resumption. Existing unrelated frontend streaming claims and historical generated reports are not acceptance evidence. No UI redesign or GPU model lifecycle migration was attempted.
 
-Next highest-value task: run the opt-in real-provider acceptance matrix against one explicitly configured, already served local model, validating tool calls, structured output, cancellation and concurrency using its actual capability/context settings.
+Completed continuation: the selected real-provider matrix now passes. Remaining acceptance work includes an interactive desktop bridge/GUI smoke and Docker execution on a host with Docker available; neither is implied by these live API results.
+
+0.1.0 -> 0.2.0: preserve initial evidence and add actual real-provider results, model/context identity, bounded claim semantics, cleanup proof and current default-suite skip counts. No runtime API or behavior change.
 
 ## Source and receipt identity
 
 Implementation commit: `2349906a7f5f4c71f0badd3f542d3295b8abf3d9`. The append-only [packet lineage](../lineage/packet-lineage.jsonl) references this source and records the shared executed suite (63 collected, 61 PASS, 2 SKIP, zero failures/errors; 6,131 ms JUnit suite time). These are local-checkpoint receipts, not merged/released packet closure or independent review. The final repository diff is relative to baseline `12e84fc`. The original main checkout remained clean at that baseline.
+
+Live acceptance source commit: `3d7c0c3ff17e40bc573e65a6ed46fc7033de7cf1`. The subsequent `TC-HUB-LIVE-001` lineage entry records five real-provider passes, individual observations, model digest, served context, lifecycle cleanup, default-suite results and SHA-256 hashes of local raw receipts. The product runtime is unchanged from implementation commit `2349906a7f5f4c71f0badd3f542d3295b8abf3d9`.
