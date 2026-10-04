@@ -3,8 +3,8 @@
 | Field | Value |
 |---|---|
 | Document ID | BENCH-SPEC-EMBEDDINGS-001 |
-| Version | 1.0.7 |
-| Status | Frozen retrieval profiles; full matrix in progress; Ollama pacing mitigation under revision |
+| Version | 1.0.8 |
+| Status | Frozen retrieval profiles; full matrix in progress; per-request Ollama burst cap is under validation |
 | Complexity / risk | C-2 / MEDIUM |
 | Parent | [FR-018 GPU model and VRAM advisor](../requirements/FR-018-model-vram-advisor.md), [SPEC-EVAL-002](SPEC-EVAL-002-evaluation-hardening.md) |
 | Peer | [SPEC-LLM-Benchmark-Harness](SPEC-LLM-Benchmark-Harness.md) |
@@ -90,7 +90,7 @@ Latency is measured locally and is not part of MTEB's retrieval quality score. R
 - Preflight all model artifacts, SHA-256 values, running Ollama models, GPU/host memory, and task revisions before scored inference.
 - Run serially; start a task only when available VRAM is at least the model's frozen minimum and available host RAM is at least 6 GiB.
 - Stop before starting a new batch if host available memory falls below 4 GiB. Do not evict unrelated models/processes or clear user caches.
-- On Windows Ollama v0.35.1, the current runner spaces requests by their input count to an 18-input/s average. This is not a strict per-request burst limit: an MTEB call can still send the configured batch of 64 inputs at once. A BGE-M3 CodeSearchNet JavaScript task failed with a loopback socket error under this pacing, so do not treat 18 inputs/s alone as a sufficient mitigation. Retry socket-failed cells only after constraining the request burst and validating the revised guard; retain each cell's actual rate and batch settings in its local ledger. Pacing changes elapsed time, not model prompts or ranking metrics. Keep the independent performance smoke unpaced and report it separately. See [RCA EMBED-007 loopback socket pressure](../../.brain/rca/2026-10-04-embedding-007-loopback-socket-exhaustion.md) and the [upstream Ollama report](https://github.com/ollama/ollama/issues/18392).
+- On Windows Ollama v0.35.1, the runner spaces requests by their input count to an 18-input/s average. This is not a strict per-request burst limit: an MTEB call can send the configured batch of 64 inputs at once. BGE-M3 CodeSearchNet JavaScript and BGE-M3 Q4 German MIRACL both failed with loopback socket errors under this setting. Newly started Ollama runner processes now cap MTEB request batches at 8 inputs while retaining the 18-input/s average; this conservative guard is not yet validated by a completed representative task. The in-flight BGE-M3 Q4 process started with batch size 64 and retains that setting. Record each cell's actual rate and batch settings in its local ledger. These transport guards change elapsed time, not model prompts or ranking metrics. Keep the independent performance smoke unpaced and report it separately. See [RCA EMBED-007 loopback socket pressure](../../.brain/rca/2026-10-04-embedding-007-loopback-socket-exhaustion.md) and the [upstream Ollama report](https://github.com/ollama/ollama/issues/18392).
 - Download only benchmark datasets to a dedicated cache outside the repository. Do not redistribute dataset rows.
 - If an Ollama alias is needed for a local GGUF, use a unique `llh-embed-007-<slug>` name, confirm it did not exist before creation, and remove only aliases created by this run after confirming the process is unloaded.
 - Retain raw run artifacts locally. No raw dataset, embedding matrix, local absolute path, or model response is included in a public commit.
@@ -105,7 +105,7 @@ Latency is measured locally and is not part of MTEB's retrieval quality score. R
 
 ## Current execution record
 
-The initial SciFact model screen covers all 15 candidates: 13 returned SciFact scores, and 2 failed the local backend smoke check before entering MTEB. The runner records 11 task-specific performance-smoke FAIL rows for each incompatible candidate. E5-small completed all 11 cells. BGE-small completed an initial 11-cell pass with 8 PASS and 3 socket-related FAIL. The Jina retrieval-tuned candidate completed MIRACL Thai and its resource guard marked nine other cells BLOCKED while another Ollama model was active. In the current full pass, BGE-M3 completed all 11 cells with 10 PASS and one CodeSearchNet JavaScript socket FAIL while the 18-input/s average pacer was active. Across the latest ledger, 77 of 165 cells have terminal status (42 PASS, 26 FAIL, 9 BLOCKED), with 88 cells remaining nonterminal. The 18-input/s pacing alone is not accepted as a sufficient guard; retry eligibility and settings are recorded in [REPORT-EMBED-007](REPORT-EMBED-007.md). This is interim evidence only and does not satisfy the full 165-cell acceptance criterion.
+The initial SciFact model screen covers all 15 candidates: 13 returned SciFact scores, and 2 failed the local backend smoke check before entering MTEB. The runner records 11 task-specific performance-smoke FAIL rows for each incompatible candidate. E5-small completed all 11 cells. BGE-small completed an initial 11-cell pass with 8 PASS and 3 socket-related FAIL. The Jina retrieval-tuned candidate completed MIRACL Thai and its resource guard marked nine other cells BLOCKED while another Ollama model was active. BGE-M3 completed all 11 cells with 10 PASS and one CodeSearchNet JavaScript socket FAIL. BGE-M3 Q4 then failed German MIRACL under the same 18-input/s average and 64-input batch. The local runner now caps MTEB batches at 8 for newly started Ollama processes; its first completed representative task is pending. Across the latest ledger, 78 of 165 cells have terminal status (42 PASS, 27 FAIL, 9 BLOCKED), with 87 cells remaining nonterminal. This is interim evidence only and does not satisfy the full 165-cell acceptance criterion. See [REPORT-EMBED-007](REPORT-EMBED-007.md) for task scores, runtime, and per-cell transport settings.
 
 ## References
 
@@ -127,3 +127,4 @@ The initial SciFact model screen covers all 15 candidates: 13 returned SciFact s
 - 1.0.5 — documented an 18-input/s Ollama evaluation cap after a Windows loopback socket failure; model profiles, task splits, metrics, and acceptance criteria remain unchanged.
 - 1.0.6 — recorded the first Jina Thai result and nine resource-guarded cells to retry; matrix counts updated without changing the frozen profiles or acceptance criterion.
 - 1.0.7 — recorded that the 18-input/s average pacer did not prevent a long BGE-M3 socket failure, clarified its 64-input request burst, and updated the interim matrix count; retrieval profiles and acceptance criteria remain unchanged.
+- 1.0.8 — added the BGE-M3 Q4 socket failure, distinguished average pacing from request-burst control, and recorded a new 8-input MTEB batch guard as not yet validated.
