@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | Report ID | REPORT-EMBED-007 |
-| Version | 0.8 |
-| Status | Interim; E5-small complete; BGE-small, Jina, and BGE-M3 first passes recorded; remaining task matrix in progress |
-| Protocol | [BENCH-SPEC-EMBEDDINGS-001 v1.0.9](BENCH-SPEC-EMBEDDINGS-001.md) |
+| Version | 0.9 |
+| Status | Interim; 135/165 matrix cells terminal; long-run Ollama transport and Windows result-cache path issues under remediation |
+| Protocol | [BENCH-SPEC-EMBEDDINGS-001 v1.1.0](BENCH-SPEC-EMBEDDINGS-001.md) |
 | Run | EMBED-007, MTEB 2.22.2 |
 | Host context (verified live during this run) | NVIDIA GeForce RTX 5060 Ti 16 GB; Intel Core i7-14700KF; 31.76 GiB visible system RAM; Windows 11 Pro build 26300; NVIDIA driver 617.14; CUDA UMD 13.4 |
 
@@ -128,6 +128,26 @@ SciFact and the two Thai results appear in the earlier tables. The remaining eig
 
 The German MIRACL cell failed after 16m52s with a Windows Ollama loopback socket error. It began with 11.31 GiB host RAM and 14.22 GiB free GPU memory, so the observed failure was not caused by the runner's low-memory guard. BGE-M3 Q4 finished all 11 cells with 10 PASS and one FAIL.
 
+## Jina Omni small text-matching full-matrix pass
+
+The Q4 GGUF completed all 11 cells with nine scores and two infrastructure failures. MTEB used the frozen model-card prefixes, batch size 8, and the local Ollama 18-input/s average pacer.
+
+| Task and split | Status | nDCG@10 | MRR@10 | Recall@100 | Evaluation seconds |
+|---|---:|---:|---:|---:|---:|
+| SciFact, `test` | PASS | 0.66278 | 0.62510 | 0.91667 | 311.345 |
+| MIRACL Thai hard negatives, `dev` | FAIL | — | — | — | — |
+| MIRACL German hard negatives, `dev` | FAIL | — | — | — | — |
+| Belebele Thai, `test` | PASS | 0.77255 | 0.74080 | 0.96111 | 87.146 |
+| NFCorpus, `test` | PASS | 0.29711 | 0.47421 | 0.30628 | 276.620 |
+| CodeSearchNet Python, `test` | PASS | 0.90644 | 0.88603 | 0.99400 | 142.508 |
+| CodeSearchNet JavaScript, `test` | PASS | 0.77210 | 0.74816 | 0.90300 | 147.060 |
+| CodeSearchNet Go, `test` | PASS | 0.95082 | 0.93755 | 0.99700 | 139.012 |
+| CodeSearchNet Ruby, `test` | PASS | 0.82999 | 0.80355 | 0.94900 | 321.207 |
+| CodeSearchNet Java, `test` | PASS | 0.88899 | 0.86488 | 0.98100 | 136.212 |
+| CodeSearchNet PHP, `test` | PASS | 0.86277 | 0.83599 | 0.97400 | 137.056 |
+
+Thai MIRACL failed after 63m50s with the Windows Ollama tokenizer socket-buffer error under batch size 8 and 18 inputs/s. German MIRACL failed while writing MTEB's result cache: its output path reached the Windows legacy path limit. The cache-path RCA confirms the failure and records a short deterministic cache key as the proposed fix; neither failure has a retrieval score. This model's run reached 3.37 GiB minimum host free memory and 14.20 GiB GPU use, so subsequent large-model starts remain subject to the existing resource guard.
+
 ## Local latency and memory screening
 
 Latency is single-query embedding latency over 20 samples (`p50`/`p95`). Query/document throughput uses batch size 32. GPU delta and runner RSS are the observed peaks during MTEB plus the performance smoke check, not isolated load-only measurements. Host memory is the minimum available during the run. These numbers describe this one PC and are not MTEB quality metrics.
@@ -143,7 +163,7 @@ Latency is single-query embedding latency over 20 samples (`p50`/`p95`). Query/d
 | `jina-code-embeddings-1.5b` | 22.57 / 22.88 | 533 / 695 | 4.12 | 2,249 | 7.26 |
 | `jina-embeddings-v5-omni-nano-retrieval-q4_k_m` | 11.80 / 30.19 | 307.15 / 283.40 | 0.11 | 879 | 13.97 |
 | `jina-embeddings-v5-omni-nano-text-matching-q4_k_m` | 26.79 / 34.84 | 42 / 149 | 0.64 | 958 | 7.52 |
-| `jina-embeddings-v5-omni-small-text-matching-q4_k_m` | 11.49 / 29.43 | 30 / 184 | 6.12 | 1,069 | 6.10 |
+| `jina-embeddings-v5-omni-small-text-matching-q4_k_m` | 20.60 / 34.88 | 200.03 / 189.02 | 13.06 | 2,032 | 3.37 |
 | `multilingual-e5-small` | 5.81 / 6.28 | 1,424.63 / 3,132.59 | 0.63 | 1,847 | 9.19 |
 | `voyage-4-nano` | 18.21 / 20.60 | 1,428 / 1,557 | 2.33 | 2,123 | 8.63 |
 | `wemm-embedding-2b-q4_k_m` | 33.79 / 44.27 | 88 / 37 | 5.09 | 987 | 5.41 |
@@ -161,9 +181,9 @@ Detailed evidence and prevention actions are recorded in [RCA EMBED-007](../../.
 
 ## Completion status and next work
 
-At this report revision, 85 of 165 candidate-task cells have terminal results: 49 PASS with scores, 27 FAIL, and 9 BLOCKED; 80 cells remain nonterminal. All 15 candidates have a SciFact screen: 13 returned scores and E5 IQ4 / Voyage F16 failed before MTEB. The runner records 11 task-specific performance-smoke failures for each incompatible candidate. E5-small completed all 11 cells; BGE-small's initial pass completed all 11 with three socket-pressure failures; Jina completed its Thai MIRACL cell and nine resource-guarded cells still need retry after Ollama becomes idle. BGE-M3 and BGE-M3 Q4 each completed all 11 cells with 10 PASS and one socket-related failure. The local runner caps requests at 8 items for newly started Ollama runs; its first representative MIRACL German task is in progress and has not produced a result. Do not interpret this report as completion of the full matrix.
+At this report revision, 135 of 165 matrix cells have terminal results: 87 PASS with scores, 39 FAIL, and 9 BLOCKED; 30 cells remain nonterminal. The two model-level performance-smoke failures are excluded from this matrix count. All 15 candidates have a SciFact screen: 13 returned scores and E5 IQ4 / Voyage F16 failed before MTEB. E5-small completed all 11 cells; BGE-small's initial pass completed all 11 with three socket-pressure failures; Jina retrieval-tuned completed one score and has nine resource-guarded cells for retry; BGE-M3 and BGE-M3 Q4 each completed all 11 with 10 PASS and one socket-related failure; Jina Omni nano text-matching completed 10 PASS and one socket failure; Jina Omni small text-matching completed nine PASS and two infrastructure failures. Batch size 8 plus 18 inputs/s did not prevent its 63m50s Thai MIRACL socket failure. Nine cache-result failures were caused by output paths exceeding the host's disabled Windows long-path support. The remaining matrix process is continuing serially. Do not interpret this interim report as completion of the full matrix.
 
-Next, continue the remaining model/task cells serially as resource guards permit. Keep raw task artifacts and absolute paths outside the public report and repository.
+Continue the remaining model/task cells serially as resource guards permit. The proposed short hashed MTEB cache root and lower-rate/batch socket retry need approval and validation before replaying infrastructure failures. Keep raw task artifacts and absolute paths outside the public report and repository.
 
 ## Version history
 
@@ -175,3 +195,4 @@ Next, continue the remaining model/task cells serially as resource guards permit
 - 0.6 — added BGE-M3 retrieval and code-search progress, recorded the failure under the 18-input/s average pacer, and updated RCA evidence and the pending-cell count.
 - 0.7 — recorded the BGE-M3 Q4 German socket failure and the interim 8-input burst guard for future Ollama processes.
 - 0.8 — recorded BGE-M3 Q4's full 11-cell result set and updated the matrix count while the first batch-8 guard validation runs.
+- 0.9 — recorded Jina Omni small text-matching's 11-cell outcomes, refreshed its latency/memory observation, confirmed the batch-8 long-task socket failure and Windows cache-path overflow, and updated the matrix count.
