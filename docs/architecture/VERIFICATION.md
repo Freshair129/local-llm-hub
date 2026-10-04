@@ -1,6 +1,6 @@
 ---
 id: HUB-VERIFICATION
-version: 0.2.0
+version: 0.3.0
 status: active
 superseded_by: null
 date: 2026-10-04
@@ -70,6 +70,14 @@ Out-of-scope observations: model discovery emitted warnings about missing templa
 
 ## Acceptance mapping
 
+### Follow-up audit, 2026-10-04
+
+The user's request to fix all remaining items triggered a source/contract audit, recorded in [RCA-002](../../.brain/rca/RCA-002-DESKTOP-ACCEPTANCE-GAPS.md) and the [draft repair plan](../plans/HUB-ACCEPTANCE-REPAIR.md). Confirmed findings are mismatched desktop/Hub model namespaces, Arena request/response field mismatches and fabricated unavailable metrics. Isolated reproductions returned MODEL_NOT_FOUND for an unregistered physical model name and a JS TypeError when Arena consumed the canonical ChatResponse. These are not native GUI execution results. Formatting remains FAIL across 23 files; Docker and WebDriver prerequisites are absent. No product fix is claimed at this stage.
+
+Retrospective inspection of the preserved live Ollama log provides additional server-side cancellation evidence: lines 832-834 record the cancelled request, `cancel task, id_task = 674`, and `stop processing` for that same slot/task; lines 862-877 record task 704 completing the recovery request. This confirms server-task cancellation/slot release in the existing run, beyond the client cleanup assertion. The slot messages lack precise timestamps, so GPU kernel cancellation latency remains unmeasured. No new inference was run for this audit.
+
+The unrelated MaralGPT model warning was narrowed to a missing 407-byte config blob, not missing weights: its 5,629,109,248-byte model layer exists. No model files were changed. The draft plan records bounded metadata recovery, environment setup and the explicit remaining limits.
+
 | Criteria | Proof and limit |
 |---|---|
 | H01-H02 | Configuration/registry tests: malformed/duplicate/unknown fields, missing secret/env, invalid root/context/schema, aliases, cycles and missing references |
@@ -109,6 +117,8 @@ Partially implemented: MCP has an adapter interface and fake adapter verificatio
 Completed continuation: the selected real-provider matrix now passes. Remaining acceptance work includes an interactive desktop bridge/GUI smoke and Docker execution on a host with Docker available; neither is implied by these live API results.
 
 0.1.0 -> 0.2.0: preserve initial evidence and add actual real-provider results, model/context identity, bounded claim semantics, cleanup proof and current default-suite skip counts. No runtime API or behavior change.
+
+0.2.0 -> 0.3.0: add confirmed desktop contract findings, distinguish server-task cancellation evidence from unmeasured GPU timing, and link the reviewable repair proposal. Documentation and diagnostic observations only; remediation is not yet implemented.
 
 ## Source and receipt identity
 

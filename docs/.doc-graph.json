@@ -6,6 +6,8 @@
   "template": "3-layer-appendix + ai-system + domain-feature-requirement",
 
   "nodes": [
+    {"id": "plan:HUB-ACCEPTANCE-REPAIR", "type": "plan", "path": "docs/plans/HUB-ACCEPTANCE-REPAIR.md", "title": "Desktop and Acceptance Repair Proposal", "status": "draft"},
+    {"id": "doc:RCA-002-DESKTOP-ACCEPTANCE-GAPS", "type": "document", "path": ".brain/rca/RCA-002-DESKTOP-ACCEPTANCE-GAPS.md", "title": "Desktop Contract Failures and Acceptance Gaps", "status": "active"},
     {"id": "doc:HUB-CURRENT-STATE", "type": "document", "path": "docs/architecture/CURRENT-STATE.md", "title": "Agent Harness Current-State Audit", "status": "active"},
     {"id": "doc:HUB-TARGET-ARCHITECTURE", "type": "architecture", "path": "docs/architecture/TARGET-ARCHITECTURE.md", "title": "Agent Harness Target Architecture", "status": "active"},
     {"id": "plan:HUB-IMPLEMENTATION", "type": "plan", "path": "docs/architecture/IMPLEMENTATION-PLAN.md", "title": "Agent Harness Implementation and Acceptance Plan", "status": "active"},
@@ -129,6 +131,11 @@
   ],
 
   "edges": [
+    {"from": "plan:HUB-ACCEPTANCE-REPAIR", "to": "plan:HUB-IMPLEMENTATION", "relation": "extends"},
+    {"from": "plan:HUB-ACCEPTANCE-REPAIR", "to": "doc:RCA-002-DESKTOP-ACCEPTANCE-GAPS", "relation": "remediates"},
+    {"from": "plan:HUB-ACCEPTANCE-REPAIR", "to": "packet:PKT-FR-023-HUB-ROUTE", "relation": "extends"},
+    {"from": "doc:RCA-002-DESKTOP-ACCEPTANCE-GAPS", "to": "req:FR-007", "relation": "audits"},
+    {"from": "doc:RCA-002-DESKTOP-ACCEPTANCE-GAPS", "to": "req:FR-011", "relation": "audits"},
     {"from": "doc:HUB-CURRENT-STATE", "to": "doc:PRD-SDD", "relation": "audits"},
     {"from": "doc:HUB-TARGET-ARCHITECTURE", "to": "doc:PRD-SDD", "relation": "extends"},
     {"from": "doc:HUB-TARGET-ARCHITECTURE", "to": "doc:ADR", "relation": "extends"},
@@ -303,4 +310,3 @@
     {"from": "feat:FEAT-031", "to": "req:FR-010", "relation": "implements"}
   ]
 }
-
