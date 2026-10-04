@@ -1,13 +1,13 @@
 ---
 id: RCA-002-DESKTOP-ACCEPTANCE-GAPS
-version: 0.1.0
+version: 0.2.0
 status: active
 superseded_by: null
 author: ATHER
 date: 2026-10-04
 source_commit: 0c6af1d
 root_cause_status: confirmed for the listed source contracts
-remediation_status: proposed
+remediation_status: implemented locally; Docker acceptance blocked by host capacity
 ---
 
 # Desktop contract failures and remaining acceptance gaps
@@ -55,4 +55,12 @@ The concrete contracts, change map, environment actions and exit criteria are in
 
 ## Version diff
 
+### Native execution finding, 2026-10-05
+
+Native run7 additionally records Chat completion at 23.69 seconds, Arena completion at 46.08 seconds, and visible Chat outage only at 130.51 seconds; Arena's outage exceeds its 145-second wait. This is a failed desktop acceptance, not model slowness (provider is deterministic mock). `get_sensor_tree` is a synchronous Tauri command performing sysinfo disk enumeration and blocking LHM pipe reads on the UI command thread. `updateTelemetryDOM` dispatches three additional sensor reads every two seconds without awaiting them; the installed LHM sidecar is actually launched in the native run. These unbounded overlapping synchronous requests can starve unrelated IPC dispatch and result delivery. Prevention within R4: move sensor reads to a blocking worker behind an async IPC command and await the modular refresh batch before allowing the next telemetry poll. Preserve sensor payloads and hardware behavior; do not redesign telemetry or invent sensor values. The native default-cadence outage test is the regression check. A diagnostic pause late in run7 did not drain its existing backlog before the deadline.
+
+Symptom: WebDriver selects Chat but its input is not interactable. Evidence: `.hub/desktop/run4/receipt.json` records `view-chat` and its input at 0x0; its parent is `view-gpu` with computed `display:none`. The screenshot shows the selected Chat navigation with an empty content area. Root cause: the Hardware view's missing closing div nests subsequent peer view panels inside it. Navigation correctly hides Hardware, consequently hiding Chat and Arena too. Source compilation and isolated JS tests never inspect the parsed document hierarchy. Prevention: close the Hardware panel before the next peer panel and assert every `.view-panel` is a direct child of `views-container` in native acceptance, alongside real interactability. This minimal markup correction is necessary for approved R4 Chat/Arena acceptance; it is not a layout redesign.
+
 New 0.1.0: source-backed desktop RCA, isolated reproductions, formatter baseline and environment blockers. Remediation awaits review of the proposed contract changes.
+
+0.1.0 -> 0.2.0: approved repairs implemented. Run9 passes seven native checks at the unchanged 2-second polling cadence: Chat at 9.61 seconds from launch, Arena at 9.93, Chat outage at 12.41, Arena outage at 14.86 and catalog failure at 21.48. This before/after evidence confirms the IPC starvation repair; it is a functional run, not a performance benchmark. The HTML correction closes tm-panel-sectors before its performance sibling, allowing the existing later close tag to close view-gpu. Current evidence and remaining gates are in [verification](../../docs/architecture/VERIFICATION.md).

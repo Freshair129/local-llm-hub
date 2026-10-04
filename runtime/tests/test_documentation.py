@@ -11,12 +11,14 @@ GUIDES = ('architecture', 'agent-runtime', 'model-router', 'providers', 'tools',
           'memory', 'configuration', 'local-deployment')
 DOCS = [*ROOT.glob('docs/architecture/**/*.md'), *(ROOT / f'docs/{name}.md' for name in GUIDES),
     ROOT / 'docs/features/CROSS-FEAT-002-agent-harness.md', ROOT / '.brain/rca/RCA-001-UAT-EVIDENCE.md',
+    ROOT / '.brain/rca/RCA-002-DESKTOP-ACCEPTANCE-GAPS.md', ROOT / 'docs/plans/HUB-ACCEPTANCE-REPAIR.md',
+    ROOT / 'docs/requirements/FR-007-chat-interface.md', ROOT / 'docs/requirements/FR-011-model-arena.md',
     *(p for n in range(18, 24) for p in ROOT.glob(f'docs/requirements/FR-{n:03}-*.md')),
     *(p for n in range(18, 24) for p in ROOT.glob(f'docs/packets/PKT-FR-{n:03}-*.md'))]
 
 
 def test_harness_doc_metadata_links_and_fences():
-    assert len(DOCS) == 32
+    assert len(DOCS) == 36
     for path in DOCS:
         text = path.read_text(encoding='utf-8')
         frontmatter = re.match(r'^---\n(.*?)\n---', text, re.S)

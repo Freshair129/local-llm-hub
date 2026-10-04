@@ -278,6 +278,20 @@ async fn send_chat_message(
 
 // trace:implements FR-023
 #[tauri::command]
+async fn get_chat_catalog(
+    state: State<'_, SharedAppState>,
+) -> Result<commands::hub::ChatCatalog, String> {
+    match commands::hub::HubBridge::from_env()? {
+        Some(hub) => hub.catalog().await,
+        None => {
+            let guard = state.lock().await;
+            Ok(commands::hub::ChatCatalog::legacy(&guard.models))
+        }
+    }
+}
+
+// trace:implements FR-023
+#[tauri::command]
 async fn run_hub_agent(
     agent_id: String,
     input: String,
@@ -501,15 +515,19 @@ fn offload_storage_blob(
 
 // trace:implements FR-006
 #[tauri::command]
-fn get_sensor_tree(
+async fn get_sensor_tree(
     sensor_hub: State<'_, Arc<SensorHub>>,
 ) -> Result<Vec<sensors::SensorReading>, String> {
-    let mut readings = Vec::new();
-    readings.extend(sensor_hub.sysinfo.read_all());
-    if sensor_hub.lhm.available() {
-        readings.extend(sensor_hub.lhm.read_all());
-    }
-    Ok(readings)
+    let sensor_hub = Arc::clone(sensor_hub.inner());
+    tokio::task::spawn_blocking(move || {
+        let mut readings = sensor_hub.sysinfo.read_all();
+        if sensor_hub.lhm.available() {
+            readings.extend(sensor_hub.lhm.read_all());
+        }
+        readings
+    })
+    .await
+    .map_err(|_| "Sensor worker failed".to_string())
 }
 
 // trace:implements FR-006
@@ -701,6 +719,7 @@ pub fn run() {
             set_fan_duty,
             send_chat_message,
             run_hub_agent,
+            get_chat_catalog,
             generate_proxy_config,
             get_proxy_status,
             create_api_key,

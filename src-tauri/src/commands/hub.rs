@@ -1,8 +1,40 @@
 // trace:implements FR-023
 //! Opt-in loopback bridge. An enabled but unavailable hub never falls back silently.
-use crate::models::types::{ChatRequest, ChatResponse};
+use crate::models::types::{ChatRequest, ChatResponse, UnifiedModel};
+use serde::Serialize;
 use serde_json::{json, Value};
 use std::time::{Duration, Instant};
+
+#[derive(Debug, Serialize, PartialEq)]
+pub struct ChatModelOption {
+    pub id: String,
+    pub name: String,
+    pub model: String,
+    pub backend: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ChatCatalog {
+    pub mode: &'static str,
+    pub models: Vec<ChatModelOption>,
+}
+
+impl ChatCatalog {
+    pub fn legacy(models: &[UnifiedModel]) -> Self {
+        Self {
+            mode: "legacy",
+            models: models
+                .iter()
+                .map(|model| ChatModelOption {
+                    id: model.id.clone(),
+                    name: model.name.clone(),
+                    model: model.name.clone(),
+                    backend: model.backend.clone(),
+                })
+                .collect(),
+        }
+    }
+}
 
 pub struct HubBridge {
     base: reqwest::Url,
@@ -46,12 +78,25 @@ impl HubBridge {
     }
 
     async fn post(&self, path: &str, payload: Value) -> Result<Value, String> {
+        self.request(reqwest::Method::POST, path, Some(payload))
+            .await
+    }
+
+    async fn request(
+        &self,
+        method: reqwest::Method,
+        path: &str,
+        payload: Option<Value>,
+    ) -> Result<Value, String> {
         let url = self.base.join(path).map_err(|_| "HUB_CONFIG_INVALID")?;
-        let mut response = self
-            .client
-            .post(url)
-            .bearer_auth(&self.token)
-            .json(&payload)
+        let mut request = self.client.request(method, url).bearer_auth(&self.token);
+        if path == "v1/models" {
+            request = request.timeout(Duration::from_secs(10));
+        }
+        if let Some(payload) = payload {
+            request = request.json(&payload);
+        }
+        let mut response = request
             .send()
             .await
             .map_err(|_| "HUB_UNAVAILABLE: check the configured local runtime")?;
@@ -69,6 +114,34 @@ impl HubBridge {
             body.extend_from_slice(&chunk);
         }
         serde_json::from_slice(&body).map_err(|_| "HUB_RESPONSE_INVALID".into())
+    }
+
+    pub async fn catalog(&self) -> Result<ChatCatalog, String> {
+        let data = self
+            .request(reqwest::Method::GET, "v1/models", None)
+            .await?;
+        let rows = data["data"].as_array().ok_or("HUB_RESPONSE_INVALID")?;
+        let mut models = Vec::new();
+        for row in rows {
+            let enabled = row["enabled"].as_bool().ok_or("HUB_RESPONSE_INVALID")?;
+            if !enabled {
+                continue;
+            }
+            let id = row["id"]
+                .as_str()
+                .filter(|id| !id.is_empty())
+                .ok_or("HUB_RESPONSE_INVALID")?;
+            models.push(ChatModelOption {
+                id: id.into(),
+                name: id.into(),
+                model: id.into(),
+                backend: "hub".into(),
+            });
+        }
+        Ok(ChatCatalog {
+            mode: "hub",
+            models,
+        })
     }
 
     pub async fn chat(&self, request: &ChatRequest) -> Result<ChatResponse, String> {
@@ -130,6 +203,94 @@ impl HubBridge {
 mod tests {
     use super::*;
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
+
+    // trace:verifies FR-023
+    #[tokio::test]
+    async fn catalog_uses_enabled_logical_ids_and_fails_closed() {
+        for (body, expected) in [
+            (
+                r#"{"data":[{"id":"logical-a","enabled":true,"private_url":"do-not-export"},{"id":"disabled","enabled":false}]}"#,
+                Some("logical-a"),
+            ),
+            (r#"{"data":[{"id":"missing-enabled"}]}"#, None),
+            (r#"{"unexpected":[]}"#, None),
+        ] {
+            let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+            let bridge = HubBridge::configured(
+                Some(&format!("http://{}", listener.local_addr().unwrap())),
+                Some("test-only-token-1234"),
+            )
+            .unwrap()
+            .unwrap();
+            let server = tokio::spawn(async move {
+                let (mut stream, _) = listener.accept().await.unwrap();
+                let mut request = Vec::new();
+                loop {
+                    let mut chunk = [0; 1024];
+                    let size = stream.read(&mut chunk).await.unwrap();
+                    assert!(size > 0);
+                    request.extend_from_slice(&chunk[..size]);
+                    if request.windows(4).any(|v| v == b"\r\n\r\n") {
+                        break;
+                    }
+                }
+                let request = String::from_utf8(request).unwrap();
+                assert!(request.starts_with("GET /v1/models "));
+                assert!(request
+                    .to_lowercase()
+                    .contains("authorization: bearer test-only-token-1234"));
+                stream
+                    .write_all(
+                        format!(
+                            "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{}",
+                            body.len(),
+                            body
+                        )
+                        .as_bytes(),
+                    )
+                    .await
+                    .unwrap();
+            });
+            let result = bridge.catalog().await;
+            server.await.unwrap();
+            if let Some(id) = expected {
+                let catalog = result.unwrap();
+                assert_eq!(catalog.mode, "hub");
+                assert_eq!(catalog.models.len(), 1);
+                assert_eq!(catalog.models[0].model, id);
+                assert_eq!(catalog.models[0].backend, "hub");
+                let json = serde_json::to_string(&catalog).unwrap();
+                assert!(!json.contains("do-not-export") && !json.contains("token"));
+            } else {
+                assert_eq!(result.unwrap_err(), "HUB_RESPONSE_INVALID");
+            }
+            assert!(bridge
+                .catalog()
+                .await
+                .unwrap_err()
+                .starts_with("HUB_UNAVAILABLE"));
+        }
+    }
+
+    // trace:verifies FR-023
+    #[test]
+    fn legacy_catalog_keeps_physical_names_and_backend() {
+        let model = UnifiedModel::new(
+            "vllm:physical",
+            "backend-name",
+            "physical",
+            "vllm",
+            "gguf",
+            0,
+            None,
+            false,
+        );
+        let catalog = ChatCatalog::legacy(&[model]);
+        assert_eq!(catalog.mode, "legacy");
+        assert_eq!(catalog.models[0].id, "vllm:physical");
+        assert_eq!(catalog.models[0].model, "backend-name");
+        assert_eq!(catalog.models[0].backend, "vllm");
+    }
 
     #[test]
     fn opt_in_and_credentials_fail_closed() {

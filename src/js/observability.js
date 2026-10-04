@@ -12,12 +12,13 @@ import { invoke } from './api.js';
 
 let pollInterval = null;
 let currentCadenceMs = 2000;
+let refreshingTelemetry = false;
 
 function formatGb(bytes) {
   return (bytes / (1024 * 1024 * 1024)).toFixed(1);
 }
 
-export function updateTelemetryDOM(telemetry) {
+export async function updateTelemetryDOM(telemetry) {
   if (!telemetry) return;
 
   const now = new Date();
@@ -136,21 +137,24 @@ export function updateTelemetryDOM(telemetry) {
   if (obsPowerSub) obsPowerSub.textContent = `GPU: ${(100 + (gpu?.utilization_pct || 40) * 0.9).toFixed(0)} W • CPU: ${(50 + cpuPct * 0.4).toFixed(0)} W • NVMe: 42 °C • VRM: 49 °C`;
   if (obsPowerBar) obsPowerBar.style.width = `${Math.min(100, Math.round((totalPowerW / 450) * 100))}%`;
 
-  // 5. Synchronously update modular views on every cadence tick!
-  refreshProcesses();
-  refreshCpuTelemetry();
-  refreshGpuTelemetry();
-  refreshHardwareSurfaces();
+  // Wait for this batch before scheduling another hardware refresh.
+  await Promise.allSettled([
+    refreshProcesses(), refreshCpuTelemetry(), refreshGpuTelemetry(), refreshHardwareSurfaces()
+  ]);
 }
 
 export async function fetchHardwareTelemetry() {
+  if (refreshingTelemetry) return null;
+  refreshingTelemetry = true;
   try {
     const data = await invoke('get_hardware_telemetry');
-    updateTelemetryDOM(data);
+    await updateTelemetryDOM(data);
     return data;
   } catch (err) {
     console.error('Failed to get hardware telemetry:', err);
     return null;
+  } finally {
+    refreshingTelemetry = false;
   }
 }
 

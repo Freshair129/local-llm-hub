@@ -2,7 +2,7 @@
 id: PKT-FR-023-HUB-ROUTE
 fr_id: FR-023
 layer: route
-version: 0.3.0
+version: 0.4.0
 status: active
 superseded_by: null
 interface: LOCKED
@@ -49,3 +49,9 @@ CMP addition: runtime/tests/test_live_integration.py and related focused validat
 New bounded packet under user approval dated 2026-10-03. No closure claimed until its tests and documentation checks pass.
 
 0.2.0 -> 0.3.0: user requested the next live-provider verification step; specify executable capability/concurrency/cancellation checks within the previously approved H30 scope.
+
+## Approved acceptance repair (2026-10-05)
+
+The user approved [repair plan 0.2.0](../plans/HUB-ACCEPTANCE-REPAIR.md). Extend the interface lock with get_chat_catalog(state) -> Result<ChatCatalog, String>, serialized as mode plus models containing id/name/model/backend strings. Hub catalog uses only enabled logical IDs; legacy uses cached physical inventory. Errors fail closed. Preserve ChatRequest/ChatResponse and list_all_models. CMP additionally includes src/main.js, src/js/chat.js, src/js/arena.js, src/js/state.js, a shared inference-catalog module, focused JS/Rust regression tests and desktop/container acceptance runners. R1 mechanical formatting is isolated from behavioral commits. Parent H25-H27/H30 and peer FR-007/FR-011 contracts are reconciled by the approved plan. Target cases R1-R6 and rollback are defined there; no production automation plugin, global bind change, new model weights or unrelated refactor.
+
+Version diff 0.3.0 -> 0.4.0: approved catalog IPC and executable desktop/container acceptance repairs.

@@ -6,7 +6,7 @@
   "template": "3-layer-appendix + ai-system + domain-feature-requirement",
 
   "nodes": [
-    {"id": "plan:HUB-ACCEPTANCE-REPAIR", "type": "plan", "path": "docs/plans/HUB-ACCEPTANCE-REPAIR.md", "title": "Desktop and Acceptance Repair Proposal", "status": "draft"},
+    {"id": "plan:HUB-ACCEPTANCE-REPAIR", "type": "plan", "path": "docs/plans/HUB-ACCEPTANCE-REPAIR.md", "title": "Desktop and Acceptance Repair Proposal", "status": "active"},
     {"id": "doc:RCA-002-DESKTOP-ACCEPTANCE-GAPS", "type": "document", "path": ".brain/rca/RCA-002-DESKTOP-ACCEPTANCE-GAPS.md", "title": "Desktop Contract Failures and Acceptance Gaps", "status": "active"},
     {"id": "doc:HUB-CURRENT-STATE", "type": "document", "path": "docs/architecture/CURRENT-STATE.md", "title": "Agent Harness Current-State Audit", "status": "active"},
     {"id": "doc:HUB-TARGET-ARCHITECTURE", "type": "architecture", "path": "docs/architecture/TARGET-ARCHITECTURE.md", "title": "Agent Harness Target Architecture", "status": "active"},

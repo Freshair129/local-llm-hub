@@ -8,6 +8,7 @@
     "packet": "node scripts/packet.mjs",
     "ai-review": "node scripts/ai_code_review.mjs",
     "eval:test": "node eval/tests/eval_harness.test.mjs",
+    "desktop:test": "node --experimental-vm-modules --test eval/desktop/desktop_contracts.test.mjs",
     "eval:smoke": "node eval/harness/smoke-test.mjs"
   },
   "devDependencies": {

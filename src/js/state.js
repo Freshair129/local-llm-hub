@@ -10,6 +10,7 @@ class AppStore {
       lanPort: 8080,
       activeView: 'models',
       models: [],
+      inferenceCatalog: { mode: null, models: [], loading: true, error: null },
       selectedModel: null,
       isScanningGguf: false
     };

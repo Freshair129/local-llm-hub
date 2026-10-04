@@ -1,14 +1,14 @@
 ---
 id: HUB-ACCEPTANCE-REPAIR
-version: 0.1.0
-status: draft
+version: 0.2.0
+status: active
 superseded_by: null
 author: ATHER
 owner: Boss
 date: 2026-10-04
 complexity: C-3
 risk: HIGH
-approval: pending review of this proposal
+approval: approved by user on 2026-10-05
 source_commit: 0c6af1d
 ---
 
@@ -44,7 +44,7 @@ flowchart TD
 
 Add `get_chat_catalog(state) -> Result<ChatCatalog, String>` as an additive IPC command. Its serialized result is `{mode: "hub" | "legacy", models: [{id, name, model, backend}]}`. All option fields are strings: id is the UI selection key, name is display text, model is the exact value sent in ChatRequest.model, and backend is the selected legacy backend or hub. For Hub entries, id/model are the registered logical ID; do not expose private endpoint URLs or tokens. Only enabled Hub models appear. For legacy entries, keep the current inventory ID, display name and actual backend model name. Return an explicit error on an enabled but unavailable Hub; do not fall back to the legacy list.
 
-Both Chat and Arena consume this catalog through shared frontend state. Physical model-management views continue using list_all_models. Reinitialization preserves a still-valid selection, resets a stale selection explicitly and does not retain a previous-mode model. An empty/error catalog disables inference with a visible explanation. Request payload remains `{request:{model,messages,backend,temperature,max_tokens}}`; response remains the existing ChatResponse. This is a contract addition and changes cross-module behavior, so the previous approval does not approve this specific new IPC yet.
+Both Chat and Arena consume this catalog through shared frontend state. Physical model-management views continue using list_all_models. Reinitialization preserves a still-valid selection, resets a stale selection explicitly and does not retain a previous-mode model. An empty/error catalog disables inference with a visible explanation. Request payload remains `{request:{model,messages,backend,temperature,max_tokens}}`; response remains the existing ChatResponse. This is a contract addition and changes cross-module behavior, approved by the user on 2026-10-05.
 
 Arena renders content, uses reported completion_tokens when available, and removes Math.random, response-length token guesses and fabricated GPU labels. Show TTFT as not measured. Any output-token rate derived from total duration is labeled an end-to-end rate, not decode throughput. The legacy zero-for-unknown usage convention must not turn absent measurements into performance evidence. Winner indication is withheld when comparable measured values are unavailable.
 
@@ -91,4 +91,6 @@ Rollback disables the opt-in bridge and restores only this change's explicit fil
 
 New draft 0.1.0: replaces an ambiguous "fix all" with confirmed causes, an additive catalog contract, seven bounded units, explicit environment setup and verifiable exit criteria. No application code, dependencies, container installation or model files were modified while preparing this proposal.
 
-Please review and approve this documentation. I will generate the code once approved.
+Approval delta 0.1.0 -> 0.2.0: user approved all specified repair units and environment actions on 2026-10-05. Execution is authorized within the stated boundaries.
+
+R4 execution refinement: native tests reproduced hidden peer panels and IPC starvation from synchronous, overlapping sensor reads (RCA-002). The minimal HTML close-tag correction and async worker/one-in-flight telemetry refresh are required to make the approved Chat/Arena acceptance executable. `src/index.html` and `src/js/observability.js` are consequently included alongside the already scoped Rust command file. Sensor contracts, sampling cadence, settings and hardware data are preserved; this remains MEDIUM cross-module repair risk.

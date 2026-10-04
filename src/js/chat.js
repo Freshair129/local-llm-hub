@@ -6,13 +6,18 @@
 import { recordTaskExecution } from './stats.js';
 import { invoke } from './api.js';
 import { PERSONAS, getPersonaById } from './personas.js';
+import { store } from './state.js';
+import { populateInferenceSelect } from './inference-catalog.js';
 
 let conversationHistory = [];
 let currentModel = '';
 let currentBackend = 'ollama';
 let currentPersonaId = 'default';
+let currentSelection = '';
+let sending = false;
 
-export function initChat(models = []) {
+export function initChat() {
+  const catalog = store.state.inferenceCatalog;
   const modelSelect = document.getElementById('chat-model-select');
   const personaSelect = document.getElementById('chat-persona-select');
 
@@ -21,34 +26,36 @@ export function initChat(models = []) {
       `<option value="${p.id}">${p.icon} ${p.name}</option>`
     ).join('');
 
-    personaSelect.addEventListener('change', (e) => {
+    personaSelect.value = currentPersonaId;
+    personaSelect.disabled = sending;
+    personaSelect.onchange = (e) => {
       currentPersonaId = e.target.value;
       const persona = getPersonaById(currentPersonaId);
       // Reset conversation history with new system prompt
       conversationHistory = [{ role: 'system', content: persona.systemPrompt }];
-    });
+    };
   }
 
-  if (modelSelect && models.length > 0) {
-    if (!currentModel) {
-      currentModel = models[0].name;
-      currentBackend = models[0].backend || 'ollama';
-    }
-    modelSelect.innerHTML = models
-      .map(m => `<option value="${m.name}" data-backend="${m.backend}">${m.name} (${m.backend})</option>`)
-      .join('');
-
-    modelSelect.addEventListener('change', (e) => {
-      currentModel = e.target.value;
-      const opt = e.target.selectedOptions[0];
-      currentBackend = opt ? opt.getAttribute('data-backend') : 'ollama';
-    });
+  if (modelSelect) {
+    populateInferenceSelect(modelSelect, catalog);
+    modelSelect.disabled ||= sending;
+    const selectModel = () => {
+      const selected = store.state.inferenceCatalog.models.find(model => model.id === modelSelect.value);
+      const key = selected ? `${catalog.mode}:${selected.id}` : '';
+      if (key !== currentSelection) conversationHistory = [];
+      currentSelection = key;
+      currentModel = selected?.model || '';
+      currentBackend = selected?.backend || '';
+    };
+    selectModel();
+    modelSelect.onchange = selectModel;
   }
 
   const sendBtn = document.getElementById('chat-send-btn');
   const chatInput = document.getElementById('chat-user-input');
 
   if (sendBtn && chatInput) {
+    sendBtn.disabled = sending || catalog.loading || !!catalog.error || !currentModel;
     sendBtn.onclick = () => sendMessage();
     chatInput.onkeydown = (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
@@ -57,9 +64,7 @@ export function initChat(models = []) {
       }
     };
     // trace:implements FEAT-023
-    chatInput.addEventListener('input', (e) => {
-      updateTokenPreflight(e.target.value);
-    });
+    chatInput.oninput = (e) => updateTokenPreflight(e.target.value);
   }
 }
 
@@ -144,9 +149,15 @@ export async function sendMessage() {
   const inputEl = document.getElementById('chat-user-input');
   const messagesContainer = document.getElementById('chat-messages-container');
   if (!inputEl || !messagesContainer) return;
+  const catalog = store.state.inferenceCatalog;
+  if (sending || catalog.loading || catalog.error || !catalog.models.some(model => model.model === currentModel && model.backend === currentBackend)) return;
 
   const text = inputEl.value.trim();
   if (!text) return;
+  sending = true;
+  initChat();
+  const sendBtn = document.getElementById('chat-send-btn');
+  if (sendBtn) sendBtn.disabled = true;
 
   // Ensure active persona system prompt is prepended
   const persona = getPersonaById(currentPersonaId);
@@ -168,7 +179,7 @@ export async function sendMessage() {
   loadingDiv.id = loadingId;
   loadingDiv.className = 'chat-message message-assistant loading';
   loadingDiv.innerHTML = `
-    <div class="message-sender">🤖 ${currentModel}</div>
+    <div class="message-sender">🤖 ${escapeHtml(currentModel)}</div>
     <div class="message-body"><span class="spinner">⏳</span> Generating response...</div>
   `;
   messagesContainer.appendChild(loadingDiv);
@@ -197,22 +208,25 @@ export async function sendMessage() {
       success: true,
       tokens: (res.prompt_tokens || 0) + (res.completion_tokens || 0),
       tps: res.tps || 0,
-      vram: 'CUDA Active'
+      vram: 'Not measured'
     });
 
   } catch (err) {
     const lEl = document.getElementById(loadingId);
     if (lEl) {
       lEl.className = 'chat-message message-assistant error';
-      lEl.innerHTML = `<div class="message-body" style="color:#ef4444;">Error: ${err}</div>`;
+      lEl.innerHTML = `<div class="message-body" style="color:#ef4444;">Error: ${escapeHtml(String(err))}</div>`;
     }
 
     recordTaskExecution(currentModel, {
       success: false,
       tokens: 0,
       tps: 0,
-      vram: 'CUDA Error'
+      vram: 'Not measured'
     });
+  } finally {
+    sending = false;
+    initChat();
   }
 }
 
@@ -225,15 +239,15 @@ function renderChatMessage(role, content, stats = null) {
 
   const statsHtml = stats ? `
     <div class="message-meta" style="font-size:11px; margin-top:6px; color:rgba(255,255,255,0.4); display:flex; gap:12px;">
-      <span>⚡ ${stats.tps} t/s</span>
+      <span>⚡ ${stats.completion_tokens > 0 && stats.duration_ms > 0 ? (stats.completion_tokens * 1000 / stats.duration_ms).toFixed(1) : 'Not measured'} output tok/s (end-to-end)</span>
       <span>⏱️ ${(stats.duration_ms/1000).toFixed(2)}s</span>
-      <span>📊 ${stats.completion_tokens} tokens</span>
+      <span>📊 ${stats.completion_tokens > 0 ? stats.completion_tokens : 'Not reported'} tokens</span>
     </div>
   ` : '';
 
   msgDiv.innerHTML = `
     <div class="message-sender" style="font-size:12px; font-weight:600; margin-bottom:4px; color:${role === 'user' ? '#60a5fa' : '#34d399'};">
-      ${role === 'user' ? '👤 You' : '🤖 ' + currentModel}
+      ${role === 'user' ? '👤 You' : '🤖 ' + escapeHtml(currentModel)}
     </div>
     <div class="message-body" style="line-height:1.5;">${escapeHtml(content)}</div>
     ${statsHtml}

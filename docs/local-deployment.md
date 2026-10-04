@@ -1,6 +1,6 @@
 ---
 id: HUB-DEPLOYMENT-GUIDE
-version: 0.2.0
+version: 0.3.0
 status: active
 superseded_by: null
 ---
@@ -51,3 +51,30 @@ Stopping the service or clearing the opt-in desktop bridge environment returns t
 Version diff: new repeatable local workflow, evaluation semantics and explicit deployment limits.
 
 0.1.0 -> 0.2.0: expand opt-in live acceptance from one direct completion into five assertions through a real HTTP Hub API, document the served context/output budget and limit cancellation/structured-output claims to what is measured.
+
+## Native desktop repair acceptance
+
+Run `npm run desktop:test` for seven focused JS contract tests, and `node --test eval/tests/*.test.mjs` for the existing evaluation/UAT suite. The VM module flag is scoped to the desktop test script. Run `cargo fmt --manifest-path src-tauri/Cargo.toml --all -- --check` and `cargo test --manifest-path src-tauri/Cargo.toml --locked --lib` separately.
+
+The opt-in [native runner](../eval/desktop/native_smoke.py) requires Windows, the runtime virtual environment, a distinct acceptance build, tauri-driver and matching EdgeDriver. The WebDriver capability webviewOptions.userDataFolder pins the profile location (the driver otherwise creates its own temporary profile). See [Microsoft capability reference](https://learn.microsoft.com/en-us/microsoft-edge/webdriver/capabilities-edge-options). It starts a real authenticated Hub with the explicit mock provider, exercises real Tauri IPC/HTTP through UI controls, and uses Windows job containment for cleanup. It never substitutes a mock IPC bridge. Native functional results do not establish GPU inference, installer signing or performance acceptance.
+
+Verified tools: tauri-driver 2.1.0 installed with `cargo install --version 2.1.0 --locked` into the task-local `.hub/tools`; Microsoft EdgeDriver 154.0.4258.53 matched WebView2 154.0.4258.53. The downloaded executable's Authenticode signature is valid, Microsoft Corporation; SHA-256 `008115b68b38437b1c0138f3cced648f61f333cf4623a9895296e7c1c01abcb8`. Follow [official manual setup](https://v2.tauri.app/develop/tests/webdriver/manual-setup/); do not assume a later installed WebView2 still matches this pin.
+
+```powershell
+# Keep tools, caches and profiles on the workspace drive.
+$env:TEMP="$PWD\.hub\tmp"
+$env:TMP=$env:TEMP
+$env:TAURI_CONFIG='{"identifier":"com.localllm.hub.acceptance","productName":"Local LLM Hub Acceptance"}'
+cargo build --manifest-path src-tauri/Cargo.toml --locked
+# Check success, copy the acceptance executable into .hub/desktop/app, then:
+.venv/Scripts/python.exe eval/desktop/native_smoke.py --application .hub/desktop/app/tauri-app.exe --driver .hub/tools/bin/tauri-driver.exe --edge-driver .hub/tools/edge-154.0.4258.53/msedgedriver.exe --output .hub/desktop/fresh-run
+Remove-Item Env:TAURI_CONFIG
+```
+
+Every output directory must be new: previous failures and screenshots are preserved. The runner creates isolated config, SQLite state and a WebView2 profile below it. Do not run against the installed `O:\local-llm-hub\tauri-app.exe`. Client waits allow the bridge's existing 125-second completion deadline; they are not performance thresholds.
+
+### Container prerequisite blocker, 2026-10-05
+
+Ubuntu 26.04 WSL2 is present with systemd and no Docker/Podman/socket or conflicting Docker package. Its registered VHD is on C:, whose measured free space was 370,077,696 bytes (approximately 353 MiB), later 361,238,528 bytes. The guest filesystem's large virtual free capacity is not host capacity. Installing packages/images could exhaust the host. Per the approved repair's prerequisite stop rule, Docker installation/build/start/restart and Linux symlink acceptance are **NOT_RUN / BLOCKED**. No package installation, distro relocation, firewall change, startup enablement or cleanup was performed. Free sufficient host capacity and recheck before continuing the approved isolated Compose acceptance; moving the distro requires separate scope.
+
+0.2.0 -> 0.3.0: add reproducible native test setup and the actual host-storage blocker; preserve the distinction between test provider and real-model acceptance.
