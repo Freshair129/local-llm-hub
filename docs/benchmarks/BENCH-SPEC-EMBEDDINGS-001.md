@@ -3,8 +3,8 @@
 | Field | Value |
 |---|---|
 | Document ID | BENCH-SPEC-EMBEDDINGS-001 |
-| Version | 1.0.5 |
-| Status | Frozen retrieval profiles; full matrix in progress with Ollama request pacing |
+| Version | 1.0.6 |
+| Status | Frozen retrieval profiles; full matrix in progress with Ollama pacing and resource-guard retries |
 | Complexity / risk | C-2 / MEDIUM |
 | Parent | [FR-018 GPU model and VRAM advisor](../requirements/FR-018-model-vram-advisor.md), [SPEC-EVAL-002](SPEC-EVAL-002-evaluation-hardening.md) |
 | Peer | [SPEC-LLM-Benchmark-Harness](SPEC-LLM-Benchmark-Harness.md) |
@@ -105,7 +105,7 @@ Latency is measured locally and is not part of MTEB's retrieval quality score. R
 
 ## Current execution record
 
-The initial SciFact model screen covers all 15 candidates: 13 returned SciFact scores, and 2 failed the local backend smoke check before entering MTEB. The runner now records 11 task-specific performance-smoke FAIL rows for each incompatible candidate. Thai follow-up has six PASS cells across `multilingual-e5-small`, `bge-m3`, and `bge-m3-q4_k_m`; E5-small completed all 11 cells. BGE-small completed an initial 11-cell pass with 8 PASS and 3 FAIL; the socket-related failures will be retried with the documented Ollama pacing. At the latest report revision, 59 of 165 cells have terminal status (34 PASS, 25 FAIL), with 106 cells remaining nonterminal while the full run proceeds serially. This is interim evidence only and does not satisfy the full 165-cell acceptance criterion. See [REPORT-EMBED-007](REPORT-EMBED-007.md) for scores, runtime measurements, failure evidence, and pending work.
+The initial SciFact model screen covers all 15 candidates: 13 returned SciFact scores, and 2 failed the local backend smoke check before entering MTEB. The runner now records 11 task-specific performance-smoke FAIL rows for each incompatible candidate. Thai follow-up has six PASS cells across `multilingual-e5-small`, `bge-m3`, and `bge-m3-q4_k_m`; E5-small completed all 11 cells. BGE-small completed an initial 11-cell pass with 8 PASS and 3 socket-related FAIL; retry those failures with the documented Ollama pacing. The Jina retrieval-tuned candidate completed MIRACL Thai and its resource guard marked nine other cells BLOCKED while another Ollama model was active; retry those blocked cells after the host is idle. At the latest report revision, 69 of 165 cells have terminal status (35 PASS, 25 FAIL, 9 BLOCKED), with 96 cells remaining nonterminal while the full run proceeds serially. This is interim evidence only and does not satisfy the full 165-cell acceptance criterion. See [REPORT-EMBED-007](REPORT-EMBED-007.md) for scores, runtime measurements, failure evidence, and pending work.
 
 ## References
 
@@ -125,3 +125,4 @@ The initial SciFact model screen covers all 15 candidates: 13 returned SciFact s
 - 1.0.3 — corrected parent-document links and verified host metadata, linked the interim screening report, and recorded current execution status without weakening the 165-cell acceptance criterion.
 - 1.0.4 — updated the execution record for E5-small's completed 11-cell matrix and the current 49 terminal results; the frozen benchmark protocol and 165-cell acceptance criterion are unchanged.
 - 1.0.5 — documented an 18-input/s Ollama evaluation cap after a Windows loopback socket failure; model profiles, task splits, metrics, and acceptance criteria remain unchanged.
+- 1.0.6 — recorded the first Jina Thai result and nine resource-guarded cells to retry; matrix counts updated without changing the frozen profiles or acceptance criterion.

@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | Report ID | REPORT-EMBED-007 |
-| Version | 0.4 |
-| Status | Interim; E5-small complete; BGE-small first pass complete; full task matrix in progress |
-| Protocol | [BENCH-SPEC-EMBEDDINGS-001 v1.0.5](BENCH-SPEC-EMBEDDINGS-001.md) |
+| Version | 0.5 |
+| Status | Interim; E5-small complete; BGE-small and Jina first passes recorded; full task matrix in progress |
+| Protocol | [BENCH-SPEC-EMBEDDINGS-001 v1.0.6](BENCH-SPEC-EMBEDDINGS-001.md) |
 | Run | EMBED-007, MTEB 2.22.2 |
 | Host context (verified live during this run) | NVIDIA GeForce RTX 5060 Ti 16 GB; Intel Core i7-14700KF; 31.76 GiB visible system RAM; Windows 11 Pro build 26300; NVIDIA driver 617.14; CUDA UMD 13.4 |
 
@@ -86,6 +86,14 @@ These results follow the frozen E5-small profile, including the `query: ` and `p
 
 The first BGE-small pass produced three socket-pressure failures on the local Ollama backend. See the linked RCA for the error and prevention; these cells are eligible for a paced retry. The English-only model's Thai retrieval scores are out-of-domain.
 
+## Jina retrieval-tuned follow-up quality
+
+| Candidate | Task and split | Status | nDCG@10 | MRR@10 | Recall@100 | Evaluation seconds |
+|---|---|---:|---:|---:|---:|---:|
+| `jina-embeddings-v5-omni-nano-retrieval-q4_k_m` | MIRACL Thai hard negatives, `dev` | PASS | 0.53910 | 0.54144 | 0.91458 | 1,639.164 |
+
+The Jina retrieval-tuned GGUF completed its Thai MIRACL cell before the Ollama pacing change. Its nine other non-SciFact cells were recorded as BLOCKED because the resource guard found another Ollama model active and insufficient free VRAM. Retry those cells after the host is idle; the user model was left untouched.
+
 ## Local latency and memory screening
 
 Latency is single-query embedding latency over 20 samples (`p50`/`p95`). Query/document throughput uses batch size 32. GPU delta and runner RSS are the observed peaks during MTEB plus the performance smoke check, not isolated load-only measurements. Host memory is the minimum available during the run. These numbers describe this one PC and are not MTEB quality metrics.
@@ -99,7 +107,7 @@ Latency is single-query embedding latency over 20 samples (`p50`/`p95`). Query/d
 | `german-rag-bge-m3-merged-x-snowflake-arctic-hessian-ai-q8_0` | 25.38 / 267.08 | 182 / 174 | 0.49 | 967 | 5.89 |
 | `jina-code-embeddings-0.5b` | 18.01 / 19.66 | 937 / 1,529 | 2.10 | 2,187 | 7.66 |
 | `jina-code-embeddings-1.5b` | 22.57 / 22.88 | 533 / 695 | 4.12 | 2,249 | 7.26 |
-| `jina-embeddings-v5-omni-nano-retrieval-q4_k_m` | 31.78 / 303.57 | 279 / 301 | 0.64 | 958 | 7.51 |
+| `jina-embeddings-v5-omni-nano-retrieval-q4_k_m` | 11.80 / 30.19 | 307.15 / 283.40 | 0.11 | 879 | 13.97 |
 | `jina-embeddings-v5-omni-nano-text-matching-q4_k_m` | 26.79 / 34.84 | 42 / 149 | 0.64 | 958 | 7.52 |
 | `jina-embeddings-v5-omni-small-text-matching-q4_k_m` | 11.49 / 29.43 | 30 / 184 | 6.12 | 1,069 | 6.10 |
 | `multilingual-e5-small` | 5.81 / 6.28 | 1,424.63 / 3,132.59 | 0.63 | 1,847 | 9.19 |
@@ -119,7 +127,7 @@ Detailed evidence and prevention actions are recorded in [RCA EMBED-007](../../.
 
 ## Completion status and next work
 
-At this report revision, 59 of 165 candidate-task cells have terminal results: 34 PASS with scores and 25 FAIL; 106 cells remain nonterminal, including the active Jina retrieval-tuned GGUF run. All 15 candidates have a SciFact screen: 13 returned scores and E5 IQ4 / Voyage F16 failed before MTEB. The updated runner records 11 task-specific performance-smoke failures for each incompatible candidate. E5-small completed all 11 cells; BGE-small's initial pass completed all 11 with three local socket-pressure failures pending paced retries. Do not interpret the report as completion of the full matrix.
+At this report revision, 69 of 165 candidate-task cells have terminal results: 35 PASS with scores, 25 FAIL, and 9 BLOCKED; 96 cells remain nonterminal. All 15 candidates have a SciFact screen: 13 returned scores and E5 IQ4 / Voyage F16 failed before MTEB. The updated runner records 11 task-specific performance-smoke failures for each incompatible candidate. E5-small completed all 11 cells; BGE-small's initial pass completed all 11 with three local socket-pressure failures pending paced retries. Jina completed its Thai MIRACL cell; nine resource-guarded cells need retry after Ollama becomes idle. Do not interpret the report as completion of the full matrix.
 
 Next, continue the remaining model/task cells serially as resource guards permit. Keep raw task artifacts and absolute paths outside the public report and repository.
 
@@ -129,3 +137,4 @@ Next, continue the remaining model/task cells serially as resource guards permit
 - 0.2 — added full-precision and Q4 BGE-M3 Thai results, task-specific failure rows for both incompatible GGUF candidates, verified live host metadata, and corrected terminal/pending cell counts.
 - 0.3 — recorded all 11 E5-small task results, refreshed E5-small and BGE-small latency/memory measurements, and updated the current matrix count while the full run continues.
 - 0.4 — added BGE-small's first complete task pass, recorded its socket-pressure failures and successful retrieval scores, and updated the matrix status and protocol reference.
+- 0.5 — added Jina MIRACL Thai quality, recorded its nine resource-guarded cells, refreshed its performance smoke, and updated terminal/pending counts.
