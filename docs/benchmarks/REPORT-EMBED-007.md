@@ -3,15 +3,15 @@
 | Field | Value |
 |---|---|
 | Report ID | REPORT-EMBED-007 |
-| Version | 0.2 |
-| Status | Interim; Thai follow-up complete for three candidates; full task matrix pending |
-| Protocol | [BENCH-SPEC-EMBEDDINGS-001 v1.0.3](BENCH-SPEC-EMBEDDINGS-001.md) |
+| Version | 0.3 |
+| Status | Interim; E5-small completed all 11 cells; full task matrix in progress |
+| Protocol | [BENCH-SPEC-EMBEDDINGS-001 v1.0.4](BENCH-SPEC-EMBEDDINGS-001.md) |
 | Run | EMBED-007, MTEB 2.22.2 |
 | Host context (verified live during this run) | NVIDIA GeForce RTX 5060 Ti 16 GB; Intel Core i7-14700KF; 31.76 GiB visible system RAM; Windows 11 Pro build 26300; NVIDIA driver 617.14; CUDA UMD 13.4 |
 
 ## Scope and method
 
-This report records the initial local-backend screen for all 15 candidates, SciFact quality results where the candidate reached MTEB, and completed Thai retrieval cells. The frozen protocol defines 11 task/subset cells per model, or 165 cells total. The present screen is partial; its SciFact scores do not establish a multilingual, code-search, domain-wide, or overall model ranking.
+This report records the initial local-backend screen for all 15 candidates, SciFact quality results where the candidate reached MTEB, and completed follow-up retrieval cells. The frozen protocol defines 11 task/subset cells per model, or 165 cells total. The present screen is partial; its SciFact scores do not establish a multilingual, code-search, domain-wide, or overall model ranking.
 
 MTEB SciFact ran on `default/test` at dataset revision `d56462d0e63a25450459c4f213e49ffdb866f7f9`. Thai runs use MIRACL hard negatives `th/dev`, revision `d7d94fa4b946cec4a27c84653aa0cf6b33f74a3c`, and Belebele Thai `test`, revision `979a211276faa22f671e69d096634193567cfd05`. Each model used its frozen model-card input profile in the protocol. The run used local weights only and made no hosted embedding API calls.
 
@@ -54,6 +54,21 @@ The top SciFact candidate in this screen is Voyage-4-Nano HF (`nDCG@10=0.75229`)
 
 E5-small used the card-required `query: ` and `passage: ` prefixes, 512-token limit, mean pooling, and L2 normalization. The results are task-specific and should not be compared numerically across MIRACL and Belebele. On the same task/split, Q4 BGE-M3 trailed full BGE-M3 by 0.01089 nDCG@10 on MIRACL and 0.00420 on Belebele. All three Thai-tested candidates passed both tasks.
 
+## Additional E5-small retrieval quality
+
+| Candidate | Task and split | Status | nDCG@10 | MRR@10 | Recall@100 | Evaluation seconds |
+|---|---|---:|---:|---:|---:|---:|
+| `multilingual-e5-small` | MIRACL German hard negatives, `dev` | PASS | 0.50831 | 0.57668 | 0.95227 | 161.836 |
+| `multilingual-e5-small` | NFCorpus, `test` | PASS | 0.31004 | 0.50529 | 0.27366 | 40.350 |
+| `multilingual-e5-small` | CodeSearchNet Python, `test` | PASS | 0.86313 | 0.83213 | 0.99400 | 27.991 |
+| `multilingual-e5-small` | CodeSearchNet JavaScript, `test` | PASS | 0.69527 | 0.65600 | 0.90800 | 25.236 |
+| `multilingual-e5-small` | CodeSearchNet Go, `test` | PASS | 0.90300 | 0.87755 | 0.99300 | 24.633 |
+| `multilingual-e5-small` | CodeSearchNet Ruby, `test` | PASS | 0.76583 | 0.72690 | 0.95800 | 24.955 |
+| `multilingual-e5-small` | CodeSearchNet Java, `test` | PASS | 0.74957 | 0.69882 | 0.96100 | 26.305 |
+| `multilingual-e5-small` | CodeSearchNet PHP, `test` | PASS | 0.80281 | 0.76522 | 0.96400 | 25.265 |
+
+These results follow the frozen E5-small profile, including the `query: ` and `passage: ` prefixes. CodeSearchNet language rows use the frozen test split and should be read as separate language-specific retrieval results.
+
 ## Local latency and memory screening
 
 Latency is single-query embedding latency over 20 samples (`p50`/`p95`). Query/document throughput uses batch size 32. GPU delta and runner RSS are the observed peaks during MTEB plus the performance smoke check, not isolated load-only measurements. Host memory is the minimum available during the run. These numbers describe this one PC and are not MTEB quality metrics.
@@ -61,8 +76,8 @@ Latency is single-query embedding latency over 20 samples (`p50`/`p95`). Query/d
 | Candidate | Query latency p50/p95 (ms) | Query/doc throughput (items/s) | GPU memory delta (GiB) | Runner RSS (MiB) | Minimum host free (GiB) |
 |---|---:|---:|---:|---:|---:|
 | `bge-m3` | 22.25 / 54.23 | 179 / 86 | 0.85 | 2,222 | 4.46 |
-| `bge-m3-q4_k_m` | 25.02 / 281.85 | 211 / 175 | 0.37 | 1,047 | 5.83 |
-| `bge-small-en-v1.5-q4_k_m` | 13.94 / 40.75 | 305 / 329 | 0.20 | 994 | 8.60 |
+| `bge-m3-q4_k_m` | 27.13 / 46.89 | 192 / 157 | 0.41 | 2,209 | 4.07 |
+| `bge-small-en-v1.5-q4_k_m` | 11.67 / 28.88 | 375.89 / 340.41 | 0.15 | 878 | 10.02 |
 | `coderankembed` | 8.59 / 10.08 | 1,276 / 1,642 | 14.46 | 6,449 | 3.34 |
 | `german-rag-bge-m3-merged-x-snowflake-arctic-hessian-ai-q8_0` | 25.38 / 267.08 | 182 / 174 | 0.49 | 967 | 5.89 |
 | `jina-code-embeddings-0.5b` | 18.01 / 19.66 | 937 / 1,529 | 2.10 | 2,187 | 7.66 |
@@ -70,8 +85,7 @@ Latency is single-query embedding latency over 20 samples (`p50`/`p95`). Query/d
 | `jina-embeddings-v5-omni-nano-retrieval-q4_k_m` | 31.78 / 303.57 | 279 / 301 | 0.64 | 958 | 7.51 |
 | `jina-embeddings-v5-omni-nano-text-matching-q4_k_m` | 26.79 / 34.84 | 42 / 149 | 0.64 | 958 | 7.52 |
 | `jina-embeddings-v5-omni-small-text-matching-q4_k_m` | 11.49 / 29.43 | 30 / 184 | 6.12 | 1,069 | 6.10 |
-| `multilingual-e5-small` | 5.35 / 6.99 | 2,140 / 3,325 | 1.52 | 2,037 | 7.92 |
-| `bge-m3-q4_k_m` | 27.13 / 46.89 | 192 / 157 | 0.41 | 2,209 | 4.07 |
+| `multilingual-e5-small` | 5.81 / 6.28 | 1,424.63 / 3,132.59 | 0.63 | 1,847 | 9.19 |
 | `voyage-4-nano` | 18.21 / 20.60 | 1,428 / 1,557 | 2.33 | 2,123 | 8.63 |
 | `wemm-embedding-2b-q4_k_m` | 33.79 / 44.27 | 88 / 37 | 5.09 | 987 | 5.41 |
 
@@ -88,11 +102,12 @@ Detailed evidence and prevention actions are recorded in [RCA EMBED-007](../../.
 
 ## Completion status and next work
 
-At this report revision, 41 of 165 candidate-task cells have terminal results: 19 PASS with scores and 22 FAIL at performance smoke; 124 cells have not started. All 15 candidates have a SciFact screen: 13 returned scores and E5 IQ4 / Voyage F16 failed before MTEB. The updated runner records 11 task-specific performance-smoke failures for each incompatible candidate. Thai E5-small, BGE-M3, and BGE-M3 Q4 each passed both selected Thai tasks. No benchmark process is active now. Do not interpret the report as completion of the full matrix.
+At this report revision, 49 of 165 candidate-task cells have terminal results: 27 PASS with scores and 22 FAIL at performance smoke; 116 cells remain nonterminal, including the currently running BGE-small MIRACL Thai cell. All 15 candidates have a SciFact screen: 13 returned scores and E5 IQ4 / Voyage F16 failed before MTEB. The updated runner records 11 task-specific performance-smoke failures for each incompatible candidate. E5-small has completed all 11 cells; E5-small, BGE-M3, and BGE-M3 Q4 each passed both selected Thai tasks. Do not interpret the report as completion of the full matrix.
 
-Next, continue with German MIRACL and the remaining NFCorpus and CodeSearchNet language cells as resource guards permit. Keep raw task artifacts and absolute paths outside the public report and repository.
+Next, continue the remaining model/task cells serially as resource guards permit. Keep raw task artifacts and absolute paths outside the public report and repository.
 
 ## Version history
 
 - 0.1 — initial interim screen: all 15 SciFact cells, E5-small Thai cells, latency/memory smoke data, loader compatibility findings, and pending matrix status.
 - 0.2 — added full-precision and Q4 BGE-M3 Thai results, task-specific failure rows for both incompatible GGUF candidates, verified live host metadata, and corrected terminal/pending cell counts.
+- 0.3 — recorded all 11 E5-small task results, refreshed E5-small and BGE-small latency/memory measurements, and updated the current matrix count while the full run continues.

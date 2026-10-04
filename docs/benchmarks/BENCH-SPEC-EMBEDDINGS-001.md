@@ -3,8 +3,8 @@
 | Field | Value |
 |---|---|
 | Document ID | BENCH-SPEC-EMBEDDINGS-001 |
-| Version | 1.0.3 |
-| Status | Frozen protocol; initial screening complete; follow-up matrix in progress |
+| Version | 1.0.4 |
+| Status | Frozen protocol; initial screening complete; full matrix in progress |
 | Complexity / risk | C-2 / MEDIUM |
 | Parent | [FR-018 GPU model and VRAM advisor](../requirements/FR-018-model-vram-advisor.md), [SPEC-EVAL-002](SPEC-EVAL-002-evaluation-hardening.md) |
 | Peer | [SPEC-LLM-Benchmark-Harness](SPEC-LLM-Benchmark-Harness.md) |
@@ -104,7 +104,7 @@ Latency is measured locally and is not part of MTEB's retrieval quality score. R
 
 ## Current execution record
 
-The initial SciFact model screen covers all 15 candidates: 13 returned SciFact scores, and 2 failed the local backend smoke check before entering MTEB. The runner now records 11 task-specific performance-smoke FAIL rows for each incompatible candidate. Thai follow-up has six PASS cells across `multilingual-e5-small`, `bge-m3`, and `bge-m3-q4_k_m`. At the latest report revision, 41 of 165 cells have terminal status and 124 are not started. This is interim evidence only and does not satisfy the full 165-cell acceptance criterion. See [REPORT-EMBED-007](REPORT-EMBED-007.md) for scores, runtime measurements, failure evidence, and pending work.
+The initial SciFact model screen covers all 15 candidates: 13 returned SciFact scores, and 2 failed the local backend smoke check before entering MTEB. The runner now records 11 task-specific performance-smoke FAIL rows for each incompatible candidate. Thai follow-up has six PASS cells across `multilingual-e5-small`, `bge-m3`, and `bge-m3-q4_k_m`; E5-small has since completed all 11 task cells. At the latest report revision, 49 of 165 cells have terminal status (27 PASS, 22 FAIL), with 116 cells remaining nonterminal while the full run proceeds serially. This is interim evidence only and does not satisfy the full 165-cell acceptance criterion. See [REPORT-EMBED-007](REPORT-EMBED-007.md) for scores, runtime measurements, failure evidence, and pending work.
 
 ## References
 
@@ -122,3 +122,4 @@ The initial SciFact model screen covers all 15 candidates: 13 returned SciFact s
 - 1.0.1 — corrected MTEB's official MIRACL split to `dev`, pinned exact Thai subsets, task revisions, and the MTEB package version.
 - 1.0.2 — added German MIRACL coverage and froze HF-card query/document prompts and local custom-code audit outcomes for all 15 candidates; clarified 165 result cells.
 - 1.0.3 — corrected parent-document links and verified host metadata, linked the interim screening report, and recorded current execution status without weakening the 165-cell acceptance criterion.
+- 1.0.4 — updated the execution record for E5-small's completed 11-cell matrix and the current 49 terminal results; the frozen benchmark protocol and 165-cell acceptance criterion are unchanged.
