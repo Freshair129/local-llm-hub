@@ -5,7 +5,7 @@
 | Date | 2026-10-05 |
 | Run | EMBED-007, MTEB 2.22.2 |
 | Risk | MEDIUM — local benchmark cache and run duration only |
-| Status | Root cause confirmed by a path-length probe; runner correction proposed, not applied |
+| Status | Root cause confirmed by a path-length probe; short hashed cache-path correction approved and under implementation |
 
 ## Symptom
 
@@ -29,4 +29,4 @@ The earlier model and task checks verified loading, inference, and scores but di
 
 ## Proposed prevention
 
-Use a short deterministic per-cell cache directory derived from the model slug, task name, and subset. Before applying the change, assert that all 165 generated result paths are below 260 characters and run an isolated cache-write smoke using the benchmark environment. Then retry only the result-cache failures and preserve the complete cell identity in the ledger. Do not change Windows registry settings or model/task evaluation profiles as a workaround.
+Use a short deterministic per-cell cache directory derived from the model slug, task name, and subset. Assert that all 165 generated result paths are below 260 characters and run an isolated cache-write smoke using the benchmark environment. Then retry only the result-cache failures and preserve the complete cell identity in the ledger. Do not change Windows registry settings or model/task evaluation profiles as a workaround.

@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Report ID | REPORT-EMBED-007 |
-| Version | 0.9 |
+| Version | 0.10 |
 | Status | Interim; 135/165 matrix cells terminal; long-run Ollama transport and Windows result-cache path issues under remediation |
 | Protocol | [BENCH-SPEC-EMBEDDINGS-001 v1.1.0](BENCH-SPEC-EMBEDDINGS-001.md) |
 | Run | EMBED-007, MTEB 2.22.2 |
@@ -183,7 +183,7 @@ Detailed evidence and prevention actions are recorded in [RCA EMBED-007](../../.
 
 At this report revision, 135 of 165 matrix cells have terminal results: 87 PASS with scores, 39 FAIL, and 9 BLOCKED; 30 cells remain nonterminal. The two model-level performance-smoke failures are excluded from this matrix count. All 15 candidates have a SciFact screen: 13 returned scores and E5 IQ4 / Voyage F16 failed before MTEB. E5-small completed all 11 cells; BGE-small's initial pass completed all 11 with three socket-pressure failures; Jina retrieval-tuned completed one score and has nine resource-guarded cells for retry; BGE-M3 and BGE-M3 Q4 each completed all 11 with 10 PASS and one socket-related failure; Jina Omni nano text-matching completed 10 PASS and one socket failure; Jina Omni small text-matching completed nine PASS and two infrastructure failures. Batch size 8 plus 18 inputs/s did not prevent its 63m50s Thai MIRACL socket failure. Nine cache-result failures were caused by output paths exceeding the host's disabled Windows long-path support. The remaining matrix process is continuing serially. Do not interpret this interim report as completion of the full matrix.
 
-Continue the remaining model/task cells serially as resource guards permit. The proposed short hashed MTEB cache root and lower-rate/batch socket retry need approval and validation before replaying infrastructure failures. Keep raw task artifacts and absolute paths outside the public report and repository.
+Continue the remaining model/task cells serially as resource guards permit. The approved local runner change uses a short hashed MTEB cache root. Validate the proposed Ollama batch-4, 4-input/s transport on one long MIRACL task before replaying socket failures. Keep raw task artifacts and absolute paths outside the public report and repository.
 
 ## Version history
 
@@ -196,3 +196,4 @@ Continue the remaining model/task cells serially as resource guards permit. The 
 - 0.7 — recorded the BGE-M3 Q4 German socket failure and the interim 8-input burst guard for future Ollama processes.
 - 0.8 — recorded BGE-M3 Q4's full 11-cell result set and updated the matrix count while the first batch-8 guard validation runs.
 - 0.9 — recorded Jina Omni small text-matching's 11-cell outcomes, refreshed its latency/memory observation, confirmed the batch-8 long-task socket failure and Windows cache-path overflow, and updated the matrix count.
+- 0.10 — recorded approval for a short hashed MTEB cache path and the batch-4, 4-input/s long-task transport validation; the benchmark matrix and score profiles remain frozen.

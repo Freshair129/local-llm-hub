@@ -3,8 +3,8 @@
 | Field | Value |
 |---|---|
 | Document ID | BENCH-SPEC-EMBEDDINGS-001 |
-| Version | 1.1.0 |
-| Status | Frozen retrieval profiles; full matrix in progress; batch-8 guard did not prevent long-run socket failure; Windows cache-path overflow confirmed |
+| Version | 1.1.1 |
+| Status | Frozen retrieval profiles; full matrix in progress; approved batch-4/4-inputs/s transport candidate awaiting long-task validation; Windows cache-path overflow confirmed |
 | Complexity / risk | C-2 / MEDIUM |
 | Parent | [FR-018 GPU model and VRAM advisor](../requirements/FR-018-model-vram-advisor.md), [SPEC-EVAL-002](SPEC-EVAL-002-evaluation-hardening.md) |
 | Peer | [SPEC-LLM-Benchmark-Harness](SPEC-LLM-Benchmark-Harness.md) |
@@ -91,7 +91,7 @@ Latency is measured locally and is not part of MTEB's retrieval quality score. R
 - Run serially; start a task only when available VRAM is at least the model's frozen minimum and available host RAM is at least 6 GiB.
 - Stop before starting a new batch if host available memory falls below 4 GiB. Do not evict unrelated models/processes or clear user caches.
 - On Windows Ollama v0.35.1, the runner spaces requests by their input count to an 18-input/s average. This is not a strict per-request burst limit: an MTEB call can send the configured batch of 64 inputs at once. BGE-M3 CodeSearchNet JavaScript and BGE-M3 Q4 German MIRACL failed with loopback socket errors under this setting. Newly started Ollama processes cap MTEB batches at 8, but Jina Omni small text-matching still failed on Thai MIRACL after 63m50s with the same socket error. Treat batch 8 plus 18 inputs/s as insufficient for long tasks; the next transport setting needs a separate representative-task validation. Record each cell's actual rate and batch settings in its local ledger. These transport guards change elapsed time, not model prompts or ranking metrics. Keep the independent performance smoke unpaced and report it separately. See [RCA EMBED-007 loopback socket pressure](../../.brain/rca/2026-10-04-embedding-007-loopback-socket-exhaustion.md) and the [upstream Ollama report](https://github.com/ollama/ollama/issues/18392).
-- Keep MTEB's Windows result-cache file paths below the legacy 260-character limit. Nine current cache failures have paths calculated at 260–268 characters; the full 165-cell matrix's current nested layout reaches 278 characters. `LongPathsEnabled` is 0 on this host, and a 270-character write probe using the benchmark Python environment failed with the same `FileNotFoundError`. A short deterministic per-cell cache directory is proposed; it calculates to a 195-character maximum across the matrix but is not yet installed or validated. See [RCA EMBED-007 Windows MTEB cache-path overflow](../../.brain/rca/2026-10-05-embedding-007-mteb-cache-path-overflow.md).
+- Keep MTEB's Windows result-cache file paths below the legacy 260-character limit. Nine current cache failures have paths calculated at 260–268 characters; the full 165-cell matrix's current nested layout reaches 278 characters. `LongPathsEnabled` is 0 on this host, and a 270-character write probe using the benchmark Python environment failed with the same `FileNotFoundError`. The approved local runner patch uses a short deterministic per-cell cache directory, calculated to keep every matrix path at or below 195 characters. See [RCA EMBED-007 Windows MTEB cache-path overflow](../../.brain/rca/2026-10-05-embedding-007-mteb-cache-path-overflow.md).
 - Download only benchmark datasets to a dedicated cache outside the repository. Do not redistribute dataset rows.
 - If an Ollama alias is needed for a local GGUF, use a unique `llh-embed-007-<slug>` name, confirm it did not exist before creation, and remove only aliases created by this run after confirming the process is unloaded.
 - Retain raw run artifacts locally. No raw dataset, embedding matrix, local absolute path, or model response is included in a public commit.
@@ -131,3 +131,4 @@ The initial SciFact model screen covers all 15 candidates: 13 returned SciFact s
 - 1.0.8 — added the BGE-M3 Q4 socket failure, distinguished average pacing from request-burst control, and recorded a new 8-input MTEB batch guard as not yet validated.
 - 1.0.9 — recorded all BGE-M3 Q4 task outcomes, updated the interim matrix count, and noted that end-to-end validation of the 8-input batch guard has started.
 - 1.1.0 — recorded the failed long-task validation of the batch-8 guard, confirmed the Windows MTEB cache-path overflow, and updated the matrix count; model/task profiles and the 165-cell acceptance criterion are unchanged.
+- 1.1.1 — recorded approval for a short hashed local cache path and an Ollama transport-validation candidate capped at batch 4 and 4 inputs/s; these transport limits do not alter model profiles or task acceptance.
