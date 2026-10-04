@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | Report ID | REPORT-EMBED-007 |
-| Version | 0.5 |
-| Status | Interim; E5-small complete; BGE-small and Jina first passes recorded; full task matrix in progress |
-| Protocol | [BENCH-SPEC-EMBEDDINGS-001 v1.0.6](BENCH-SPEC-EMBEDDINGS-001.md) |
+| Version | 0.6 |
+| Status | Interim; E5-small complete; BGE-small and Jina first passes recorded; BGE-M3 and remaining task matrix in progress |
+| Protocol | [BENCH-SPEC-EMBEDDINGS-001 v1.0.7](BENCH-SPEC-EMBEDDINGS-001.md) |
 | Run | EMBED-007, MTEB 2.22.2 |
 | Host context (verified live during this run) | NVIDIA GeForce RTX 5060 Ti 16 GB; Intel Core i7-14700KF; 31.76 GiB visible system RAM; Windows 11 Pro build 26300; NVIDIA driver 617.14; CUDA UMD 13.4 |
 
@@ -94,6 +94,23 @@ The first BGE-small pass produced three socket-pressure failures on the local Ol
 
 The Jina retrieval-tuned GGUF completed its Thai MIRACL cell before the Ollama pacing change. Its nine other non-SciFact cells were recorded as BLOCKED because the resource guard found another Ollama model active and insufficient free VRAM. Retry those cells after the host is idle; the user model was left untouched.
 
+## BGE-M3 full-matrix progress
+
+The current BGE-M3 pass completed the following cells under its frozen BGE-M3 profile. Its German MIRACL and later task rows used the runner's 18-input/s average Ollama pacer; the earlier SciFact and Thai rows predate that guard.
+
+| Task and split | Status | nDCG@10 | MRR@10 | Recall@100 | Evaluation seconds |
+|---|---:|---:|---:|---:|---:|
+| MIRACL German hard negatives, `dev` | PASS | 0.57708 | 0.65374 | 0.96296 | 4,003.274 |
+| NFCorpus, `test` | PASS | 0.31475 | 0.52478 | 0.28335 | 233.179 |
+| CodeSearchNet Python, `test` | PASS | 0.85387 | 0.82142 | 0.99100 | 126.762 |
+| CodeSearchNet JavaScript, `test` | FAIL | — | — | — | — |
+| CodeSearchNet Go, `test` | PASS | 0.87523 | 0.84689 | 0.99000 | 124.294 |
+| CodeSearchNet Ruby, `test` | PASS | 0.74165 | 0.70289 | 0.95100 | 125.162 |
+| CodeSearchNet Java, `test` | PASS | 0.68283 | 0.63094 | 0.94800 | 125.096 |
+| CodeSearchNet PHP, `test` | PASS | 0.77890 | 0.73841 | 0.95300 | 125.451 |
+
+The JavaScript failure occurred after 112 seconds with Windows reporting insufficient socket buffer space or a full queue while Ollama called its internal tokenizer. Host free RAM was 10.35 GiB and free GPU memory was 13.77 GiB at task start. The runner was using an average input-rate pacer, but its API request still carried a batch of up to 64 inputs; the pacing therefore did not bound a single-call burst. See the updated [socket-pressure RCA](../../.brain/rca/2026-10-04-embedding-007-loopback-socket-exhaustion.md). The MTEB quality result for JavaScript remains unavailable, and that cell needs a retry with a validated burst guard. BGE-M3 finished all 11 cells with 10 PASS and one FAIL.
+
 ## Local latency and memory screening
 
 Latency is single-query embedding latency over 20 samples (`p50`/`p95`). Query/document throughput uses batch size 32. GPU delta and runner RSS are the observed peaks during MTEB plus the performance smoke check, not isolated load-only measurements. Host memory is the minimum available during the run. These numbers describe this one PC and are not MTEB quality metrics.
@@ -127,7 +144,7 @@ Detailed evidence and prevention actions are recorded in [RCA EMBED-007](../../.
 
 ## Completion status and next work
 
-At this report revision, 69 of 165 candidate-task cells have terminal results: 35 PASS with scores, 25 FAIL, and 9 BLOCKED; 96 cells remain nonterminal. All 15 candidates have a SciFact screen: 13 returned scores and E5 IQ4 / Voyage F16 failed before MTEB. The updated runner records 11 task-specific performance-smoke failures for each incompatible candidate. E5-small completed all 11 cells; BGE-small's initial pass completed all 11 with three local socket-pressure failures pending paced retries. Jina completed its Thai MIRACL cell; nine resource-guarded cells need retry after Ollama becomes idle. Do not interpret the report as completion of the full matrix.
+At this report revision, 77 of 165 candidate-task cells have terminal results: 42 PASS with scores, 26 FAIL, and 9 BLOCKED; 88 cells remain nonterminal. All 15 candidates have a SciFact screen: 13 returned scores and E5 IQ4 / Voyage F16 failed before MTEB. The runner records 11 task-specific performance-smoke failures for each incompatible candidate. E5-small completed all 11 cells; BGE-small's initial pass completed all 11 with three socket-pressure failures; Jina completed its Thai MIRACL cell and nine resource-guarded cells still need retry after Ollama becomes idle. BGE-M3 completed all 11 cells with 10 PASS and one socket-related failure. Do not interpret this report as completion of the full matrix.
 
 Next, continue the remaining model/task cells serially as resource guards permit. Keep raw task artifacts and absolute paths outside the public report and repository.
 
@@ -138,3 +155,4 @@ Next, continue the remaining model/task cells serially as resource guards permit
 - 0.3 — recorded all 11 E5-small task results, refreshed E5-small and BGE-small latency/memory measurements, and updated the current matrix count while the full run continues.
 - 0.4 — added BGE-small's first complete task pass, recorded its socket-pressure failures and successful retrieval scores, and updated the matrix status and protocol reference.
 - 0.5 — added Jina MIRACL Thai quality, recorded its nine resource-guarded cells, refreshed its performance smoke, and updated terminal/pending counts.
+- 0.6 — added BGE-M3 retrieval and code-search progress, recorded the failure under the 18-input/s average pacer, and updated RCA evidence and the pending-cell count.

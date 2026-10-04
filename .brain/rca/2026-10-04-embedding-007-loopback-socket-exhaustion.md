@@ -5,11 +5,11 @@
 | Date | 2026-10-04 |
 | Run | EMBED-007, MTEB 2.22.2 |
 | Risk | MEDIUM — local benchmark harness and run duration only |
-| Status | Root cause mechanism confirmed; local socket pressure attribution is partial |
+| Status | Socket failure reproduced under average pacing; machine-wide socket pressure attribution remains partial |
 
 ## Symptom
 
-The initial full-matrix pass for `bge-small-en-v1.5-q4_k_m` failed on MIRACL Thai, MIRACL German, and CodeSearchNet Java. The runner returned HTTP 400 from local Ollama `/v1/embeddings`; the embedded error said that Ollama could not dial its local runner at `127.0.0.1:64337/tokenize` because Windows had insufficient socket buffer space or a full queue. Other BGE-small cells passed.
+The initial full-matrix pass for `bge-small-en-v1.5-q4_k_m` failed on MIRACL Thai, MIRACL German, and CodeSearchNet Java. A later BGE-M3 pass also failed on CodeSearchNet JavaScript after the runner enabled its 18-input/s average pacer. Ollama returned HTTP 400 from `/v1/embeddings`; the embedded error said that it could not dial its local runner's `/tokenize` endpoint because Windows had insufficient socket buffer space or a full queue. Other BGE-M3 cells passed, including German MIRACL and four other longer retrieval/code tasks.
 
 ## Evidence
 
@@ -17,15 +17,18 @@ The initial full-matrix pass for `bge-small-en-v1.5-q4_k_m` failed on MIRACL Tha
 - Windows reported a TCP dynamic port range of 16,384. A `netstat` snapshot after the failure showed 15,790 IPv4 TIME_WAIT rows, 15,761 remote-loopback rows, and 29 non-loopback rows. Of those, 394 rows targeted runner port 64337 and 124 targeted Ollama port 11434. TIME_WAIT row count is not a count of unique local ports; most connections targeted other local endpoints, so the source of the majority is not attributed to this benchmark.
 - The runner is Ollama v0.35.1. Its pinned source configures the internal runner HTTP transport with `DisableKeepAlives: true` ([v0.35.1 source](https://github.com/ollama/ollama/blob/v0.35.1/llm/llama_server.go#L2513-L2527)). The [Ollama bulk-embedding report](https://github.com/ollama/ollama/issues/18392) describes Windows loopback socket exhaustion under sustained embedding, explains the per-input internal requests, and reports no failures after pacing at 18 inputs per second.
 - This runner invokes MTEB serially (`num_proc=1`); its ordinary 20-sample performance smoke does not exercise sustained corpus volume.
+- The revised run's BGE-M3 CodeSearchNet JavaScript row records the same Windows socket-buffer/queue error with `mteb_max_inputs_per_second=18.0`; host free RAM was 10.35 GiB and free GPU memory was 13.77 GiB at task start. The cell failed after 112 seconds. BGE-M3 German MIRACL (`4,003.274` sec), NFCorpus, Python, Go, and Ruby passed under the pacing guard.
+- The runner's pacer delays between API requests by the number of inputs in each payload. The MTEB batch size for BGE-M3 is 64, so a single request may still deliver 64 inputs as one burst; the 18-input/s value is a long-run average and not a per-request concurrency bound.
+- A Windows TCP snapshot after this later failure showed 6,143 IPv4 TIME_WAIT rows, of which 6,103 were remote-loopback rows, 119 targeted the current runner port, and 31 targeted Ollama port 11434. These are state rows rather than unique local ports. The majority of loopback rows targeted other local endpoints and remain unattributed.
 
 ## Root Cause
 
-Ollama v0.35.1 disables keep-alive on its internal HTTP client to the model runner. Long embedding jobs therefore create repeated loopback connections. During the MIRACL and CodeSearchNet cells, the Windows networking stack rejected a tokenizer connection with `WSAENOBUFS`/queue exhaustion. The observed socket state was under broad local pressure; the benchmark's precise share of machine-wide TIME_WAIT connections is unknown. This is a local Ollama transport/resource failure, not a retrieval-score failure or model-profile mismatch.
+Ollama v0.35.1 disables keep-alive on its internal HTTP client to the model runner. Long embedding jobs therefore create repeated loopback connections. The Windows networking stack rejected tokenizer connections with `WSAENOBUFS`/queue exhaustion. The first 18-input/s mitigation paced average inputs between requests but allowed a 64-input batch burst, so it did not sufficiently bound short-term connection creation for the long BGE-M3 JavaScript task. Broader machine-wide socket pressure likely contributed, but the benchmark's precise share of TIME_WAIT rows is unknown. This is a local Ollama transport/resource failure, not a retrieval-score failure or model-profile mismatch.
 
 ## Why the issue escaped detection
 
-The earlier SciFact screen and 20-example performance smoke completed before sustained request volume accumulated. Existing preflight guards checked host RAM and GPU VRAM but did not pace Ollama inputs or inspect socket pressure.
+The earlier SciFact screen and 20-example performance smoke completed before sustained request volume accumulated. The first pacing change was validated against an upstream report and an average-rate fake-clock test, but did not account for the MTEB request batch size and was incorrectly described as a strict per-second bound. Existing preflight guards checked host RAM and GPU VRAM but did not bound each Ollama request burst or inspect socket pressure.
 
 ## Prevention
 
-The local benchmark runner will pace Ollama-backed MTEB traffic to at most 18 input items per second. This retains the frozen model prompts, dataset revisions, and batch profiles; it changes evaluation wall time but not the embedding inputs or retrieval metrics. The independent performance smoke remains unpaced and is reported separately. Retry the three BGE-small cells that failed in the initial pass. Do not change Windows TCP settings, restart the user's Ollama service, or unload unrelated models as part of this mitigation.
+Before retrying the four socket-failed cells, bound each Ollama request batch as well as its sustained input rate, then validate the revised guard on a representative long task and retain its actual settings in the ledger. Do not describe the current 18-input/s average pacing as sufficient. This transport guard must retain the frozen prompts, dataset revisions, and embeddings; the independent performance smoke remains unpaced and is reported separately. Do not change Windows TCP settings, restart the user's Ollama service, or unload unrelated models as part of mitigation.
