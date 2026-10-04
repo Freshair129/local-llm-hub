@@ -3,7 +3,7 @@
 | Field | Value |
 |---|---|
 | Document ID | BENCH-SPEC-EMBEDDINGS-001 |
-| Version | 1.0.8 |
+| Version | 1.0.9 |
 | Status | Frozen retrieval profiles; full matrix in progress; per-request Ollama burst cap is under validation |
 | Complexity / risk | C-2 / MEDIUM |
 | Parent | [FR-018 GPU model and VRAM advisor](../requirements/FR-018-model-vram-advisor.md), [SPEC-EVAL-002](SPEC-EVAL-002-evaluation-hardening.md) |
@@ -105,7 +105,7 @@ Latency is measured locally and is not part of MTEB's retrieval quality score. R
 
 ## Current execution record
 
-The initial SciFact model screen covers all 15 candidates: 13 returned SciFact scores, and 2 failed the local backend smoke check before entering MTEB. The runner records 11 task-specific performance-smoke FAIL rows for each incompatible candidate. E5-small completed all 11 cells. BGE-small completed an initial 11-cell pass with 8 PASS and 3 socket-related FAIL. The Jina retrieval-tuned candidate completed MIRACL Thai and its resource guard marked nine other cells BLOCKED while another Ollama model was active. BGE-M3 completed all 11 cells with 10 PASS and one CodeSearchNet JavaScript socket FAIL. BGE-M3 Q4 then failed German MIRACL under the same 18-input/s average and 64-input batch. The local runner now caps MTEB batches at 8 for newly started Ollama processes; its first completed representative task is pending. Across the latest ledger, 78 of 165 cells have terminal status (42 PASS, 27 FAIL, 9 BLOCKED), with 87 cells remaining nonterminal. This is interim evidence only and does not satisfy the full 165-cell acceptance criterion. See [REPORT-EMBED-007](REPORT-EMBED-007.md) for task scores, runtime, and per-cell transport settings.
+The initial SciFact model screen covers all 15 candidates: 13 returned SciFact scores, and 2 failed the local backend smoke check before entering MTEB. The runner records 11 task-specific performance-smoke FAIL rows for each incompatible candidate. E5-small completed all 11 cells. BGE-small completed an initial 11-cell pass with 8 PASS and 3 socket-related FAIL. The Jina retrieval-tuned candidate completed MIRACL Thai and its resource guard marked nine other cells BLOCKED while another Ollama model was active. BGE-M3 completed all 11 cells with 10 PASS and one CodeSearchNet JavaScript socket FAIL. BGE-M3 Q4 completed all 11 cells with 10 PASS and one German MIRACL socket FAIL under the same 18-input/s average and 64-input batch. The local runner now caps MTEB batches at 8 for newly started Ollama processes; the first representative task is running but has not completed. Across the latest ledger, 85 of 165 cells have terminal status (49 PASS, 27 FAIL, 9 BLOCKED), with 80 cells remaining nonterminal. This is interim evidence only and does not satisfy the full 165-cell acceptance criterion. See [REPORT-EMBED-007](REPORT-EMBED-007.md) for task scores, runtime, and per-cell transport settings.
 
 ## References
 
@@ -128,3 +128,4 @@ The initial SciFact model screen covers all 15 candidates: 13 returned SciFact s
 - 1.0.6 — recorded the first Jina Thai result and nine resource-guarded cells to retry; matrix counts updated without changing the frozen profiles or acceptance criterion.
 - 1.0.7 — recorded that the 18-input/s average pacer did not prevent a long BGE-M3 socket failure, clarified its 64-input request burst, and updated the interim matrix count; retrieval profiles and acceptance criteria remain unchanged.
 - 1.0.8 — added the BGE-M3 Q4 socket failure, distinguished average pacing from request-burst control, and recorded a new 8-input MTEB batch guard as not yet validated.
+- 1.0.9 — recorded all BGE-M3 Q4 task outcomes, updated the interim matrix count, and noted that end-to-end validation of the 8-input batch guard has started.
