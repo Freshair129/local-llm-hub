@@ -1,6 +1,6 @@
 ---
 id: HUB-VERIFICATION
-version: 0.5.0
+version: 0.6.0
 status: active
 superseded_by: null
 date: 2026-10-05
@@ -12,7 +12,7 @@ scope: local engineering checkpoint
 
 ## Approved repair checkpoint, 2026-10-05
 
-Current repair source: desktop fixes `6c62285` and verification checkpoint `52a668c` on `feat/local-llm-agent-harness`; the R5 runner's exact SHA-256 is in its receipt. User approval covers [HUB-ACCEPTANCE-REPAIR](../plans/HUB-ACCEPTANCE-REPAIR.md). The approved repair scope is **PASS as a local checkpoint**. The historical 2026-10-04 formatting and native-GUI failures below are superseded by this section, not silently erased.
+Current repair source: desktop fixes `6c62285`, verification checkpoint `52a668c`, and the tested R5 runner checkpoint `a6e66c9` on `feat/local-llm-agent-harness`. The Docker receipt records its pre-commit base `52a668c` and SHA-256 hashes for the exact runner, Compose file and Dockerfile now committed in `a6e66c9`. User approval covers [HUB-ACCEPTANCE-REPAIR](../plans/HUB-ACCEPTANCE-REPAIR.md). The approved repair scope is **PASS as a local checkpoint**. The historical 2026-10-04 formatting and native-GUI failures below are superseded by this section, not silently erased.
 
 | Gate | Current outcome and scope |
 |---|---|
@@ -35,7 +35,7 @@ Architecture review: the new catalog derives selection from the same Hub/legacy 
 
 Known remaining limits: the Windows true-symlink fixture remains SKIP because this host lacks the existing privilege; Linux symlink escape rejection and the Windows junction check pass. Streaming, live MCP, other providers and signed installer remain deferred/unverified. The pre-existing topbar overflows at a 1200-pixel window (native refresh check widens to 1600); responsive redesign and legacy simulated hardware/seeded analytics surfaces are outside this approved repair and are not accepted as measurements. LHM pipe reads still lack an intrinsic deadline; the worker isolation prevents them blocking the UI, but sidecar recovery is separate work.
 
-Version diff 0.4.0 -> 0.5.0: close the approved Docker gate with 8/8 bounded container checks, Linux symlink coverage and explicit cleanup evidence; update the harness document/graph count. The previous checkpoint history follows.
+Version diff 0.5.0 -> 0.6.0: bind the R5 receipt and append-only packet lineage to the implementation checkpoint; retain the explicit pre-commit receipt source and file hashes. The previous checkpoint history follows.
 
 ## Historical runtime checkpoint
 
