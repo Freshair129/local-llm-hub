@@ -3,8 +3,8 @@
 | Field | Value |
 |---|---|
 | Document ID | BENCH-SPEC-EMBEDDINGS-001 |
-| Version | 1.1.1 |
-| Status | Frozen retrieval profiles; full matrix in progress; approved batch-4/4-inputs/s transport candidate awaiting long-task validation; Windows cache-path overflow confirmed |
+| Version | 1.1.2 |
+| Status | Frozen retrieval profiles; full matrix in progress; approved batch-4/4-inputs/s Ollama transport validation running on long MIRACL; Windows cache-path overflow confirmed |
 | Complexity / risk | C-2 / MEDIUM |
 | Parent | [FR-018 GPU model and VRAM advisor](../requirements/FR-018-model-vram-advisor.md), [SPEC-EVAL-002](SPEC-EVAL-002-evaluation-hardening.md) |
 | Peer | [SPEC-LLM-Benchmark-Harness](SPEC-LLM-Benchmark-Harness.md) |
@@ -106,7 +106,7 @@ Latency is measured locally and is not part of MTEB's retrieval quality score. R
 
 ## Current execution record
 
-The initial SciFact model screen covers all 15 candidates: 13 returned SciFact scores, and 2 failed the local backend smoke check before entering MTEB. The runner records 11 task-specific performance-smoke FAIL rows for each incompatible candidate; those rows are outside the 165-cell matrix. E5-small completed all 11 cells. BGE-small completed an initial 11-cell pass with 8 PASS and 3 socket-related FAIL. The Jina retrieval-tuned candidate completed MIRACL Thai and its resource guard marked nine other cells BLOCKED while another Ollama model was active. BGE-M3 and BGE-M3 Q4 each completed all 11 cells with 10 PASS and one socket-related FAIL. Jina Omni nano text-matching completed 10 PASS and one FAIL. Jina Omni small text-matching completed 9 PASS and two infrastructure FAIL under batch 8 and 18 inputs/s. Across the latest ledger, 135 of 165 matrix cells have terminal status (87 PASS, 39 FAIL, 9 BLOCKED), with 30 cells remaining nonterminal. The batch-8 socket guard is insufficient for long-running MIRACL, and nine MTEB cache writes failed on overlong Windows paths. This is interim evidence only and does not satisfy the full 165-cell acceptance criterion. See [REPORT-EMBED-007](REPORT-EMBED-007.md) for scores, runtime, and per-cell transport settings.
+The initial SciFact model screen covers all 15 candidates: 13 returned SciFact scores, and 2 failed the local backend smoke check before entering MTEB. The runner records 11 task-specific performance-smoke FAIL rows for each incompatible candidate; those rows are outside the 165-cell matrix. E5-small completed all 11 cells. BGE-small completed an initial 11-cell pass with 8 PASS and 3 socket-related FAIL. The Jina retrieval-tuned candidate completed MIRACL Thai and its resource guard marked nine other cells BLOCKED while another Ollama model was active. BGE-M3 and BGE-M3 Q4 each completed all 11 cells with 10 PASS and one socket-related FAIL. Jina Omni nano text-matching completed 10 PASS and one FAIL. Jina Omni small text-matching completed 9 PASS and two infrastructure FAIL under batch 8 and 18 inputs/s. Voyage-4-Nano HF has five retrieval passes, a CUDA OOM on CodeSearchNet JavaScript, and four later CodeSearchNet cells marked NOT_RUN; see [RCA EMBED-007 Voyage CodeSearchNet CUDA OOM](../../.brain/rca/2026-10-05-embedding-007-voyage-codesearchnet-oom.md). Count each unique model/task/subset/split key once, using its latest ledger status: 145 of 165 cells are terminal (92 PASS, 39 FAIL, 9 BLOCKED, 4 NOT_RUN, 1 OOM), with 20 cells remaining nonterminal. The batch-8 Ollama socket guard was insufficient for long-running MIRACL, and nine MTEB cache writes failed on overlong Windows paths. The approved Ollama batch-4, 4-input/s long-MIRACL validation is now running on Wemm; it has no terminal result yet. This is interim evidence only and does not satisfy the full 165-cell acceptance criterion. See [REPORT-EMBED-007](REPORT-EMBED-007.md) for scores, runtime, and per-cell transport settings.
 
 ## References
 
@@ -132,3 +132,4 @@ The initial SciFact model screen covers all 15 candidates: 13 returned SciFact s
 - 1.0.9 — recorded all BGE-M3 Q4 task outcomes, updated the interim matrix count, and noted that end-to-end validation of the 8-input batch guard has started.
 - 1.1.0 — recorded the failed long-task validation of the batch-8 guard, confirmed the Windows MTEB cache-path overflow, and updated the matrix count; model/task profiles and the 165-cell acceptance criterion are unchanged.
 - 1.1.1 — recorded approval for a short hashed local cache path and an Ollama transport-validation candidate capped at batch 4 and 4 inputs/s; these transport limits do not alter model profiles or task acceptance.
+- 1.1.2 — recorded Voyage-4-Nano's follow-up retrieval outcomes and CUDA OOM, recalculated progress by unique matrix cell using the latest ledger row, and marked the approved Ollama 4/4 long-MIRACL validation as in progress; frozen retrieval profiles and acceptance criteria are unchanged.

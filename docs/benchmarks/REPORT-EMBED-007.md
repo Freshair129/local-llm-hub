@@ -3,9 +3,9 @@
 | Field | Value |
 |---|---|
 | Report ID | REPORT-EMBED-007 |
-| Version | 0.10 |
-| Status | Interim; 135/165 matrix cells terminal; long-run Ollama transport and Windows result-cache path issues under remediation |
-| Protocol | [BENCH-SPEC-EMBEDDINGS-001 v1.1.0](BENCH-SPEC-EMBEDDINGS-001.md) |
+| Version | 0.11 |
+| Status | Interim; 145/165 unique matrix cells terminal; Voyage HF CUDA OOM retry and long-run Ollama transport validation remain open |
+| Protocol | [BENCH-SPEC-EMBEDDINGS-001 v1.1.2](BENCH-SPEC-EMBEDDINGS-001.md) |
 | Run | EMBED-007, MTEB 2.22.2 |
 | Host context (verified live during this run) | NVIDIA GeForce RTX 5060 Ti 16 GB; Intel Core i7-14700KF; 31.76 GiB visible system RAM; Windows 11 Pro build 26300; NVIDIA driver 617.14; CUDA UMD 13.4 |
 
@@ -148,6 +148,25 @@ The Q4 GGUF completed all 11 cells with nine scores and two infrastructure failu
 
 Thai MIRACL failed after 63m50s with the Windows Ollama tokenizer socket-buffer error under batch size 8 and 18 inputs/s. German MIRACL failed while writing MTEB's result cache: its output path reached the Windows legacy path limit. The cache-path RCA confirms the failure and records a short deterministic cache key as the proposed fix; neither failure has a retrieval score. This model's run reached 3.37 GiB minimum host free memory and 14.20 GiB GPU use, so subsequent large-model starts remain subject to the existing resource guard.
 
+## Voyage-4-Nano HF retrieval follow-up
+
+The local HF/CUDA run used its frozen MTEB batch size of 8. Its results do not validate the separate Ollama batch-4, 4-input/s transport candidate.
+
+| Task and split | Status | nDCG@10 | MRR@10 | Recall@100 | Evaluation seconds |
+|---|---:|---:|---:|---:|---:|
+| MIRACL Thai hard negatives, `dev` | PASS | 0.71717 | 0.72571 | 0.99072 | 1,411.591 |
+| MIRACL German hard negatives, `dev` | PASS | 0.46501 | 0.49277 | 0.95538 | 530.425 |
+| Belebele Thai, `test` | PASS | 0.93315 | 0.91839 | 0.99778 | 12.790 |
+| NFCorpus, `test` | PASS | 0.39593 | 0.60249 | 0.37963 | 74.807 |
+| CodeSearchNet Python, `test` | PASS | 0.95398 | 0.94042 | 0.99800 | 33.557 |
+| CodeSearchNet JavaScript, `test` | OOM | — | — | — | — |
+| CodeSearchNet Go, `test` | NOT_RUN | — | — | — | — |
+| CodeSearchNet Ruby, `test` | NOT_RUN | — | — | — | — |
+| CodeSearchNet Java, `test` | NOT_RUN | — | — | — | — |
+| CodeSearchNet PHP, `test` | NOT_RUN | — | — | — | — |
+
+The JavaScript task ended on CUDA OOM after the preceding Python pass. It began with 4.36 GiB free GPU memory; PyTorch then reported zero free and could not satisfy a 16 GiB allocation request. The runner stopped this model's remaining CodeSearchNet languages and recorded them as NOT_RUN. See [RCA EMBED-007 Voyage CodeSearchNet CUDA OOM](../../.brain/rca/2026-10-05-embedding-007-voyage-codesearchnet-oom.md). The four unrun cells and the OOM cell still require follow-up.
+
 ## Local latency and memory screening
 
 Latency is single-query embedding latency over 20 samples (`p50`/`p95`). Query/document throughput uses batch size 32. GPU delta and runner RSS are the observed peaks during MTEB plus the performance smoke check, not isolated load-only measurements. Host memory is the minimum available during the run. These numbers describe this one PC and are not MTEB quality metrics.
@@ -174,6 +193,7 @@ CodeRankEmbed's run approached the resource guard: measured GPU delta was 14.46 
 
 - **CodeRankEmbed HF:** the first load failed because Transformers loaded duplicate dynamic `NomicBertConfig` class identities and the custom-code flag was not passed through the SentenceTransformer constructor. It passed SciFact using a compatible isolated Transformers 4.45.1 / Sentence Transformers 5.3.0 environment after the runner was corrected.
 - **Voyage-4-Nano HF:** the model's local custom code imports a module absent from the card-configured Transformers 4.51.3 runtime. It passed SciFact using Transformers 4.57.1 / Sentence Transformers 5.3.0.
+- **Voyage-4-Nano HF CodeSearchNet JavaScript:** the task exhausted the available GPU memory at MTEB batch size 8; the per-model 4 GiB pre-task threshold allowed the run to start with 4.36 GiB free. The runner recorded the cell as OOM and stopped the remaining four languages. See the linked RCA; a fresh resource check and a separately documented lower-batch retry are required.
 - **E5 IQ4_XS GGUF:** local Ollama's BERT executor exited because the GGUF does not define the required token-type count. Both `/api/embed` and `/v1/embeddings` failed; there is no score.
 - **Voyage F16 GGUF:** local Ollama returned 1,024 dimensions for default, 1,024, and requested 2,048 output dimensions. This violates the frozen profile; whether the conversion or runtime causes the cap remains unresolved.
 
@@ -181,9 +201,9 @@ Detailed evidence and prevention actions are recorded in [RCA EMBED-007](../../.
 
 ## Completion status and next work
 
-At this report revision, 135 of 165 matrix cells have terminal results: 87 PASS with scores, 39 FAIL, and 9 BLOCKED; 30 cells remain nonterminal. The two model-level performance-smoke failures are excluded from this matrix count. All 15 candidates have a SciFact screen: 13 returned scores and E5 IQ4 / Voyage F16 failed before MTEB. E5-small completed all 11 cells; BGE-small's initial pass completed all 11 with three socket-pressure failures; Jina retrieval-tuned completed one score and has nine resource-guarded cells for retry; BGE-M3 and BGE-M3 Q4 each completed all 11 with 10 PASS and one socket-related failure; Jina Omni nano text-matching completed 10 PASS and one socket failure; Jina Omni small text-matching completed nine PASS and two infrastructure failures. Batch size 8 plus 18 inputs/s did not prevent its 63m50s Thai MIRACL socket failure. Nine cache-result failures were caused by output paths exceeding the host's disabled Windows long-path support. The remaining matrix process is continuing serially. Do not interpret this interim report as completion of the full matrix.
+At this report revision, 145 of 165 unique model/task/subset/split cells have terminal statuses: 92 PASS, 39 FAIL, 9 BLOCKED, 4 NOT_RUN, and 1 OOM; 20 cells remain nonterminal. Retries are collapsed by key and use the latest ledger row. The two model-level performance-smoke failures are excluded from this matrix count. All 15 candidates have a SciFact screen: 13 returned scores and E5 IQ4 / Voyage F16 failed before MTEB. Voyage-4-Nano added five retrieval passes, one CodeSearchNet JavaScript OOM, and four CodeSearchNet cells stopped as NOT_RUN. E5-small completed all 11 cells; BGE-small's initial pass completed all 11 with three socket-pressure failures; Jina retrieval-tuned completed one score and has nine resource-guarded cells for retry; BGE-M3 and BGE-M3 Q4 each completed all 11 with 10 PASS and one socket-related failure; Jina Omni nano text-matching completed 10 PASS and one socket failure; Jina Omni small text-matching completed nine PASS and two infrastructure failures. Batch size 8 plus 18 inputs/s did not prevent its 63m50s Thai MIRACL socket failure. Nine cache-result failures were caused by output paths exceeding the host's disabled Windows long-path support. The Wemm Ollama batch-4, 4-input/s long-MIRACL validation is active, with no score yet. Do not interpret this interim report as completion of the full matrix.
 
-Continue the remaining model/task cells serially as resource guards permit. The approved local runner change uses a short hashed MTEB cache root. Validate the proposed Ollama batch-4, 4-input/s transport on one long MIRACL task before replaying socket failures. Keep raw task artifacts and absolute paths outside the public report and repository.
+Continue the remaining model/task cells serially as resource guards permit. The approved local runner change uses a short hashed MTEB cache root. The Wemm Ollama batch-4, 4-input/s long-MIRACL validation is in progress; wait for its terminal result before replaying socket failures. Retry the Voyage HF OOM and its four NOT_RUN language cells only after a fresh resource check and a separately documented lower-batch setting. Keep raw task artifacts and absolute paths outside the public report and repository.
 
 ## Version history
 
@@ -197,3 +217,4 @@ Continue the remaining model/task cells serially as resource guards permit. The 
 - 0.8 — recorded BGE-M3 Q4's full 11-cell result set and updated the matrix count while the first batch-8 guard validation runs.
 - 0.9 — recorded Jina Omni small text-matching's 11-cell outcomes, refreshed its latency/memory observation, confirmed the batch-8 long-task socket failure and Windows cache-path overflow, and updated the matrix count.
 - 0.10 — recorded approval for a short hashed MTEB cache path and the batch-4, 4-input/s long-task transport validation; the benchmark matrix and score profiles remain frozen.
+- 0.11 — added Voyage-4-Nano follow-up retrieval results and its CodeSearchNet JavaScript OOM evidence, recalculated terminal counts by unique cell/latest status, and recorded the Ollama 4/4 validation as in progress.
