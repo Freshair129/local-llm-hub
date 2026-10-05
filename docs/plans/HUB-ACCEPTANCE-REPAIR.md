@@ -1,6 +1,6 @@
 ---
 id: HUB-ACCEPTANCE-REPAIR
-version: 0.2.0
+version: 0.3.0
 status: active
 superseded_by: null
 author: ATHER
@@ -75,7 +75,7 @@ Reference procedures: [Tauri WebDriver](https://v2.tauri.app/develop/tests/webdr
 | Item | Current evidence | Disposition |
 |---|---|---|
 | Backend cancellation | Existing Ollama log lines 832-834 record HTTP completion after disconnect, cancellation of task 674 and slot release; task 704 subsequently completes. | Promote only server-task stop/release evidence after correlation review. Existing untimestamped slot lines cannot establish GPU kernel stop latency. |
-| True Windows symlink test | Existing fixture skips when the host cannot create a symlink; junction escape already passes. | Execute the symlink test in Linux container acceptance as additional platform coverage. Keep Windows-specific privilege-dependent result distinct; do not change Windows developer mode or privilege policy automatically. |
+| True Windows symlink test | Existing fixture skips when the host cannot create a symlink; junction escape already passes. | Linux symlink escape rejection passed in container acceptance. Keep the Windows-specific privilege-dependent result as SKIP; do not change Windows developer mode or privilege policy automatically. |
 | Broken unrelated model entry | The MaralGPT-Mythos-9B Q4_K_M manifest references a missing 407-byte config blob `008c3c9e5d7ccd86e9e8445d7df131715860e848a9ffeb0abb02f3d9a661c57c`; its 5,629,109,248-byte model layer is present. | Diagnose/recover only an exact SHA-256-matching existing local metadata copy if available. Do not redownload weights, fabricate metadata, overwrite the manifest or remove the model under this approval. If no exact copy exists, report the separate recovery prerequisite. |
 | Template warnings on other models | Discovery warnings alone do not prove those embedding/reranking models fail their intended task. | Preserve inventory and report warnings; no speculative template rewrite. |
 | Global Ollama binding | Process/user setting remains 0.0.0.0:11434; no pre-existing inference listener was found before the temporary test. | Temporary task stays loopback-only. Managed service/network-policy migration is not inferred from a GUI repair. |
@@ -94,3 +94,7 @@ New draft 0.1.0: replaces an ambiguous "fix all" with confirmed causes, an addit
 Approval delta 0.1.0 -> 0.2.0: user approved all specified repair units and environment actions on 2026-10-05. Execution is authorized within the stated boundaries.
 
 R4 execution refinement: native tests reproduced hidden peer panels and IPC starvation from synchronous, overlapping sensor reads (RCA-002). The minimal HTML close-tag correction and async worker/one-in-flight telemetry refresh are required to make the approved Chat/Arena acceptance executable. `src/index.html` and `src/js/observability.js` are consequently included alongside the already scoped Rust command file. Sensor contracts, sampling cadence, settings and hardware data are preserved; this remains MEDIUM cross-module repair risk.
+
+R5 execution result, 2026-10-05: the exact approved pip HTTP cache was purged, reclaiming a measured 4,720,885,760 bytes; Docker Engine 29.8.2 and Compose 5.6.0 were installed in the existing Ubuntu 26.04 WSL2 distro. The CPU-only container acceptance passed 8/8, including auth, runtime restrictions, Linux symlink escape and project-memory persistence across restart. Compose removed task containers/network; the image and named volumes remain; Docker units are disabled/inactive and port 8787 has no listener. Windows true-symlink creation remains SKIP under the existing host privilege policy. See [verification](../architecture/VERIFICATION.md), [deployment](../local-deployment.md) and the append-only packet receipt.
+
+Version diff 0.2.0 -> 0.3.0: record completion of R5 and Linux symlink coverage; retain the separate Windows privilege-dependent SKIP.

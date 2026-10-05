@@ -1,6 +1,6 @@
 ---
 id: HUB-VERIFICATION
-version: 0.4.0
+version: 0.5.0
 status: active
 superseded_by: null
 date: 2026-10-05
@@ -12,7 +12,7 @@ scope: local engineering checkpoint
 
 ## Approved repair checkpoint, 2026-10-05
 
-Current repair source: `6c62285` on `feat/local-llm-agent-harness`; isolated mechanical formatting: `1dabe42`. User approval covers [HUB-ACCEPTANCE-REPAIR](../plans/HUB-ACCEPTANCE-REPAIR.md). Overall status is **PARTIAL: desktop repairs verified; container acceptance BLOCKED**. The historical 2026-10-04 formatting and native-GUI failures below are superseded by this section, not silently erased.
+Current repair source: desktop fixes `6c62285` and verification checkpoint `52a668c` on `feat/local-llm-agent-harness`; the R5 runner's exact SHA-256 is in its receipt. User approval covers [HUB-ACCEPTANCE-REPAIR](../plans/HUB-ACCEPTANCE-REPAIR.md). The approved repair scope is **PASS as a local checkpoint**. The historical 2026-10-04 formatting and native-GUI failures below are superseded by this section, not silently erased.
 
 | Gate | Current outcome and scope |
 |---|---|
@@ -21,21 +21,21 @@ Current repair source: `6c62285` on `feat/local-llm-agent-harness`; isolated mec
 | Focused JS | PASS 7/7: canonical Arena payload/response, unavailable usage, fail-closed Chat/catalog, refresh race, duplicate send, concurrent error guard and non-overlapping telemetry batches |
 | Existing Node suite | PASS 7 runner entries (evaluation wrapper includes its existing five assertions) |
 | Python | PASS 61, SKIP 6: five explicitly opt-in real-provider cases and one Windows symlink privilege condition. Ruff and strict mypy (20 modules) PASS |
-| Documentation | PASS: metadata/links/fences for 36 documents, graph/dependency checks and source trace annotations |
+| Documentation | PASS: metadata/links/fences for 37 documents; graph 118 nodes/175 edges; dependency checks and source trace annotations |
 | Native Tauri | PASS seven real WebDriver checks through native IPC and authenticated Hub HTTP, explicit CPU mock provider; Chat, Arena, both outage paths and fail-closed catalog. This is desktop functional evidence, not real-model/GPU or installer evidence |
-| R5 Docker | BLOCKED / NOT_RUN: WSL VHD is on C:, with approximately 353 MiB host capacity available at initial preflight and 292,356,096 bytes (279 MiB) at final recheck. No Docker packages, images or containers installed/started. Linux-container symlink acceptance remains NOT_RUN |
+| R5 Docker | PASS 8/8: Ubuntu 26.04 WSL2, Docker Engine 29.8.2, Compose 5.6.0; CPU mock health/auth/catalog/chat, unprivileged/read-only/capability/loopback checks, Linux symlink escape rejection and project-memory persistence across restart. Compose containers/network removed; named volumes and image retained; Docker units left inactive/disabled; port 8787 has no listener |
 | R6 Cancellation | Preserved Ollama log correlates cancelled task 674, slot stop/release and successful recovery task 704. GPU kernel stop latency NOT_MEASURED; no inference rerun for documentation |
 | Model metadata | Exact existing local 407-byte SHA-256 copy restored; real Ollama `/api/show` returns 200 for MaralGPT. `/api/ps` empty: no 9B inference or weights download. Owned listener subsequently verified closed |
 
-The native test uses tauri-driver 2.1.0 and Microsoft EdgeDriver/WebView2 154.0.4258.53, a separate app identifier and an explicit task-local profile. Run9 and run10 pass; earlier failed receipts are preserved. The canonical source-linked final receipt is `.hub/desktop/acceptance-final/receipt.json`, with executable SHA-256, elapsed checkpoints, screenshots and process/port cleanup. Raw receipts are local ignored artifacts; hashes and source identity are appended to [packet lineage](../lineage/packet-lineage.jsonl).
+The native test uses tauri-driver 2.1.0 and Microsoft EdgeDriver/WebView2 154.0.4258.53, a separate app identifier and an explicit task-local profile. Run9 and run10 pass; earlier failed receipts are preserved. The canonical source-linked final receipt is `.hub/desktop/acceptance-final/receipt.json`, with executable SHA-256, elapsed checkpoints, screenshots and process/port cleanup. The R5 Docker receipt is `.hub/container/20261005T090831Z-ef4243c8.json` (SHA-256 `FD4D45F3B840BC7A72D0CD7B686926C99771B80E59CB3F37C37FE722D9006ED5`); it binds the tested Compose, Dockerfile and runner hashes to the built image. Raw receipts are local ignored artifacts; hashes and source identity are appended to [packet lineage](../lineage/packet-lineage.jsonl).
 
 Native testing uncovered two additional causes documented in [RCA-002](../../.brain/rca/RCA-002-DESKTOP-ACCEPTANCE-GAPS.md): a missing Hardware subpanel closing tag hid subsequent peer views, and synchronous sensor reads combined with overlapping polling starved IPC. The markup now gives every peer view the same parent. Sensor reads run on a blocking worker behind async IPC; a telemetry batch completes before another poll begins. The two-second cadence, sensor payloads and backend contracts remain intact. Run7 previously timed out on Arena outage; run9 completes all seven checks at 21.48 seconds from launch. These are functional observations, not a latency benchmark.
 
 Architecture review: the new catalog derives selection from the same Hub/legacy mode as execution, exposes no endpoint URL or token, and fails closed. Physical inventory stays separate. Buffering remains explicit; TTFT, missing tokens and GPU activity are not fabricated by Chat/Arena. Original source/installed application remain untouched; this is a local branch, with no merge, push, deployment or release.
 
-Known remaining limits: Docker and Linux-container acceptance require host capacity; Windows true symlink still needs the existing privilege; streaming, live MCP, other providers and signed installer remain deferred/unverified. The pre-existing topbar overflows at a 1200-pixel window (native refresh check widens to 1600); responsive redesign and legacy simulated hardware/seeded analytics surfaces are outside this approved repair and are not accepted as measurements. LHM pipe reads still lack an intrinsic deadline; the worker isolation prevents them blocking the UI, but sidecar recovery is separate work.
+Known remaining limits: the Windows true-symlink fixture remains SKIP because this host lacks the existing privilege; Linux symlink escape rejection and the Windows junction check pass. Streaming, live MCP, other providers and signed installer remain deferred/unverified. The pre-existing topbar overflows at a 1200-pixel window (native refresh check widens to 1600); responsive redesign and legacy simulated hardware/seeded analytics surfaces are outside this approved repair and are not accepted as measurements. LHM pipe reads still lack an intrinsic deadline; the worker isolation prevents them blocking the UI, but sidecar recovery is separate work.
 
-Version diff 0.3.0 -> 0.4.0: implement and verify approved repairs; add source-linked native evidence, successful exact metadata recovery and explicit host-capacity blocker. The previous checkpoint history follows.
+Version diff 0.4.0 -> 0.5.0: close the approved Docker gate with 8/8 bounded container checks, Linux symlink coverage and explicit cleanup evidence; update the harness document/graph count. The previous checkpoint history follows.
 
 ## Historical runtime checkpoint
 

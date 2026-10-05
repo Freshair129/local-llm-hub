@@ -7,6 +7,7 @@
 
   "nodes": [
     {"id": "plan:HUB-ACCEPTANCE-REPAIR", "type": "plan", "path": "docs/plans/HUB-ACCEPTANCE-REPAIR.md", "title": "Desktop and Acceptance Repair Proposal", "status": "active"},
+    {"id": "plan:HUB-DOCKER-CAPACITY-UNBLOCK", "type": "plan", "path": "docs/plans/HUB-DOCKER-CAPACITY-UNBLOCK.md", "title": "Restore host capacity before approved container acceptance", "status": "active"},
     {"id": "doc:RCA-002-DESKTOP-ACCEPTANCE-GAPS", "type": "document", "path": ".brain/rca/RCA-002-DESKTOP-ACCEPTANCE-GAPS.md", "title": "Desktop Contract Failures and Acceptance Gaps", "status": "active"},
     {"id": "doc:HUB-CURRENT-STATE", "type": "document", "path": "docs/architecture/CURRENT-STATE.md", "title": "Agent Harness Current-State Audit", "status": "active"},
     {"id": "doc:HUB-TARGET-ARCHITECTURE", "type": "architecture", "path": "docs/architecture/TARGET-ARCHITECTURE.md", "title": "Agent Harness Target Architecture", "status": "active"},
@@ -134,6 +135,9 @@
     {"from": "plan:HUB-ACCEPTANCE-REPAIR", "to": "plan:HUB-IMPLEMENTATION", "relation": "extends"},
     {"from": "plan:HUB-ACCEPTANCE-REPAIR", "to": "doc:RCA-002-DESKTOP-ACCEPTANCE-GAPS", "relation": "remediates"},
     {"from": "plan:HUB-ACCEPTANCE-REPAIR", "to": "packet:PKT-FR-023-HUB-ROUTE", "relation": "extends"},
+    {"from": "plan:HUB-DOCKER-CAPACITY-UNBLOCK", "to": "plan:HUB-ACCEPTANCE-REPAIR", "relation": "extends"},
+    {"from": "plan:HUB-DOCKER-CAPACITY-UNBLOCK", "to": "doc:HUB-DEPLOYMENT-GUIDE", "relation": "details"},
+    {"from": "plan:HUB-DOCKER-CAPACITY-UNBLOCK", "to": "doc:RCA-002-DESKTOP-ACCEPTANCE-GAPS", "relation": "remediates"},
     {"from": "doc:RCA-002-DESKTOP-ACCEPTANCE-GAPS", "to": "req:FR-007", "relation": "audits"},
     {"from": "doc:RCA-002-DESKTOP-ACCEPTANCE-GAPS", "to": "req:FR-011", "relation": "audits"},
     {"from": "doc:HUB-CURRENT-STATE", "to": "doc:PRD-SDD", "relation": "audits"},

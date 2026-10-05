@@ -2,7 +2,7 @@
 id: PKT-FR-023-HUB-ROUTE
 fr_id: FR-023
 layer: route
-version: 0.4.0
+version: 0.5.0
 status: active
 superseded_by: null
 interface: LOCKED
@@ -55,3 +55,9 @@ New bounded packet under user approval dated 2026-10-03. No closure claimed unti
 The user approved [repair plan 0.2.0](../plans/HUB-ACCEPTANCE-REPAIR.md). Extend the interface lock with get_chat_catalog(state) -> Result<ChatCatalog, String>, serialized as mode plus models containing id/name/model/backend strings. Hub catalog uses only enabled logical IDs; legacy uses cached physical inventory. Errors fail closed. Preserve ChatRequest/ChatResponse and list_all_models. CMP additionally includes src/main.js, src/js/chat.js, src/js/arena.js, src/js/state.js, a shared inference-catalog module, focused JS/Rust regression tests and desktop/container acceptance runners. R1 mechanical formatting is isolated from behavioral commits. Parent H25-H27/H30 and peer FR-007/FR-011 contracts are reconciled by the approved plan. Target cases R1-R6 and rollback are defined there; no production automation plugin, global bind change, new model weights or unrelated refactor.
 
 Version diff 0.3.0 -> 0.4.0: approved catalog IPC and executable desktop/container acceptance repairs.
+
+### TC-HUB-CONTAINER-001 (executed 2026-10-05)
+
+PASS, 8/8 in Ubuntu 26.04 WSL2 using Docker Engine 29.8.2 and Compose 5.6.0 with the explicit CPU mock provider. Checks covered loopback health, unauthenticated rejection, authenticated catalog/chat, UID 10001 and read-only/capability/loopback controls, Linux symlink escape rejection, project SQLite memory persistence across restart, and cleanup. The task's containers/network were removed; named volumes and image remain; Docker units are inactive/disabled. Receipt: `.hub/container/20261005T090831Z-ef4243c8.json` (SHA-256 `FD4D45F3B840BC7A72D0CD7B686926C99771B80E59CB3F37C37FE722D9006ED5`). The Windows true-symlink fixture remains SKIP for lack of host privilege; no real-model/GPU claim is made.
+
+Version diff 0.4.0 -> 0.5.0: close the approved R5 container acceptance with an eight-check source-linked receipt.

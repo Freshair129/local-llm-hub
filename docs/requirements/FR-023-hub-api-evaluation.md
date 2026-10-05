@@ -4,7 +4,7 @@ domain: inference-gateway
 owner: Boss
 status: active
 superseded_by: null
-version: 0.3.0
+version: 0.4.0
 priority: P0
 features: [CROSS-FEAT-002]
 depends_on:
@@ -31,8 +31,12 @@ Component scope: runtime/local_llm_hub/api.py; runtime/local_llm_hub/cli.py; run
 
 Map the listed H criteria to executed deterministic tests, including failure paths. Record actual results in the verification report; source presence is not acceptance.
 
+Approved R5 container packaging acceptance passed locally on 2026-10-05: the locked CPU image built; health, authentication, catalog/chat, unprivileged runtime controls, Linux symlink escape rejection and project-memory restart persistence passed; task containers/network were removed and named volumes preserved. The source-linked receipt and exact limits are in [verification](../architecture/VERIFICATION.md).
+
 ## Version diff
 
 New requirement derived from the approved 0.2.0 architecture.
 
 0.2.0 -> 0.3.0: approved additive catalog IPC and native desktop acceptance; no streaming or provider extension.
+
+0.3.0 -> 0.4.0: record the executed R5 container packaging acceptance without widening runtime/API contracts.

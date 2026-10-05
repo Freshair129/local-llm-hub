@@ -1,6 +1,6 @@
 ---
 id: HUB-DEPLOYMENT-GUIDE
-version: 0.3.0
+version: 0.4.0
 status: active
 superseded_by: null
 ---
@@ -44,7 +44,7 @@ JUnit properties record selected model/context, elapsed time, real provider call
 
 The tests never start model servers, download models, modify production catalogs or change global binding/firewall settings. The temporary server for this checkpoint used only process-local `OLLAMA_HOST=127.0.0.1:11435`, the existing `O:\.ollama\models`, context 8,192, one parallel request and one loaded model. Cloud access and startup blob pruning were disabled; a task-owned Windows Job Object contained the server and its runner descendants and was closed after testing. The [Ollama FAQ](https://docs.ollama.com/faq) documents binding, context, concurrency and cloud controls; [Ollama environment configuration](https://github.com/ollama/ollama/blob/main/envconfig/config.go) documents `OLLAMA_NOPRUNE`. These are operator lifecycle details, not a new Hub server-management feature. See the [verification receipt](architecture/VERIFICATION.md) for executed results and limits.
 
-The optional `compose.yaml` builds only the CPU agent runtime, exposes port 8787 on host loopback, runs as UID 10001, and persists state/workspace in separate named volumes. Run `docker compose up --build -d` after generating `.env`. The container listens on all interfaces internally; host publishing remains loopback. Model servers stay external and independently replaceable. Docker startup, image health and persistence restart are NOT_RUN on the current host because Docker is unavailable. To use real endpoints, provide reviewed container config/paths and a reachable server URL; container loopback refers to the container itself.
+The optional `compose.yaml` builds only the CPU agent runtime, exposes port 8787 on host loopback, runs as UID 10001, and persists state/workspace in separate named volumes. For an operator-managed service, run `docker compose up --build -d` after generating `.env`. The container listens on all interfaces internally; host publishing remains loopback. Model servers stay external and independently replaceable. On 2026-10-05, the bounded [container acceptance runner](../eval/container_smoke.py) passed 8/8 checks on Ubuntu 26.04 WSL2 with Docker Engine 29.8.2 and Compose 5.6.0: health, unauthenticated rejection, authenticated mock catalog/chat, non-root/read-only/capability/loopback controls, Linux symlink-escape rejection and SQLite project memory across a container restart. The runner generated a process-local test token, did not read `.env`, removed the task's containers/network, retained its named volumes and image, then left Docker-related systemd units inactive and disabled. This verifies the CPU mock contract, not a real model endpoint or GPU inference. To use real endpoints, provide reviewed container config/paths and a reachable server URL; container loopback refers to the container itself.
 
 Stopping the service or clearing the opt-in desktop bridge environment returns to the legacy desktop route. Preserve `.hub` and operator config; no reset or data deletion is required. The desktop executable build is verified separately from GUI/hardware interaction and installer signing.
 
@@ -73,8 +73,17 @@ Remove-Item Env:TAURI_CONFIG
 
 Every output directory must be new: previous failures and screenshots are preserved. The runner creates isolated config, SQLite state and a WebView2 profile below it. Do not run against the installed `O:\local-llm-hub\tauri-app.exe`. Client waits allow the bridge's existing 125-second completion deadline; they are not performance thresholds.
 
-### Container prerequisite blocker, 2026-10-05
+### Container capacity recovery and acceptance, 2026-10-05
 
-Ubuntu 26.04 WSL2 is present with systemd and no Docker/Podman/socket or conflicting Docker package. Its registered VHD is on C:, whose measured free space was 370,077,696 bytes (approximately 353 MiB), later 361,238,528 bytes. The guest filesystem's large virtual free capacity is not host capacity. Installing packages/images could exhaust the host. Per the approved repair's prerequisite stop rule, Docker installation/build/start/restart and Linux symlink acceptance are **NOT_RUN / BLOCKED**. No package installation, distro relocation, firewall change, startup enablement or cleanup was performed. Free sufficient host capacity and recheck before continuing the approved isolated Compose acceptance; moving the distro requires separate scope.
+The initial blocker was low C: capacity with the Ubuntu VHD stored on C:. After approval, only `C:\Users\freshair\AppData\Local\pip\cache` was purged; pip reported 1,012 HTTP files removed, 4,718.3 MB reclaimed, and zero remaining HTTP files/wheels. Docker packages and the image were then built in the existing Ubuntu 26.04 WSL2 distribution. The acceptance receipt records Docker 29.8.2, Compose 5.6.0, eight passing checks, and successful cleanup. At final recheck C: had 7,608,295,424 free bytes; the WSL VHD remained on C: and was 6,333,399,040 bytes. WSL's virtual guest free-space report is not host capacity. Docker packages/image and the two task-owned state/workspace volumes were retained; services remain disabled/inactive. No distro relocation, firewall change, persistent startup enablement or unrelated cleanup occurred. The Windows true-symlink fixture remains privilege-dependent and skipped; Linux symlink traversal rejection passed in the container.
+
+Reproduce the bounded acceptance from the Windows checkout by passing its commit ID to the WSL runner; the ID is provenance only, and the test token is generated in process memory:
+
+```powershell
+$sourceCommit = git rev-parse HEAD
+wsl -d Ubuntu -u root -- env LOCAL_LLM_HUB_SOURCE_COMMIT=$sourceCommit python3 /mnt/o/local-llm-hub-worktrees/harness-design/eval/container_smoke.py
+```
 
 0.2.0 -> 0.3.0: add reproducible native test setup and the actual host-storage blocker; preserve the distinction between test provider and real-model acceptance.
+
+0.3.0 -> 0.4.0: record the approved exact-cache purge, Docker/Compose installation and 8/8 CPU-container acceptance, including Linux symlink and cleanup verification.
