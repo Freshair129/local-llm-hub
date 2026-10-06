@@ -1,0 +1,10 @@
+{
+  "checks": {
+    "six_requests_integrity": true
+  },
+  "sourceArtifactSha256": {
+    "manifest.json": "fba952c96061d67b160c7c69266c4cd27cbef539c12921f419bed52bd1fb43f8",
+    "summary.json": "f27220881212fec671d2898e568ef458e8fd3ba82571f34add78bf5fbf1eb226",
+    "verification.json": "b0d2c84d953023659af5341e26df4aa37a2e18bbae6cf00fed4df9c859b08230"
+  }
+}

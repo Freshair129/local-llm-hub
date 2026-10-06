@@ -1,0 +1,76 @@
+{
+  "rows": [
+    {
+      "slug": "gemma-hf",
+      "status": "PASS"
+    },
+    {
+      "slug": "gemma-hf",
+      "status": "PASS"
+    },
+    {
+      "slug": "gemma-hf",
+      "status": "FAIL"
+    },
+    {
+      "slug": "gemma-greedy",
+      "status": "PASS"
+    },
+    {
+      "slug": "gemma-greedy",
+      "status": "PASS"
+    },
+    {
+      "slug": "gemma-greedy",
+      "status": "PASS"
+    },
+    {
+      "slug": "softnix-upstream",
+      "status": "NOT_EXECUTABLE"
+    },
+    {
+      "slug": "softnix-upstream",
+      "status": "FAIL"
+    },
+    {
+      "slug": "softnix-upstream",
+      "status": "NOT_EXECUTABLE"
+    },
+    {
+      "slug": "softnix-lowtemp",
+      "status": "FAIL"
+    },
+    {
+      "slug": "softnix-lowtemp",
+      "status": "FAIL"
+    },
+    {
+      "slug": "softnix-lowtemp",
+      "status": "FAIL"
+    },
+    {
+      "slug": "thaidoc-embedded",
+      "status": "FAIL"
+    },
+    {
+      "slug": "thaidoc-embedded",
+      "status": "PASS"
+    },
+    {
+      "slug": "thaidoc-embedded",
+      "status": "PASS"
+    },
+    {
+      "slug": "thaidoc-upstream",
+      "status": "PASS"
+    },
+    {
+      "slug": "thaidoc-upstream",
+      "status": "PASS"
+    },
+    {
+      "slug": "thaidoc-upstream",
+      "status": "PASS"
+    }
+  ]
+}

@@ -1,0 +1,259 @@
+{
+  "benchmark": "BENCH-5060TI-TUNING-006",
+  "date": "2026-10-04",
+  "profiles": [
+    {
+      "key": "gemma",
+      "source_slug": "gemma4-v2-agentic-q4_k_m",
+      "stage": "calibration",
+      "slug": "gemma-hf",
+      "alias": "llh-tune-gemma:hf",
+      "baseline_alias": "llh-general-gemma-agentic:bench005",
+      "calibration": {
+        "baselineCombined": 2,
+        "selectedCombined": 4,
+        "baselineFunctional": 2,
+        "selectedFunctional": 4
+      },
+      "options": {
+        "temperature": 1,
+        "top_p": 0.95,
+        "top_k": 64,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "repeat_last_n": 64,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "num_ctx": 16384,
+        "num_predict": 8192
+      },
+      "think": true,
+      "confirmed_bounded_gain": false,
+      "status": "calibration_gain_not_confirmed_do_not_promote",
+      "confirmation": {
+        "controlCombined": 3,
+        "selectedCombined": 1,
+        "controlFunctional": 3,
+        "selectedFunctional": 1,
+        "controlBudgetStops": 0,
+        "selectedBudgetStops": 0,
+        "controlMedianSeconds": 11.470615850000002,
+        "selectedMedianSeconds": 11.588624899999996
+      },
+      "source_index": [
+        {
+          "repo": "yuxinlu1/gemma-4-12B-agentic-fable5-composer2.5-v2-3.5x-tau2",
+          "revision": "af644ab1c593a95a994257343b04b99546f431b2",
+          "url": "https://huggingface.co/yuxinlu1/gemma-4-12B-agentic-fable5-composer2.5-v2-3.5x-tau2/tree/af644ab1c593a95a994257343b04b99546f431b2"
+        },
+        {
+          "repo": "yuxinlu1/gemma-4-12B-agentic-fable5-composer2.5-v2-3.5x-tau2-GGUF",
+          "revision": "190a31365a6b80a692349be34ccdac730cad4fe4",
+          "url": "https://huggingface.co/yuxinlu1/gemma-4-12B-agentic-fable5-composer2.5-v2-3.5x-tau2-GGUF/tree/190a31365a6b80a692349be34ccdac730cad4fe4"
+        }
+      ],
+      "limitation": "Only two Rust tasks. Fresh seeds are not fresh tasks. Original scoring omits some contract edge cases; consult separate diagnostics. No product routing promotion."
+    },
+    {
+      "key": "thaidoc",
+      "source_slug": "thaidoc-finetune-q4_k_m",
+      "stage": "calibration",
+      "slug": "thaidoc-upstream",
+      "alias": "llh-tune-thaidoc:upstream",
+      "baseline_alias": "llh-general-thaidoc:bench005",
+      "calibration": {
+        "baselineCombined": 0,
+        "selectedCombined": 3,
+        "baselineFunctional": 0,
+        "selectedFunctional": 3
+      },
+      "options": {
+        "temperature": 0.4,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "repeat_penalty": 1.05,
+        "repeat_last_n": 64,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "num_ctx": 16384,
+        "num_predict": 8192
+      },
+      "confirmed_bounded_gain": false,
+      "status": "calibration_gain_not_confirmed_do_not_promote",
+      "confirmation": {
+        "controlCombined": 3,
+        "selectedCombined": 1,
+        "controlFunctional": 3,
+        "selectedFunctional": 2,
+        "controlBudgetStops": 0,
+        "selectedBudgetStops": 0,
+        "controlMedianSeconds": 3.803386300000013,
+        "selectedMedianSeconds": 4.071868400000007
+      },
+      "source_index": [
+        {
+          "repo": "dearxoasis/thaidoc-finetune-gguf",
+          "revision": "d71cee94adfca53507e2f07981a5752a9d1061b7",
+          "url": "https://huggingface.co/dearxoasis/thaidoc-finetune-gguf/tree/d71cee94adfca53507e2f07981a5752a9d1061b7"
+        },
+        {
+          "repo": "typhoon-ai/typhoon-s-thaillm-8b-instruct-research-preview",
+          "revision": "431f48e7703deb7b315c4c0d9e36d9fc9e819bb3",
+          "url": "https://huggingface.co/typhoon-ai/typhoon-s-thaillm-8b-instruct-research-preview/tree/431f48e7703deb7b315c4c0d9e36d9fc9e819bb3"
+        }
+      ],
+      "limitation": "Only two Rust tasks. Fresh seeds are not fresh tasks. Original scoring omits some contract edge cases; consult separate diagnostics. No product routing promotion."
+    },
+    {
+      "key": "qwen35",
+      "source_slug": "qwen3.5-9b",
+      "stage": "presence",
+      "slug": "qwen35-presence15",
+      "alias": "llh-tune-qwen35:presence15",
+      "baseline_alias": "llh-general-qwen35:bench005",
+      "calibration": {
+        "baselineCombined": 4,
+        "selectedCombined": 6,
+        "baselineFunctional": 4,
+        "selectedFunctional": 6
+      },
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "repeat_last_n": 64,
+        "presence_penalty": 1.5,
+        "frequency_penalty": 0,
+        "num_ctx": 40960,
+        "num_predict": 32768
+      },
+      "think": true,
+      "confirmed_bounded_gain": true,
+      "status": "improved_on_fresh_seeds_for_two_tasks",
+      "confirmation": {
+        "controlCombined": 3,
+        "selectedCombined": 5,
+        "controlFunctional": 3,
+        "selectedFunctional": 5,
+        "controlBudgetStops": 3,
+        "selectedBudgetStops": 0,
+        "controlMedianSeconds": 92.70859604999993,
+        "selectedMedianSeconds": 91.96930590000004
+      },
+      "source_index": [
+        {
+          "repo": "Qwen/Qwen3.5-9B",
+          "revision": "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
+          "url": "https://huggingface.co/Qwen/Qwen3.5-9B/tree/c202236235762e1c871ad0ccb60c8ee5ba337b9a"
+        }
+      ],
+      "limitation": "Only two Rust tasks. Fresh seeds are not fresh tasks. Original scoring omits some contract edge cases; consult separate diagnostics. No product routing promotion."
+    },
+    {
+      "key": "ornith",
+      "source_slug": "ornith-1.5-9b-q4_k_m",
+      "stage": "budget",
+      "slug": "ornith-budget32k",
+      "alias": "llh-tune-ornith:budget32k",
+      "baseline_alias": "llh-general-ornith:bench005",
+      "calibration": {
+        "baselineCombined": 1,
+        "selectedCombined": 3,
+        "baselineFunctional": 2,
+        "selectedFunctional": 4
+      },
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "repeat_last_n": 64,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "num_ctx": 40960,
+        "num_predict": 32768
+      },
+      "think": true,
+      "confirmed_bounded_gain": true,
+      "status": "improved_on_fresh_seeds_for_two_tasks",
+      "confirmation": {
+        "controlCombined": 4,
+        "selectedCombined": 5,
+        "controlFunctional": 4,
+        "selectedFunctional": 5,
+        "controlBudgetStops": 2,
+        "selectedBudgetStops": 1,
+        "controlMedianSeconds": 31.911101900000006,
+        "selectedMedianSeconds": 31.5427341
+      },
+      "source_index": [
+        {
+          "repo": "ornith-ai/Ornith-1.5-9B",
+          "revision": "489cb97981b8654bcfcf30ce1f94ed1b62e07b53",
+          "url": "https://huggingface.co/ornith-ai/Ornith-1.5-9B/tree/489cb97981b8654bcfcf30ce1f94ed1b62e07b53"
+        }
+      ],
+      "limitation": "Only two Rust tasks. Fresh seeds are not fresh tasks. Original scoring omits some contract edge cases; consult separate diagnostics. No product routing promotion."
+    }
+  ],
+  "not_selected": [
+    {
+      "source_slug": "softnix-qwen2.5-14b-instruct-1m-thaifood-cooking-8bit-q8_0",
+      "reason": "Both candidates remain 0/6 combined and have lower functional scores than baseline; no demonstrated gain.",
+      "retained_control_alias": "llh-general-softnix:bench005",
+      "tested_candidates": [
+        {
+          "alias": "llh-tune-softnix:upstream",
+          "options": {
+            "temperature": 0.7,
+            "top_p": 0.8,
+            "top_k": 20,
+            "min_p": 0,
+            "repeat_penalty": 1.05,
+            "repeat_last_n": 64,
+            "presence_penalty": 0,
+            "frequency_penalty": 0,
+            "num_ctx": 8192,
+            "num_predict": 4096
+          },
+          "functional": 2,
+          "combined": 0
+        },
+        {
+          "alias": "llh-tune-softnix:lowtemp",
+          "options": {
+            "temperature": 0.2,
+            "top_p": 0.8,
+            "top_k": 20,
+            "min_p": 0,
+            "repeat_penalty": 1.05,
+            "repeat_last_n": 64,
+            "presence_penalty": 0,
+            "frequency_penalty": 0,
+            "num_ctx": 8192,
+            "num_predict": 4096
+          },
+          "functional": 0,
+          "combined": 0
+        }
+      ],
+      "source_index": [
+        {
+          "repo": "krmonline/Softnix-Qwen2.5-14B-Instruct-1M-ThaiFood-Cooking-8bit",
+          "revision": "dbf83e07cfb7f423e7f8179d104370fc511ef023",
+          "url": "https://huggingface.co/krmonline/Softnix-Qwen2.5-14B-Instruct-1M-ThaiFood-Cooking-8bit/tree/dbf83e07cfb7f423e7f8179d104370fc511ef023"
+        },
+        {
+          "repo": "Qwen/Qwen2.5-14B-Instruct-1M",
+          "revision": "620fad32de7bdd2293b3d99b39eba2fe63e97438",
+          "url": "https://huggingface.co/Qwen/Qwen2.5-14B-Instruct-1M/tree/620fad32de7bdd2293b3d99b39eba2fe63e97438"
+        }
+      ]
+    }
+  ],
+  "think_usage": "Send think only where present; native-template profiles omit the field. Alias defaults persist sampler/context/output limits."
+}

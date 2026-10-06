@@ -1,0 +1,10 @@
+{
+  "selftests": {
+    "pilot": "PASS including real correct/wrong fixture compilation and CLI/trace regression tests"
+  },
+  "sourceArtifactSha256": {
+    "manifest.json": "6f69ddf2d6817172d86542946f408ee002afacd7f96faca5b08a6edb1e7c4953",
+    "summary.json": "ebbf4fdb5bb580b26ee277db824a027ee738c98f7cf99d93bce107892a0cb7a7",
+    "verification.json": "553dded64f2a0371115f9e2ba354043c49c006078e4f196d03d7fbe3dafa3e32"
+  }
+}

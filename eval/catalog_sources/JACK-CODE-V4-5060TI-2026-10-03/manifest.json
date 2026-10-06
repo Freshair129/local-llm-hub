@@ -1,0 +1,50 @@
+{
+  "benchmark": "BENCH-5060TI-JACK-004",
+  "started_at": "2026-10-03T15:20:28.648Z",
+  "tasks_sha256": "d6d002412637430b86c3e9e57cee9f8ef042d7803d62034d67b285efee8c0297",
+  "heldout_sha256": "85c56847c96a5422f73306c907fbccf880e75e0cbbfe55a63e3fae4b1bae9115",
+  "node": "v24.19.0",
+  "ollama": {
+    "version": "0.35.1"
+  },
+  "machine": {
+    "id": "MACH-RTX5060TI-I714700KF",
+    "cpu": "Intel(R) Core(TM) i7-14700KF",
+    "ram_bytes": 34104127488,
+    "gpu": {
+      "stdout": "NVIDIA GeForce RTX 5060 Ti, 617.14, 16311 MiB"
+    }
+  },
+  "candidates": [
+    {
+      "alias": "llh-jack-code:iq2_m-v4",
+      "slug": "jack-3.8-27b-coder",
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "min_p": 0,
+        "repeat_penalty": 1,
+        "presence_penalty": 0,
+        "frequency_penalty": 0,
+        "num_ctx": 32768,
+        "num_predict": 4096
+      },
+      "mode": "think=low; qwen3.8 renderer; local code-contract system",
+      "think": "low",
+      "files": [
+        {
+          "role": "model",
+          "file": "Jack-3.8-27B-Coder-16GB-VRAM.gguf",
+          "sha256": "e7fecb29086afb4f6ca054b0f1469f2704a24e56db27c5980827f5f32d26f041",
+          "bytes": 12599204320
+        }
+      ],
+      "source": {
+        "url": "https://huggingface.co/JackAgentLead/Jack-3.8-27B-Coder-16GB-VRAM/tree/996b50828fc910ac7d0a96953674995f79b428a1",
+        "repo": "JackAgentLead/Jack-3.8-27B-Coder-16GB-VRAM",
+        "revision": "996b50828fc910ac7d0a96953674995f79b428a1"
+      }
+    }
+  ]
+}

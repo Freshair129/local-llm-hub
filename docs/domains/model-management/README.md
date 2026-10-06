@@ -25,6 +25,7 @@ Domain นี้รับผิดชอบ **การประมวลผล�
 | [FEAT-007](features/FEAT-007-model-card-reader.md) | Model Card Reader & Metadata Parser | Active | ❌ |
 | [FEAT-013](features/FEAT-013-multi-model-arena.md) | Multi-Model Side-by-Side Arena | Active | ✅ depends on inference-gateway |
 | [FEAT-014](features/FEAT-014-token-roi-cost-calculator.md) | Token ROI & Cost Savings Calculator | Active | ❌ |
+| [FEAT-GPU-MODEL-ADVISOR](../../features/FEAT-GPU-MODEL-ADVISOR.md) | VRAM Model Advisor & GPU Benchmark Comparison | Approved / Implemented | ✅ depends on observability |
 
 ## Discovered Cross-Domain Features
 
@@ -41,6 +42,7 @@ Domain นี้รับผิดชอบ **การประมวลผล�
 | [FR-002](../../requirements/FR-002-model-aggregation.md) | Model Aggregation | P0 | Draft |
 | [FR-003](../../requirements/FR-003-deduplication.md) | Duplicate Detection | P0 | Draft |
 | [FR-004](../../requirements/FR-004-model-card.md) | Model Card Display | P1 | Draft |
+| [FR-024](../../requirements/FR-024-model-vram-advisor.md) | VRAM Model Advisor & GPU Benchmark Comparison | P1 | Implemented |
 
 ## Referenced Requirements (owned by others)
 

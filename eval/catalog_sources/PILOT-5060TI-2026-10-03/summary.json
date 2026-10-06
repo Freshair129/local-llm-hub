@@ -1,0 +1,392 @@
+[
+  {
+    "alias": "llh-bench-mellum-instruct:q4",
+    "slug": "mellum2-12b-a2.5b-instruct-q4_k_m",
+    "functional": 5,
+    "pass": 5,
+    "compiled": 5,
+    "truncated": 0,
+    "peakMiB": 9033,
+    "warmSec": 2.385031899999998,
+    "warmTps": 180.17093448411396,
+    "rows": [
+      {
+        "task": "FR-002",
+        "seed": 42,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "error": true,
+        "seconds": 44.6660337,
+        "tps": 174.18946278558795,
+        "peak": 9033
+      },
+      {
+        "task": "FR-002",
+        "seed": 43,
+        "pass": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 2.148171699999999,
+        "tps": 181.55107424261308,
+        "peak": 8943
+      },
+      {
+        "task": "FR-002",
+        "seed": 44,
+        "pass": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 1.827078300000001,
+        "tps": 180.43668019941768,
+        "peak": 8958
+      },
+      {
+        "task": "FR-006",
+        "seed": 42,
+        "pass": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 6.176779999999999,
+        "tps": 179.15392025960418,
+        "peak": 8953
+      },
+      {
+        "task": "FR-006",
+        "seed": 43,
+        "pass": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 2.888754500000003,
+        "tps": 179.4556823901619,
+        "peak": 8956
+      },
+      {
+        "task": "FR-006",
+        "seed": 44,
+        "pass": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 2.6218920999999975,
+        "tps": 179.90518876881026,
+        "peak": 8959
+      }
+    ]
+  },
+  {
+    "alias": "llh-bench-omnicoder:q4",
+    "slug": "omnicoder-9b-q4_k_m",
+    "functional": 1,
+    "pass": 1,
+    "compiled": 1,
+    "truncated": 5,
+    "peakMiB": 6443,
+    "warmSec": 61.98816205,
+    "warmTps": 66.27897984052939,
+    "rows": [
+      {
+        "task": "FR-002",
+        "seed": 42,
+        "pass": false,
+        "functional": false,
+        "truncated": true,
+        "seconds": 89.0832852,
+        "tps": 66.25651575650633,
+        "peak": 6370
+      },
+      {
+        "task": "FR-002",
+        "seed": 43,
+        "pass": false,
+        "functional": false,
+        "truncated": true,
+        "seconds": 62.007985599999984,
+        "tps": 66.26590355395722,
+        "peak": 6365
+      },
+      {
+        "task": "FR-002",
+        "seed": 44,
+        "pass": false,
+        "functional": false,
+        "truncated": true,
+        "seconds": 61.8249909,
+        "tps": 66.43772900011412,
+        "peak": 6443
+      },
+      {
+        "task": "FR-006",
+        "seed": 42,
+        "pass": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 53.505876600000015,
+        "tps": 66.62480692347216,
+        "peak": 6358
+      },
+      {
+        "task": "FR-006",
+        "seed": 43,
+        "pass": false,
+        "functional": false,
+        "truncated": true,
+        "seconds": 61.968338500000016,
+        "tps": 66.29205612710156,
+        "peak": 6354
+      },
+      {
+        "task": "FR-006",
+        "seed": 44,
+        "pass": false,
+        "functional": false,
+        "truncated": true,
+        "seconds": 62.215003399999986,
+        "tps": 66.02794729589925,
+        "peak": 6364
+      }
+    ]
+  },
+  {
+    "alias": "llh-bench-coding-monkey:q4",
+    "slug": "coding-monkey-gemma-q4_k_m",
+    "functional": 3,
+    "pass": 3,
+    "compiled": 5,
+    "truncated": 0,
+    "peakMiB": 9015,
+    "warmSec": 7.175724799999997,
+    "warmTps": 47.17863071342221,
+    "rows": [
+      {
+        "task": "FR-002",
+        "seed": 42,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "error": false,
+        "seconds": 23.336411499999986,
+        "tps": 23.360490369106923,
+        "peak": 8984
+      },
+      {
+        "task": "FR-002",
+        "seed": 43,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "error": false,
+        "seconds": 5.049771999999997,
+        "tps": 47.29375860155234,
+        "peak": 8994
+      },
+      {
+        "task": "FR-002",
+        "seed": 44,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "error": true,
+        "seconds": 5.591098899999983,
+        "tps": 47.38832276804746,
+        "peak": 8979
+      },
+      {
+        "task": "FR-006",
+        "seed": 42,
+        "pass": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 12.049545199999994,
+        "tps": 47.10789001664191,
+        "peak": 9015
+      },
+      {
+        "task": "FR-006",
+        "seed": 43,
+        "pass": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 8.876218200000004,
+        "tps": 47.06208267262431,
+        "peak": 9010
+      },
+      {
+        "task": "FR-006",
+        "seed": 44,
+        "pass": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 8.76035070000001,
+        "tps": 47.06350282529208,
+        "peak": 8972
+      }
+    ]
+  },
+  {
+    "alias": "llh-bench-mellum-thinking:q4",
+    "slug": "mellum2-12b-a2.5b-thinking-q4_k_m",
+    "functional": 4,
+    "pass": 4,
+    "compiled": 4,
+    "truncated": 0,
+    "peakMiB": 8933,
+    "warmSec": 6.455378950000043,
+    "warmTps": 177.69718459136894,
+    "rows": [
+      {
+        "task": "FR-002",
+        "seed": 42,
+        "pass": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 10.276463899999973,
+        "tps": 179.36112763453428,
+        "peak": 8932
+      },
+      {
+        "task": "FR-002",
+        "seed": 43,
+        "pass": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 4.444521100000013,
+        "tps": 180.22540004472,
+        "peak": 8931
+      },
+      {
+        "task": "FR-002",
+        "seed": 44,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "error": true,
+        "seconds": 6.960840100000031,
+        "tps": 177.34390626877055,
+        "peak": 8933
+      },
+      {
+        "task": "FR-006",
+        "seed": 42,
+        "pass": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 20.695058100000026,
+        "tps": 171.7944250056,
+        "peak": 8933
+      },
+      {
+        "task": "FR-006",
+        "seed": 43,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "error": true,
+        "seconds": 10.550295999999973,
+        "tps": 174.4517603938656,
+        "peak": 8931
+      },
+      {
+        "task": "FR-006",
+        "seed": 44,
+        "pass": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 5.949917800000054,
+        "tps": 178.05046291396732,
+        "peak": 8933
+      }
+    ]
+  },
+  {
+    "alias": "llh-bench-mellum-thinking:q6",
+    "slug": "mellum2-12b-a2.5b-thinking-q6_k",
+    "functional": 3,
+    "pass": 1,
+    "compiled": 3,
+    "truncated": 0,
+    "peakMiB": 11577,
+    "warmSec": 6.724278350000037,
+    "warmTps": 150.55072746407248,
+    "rows": [
+      {
+        "task": "FR-002",
+        "seed": 42,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "error": true,
+        "seconds": 15.617552999999956,
+        "tps": 148.66404803300026,
+        "peak": 11549
+      },
+      {
+        "task": "FR-002",
+        "seed": 43,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "error": true,
+        "seconds": 4.191831500000087,
+        "tps": 151.476179633044,
+        "peak": 11549
+      },
+      {
+        "task": "FR-002",
+        "seed": 44,
+        "pass": true,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 6.647261200000067,
+        "tps": 151.35399848492963,
+        "peak": 11554
+      },
+      {
+        "task": "FR-006",
+        "seed": 42,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "error": true,
+        "seconds": 7.280873100000084,
+        "tps": 151.85167216375203,
+        "peak": 11553
+      },
+      {
+        "task": "FR-006",
+        "seed": 43,
+        "pass": false,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 6.801295500000007,
+        "tps": 149.05799388592843,
+        "peak": 11573
+      },
+      {
+        "task": "FR-006",
+        "seed": 44,
+        "pass": false,
+        "functional": true,
+        "truncated": false,
+        "error": false,
+        "seconds": 7.43973330000008,
+        "tps": 149.74745644321533,
+        "peak": 11577
+      }
+    ]
+  }
+]

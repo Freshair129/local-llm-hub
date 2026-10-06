@@ -1,0 +1,10 @@
+{
+  "requestAndSourceChecks": true,
+  "slots": 48,
+  "sourceArtifactSha256": {
+    "manifest.json": "e08f84ea6d1d0dfacd85cb825faa16ed919404f0f399a92085fa506a2037882e",
+    "summary.json": "2e5ce57add68da8fb9cf43b43e5e7f7cc43e3113c02d106bde5aa61cb8553454",
+    "verification.json": "24ada9a9e51a3d38f558c9b5b3ea2dec5c1272d5c4523103f1c5f0e6206b04f2",
+    "diagnostic.json": "e45ae3932c88b32311aba80ae8688b1d36a03bbcb7e574bc605ff9159fa8896b"
+  }
+}

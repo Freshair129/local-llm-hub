@@ -1,0 +1,57 @@
+{
+  "benchmark": "BENCH-5060TI-PILOT-001",
+  "started_at": "2026-10-03T13:34:47.122Z",
+  "tasks_sha256": "d6d002412637430b86c3e9e57cee9f8ef042d7803d62034d67b285efee8c0297",
+  "heldout_sha256": "85c56847c96a5422f73306c907fbccf880e75e0cbbfe55a63e3fae4b1bae9115",
+  "options": {
+    "num_ctx": 8192,
+    "num_predict": 4096,
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0,
+    "repeat_penalty": 1
+  },
+  "node": "v24.19.0",
+  "ollama": {
+    "version": "0.35.1"
+  },
+  "machine": {
+    "id": "MACH-RTX5060TI-I714700KF",
+    "cpu": "Intel(R) Core(TM) i7-14700KF",
+    "ram_bytes": 34104127488,
+    "gpu": {
+      "stdout": "NVIDIA GeForce RTX 5060 Ti, 617.14, 16311 MiB"
+    }
+  },
+  "candidates": [
+    {
+      "alias": "llh-bench-mellum-instruct:q4",
+      "slug": "mellum2-12b-a2.5b-instruct-q4_k_m",
+      "mode": "native-template"
+    },
+    {
+      "alias": "llh-bench-omnicoder:q4",
+      "slug": "omnicoder-9b-q4_k_m",
+      "mode": "think=true",
+      "think": true
+    },
+    {
+      "alias": "llh-bench-coding-monkey:q4",
+      "slug": "coding-monkey-gemma-q4_k_m",
+      "mode": "native-template"
+    },
+    {
+      "alias": "llh-bench-mellum-thinking:q4",
+      "slug": "mellum2-12b-a2.5b-thinking-q4_k_m",
+      "mode": "think=true",
+      "think": true
+    },
+    {
+      "alias": "llh-bench-mellum-thinking:q6",
+      "slug": "mellum2-12b-a2.5b-thinking-q6_k",
+      "mode": "think=true",
+      "think": true
+    }
+  ]
+}

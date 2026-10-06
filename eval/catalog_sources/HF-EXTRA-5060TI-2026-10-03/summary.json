@@ -1,0 +1,382 @@
+[
+  {
+    "alias": "llh-extra-sushi:q4",
+    "slug": "qwen3.5-9b-sushi-coder-rl-q4_k_m",
+    "options": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "min_p": 0,
+      "repeat_penalty": 1,
+      "presence_penalty": 0,
+      "frequency_penalty": 0,
+      "num_ctx": 4096,
+      "num_predict": 1024
+    },
+    "mode": "think=true",
+    "planned": 6,
+    "received": 6,
+    "functional": 3,
+    "pass": 1,
+    "compiled": 4,
+    "truncated": 0,
+    "runtimeErrors": 0,
+    "peakMiB": 7131,
+    "warmSec": 7.937776350000002,
+    "warmTps": 71.93774946051714,
+    "allGpuOnly": true,
+    "rows": [
+      {
+        "task": "FR-002",
+        "seed": 42,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "seconds": 13.6507511,
+        "tps": 71.7816822896431,
+        "peakMiB": 7131,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-002",
+        "seed": 43,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "seconds": 6.497325999999999,
+        "tps": 72.0838524898806,
+        "peakMiB": 7131,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-002",
+        "seed": 44,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "seconds": 7.068359899999999,
+        "tps": 71.99170632366747,
+        "peakMiB": 7131,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-006",
+        "seed": 42,
+        "pass": true,
+        "functional": true,
+        "truncated": false,
+        "seconds": 12.969188199999996,
+        "tps": 71.94092468344957,
+        "peakMiB": 7131,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-006",
+        "seed": 43,
+        "pass": false,
+        "functional": true,
+        "truncated": false,
+        "seconds": 9.646728699999999,
+        "tps": 71.8837925973668,
+        "peakMiB": 7131,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-006",
+        "seed": 44,
+        "pass": false,
+        "functional": true,
+        "truncated": false,
+        "seconds": 8.807192800000005,
+        "tps": 71.79462990041702,
+        "peakMiB": 7131,
+        "gpuOnly": true
+      }
+    ]
+  },
+  {
+    "alias": "llh-extra-intelligence:q4",
+    "slug": "intelligence-cod-rag-7b-v2-i1-q4_k_m",
+    "options": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "min_p": 0,
+      "repeat_penalty": 1,
+      "presence_penalty": 0,
+      "frequency_penalty": 0,
+      "num_ctx": 8192,
+      "num_predict": 4096
+    },
+    "mode": "native-template",
+    "planned": 6,
+    "received": 6,
+    "functional": 2,
+    "pass": 0,
+    "compiled": 5,
+    "truncated": 0,
+    "runtimeErrors": 0,
+    "peakMiB": 5809,
+    "warmSec": 3.2265363499999946,
+    "warmTps": 86.23576423377412,
+    "allGpuOnly": true,
+    "rows": [
+      {
+        "task": "FR-002",
+        "seed": 42,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "seconds": 5.455987000000001,
+        "tps": 86.0738832710626,
+        "peakMiB": 5809,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-002",
+        "seed": 43,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "seconds": 2.5612855999999957,
+        "tps": 86.47505742674589,
+        "peakMiB": 5809,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-002",
+        "seed": 44,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "seconds": 2.8865803999999917,
+        "tps": 86.29806127809586,
+        "peakMiB": 5809,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-006",
+        "seed": 42,
+        "pass": false,
+        "functional": true,
+        "truncated": false,
+        "seconds": 6.484705199999997,
+        "tps": 85.9434119298428,
+        "peakMiB": 5809,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-006",
+        "seed": 43,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "seconds": 3.566492299999998,
+        "tps": 86.17346718945237,
+        "peakMiB": 5809,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-006",
+        "seed": 44,
+        "pass": false,
+        "functional": true,
+        "truncated": false,
+        "seconds": 4.159874100000001,
+        "tps": 86.11511048766074,
+        "peakMiB": 5809,
+        "gpuOnly": true
+      }
+    ]
+  },
+  {
+    "alias": "llh-extra-jack:iq2_m",
+    "slug": "jack-3.8-27b-coder",
+    "options": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "min_p": 0,
+      "repeat_penalty": 1,
+      "presence_penalty": 0,
+      "frequency_penalty": 0,
+      "num_ctx": 32768,
+      "num_predict": 4096
+    },
+    "mode": "think=false",
+    "planned": 6,
+    "received": 6,
+    "functional": 6,
+    "pass": 6,
+    "compiled": 6,
+    "truncated": 0,
+    "runtimeErrors": 0,
+    "peakMiB": 13965,
+    "warmSec": 38.71151775,
+    "warmTps": 30.409267693583665,
+    "allGpuOnly": true,
+    "rows": [
+      {
+        "task": "FR-002",
+        "seed": 42,
+        "pass": true,
+        "functional": true,
+        "truncated": false,
+        "seconds": 79.8515678,
+        "tps": 30.412034927069577,
+        "peakMiB": 13965,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-002",
+        "seed": 43,
+        "pass": true,
+        "functional": true,
+        "truncated": false,
+        "seconds": 37.1673971,
+        "tps": 30.418381015769334,
+        "peakMiB": 13965,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-002",
+        "seed": 44,
+        "pass": true,
+        "functional": true,
+        "truncated": false,
+        "seconds": 28.715619700000012,
+        "tps": 30.407151762094443,
+        "peakMiB": 13965,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-006",
+        "seed": 42,
+        "pass": true,
+        "functional": true,
+        "truncated": false,
+        "seconds": 55.00705370000002,
+        "tps": 30.41005534695612,
+        "peakMiB": 13965,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-006",
+        "seed": 43,
+        "pass": true,
+        "functional": true,
+        "truncated": false,
+        "seconds": 40.255638399999995,
+        "tps": 30.411383625072883,
+        "peakMiB": 13965,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-006",
+        "seed": 44,
+        "pass": true,
+        "functional": true,
+        "truncated": false,
+        "seconds": 54.79646539999999,
+        "tps": 30.37173891009751,
+        "peakMiB": 13965,
+        "gpuOnly": true
+      }
+    ]
+  },
+  {
+    "alias": "llh-extra-thai-sql:q4",
+    "slug": "llama3.2_3b_text2sql_thai-q4_k_m",
+    "options": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "min_p": 0,
+      "repeat_penalty": 1,
+      "presence_penalty": 0,
+      "frequency_penalty": 0,
+      "num_ctx": 8192,
+      "num_predict": 4096
+    },
+    "mode": "native-template",
+    "planned": 6,
+    "received": 6,
+    "functional": 0,
+    "pass": 0,
+    "compiled": 3,
+    "truncated": 0,
+    "runtimeErrors": 0,
+    "peakMiB": 3871,
+    "warmSec": 1.3753436999999975,
+    "warmTps": 168.85803885010165,
+    "allGpuOnly": true,
+    "rows": [
+      {
+        "task": "FR-002",
+        "seed": 42,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "seconds": 3.7686893999999738,
+        "tps": 167.2959274848198,
+        "peakMiB": 3871,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-002",
+        "seed": 43,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "seconds": 0.8244512000000104,
+        "tps": 169.87080455895787,
+        "peakMiB": 3871,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-002",
+        "seed": 44,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "seconds": 0.8595278999999864,
+        "tps": 169.56647070869653,
+        "peakMiB": 3871,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-006",
+        "seed": 42,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "seconds": 3.39650410000002,
+        "tps": 168.15884670598183,
+        "peakMiB": 3871,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-006",
+        "seed": 43,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "seconds": 1.9026191000000108,
+        "tps": 168.1496069915068,
+        "peakMiB": 3871,
+        "gpuOnly": true
+      },
+      {
+        "task": "FR-006",
+        "seed": 44,
+        "pass": false,
+        "functional": false,
+        "truncated": false,
+        "seconds": 1.8911595000000088,
+        "tps": 167.94437772381266,
+        "peakMiB": 3871,
+        "gpuOnly": true
+      }
+    ]
+  }
+]

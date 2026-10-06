@@ -1,0 +1,81 @@
+[
+  {
+    "alias": "llh-jack-code:iq2_m-v4",
+    "trials": 6,
+    "functional": 6,
+    "combined": 6,
+    "code_gate": 6,
+    "raw_format": 6,
+    "peak_vram_mib": 13982,
+    "warm_median_s": 34.74664885,
+    "warm_median_tps": 30.574257092718902,
+    "details": [
+      {
+        "task": "FR-002",
+        "seed": 42,
+        "combined": true,
+        "code_gate": true,
+        "functional": true,
+        "truncated": false,
+        "wall_s": 41.7369999,
+        "tps": 30.683054439787096,
+        "peak_vram_mib": 13980
+      },
+      {
+        "task": "FR-002",
+        "seed": 43,
+        "combined": true,
+        "code_gate": true,
+        "functional": true,
+        "truncated": false,
+        "wall_s": 43.555998800000005,
+        "tps": 30.595009856838693,
+        "peak_vram_mib": 13979
+      },
+      {
+        "task": "FR-002",
+        "seed": 44,
+        "combined": true,
+        "code_gate": true,
+        "functional": true,
+        "truncated": false,
+        "wall_s": 32.52763250000001,
+        "tps": 30.599970771752055,
+        "peak_vram_mib": 13978
+      },
+      {
+        "task": "FR-006",
+        "seed": 42,
+        "combined": true,
+        "code_gate": true,
+        "functional": true,
+        "truncated": false,
+        "wall_s": 37.56306100000002,
+        "tps": 30.601891209341865,
+        "peak_vram_mib": 13982
+      },
+      {
+        "task": "FR-006",
+        "seed": 43,
+        "combined": true,
+        "code_gate": true,
+        "functional": true,
+        "truncated": false,
+        "wall_s": 35.993337700000005,
+        "tps": 30.551553644604148,
+        "peak_vram_mib": 13976
+      },
+      {
+        "task": "FR-006",
+        "seed": 44,
+        "combined": true,
+        "code_gate": true,
+        "functional": true,
+        "truncated": false,
+        "wall_s": 33.499959999999994,
+        "tps": 30.55350432859911,
+        "peak_vram_mib": 13968
+      }
+    ]
+  }
+]

@@ -6,6 +6,9 @@
   "template": "3-layer-appendix + ai-system + domain-feature-requirement",
 
   "nodes": [
+    {"id": "req:FR-024", "type": "requirement", "path": "docs/requirements/FR-024-model-vram-advisor.md", "title": "VRAM Model Advisor and GPU Benchmark Comparison", "domain": "model-management", "priority": "P1", "status": "active"},
+    {"id": "feat:FEAT-GPU-MODEL-ADVISOR", "type": "feature", "path": "docs/features/FEAT-GPU-MODEL-ADVISOR.md", "title": "GPU Model Advisor", "status": "active"},
+    {"id": "doc:RCA-004-MAIN-MERGE-IDENTITIES", "type": "document", "path": ".brain/rca/RCA-004-MAIN-MERGE-IDENTITIES.md", "title": "Main integration identity reconciliation", "status": "active"},
     {"id": "plan:HUB-ZURI-P1-VERIFICATION", "type": "plan", "path": "docs/plans/HUB-ZURI-P1-VERIFICATION.md", "title": "Zuri P1 offline verification", "status": "active"},
     {"id": "packet:PKT-FR-018-ZURI-SCHEMA", "type": "packet", "path": "docs/packets/PKT-FR-018-ZURI-SCHEMA.md", "title": "Zuri P1 FR-018 schema", "status": "active"},
     {"id": "packet:PKT-FR-019-ZURI-SERVICE", "type": "packet", "path": "docs/packets/PKT-FR-019-ZURI-SERVICE.md", "title": "Zuri P1 FR-019 service", "status": "active"},
@@ -141,6 +144,10 @@
   ],
 
   "edges": [
+    {"from": "req:FR-024", "to": "feat:FEAT-GPU-MODEL-ADVISOR", "relation": "implements"},
+    {"from": "feat:FEAT-GPU-MODEL-ADVISOR", "to": "domain:model-management", "relation": "belongs-to"},
+    {"from": "doc:RCA-004-MAIN-MERGE-IDENTITIES", "to": "req:FR-024", "relation": "audits"},
+    {"from": "doc:RCA-004-MAIN-MERGE-IDENTITIES", "to": "req:FR-018", "relation": "audits"},
     {"from": "plan:HUB-ZURI-P1-VERIFICATION", "to": "plan:SPEC-HUB-ZURI-001", "relation": "verifies"},
     {"from": "packet:PKT-FR-018-ZURI-SCHEMA", "to": "req:FR-018", "relation": "implements"},
     {"from": "packet:PKT-FR-018-ZURI-SCHEMA", "to": "plan:SPEC-HUB-ZURI-001", "relation": "details"},

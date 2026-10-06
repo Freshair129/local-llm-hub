@@ -1,0 +1,100 @@
+{
+  "rows": [
+    {
+      "slug": "gemma-control",
+      "status": "PASS"
+    },
+    {
+      "slug": "gemma-control",
+      "status": "PASS"
+    },
+    {
+      "slug": "gemma-control",
+      "status": "PASS"
+    },
+    {
+      "slug": "gemma-selected",
+      "status": "NOT_EXECUTABLE"
+    },
+    {
+      "slug": "gemma-selected",
+      "status": "PASS"
+    },
+    {
+      "slug": "gemma-selected",
+      "status": "NOT_EXECUTABLE"
+    },
+    {
+      "slug": "thaidoc-control",
+      "status": "PASS"
+    },
+    {
+      "slug": "thaidoc-control",
+      "status": "PASS"
+    },
+    {
+      "slug": "thaidoc-control",
+      "status": "PASS"
+    },
+    {
+      "slug": "thaidoc-selected",
+      "status": "PASS"
+    },
+    {
+      "slug": "thaidoc-selected",
+      "status": "PASS"
+    },
+    {
+      "slug": "thaidoc-selected",
+      "status": "FAIL"
+    },
+    {
+      "slug": "qwen35-control",
+      "status": "NOT_EXECUTABLE"
+    },
+    {
+      "slug": "qwen35-control",
+      "status": "NOT_EXECUTABLE"
+    },
+    {
+      "slug": "qwen35-control",
+      "status": "NOT_EXECUTABLE"
+    },
+    {
+      "slug": "qwen35-selected",
+      "status": "PASS"
+    },
+    {
+      "slug": "qwen35-selected",
+      "status": "NOT_EXECUTABLE"
+    },
+    {
+      "slug": "qwen35-selected",
+      "status": "PASS"
+    },
+    {
+      "slug": "ornith-control",
+      "status": "NOT_EXECUTABLE"
+    },
+    {
+      "slug": "ornith-control",
+      "status": "PASS"
+    },
+    {
+      "slug": "ornith-control",
+      "status": "NOT_EXECUTABLE"
+    },
+    {
+      "slug": "ornith-selected",
+      "status": "NOT_EXECUTABLE"
+    },
+    {
+      "slug": "ornith-selected",
+      "status": "PASS"
+    },
+    {
+      "slug": "ornith-selected",
+      "status": "PASS"
+    }
+  ]
+}
