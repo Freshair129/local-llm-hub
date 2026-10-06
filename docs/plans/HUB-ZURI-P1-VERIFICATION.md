@@ -1,6 +1,6 @@
 ---
 id: HUB-ZURI-P1-VERIFICATION
-version: 0.2.0
+version: 0.3.0
 status: active
 superseded_by: null
 owner: Boss
@@ -75,3 +75,16 @@ CR/SPEC/RCA 0.1.0 draft -> 0.2.0 active approval. Five Zuri packets: absent -> 0
 User authorized commit/push. Source commit `57b965f92c57ad31669a3b24dea760d20f54ee93` contains the tested P1 implementation, tests and approved documents. All 32 Python worktree hashes still match the frozen receipt; no runtime changes followed verification. Five append-only [packet lineage](../lineage/packet-lineage.jsonl) entries bind the shared offline suite and component hashes to that source commit. Historical uncommitted/NOT_RUN statements above describe their earlier checkpoints. Publication targets `origin/feat/local-llm-agent-harness`; this does not merge into main or qualify P2/P3.
 
 Version diff: verification 0.1.0 -> 0.2.0 adds tested-source identity and local checkpoint lineage; native contract, evidence and package versions unchanged.
+
+## Main integration verification — 2026-10-06
+
+Combined tree `22b72bd53c764567dee6637ec8cedbc0897fa2b6` includes main `9147dd0` and the Hub/P1 history. [Merge RCA](../../.brain/rca/RCA-004-MAIN-MERGE-IDENTITIES.md) records package script preservation and advisor FR-018 -> FR-024 identity reconciliation. Criteria/runtime behavior of the advisor remain unchanged.
+
+- Python: 107 PASS, 1 existing Windows symlink privilege SKIP, 5 live DESELECTED, 12.60 seconds. JUnit `.hub/zuri-p1/merge-offline.xml` SHA-256 `699d23420fca65a19d35f2ae9aa9a91681d51244878543fd78b7af25843f85d5`.
+- Node: 15 evaluation/advisor/catalog runner entries PASS (evaluation wrapper includes five assertions), 7 desktop contract tests PASS; src/main.js syntax PASS.
+- Rust: 61 library tests PASS, 0 failed; rustfmt PASS. Cargo used offline dependency resolution; existing tests include local hardware/mock HTTP and a GitHub API case, so this is not a network-isolation claim.
+- Ruff and strict mypy (20 modules), existing documentation suite and additional requirement uniqueness/new metadata/link checks PASS. Graph: 130 nodes / 198 edges. No unmerged entries/conflict markers.
+
+PR #2 targets main using a merge commit to retain source/lineage identities. No live model, GUI/Docker rerun, Zuri pilot or sidecar qualification is claimed. Final publication state is verified on GitHub separately.
+
+Version diff: verification 0.2.0 -> 0.3.0 records combined-tree tests; package/app/native API versions unchanged.

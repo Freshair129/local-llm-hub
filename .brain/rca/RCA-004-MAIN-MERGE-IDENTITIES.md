@@ -39,3 +39,7 @@ Verify no unmerged entries/conflict markers, unique FR filename IDs and resolvab
 ## Version diff
 
 New RCA 0.1.0. Advisor requirement FR-018 -> FR-024 (identity only). Package/app/native contract versions unchanged.
+
+## Verified resolution
+
+Combined source commit `22b72bd53c764567dee6637ec8cedbc0897fa2b6`: Python 107 PASS / 1 Windows symlink privilege SKIP / 5 live DESELECTED; Node evaluation/advisor/catalog 15 runner entries PASS and desktop contracts 7 PASS; Rust library 61 PASS, 0 failures. Ruff, strict mypy, Rust formatting, frontend entrypoint syntax, existing 46-document suite and additional unique-FR/new-doc-link checks PASS. No source/runtime change was needed beyond preserving both script entries and advisor identity references. No model inference or process startup was performed for merge verification.
