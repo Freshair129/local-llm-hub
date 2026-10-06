@@ -33,7 +33,11 @@ async fn test_mvp_full_suite_e2e() {
     // 1. FR-001: Probe Backends
     let cfg = BackendConfig::default();
     let probes = probe_all_backends(&cfg).await;
-    assert_eq!(probes.len(), 4, "Must probe 4 backends (Ollama, vLLM, HF, GGUF)");
+    assert_eq!(
+        probes.len(),
+        4,
+        "Must probe 4 backends (Ollama, vLLM, HF, GGUF)"
+    );
 
     // 2. FR-002: Model Aggregation
     let mock_probes = vec![
@@ -46,12 +50,33 @@ async fn test_mvp_full_suite_e2e() {
     println!("Aggregated models: {}", aggregated.len());
 
     // 3. FR-003: Duplicate Model Detection
-    let m1 = UnifiedModel::new("ollama:test", "llama-3-8b", "llama 3 8b", "ollama", "gguf", 4000000000, Some("Q4_0".to_string()), true);
-    let m2 = UnifiedModel::new("gguf:test.gguf", "llama-3-8b.gguf", "llama 3 8b", "gguf", "gguf", 4000000000, Some("Q4_0".to_string()), false);
+    let m1 = UnifiedModel::new(
+        "ollama:test",
+        "llama-3-8b",
+        "llama 3 8b",
+        "ollama",
+        "gguf",
+        4000000000,
+        Some("Q4_0".to_string()),
+        true,
+    );
+    let m2 = UnifiedModel::new(
+        "gguf:test.gguf",
+        "llama-3-8b.gguf",
+        "llama 3 8b",
+        "gguf",
+        "gguf",
+        4000000000,
+        Some("Q4_0".to_string()),
+        false,
+    );
     let (deduped, groups) = dedup_models(&[m1, m2]);
     assert_eq!(groups.len(), 1, "Duplicate group should be formed");
     assert!(deduped[0].is_duplicate);
-    assert!(deduped[0].is_preferred, "Ollama must be preferred over GGUF per BR-001");
+    assert!(
+        deduped[0].is_preferred,
+        "Ollama must be preferred over GGUF per BR-001"
+    );
 
     // 4. FR-004: Model Card Reader
     let card_res = read_model_card("ollama:mellum2", "ollama", None).await;
@@ -83,7 +108,10 @@ async fn test_mvp_full_suite_e2e() {
         max_tokens: None,
     };
     let chat_res = execute_chat(&client, &cfg, &chat_req).await;
-    assert!(chat_res.is_err(), "Unsupported backend must return graceful Err");
+    assert!(
+        chat_res.is_err(),
+        "Unsupported backend must return graceful Err"
+    );
 
     // 8. FR-008: LiteLLM Unified Proxy
     let temp_dir = std::env::temp_dir().join("test_mvp_e2e_proxy");

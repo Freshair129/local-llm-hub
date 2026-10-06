@@ -11,6 +11,7 @@
 pub mod backends;
 pub mod chat;
 pub mod gpu;
+pub mod hub;
 pub mod modelcard;
 pub mod models;
 pub mod proxy;
@@ -31,5 +32,3 @@ pub use share::*;
 pub use storage::*;
 pub use swarm::*;
 pub use updater::*;
-
-

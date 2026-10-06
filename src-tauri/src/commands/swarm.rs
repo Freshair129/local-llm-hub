@@ -4,9 +4,9 @@
 //! Multi-Node Swarm Worker Offloader Commands.
 //! Compliant with ADR-100 (Zero panic policy, safe Result types).
 
-use tauri::State;
-use crate::models::types::{WorkerNodeConfig, SwarmTaskPayload};
+use crate::models::types::{SwarmTaskPayload, WorkerNodeConfig};
 use crate::state::SharedAppState;
+use tauri::State;
 
 pub fn register_worker_node_inner(
     state: &SharedAppState,
@@ -110,7 +110,10 @@ pub async fn offload_swarm_task(
             .to_string();
         Ok(output)
     } else {
-        Err(format!("Swarm worker returned error status: {}", resp.status()))
+        Err(format!(
+            "Swarm worker returned error status: {}",
+            resp.status()
+        ))
     }
 }
 

@@ -12,6 +12,7 @@ import { triggerProbe, scanGgufDirectory } from './js/backend.js';
 import { renderModels, syncAllModels } from './js/model.js';
 import { startTelemetryPolling, setTelemetryRefreshRate } from './js/observability.js';
 import { initChat } from './js/chat.js';
+import { refreshInferenceCatalog } from './js/inference-catalog.js';
 import { showToast } from './js/toast.js';
 import { store } from './js/state.js';
 import { renderStatsDashboard } from './js/stats.js';
@@ -223,7 +224,7 @@ function setupNavigation() {
       try {
         const models = await syncAllModels();
         store.setState({ models });
-        initChat(models);
+        await refreshInferenceViews();
         showToast('All models synced successfully', 'success');
       } catch (err) {
         showToast(`Model sync failed: ${err.message || err}`, 'error');
@@ -329,7 +330,7 @@ function setupNavigation() {
         if (res.success) {
           const models = await syncAllModels();
           store.setState({ models });
-          initChat(models);
+          await refreshInferenceViews();
           showToast(`GGUF scan complete: found ${models.length} models`, 'success');
         } else {
           showToast(`Scan failed: ${res.error}`, 'error');
@@ -367,6 +368,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   setupNavigation();
   renderStatsDashboard();
   initArena();
+  await refreshInferenceViews();
   initDownloader();
   initUpdater();
   initSensors();
@@ -400,10 +402,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     const models = await syncAllModels();
     if (models && models.length > 0) {
       store.setState({ models });
-      initChat(models);
-      populateArenaModelSelectors();
+      await refreshInferenceViews();
       showToast(`Successfully connected! ${models.length} models loaded.`, 'success');
     } else {
+      await refreshInferenceViews();
       showToast('No models detected yet. Please verify Ollama is active on 127.0.0.1:11434', 'warning');
     }
   };
@@ -412,18 +414,26 @@ window.addEventListener('DOMContentLoaded', async () => {
   const models = await syncAllModels();
   if (models && models.length > 0) {
     store.setState({ models });
-    initChat(models);
-    populateArenaModelSelectors();
+    await refreshInferenceViews();
   } else {
     // If backend was still starting up, auto-retry once after 1.5s
     setTimeout(async () => {
       await triggerProbe();
       const retried = await syncAllModels();
+      await refreshInferenceViews();
       if (retried && retried.length > 0) {
         store.setState({ models: retried });
-        initChat(retried);
-        populateArenaModelSelectors();
       }
     }, 1500);
   }
 });
+
+// trace:implements FR-023
+async function refreshInferenceViews() {
+  const pending = refreshInferenceCatalog();
+  initChat();
+  populateArenaModelSelectors();
+  await pending;
+  initChat();
+  populateArenaModelSelectors();
+}

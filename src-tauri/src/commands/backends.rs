@@ -46,9 +46,15 @@ async fn probe_http_endpoint(
             }
             Err(err) => {
                 if err.is_timeout() {
-                    last_error = format!("Request to {} timed out after {}s", target_url, PROBE_TIMEOUT_SECS);
+                    last_error = format!(
+                        "Request to {} timed out after {}s",
+                        target_url, PROBE_TIMEOUT_SECS
+                    );
                 } else if err.is_connect() {
-                    last_error = format!("Connection refused at {}. Ensure backend service is running.", target_url);
+                    last_error = format!(
+                        "Connection refused at {}. Ensure backend service is running.",
+                        target_url
+                    );
                 } else {
                     last_error = format!("Network error: {}", err);
                 }
@@ -113,7 +119,10 @@ pub fn probe_hf(cache_dir: &str) -> ProbeResult {
     };
 
     if target_path.is_empty() {
-        return ProbeResult::offline("hf", "HF cache path not configured and home directory inaccessible");
+        return ProbeResult::offline(
+            "hf",
+            "HF cache path not configured and home directory inaccessible",
+        );
     }
 
     let p = Path::new(&target_path);
@@ -123,7 +132,11 @@ pub fn probe_hf(cache_dir: &str) -> ProbeResult {
             Ok(entries) => entries.filter_map(|e| e.ok()).count(),
             Err(_) => 0,
         };
-        ProbeResult::online("hf", latency_ms, Some(format!("{} entries in {}", count, target_path)))
+        ProbeResult::online(
+            "hf",
+            latency_ms,
+            Some(format!("{} entries in {}", count, target_path)),
+        )
     } else {
         ProbeResult::offline("hf", format!("Directory not found: {}", target_path))
     }
@@ -151,7 +164,11 @@ pub fn probe_gguf(gguf_dir: &str) -> ProbeResult {
                 .count(),
             Err(_) => 0,
         };
-        ProbeResult::online("gguf", latency_ms, Some(format!("{} .gguf files found", count)))
+        ProbeResult::online(
+            "gguf",
+            latency_ms,
+            Some(format!("{} .gguf files found", count)),
+        )
     } else {
         ProbeResult::offline("gguf", format!("Directory not found: {}", gguf_dir))
     }
@@ -201,13 +218,26 @@ pub async fn start_model(
                 .map_err(|e| format!("Failed to connect to Ollama: {}", e))?;
 
             if resp.status().is_success() {
-                Ok(format!("Model '{}' successfully loaded and warmed in Ollama (keep_alive: 15m)", model_name))
+                Ok(format!(
+                    "Model '{}' successfully loaded and warmed in Ollama (keep_alive: 15m)",
+                    model_name
+                ))
             } else {
-                Err(format!("Ollama returned status {}: {}", resp.status(), resp.text().await.unwrap_or_default()))
+                Err(format!(
+                    "Ollama returned status {}: {}",
+                    resp.status(),
+                    resp.text().await.unwrap_or_default()
+                ))
             }
         }
-        "vllm" => Ok(format!("Model '{}' is managed by vLLM runtime.", model_name)),
-        "gguf" => Ok(format!("Local GGUF model '{}' is ready for direct inference.", model_name)),
+        "vllm" => Ok(format!(
+            "Model '{}' is managed by vLLM runtime.",
+            model_name
+        )),
+        "gguf" => Ok(format!(
+            "Local GGUF model '{}' is ready for direct inference.",
+            model_name
+        )),
         _ => Err(format!("Unsupported backend '{}'", backend)),
     }
 }
@@ -238,9 +268,16 @@ pub async fn stop_model(
                 .map_err(|e| format!("Failed to connect to Ollama: {}", e))?;
 
             if resp.status().is_success() {
-                Ok(format!("Model '{}' successfully unloaded from GPU VRAM (keep_alive: 0)", model_name))
+                Ok(format!(
+                    "Model '{}' successfully unloaded from GPU VRAM (keep_alive: 0)",
+                    model_name
+                ))
             } else {
-                Err(format!("Ollama returned status {}: {}", resp.status(), resp.text().await.unwrap_or_default()))
+                Err(format!(
+                    "Ollama returned status {}: {}",
+                    resp.status(),
+                    resp.text().await.unwrap_or_default()
+                ))
             }
         }
         "vllm" => Ok(format!("vLLM model '{}' stopped.", model_name)),
@@ -276,9 +313,15 @@ pub async fn pull_model(
         .map_err(|e| format!("Failed to connect to Ollama for pull: {}", e))?;
 
     if resp.status().is_success() {
-        Ok(format!("Model '{}' successfully downloaded/pulled.", model_name))
+        Ok(format!(
+            "Model '{}' successfully downloaded/pulled.",
+            model_name
+        ))
     } else {
-        let err_text = resp.text().await.unwrap_or_else(|_| "Unknown error".to_string());
+        let err_text = resp
+            .text()
+            .await
+            .unwrap_or_else(|_| "Unknown error".to_string());
         Err(format!("Ollama pull error: {}", err_text))
     }
 }
@@ -294,7 +337,10 @@ mod tests {
         assert!(!res.is_online());
         assert_eq!(res.backend, "gguf");
         assert_eq!(res.status, "offline");
-        assert!(res.error_message.unwrap_or_default().contains("Directory not found"));
+        assert!(res
+            .error_message
+            .unwrap_or_default()
+            .contains("Directory not found"));
     }
 
     // trace:verifies FR-001
@@ -303,7 +349,10 @@ mod tests {
         let res = probe_gguf("");
         assert!(!res.is_online());
         assert_eq!(res.backend, "gguf");
-        assert!(res.error_message.unwrap_or_default().contains("not configured"));
+        assert!(res
+            .error_message
+            .unwrap_or_default()
+            .contains("not configured"));
     }
 
     // trace:verifies FR-001
@@ -357,7 +406,8 @@ mod tests {
         cfg.ollama_url = "http://127.0.0.1:54321".to_string();
         let res = pull_model(&client, &cfg, "qwen2.5-coder:7b").await;
         assert!(res.is_err());
-        assert!(res.unwrap_err().contains("Failed to connect to Ollama for pull"));
+        assert!(res
+            .unwrap_err()
+            .contains("Failed to connect to Ollama for pull"));
     }
 }
-

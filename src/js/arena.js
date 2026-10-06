@@ -7,6 +7,7 @@ import { PERSONAS, getPersonaById } from './personas.js';
 import { showToast } from './toast.js';
 
 import { invoke } from './api.js';
+import { populateInferenceSelect } from './inference-catalog.js';
 
 export function initArena() {
   const container = document.getElementById('view-arena');
@@ -23,7 +24,7 @@ function renderArenaSkeleton(container) {
     <div class="view-header">
       <div class="header-title-group">
         <h2>⚔️ Multi-Model Arena & Benchmark</h2>
-        <p class="subtitle">Side-by-side head-to-head inference comparison with real-time TTFT and TPS metrics</p>
+        <p class="subtitle">Side-by-side head-to-head inference comparison with measured response duration and reported token usage</p>
       </div>
       <div class="header-actions">
         <select id="arena-persona-select" class="glass-select">
@@ -43,8 +44,8 @@ function renderArenaSkeleton(container) {
           </select>
         </div>
         <div class="arena-metrics-bar" id="arena-metrics-a">
-          <span class="metric-pill">⚡ <b id="a-tps">-</b> t/s</span>
-          <span class="metric-pill">⏱️ TTFT: <b id="a-ttft">-</b> ms</span>
+          <span class="metric-pill">⚡ <b id="a-tps">-</b> output tok/s (end-to-end)</span>
+          <span class="metric-pill">⏱️ TTFT: <b id="a-ttft">Not measured</b></span>
           <span class="metric-pill">🔢 Tokens: <b id="a-tokens">-</b></span>
         </div>
         <div class="arena-response-stream markdown-body" id="arena-output-a">
@@ -61,8 +62,8 @@ function renderArenaSkeleton(container) {
           </select>
         </div>
         <div class="arena-metrics-bar" id="arena-metrics-b">
-          <span class="metric-pill">⚡ <b id="b-tps">-</b> t/s</span>
-          <span class="metric-pill">⏱️ TTFT: <b id="b-ttft">-</b> ms</span>
+          <span class="metric-pill">⚡ <b id="b-tps">-</b> output tok/s (end-to-end)</span>
+          <span class="metric-pill">⏱️ TTFT: <b id="b-ttft">Not measured</b></span>
           <span class="metric-pill">🔢 Tokens: <b id="b-tokens">-</b></span>
         </div>
         <div class="arena-response-stream markdown-body" id="arena-output-b">
@@ -94,26 +95,15 @@ export function populateArenaModelSelectors() {
   const selectB = document.getElementById('arena-model-b-select');
   if (!selectA || !selectB) return;
 
-  const state = store.getState();
-  const models = state.models || [];
-
-  if (models.length === 0) {
-    selectA.innerHTML = '<option value="">No models detected</option>';
-    selectB.innerHTML = '<option value="">No models detected</option>';
-    return;
-  }
-
-  const optionsHtml = models.map((m, idx) => `
-    <option value="${m.id}" data-backend="${m.backend}">${m.name} (${m.backend.toUpperCase()}${m.quantization ? ' ' + m.quantization : ''})</option>
-  `).join('');
-
-  selectA.innerHTML = optionsHtml;
-  selectB.innerHTML = optionsHtml;
-
-  // Pick two distinct default models if available
-  if (models.length > 1) {
-    selectB.selectedIndex = 1;
-  }
+  const catalog = store.state.inferenceCatalog;
+  populateInferenceSelect(selectA, catalog);
+  populateInferenceSelect(selectB, catalog, 1);
+  selectA.disabled ||= arenaRunning;
+  selectB.disabled ||= arenaRunning;
+  const persona = document.getElementById('arena-persona-select');
+  if (persona) persona.disabled = arenaRunning;
+  const button = document.getElementById('btn-run-arena');
+  if (button) button.disabled = arenaRunning || catalog.loading || !!catalog.error || !catalog.models.length;
 }
 
 function populatePersonas() {
@@ -144,7 +134,11 @@ function setupArenaEvents() {
   });
 }
 
+let arenaRunning = false;
+
 async function runArenaBattle() {
+  const catalog = store.state.inferenceCatalog;
+  if (arenaRunning || catalog.loading || catalog.error || !catalog.models.length) return;
   const promptInput = document.getElementById('arena-prompt-input');
   const selectA = document.getElementById('arena-model-a-select');
   const selectB = document.getElementById('arena-model-b-select');
@@ -177,21 +171,31 @@ async function runArenaBattle() {
     btnRun.innerHTML = '<span>⚔️ Battling...</span>';
   }
 
-  // Run both models
+  arenaRunning = true;
+  populateArenaModelSelectors();
+  for (const col of ['a', 'b']) {
+    document.getElementById(`arena-col-${col}`)?.classList.remove('arena-winner');
+    const rate = document.getElementById(`${col}-tps`);
+    const tokens = document.getElementById(`${col}-tokens`);
+    if (rate) rate.textContent = 'Not measured';
+    if (tokens) tokens.textContent = 'Not reported';
+  }
   try {
-    const [resA, resB] = await Promise.all([
+    const results = await Promise.allSettled([
       executeModelInference(modelAId, persona.systemPrompt, prompt, 'a'),
       executeModelInference(modelBId, persona.systemPrompt, prompt, 'b')
     ]);
 
-    // Highlight Winner
-    applyWinnerHighlight(resA, resB);
+    const failed = results.find(result => result.status === 'rejected');
+    if (failed) throw failed.reason;
+    applyWinnerHighlight(results[0].value, results[1].value);
     showToast('Arena battle evaluation completed!', 'success');
   } catch (err) {
     showToast(`Arena battle failed: ${err}`, 'error');
   } finally {
+    arenaRunning = false;
+    populateArenaModelSelectors();
     if (btnRun) {
-      btnRun.disabled = false;
       btnRun.innerHTML = '<span>⚔️ Launch Battle</span>';
     }
   }
@@ -199,7 +203,8 @@ async function runArenaBattle() {
 
 async function executeModelInference(modelId, systemPrompt, prompt, col) {
   const startTime = performance.now();
-  let firstTokenTime = null;
+  const selected = store.state.inferenceCatalog.models.find(model => model.id === modelId);
+  if (!selected) throw new Error('Selected model is no longer available');
 
   const tpsElem = document.getElementById(`${col}-tps`);
   const ttftElem = document.getElementById(`${col}-ttft`);
@@ -209,9 +214,9 @@ async function executeModelInference(modelId, systemPrompt, prompt, col) {
   try {
     // Send chat message via Tauri IPC
     const res = await invoke('send_chat_message', {
-      req: {
-        model_id: modelId,
-        backend: "ollama",
+      request: {
+        model: selected.model,
+        backend: selected.backend,
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: prompt }
@@ -223,21 +228,17 @@ async function executeModelInference(modelId, systemPrompt, prompt, col) {
 
     const endTime = performance.now();
     const durationMs = endTime - startTime;
-    firstTokenTime = Math.min(durationMs, 180 + Math.random() * 80); // Estimate TTFT
-    const evalCount = res?.eval_count || Math.max(80, Math.floor(res.response.length / 4));
-    const tps = ((evalCount / (durationMs / 1000))).toFixed(1);
+    if (typeof res?.content !== 'string') throw new Error('Invalid chat response');
+    const tokens = Number.isInteger(res.completion_tokens) && res.completion_tokens > 0 ? res.completion_tokens : null;
+    const tps = tokens !== null && durationMs > 0 ? tokens * 1000 / durationMs : null;
 
-    if (tpsElem) tpsElem.textContent = tps;
-    if (ttftElem) ttftElem.textContent = Math.round(firstTokenTime);
-    if (tokensElem) tokensElem.textContent = evalCount;
-
-    if (outputElem) {
-      outputElem.innerHTML = `<pre class="arena-code-result"><code>${escapeHtml(res.response)}</code></pre>`;
-    }
-
-    return { col, modelId, tps: parseFloat(tps), ttft: firstTokenTime, tokens: evalCount, durationMs };
+    if (tpsElem) tpsElem.textContent = tps === null ? 'Not measured' : tps.toFixed(1);
+    if (ttftElem) ttftElem.textContent = 'Not measured';
+    if (tokensElem) tokensElem.textContent = tokens === null ? 'Not reported' : tokens;
+    if (outputElem) outputElem.innerHTML = `<pre class="arena-code-result"><code>${escapeHtml(res.content)}</code></pre>`;
+    return { col, modelId, tps, ttft: null, tokens, durationMs };
   } catch (err) {
-    if (outputElem) outputElem.innerHTML = `<div class="error-badge">Error: ${err}</div>`;
+    if (outputElem) outputElem.innerHTML = `<div class="error-badge">Error: ${escapeHtml(String(err))}</div>`;
     throw err;
   }
 }
@@ -250,6 +251,7 @@ function applyWinnerHighlight(resA, resB) {
   cardA.classList.remove('arena-winner');
   cardB.classList.remove('arena-winner');
 
+  if (!Number.isFinite(resA.tps) || !Number.isFinite(resB.tps)) return;
   if (resA.tps > resB.tps) {
     cardA.classList.add('arena-winner');
     const badgeA = document.getElementById('a-tps');

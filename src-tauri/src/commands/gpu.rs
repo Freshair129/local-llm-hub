@@ -65,11 +65,7 @@ async fn query_nvidia_smi() -> Vec<GpuInfo> {
     #[cfg(target_os = "windows")]
     cmd.creation_flags(0x0800_0000); // CREATE_NO_WINDOW
 
-    let output_res = tokio::time::timeout(
-        Duration::from_millis(600),
-        cmd.output(),
-    )
-    .await;
+    let output_res = tokio::time::timeout(Duration::from_millis(600), cmd.output()).await;
 
     match output_res {
         Ok(Ok(output)) if output.status.success() => {
@@ -210,9 +206,10 @@ mod tests {
     #[tokio::test]
     async fn test_poll_top_processes() {
         let processes = poll_top_processes(false, 10).await;
-        assert!(!processes.is_empty(), "should capture running host processes");
+        assert!(
+            !processes.is_empty(),
+            "should capture running host processes"
+        );
         assert!(processes.len() <= 10);
     }
 }
-
-

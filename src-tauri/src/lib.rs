@@ -137,8 +137,18 @@ async fn record_task_stat(
         .unwrap_or(0);
 
     let mut guard = state.lock().await;
-    let entry = guard.model_stats.entry(model_id.clone()).or_insert_with(|| crate::models::types::ModelStats::new(&model_id));
-    entry.record_execution(success, prompt_tokens, completion_tokens, duration_ms, error, now);
+    let entry = guard
+        .model_stats
+        .entry(model_id.clone())
+        .or_insert_with(|| crate::models::types::ModelStats::new(&model_id));
+    entry.record_execution(
+        success,
+        prompt_tokens,
+        completion_tokens,
+        duration_ms,
+        error,
+        now,
+    );
     let updated_stat = entry.clone();
 
     // Update model inside guard.models if already cached
@@ -238,7 +248,10 @@ async fn send_chat_message(
         let guard = state.lock().await;
         (guard.backends.clone(), reqwest::Client::new())
     };
-    let res = commands::chat::execute_chat(&client, &cfg, &request).await?;
+    let res = match commands::hub::HubBridge::from_env()? {
+        Some(hub) => hub.chat(&request).await?,
+        None => commands::chat::execute_chat(&client, &cfg, &request).await?,
+    };
 
     let now = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -246,11 +259,46 @@ async fn send_chat_message(
         .unwrap_or(0);
     {
         let mut guard = state.lock().await;
-        let entry = guard.model_stats.entry(request.model.clone()).or_insert_with(|| crate::models::types::ModelStats::new(&request.model));
-        entry.record_execution(true, res.prompt_tokens, res.completion_tokens, res.duration_ms, None, now);
+        let entry = guard
+            .model_stats
+            .entry(request.model.clone())
+            .or_insert_with(|| crate::models::types::ModelStats::new(&request.model));
+        entry.record_execution(
+            true,
+            res.prompt_tokens,
+            res.completion_tokens,
+            res.duration_ms,
+            None,
+            now,
+        );
     }
 
     Ok(res)
+}
+
+// trace:implements FR-023
+#[tauri::command]
+async fn get_chat_catalog(
+    state: State<'_, SharedAppState>,
+) -> Result<commands::hub::ChatCatalog, String> {
+    match commands::hub::HubBridge::from_env()? {
+        Some(hub) => hub.catalog().await,
+        None => {
+            let guard = state.lock().await;
+            Ok(commands::hub::ChatCatalog::legacy(&guard.models))
+        }
+    }
+}
+
+// trace:implements FR-023
+#[tauri::command]
+async fn run_hub_agent(
+    agent_id: String,
+    input: String,
+    session_id: Option<String>,
+) -> Result<serde_json::Value, String> {
+    let hub = commands::hub::HubBridge::from_env()?.ok_or("HUB_DISABLED")?;
+    hub.run(&agent_id, &input, session_id.as_deref()).await
 }
 
 // trace:implements FR-008
@@ -263,7 +311,12 @@ async fn generate_proxy_config(
         let guard = state.lock().await;
         (guard.backends.clone(), guard.models.clone())
     };
-    commands::proxy::generate_litellm_config(&models, &cfg.ollama_url, &cfg.vllm_url, std::path::Path::new(&output_path))
+    commands::proxy::generate_litellm_config(
+        &models,
+        &cfg.ollama_url,
+        &cfg.vllm_url,
+        std::path::Path::new(&output_path),
+    )
 }
 
 // trace:implements FR-008
@@ -300,7 +353,8 @@ async fn create_api_key(
         tpm_limit,
         rpm_limit,
         duration_days,
-    ).await
+    )
+    .await
 }
 
 // trace:implements FR-008
@@ -313,19 +367,13 @@ async fn list_api_keys(
 
 // trace:implements FR-008
 #[tauri::command]
-async fn toggle_api_key(
-    state: State<'_, SharedAppState>,
-    key_id: String,
-) -> Result<bool, String> {
+async fn toggle_api_key(state: State<'_, SharedAppState>, key_id: String) -> Result<bool, String> {
     commands::proxy::toggle_api_key_status(&state, &key_id).await
 }
 
 // trace:implements FR-008
 #[tauri::command]
-async fn delete_api_key(
-    state: State<'_, SharedAppState>,
-    key_id: String,
-) -> Result<bool, String> {
+async fn delete_api_key(state: State<'_, SharedAppState>, key_id: String) -> Result<bool, String> {
     commands::proxy::delete_api_key_entry(&state, &key_id).await
 }
 
@@ -343,9 +391,7 @@ async fn open_litellm_console(url: Option<String>) -> Result<String, String> {
     }
     #[cfg(not(target_os = "windows"))]
     {
-        let _ = std::process::Command::new("xdg-open")
-            .arg(&target)
-            .spawn();
+        let _ = std::process::Command::new("xdg-open").arg(&target).spawn();
     }
     Ok(target)
 }
@@ -368,19 +414,29 @@ fn stop_lan_share() -> Result<String, String> {
 
 // trace:implements FR-010
 #[tauri::command]
-fn get_lan_share_status(current_path: String, port: Option<u16>) -> Result<crate::models::types::LanShareStatus, String> {
-    Ok(commands::share::get_lan_share_status(&current_path, port.unwrap_or(8080)))
+fn get_lan_share_status(
+    current_path: String,
+    port: Option<u16>,
+) -> Result<crate::models::types::LanShareStatus, String> {
+    Ok(commands::share::get_lan_share_status(
+        &current_path,
+        port.unwrap_or(8080),
+    ))
 }
 
 // trace:implements FEAT-024
 #[tauri::command]
-fn generate_lan_pin(duration_secs: Option<u64>) -> Result<crate::models::types::LanSharePinSession, String> {
+fn generate_lan_pin(
+    duration_secs: Option<u64>,
+) -> Result<crate::models::types::LanSharePinSession, String> {
     Ok(commands::share::generate_ephemeral_pin(duration_secs))
 }
 
 // trace:implements FEAT-024
 #[tauri::command]
-fn verify_lan_pin(candidate: String) -> Result<crate::models::types::LanPinVerificationResult, String> {
+fn verify_lan_pin(
+    candidate: String,
+) -> Result<crate::models::types::LanPinVerificationResult, String> {
     Ok(commands::share::verify_ephemeral_pin(&candidate))
 }
 
@@ -403,9 +459,11 @@ fn estimate_chat_tokens(
     prompt: String,
     max_context_length: Option<usize>,
 ) -> Result<crate::models::types::TokenEstimateResult, String> {
-    Ok(commands::chat::estimate_chat_tokens(&prompt, max_context_length))
+    Ok(commands::chat::estimate_chat_tokens(
+        &prompt,
+        max_context_length,
+    ))
 }
-
 
 // trace:implements FR-014
 #[tauri::command]
@@ -415,7 +473,9 @@ fn get_app_version() -> Result<crate::models::types::AppVersionInfo, String> {
 
 // trace:implements FR-014
 #[tauri::command]
-async fn check_for_updates(endpoint_override: Option<String>) -> Result<crate::models::types::UpdateCheckResult, String> {
+async fn check_for_updates(
+    endpoint_override: Option<String>,
+) -> Result<crate::models::types::UpdateCheckResult, String> {
     let client = reqwest::Client::new();
     commands::updater::check_for_updates(&client, endpoint_override.as_deref()).await
 }
@@ -433,7 +493,8 @@ fn get_storage_health(
     blob_pointer_root: Option<String>,
 ) -> Result<crate::models::types::SymlinkHealth, String> {
     let (default_blob, known_storages) = commands::storage::discover_known_storage_roots();
-    let s_root = storage_root.unwrap_or_else(|| known_storages.first().cloned().unwrap_or_default());
+    let s_root =
+        storage_root.unwrap_or_else(|| known_storages.first().cloned().unwrap_or_default());
     let b_root = blob_pointer_root.unwrap_or(default_blob);
     commands::storage::audit_symlinks_and_storage(&s_root, &b_root)
 }
@@ -446,22 +507,27 @@ fn offload_storage_blob(
     storage_root: Option<String>,
 ) -> Result<crate::models::types::OffloadResult, String> {
     let (default_blob, known_storages) = commands::storage::discover_known_storage_roots();
-    let s_root = storage_root.unwrap_or_else(|| known_storages.first().cloned().unwrap_or_default());
+    let s_root =
+        storage_root.unwrap_or_else(|| known_storages.first().cloned().unwrap_or_default());
     let b_root = blob_pointer_root.unwrap_or(default_blob);
     commands::storage::execute_blob_offload(&blob_hash, &b_root, &s_root)
 }
 
 // trace:implements FR-006
 #[tauri::command]
-fn get_sensor_tree(
+async fn get_sensor_tree(
     sensor_hub: State<'_, Arc<SensorHub>>,
 ) -> Result<Vec<sensors::SensorReading>, String> {
-    let mut readings = Vec::new();
-    readings.extend(sensor_hub.sysinfo.read_all());
-    if sensor_hub.lhm.available() {
-        readings.extend(sensor_hub.lhm.read_all());
-    }
-    Ok(readings)
+    let sensor_hub = Arc::clone(sensor_hub.inner());
+    tokio::task::spawn_blocking(move || {
+        let mut readings = sensor_hub.sysinfo.read_all();
+        if sensor_hub.lhm.available() {
+            readings.extend(sensor_hub.lhm.read_all());
+        }
+        readings
+    })
+    .await
+    .map_err(|_| "Sensor worker failed".to_string())
 }
 
 // trace:implements FR-006
@@ -570,8 +636,10 @@ pub fn run() {
         .setup(|app| {
             // Build Tray Menu items
             let show_item = MenuItem::with_id(app, "show", "Open Dashboard", true, None::<&str>)?;
-            let hide_item = MenuItem::with_id(app, "hide", "Hide to Tray (Silent)", true, None::<&str>)?;
-            let quit_item = MenuItem::with_id(app, "quit", "Exit Local LLM Hub", true, None::<&str>)?;
+            let hide_item =
+                MenuItem::with_id(app, "hide", "Hide to Tray (Silent)", true, None::<&str>)?;
+            let quit_item =
+                MenuItem::with_id(app, "quit", "Exit Local LLM Hub", true, None::<&str>)?;
             let menu = Menu::with_items(app, &[&show_item, &hide_item, &quit_item])?;
 
             // Build Tray Icon
@@ -650,6 +718,8 @@ pub fn run() {
             get_lhm_status,
             set_fan_duty,
             send_chat_message,
+            run_hub_agent,
+            get_chat_catalog,
             generate_proxy_config,
             get_proxy_status,
             create_api_key,
@@ -723,7 +793,10 @@ mod tests {
         let hub = crate::SensorHub::default();
         assert!(hub.sysinfo.available());
         let readings = hub.sysinfo.read_all();
-        assert!(!readings.is_empty(), "sysinfo should return baseline sensors");
+        assert!(
+            !readings.is_empty(),
+            "sysinfo should return baseline sensors"
+        );
         assert!(readings.iter().any(|r| r.kind == "load"));
         assert!(readings.iter().any(|r| r.kind == "data"));
     }
@@ -740,9 +813,8 @@ mod tests {
             unit: "°C".to_string(),
         };
         let json = serde_json::to_string(&reading).expect("serialize reading");
-        let parsed: crate::sensors::SensorReading = serde_json::from_str(&json).expect("deserialize reading");
+        let parsed: crate::sensors::SensorReading =
+            serde_json::from_str(&json).expect("deserialize reading");
         assert_eq!(parsed, reading);
     }
 }
-
-

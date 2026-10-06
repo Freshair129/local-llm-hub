@@ -42,8 +42,8 @@ impl Default for BackendConfig {
     }
 }
 
-use std::collections::HashMap;
 pub use crate::models::types::{ApiKeyRecord, ModelStats, UnifiedModel, WorkerNodeConfig};
+use std::collections::HashMap;
 
 /// Lifecycle status of the embedded LiteLLM proxy process
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -82,33 +82,29 @@ impl Default for AppState {
             model_stats: HashMap::new(),
             litellm_process: None,
             litellm_status: LiteLLMStatus::default(),
-            api_keys: vec![
-                ApiKeyRecord {
-                    key_id: "key_master_hub".to_string(),
-                    key_secret: "sk-local-hub".to_string(),
-                    name: "Master Hub Key (Admin)".to_string(),
-                    role: "admin".to_string(),
-                    allowed_models: vec!["*".to_string()],
-                    max_budget: None,
-                    spend: 0.0,
-                    tpm_limit: None,
-                    rpm_limit: None,
-                    created_at: 1700000000000,
-                    expires_at: None,
-                    active: true,
-                }
-            ],
-            worker_nodes: vec![
-                WorkerNodeConfig {
-                    node_id: "node_master_01".to_string(),
-                    host: "127.0.0.1".to_string(),
-                    port: 11434,
-                    status: "online".to_string(),
-                    vram_free_mb: 12288,
-                    active_tasks: 0,
-                    last_seen_timestamp: 1700000000000,
-                }
-            ],
+            api_keys: vec![ApiKeyRecord {
+                key_id: "key_master_hub".to_string(),
+                key_secret: "sk-local-hub".to_string(),
+                name: "Master Hub Key (Admin)".to_string(),
+                role: "admin".to_string(),
+                allowed_models: vec!["*".to_string()],
+                max_budget: None,
+                spend: 0.0,
+                tpm_limit: None,
+                rpm_limit: None,
+                created_at: 1700000000000,
+                expires_at: None,
+                active: true,
+            }],
+            worker_nodes: vec![WorkerNodeConfig {
+                node_id: "node_master_01".to_string(),
+                host: "127.0.0.1".to_string(),
+                port: 11434,
+                status: "online".to_string(),
+                vram_free_mb: 12288,
+                active_tasks: 0,
+                last_seen_timestamp: 1700000000000,
+            }],
         }
     }
 }

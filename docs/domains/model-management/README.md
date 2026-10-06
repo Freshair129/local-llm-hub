@@ -42,7 +42,7 @@ Domain นี้รับผิดชอบ **การประมวลผล�
 | [FR-002](../../requirements/FR-002-model-aggregation.md) | Model Aggregation | P0 | Draft |
 | [FR-003](../../requirements/FR-003-deduplication.md) | Duplicate Detection | P0 | Draft |
 | [FR-004](../../requirements/FR-004-model-card.md) | Model Card Display | P1 | Draft |
-| [FR-018](../../requirements/FR-018-model-vram-advisor.md) | VRAM Model Advisor & GPU Benchmark Comparison | P1 | Implemented |
+| [FR-024](../../requirements/FR-024-model-vram-advisor.md) | VRAM Model Advisor & GPU Benchmark Comparison | P1 | Implemented |
 
 ## Referenced Requirements (owned by others)
 

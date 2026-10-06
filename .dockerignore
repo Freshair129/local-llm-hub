@@ -1,0 +1,13 @@
+*
+!pyproject.toml
+!uv.lock
+!runtime/
+!runtime/local_llm_hub/
+!runtime/local_llm_hub/*.py
+!config/
+!config/models.yaml
+!config/agents.yaml
+!config/permissions.yaml
+!config/runtime.yaml
+!workspace/
+!workspace/README.md

@@ -1,0 +1,13 @@
+projects:
+  demo:
+    roots: [../workspace]
+policies:
+  reader:
+    mode: read-only
+    grants: [filesystem.read, filesystem.list, search.grep, memory.retrieve, memory.search]
+  coordinator:
+    mode: read-only
+    grants: [agent.delegate, filesystem.read, filesystem.list, search.grep]
+  writer:
+    mode: workspace
+    grants: [filesystem.read, filesystem.write, filesystem.list, search.grep, memory.store, memory.retrieve, memory.search, memory.update, memory.delete]

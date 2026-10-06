@@ -1,8 +1,19 @@
-# FR-018 — VRAM Model Advisor & GPU Benchmark Comparison
+---
+id: FR-024
+version: 0.1.0
+status: active
+superseded_by: null
+domain: model-management
+owner: Boss
+priority: P1
+features: [FEAT-GPU-MODEL-ADVISOR]
+---
+
+# FR-024 — VRAM Model Advisor & GPU Benchmark Comparison
 
 | Field | Value |
 |---|---|
-| ID | FR-018 |
+| ID | FR-024 |
 | Domain | model-management |
 | Owner | Boss |
 | Priority | P1 |
@@ -29,3 +40,7 @@
 - Ingestion: `scripts/export_benchmark_catalog_sources.mjs`, then `scripts/build_benchmark_catalog.mjs`
 - Catalog: `src/data/benchmark_catalog.json`, `src/data/gpu_catalog.json`
 - Verification: `eval/tests/benchmark_catalog.test.mjs`, `eval/tests/model_advisor.test.mjs`
+
+## Version diff
+
+2026-10-06 merge reconciliation: advisor FR-018 -> FR-024 to avoid the independently allocated Hub configuration ID. Acceptance criteria and feature behavior are unchanged. See [merge RCA](../../.brain/rca/RCA-004-MAIN-MERGE-IDENTITIES.md).

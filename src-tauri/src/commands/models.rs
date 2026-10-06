@@ -29,7 +29,8 @@ pub fn normalize_model_name(raw: &str) -> String {
     // 2. Remove version tags like :latest, :v1.0, :v2
     if let Some(idx) = s.rfind(':') {
         let tag = &s[idx + 1..];
-        if tag == "latest" || (tag.starts_with('v') && tag[1..].chars().any(|c| c.is_ascii_digit())) {
+        if tag == "latest" || (tag.starts_with('v') && tag[1..].chars().any(|c| c.is_ascii_digit()))
+        {
             s.truncate(idx);
         } else {
             // e.g. :7b, :14b -> replace ':' with space
@@ -63,8 +64,8 @@ pub fn normalize_model_name(raw: &str) -> String {
 
     // 4. Quantization tokens to discard
     let quant_tokens = [
-        "q4_k_m", "q4_k_s", "q5_k_m", "q5_k_s", "q8_0", "q4_0", "q4_1",
-        "mxfp4", "f16", "f32", "iq3_m", "iq4_nl", "gguf", "ggml"
+        "q4_k_m", "q4_k_s", "q5_k_m", "q5_k_s", "q8_0", "q4_0", "q4_1", "mxfp4", "f16", "f32",
+        "iq3_m", "iq4_nl", "gguf", "ggml",
     ];
 
     let mut final_tokens = Vec::new();
@@ -80,7 +81,10 @@ pub fn normalize_model_name(raw: &str) -> String {
         }
 
         // Replace any remaining internal underscores with space (e.g. model_name -> model name)
-        let sub_tokens: Vec<&str> = clean_token.split('_').filter(|sub| !sub.is_empty()).collect();
+        let sub_tokens: Vec<&str> = clean_token
+            .split('_')
+            .filter(|sub| !sub.is_empty())
+            .collect();
         for sub in sub_tokens {
             final_tokens.push(sub.to_string());
         }
@@ -93,8 +97,8 @@ pub fn normalize_model_name(raw: &str) -> String {
 pub fn extract_quantization(raw: &str) -> Option<String> {
     let lower = raw.to_lowercase();
     let patterns = [
-        "q4_k_m", "q4_k_s", "q5_k_m", "q5_k_s", "q8_0", "q4_0", "q4_1",
-        "mxfp4", "f16", "f32", "iq3_m", "iq4_nl"
+        "q4_k_m", "q4_k_s", "q5_k_m", "q5_k_s", "q8_0", "q4_0", "q4_1", "mxfp4", "f16", "f32",
+        "iq3_m", "iq4_nl",
     ];
     for p in &patterns {
         if lower.contains(p) {
@@ -141,9 +145,15 @@ pub async fn fetch_ollama_models(client: &reqwest::Client, base_url: &str) -> Ve
     if let Some(list) = body.models {
         for m in list {
             let canonical = normalize_model_name(&m.name);
-            let quant = m.details.as_ref().and_then(|d| d.quantization_level.clone())
+            let quant = m
+                .details
+                .as_ref()
+                .and_then(|d| d.quantization_level.clone())
                 .or_else(|| extract_quantization(&m.name));
-            let fmt = m.details.as_ref().and_then(|d| d.format.clone())
+            let fmt = m
+                .details
+                .as_ref()
+                .and_then(|d| d.format.clone())
                 .unwrap_or_else(|| "gguf".to_string());
 
             let mut model = UnifiedModel::new(
@@ -230,7 +240,11 @@ pub fn scan_gguf_models(gguf_dir: &str) -> Vec<UnifiedModel> {
             if path.is_file() {
                 if let Some(ext) = path.extension() {
                     if ext.eq_ignore_ascii_case("gguf") {
-                        let filename = path.file_name().unwrap_or_default().to_string_lossy().to_string();
+                        let filename = path
+                            .file_name()
+                            .unwrap_or_default()
+                            .to_string_lossy()
+                            .to_string();
                         let size = entry.metadata().map(|m| m.len()).unwrap_or(0);
                         let canonical = normalize_model_name(&filename);
                         let quant = extract_quantization(&filename);
@@ -245,7 +259,8 @@ pub fn scan_gguf_models(gguf_dir: &str) -> Vec<UnifiedModel> {
                             quant,
                             false,
                         );
-                        model.tags = classify_model_tags(&model.name, &model.format, model.size_bytes);
+                        model.tags =
+                            classify_model_tags(&model.name, &model.format, model.size_bytes);
                         results.push(model);
                     }
                 }
@@ -261,16 +276,35 @@ pub fn classify_model_tags(name: &str, _format: &str, size_bytes: u64) -> Vec<St
     let lower = name.to_lowercase();
     let mut tags = Vec::new();
 
-    if lower.contains("coder") || lower.contains("code") || lower.contains("starcoder") || lower.contains("rust") || lower.contains("dev") {
+    if lower.contains("coder")
+        || lower.contains("code")
+        || lower.contains("starcoder")
+        || lower.contains("rust")
+        || lower.contains("dev")
+    {
         tags.push("Coding".to_string());
     }
-    if lower.contains("think") || lower.contains("reason") || lower.contains("r1") || lower.contains("qwq") || lower.contains("cot") {
+    if lower.contains("think")
+        || lower.contains("reason")
+        || lower.contains("r1")
+        || lower.contains("qwq")
+        || lower.contains("cot")
+    {
         tags.push("Reasoning".to_string());
     }
-    if lower.contains("vision") || lower.contains("vl") || lower.contains("visual") || lower.contains("multimodal") {
+    if lower.contains("vision")
+        || lower.contains("vl")
+        || lower.contains("visual")
+        || lower.contains("multimodal")
+    {
         tags.push("Vision".to_string());
     }
-    if lower.contains("instruct") || lower.contains("chat") || lower.contains("conversation") || lower.contains("-it") || lower.contains(":it") {
+    if lower.contains("instruct")
+        || lower.contains("chat")
+        || lower.contains("conversation")
+        || lower.contains("-it")
+        || lower.contains(":it")
+    {
         tags.push("Chat".to_string());
     }
     if size_bytes > 0 && size_bytes <= 3_500_000_000 {
@@ -304,7 +338,10 @@ pub fn dedup_models(models: &[UnifiedModel]) -> (Vec<UnifiedModel>, Vec<Duplicat
     let mut groups: HashMap<String, Vec<usize>> = HashMap::new();
     for (idx, m) in models.iter().enumerate() {
         if !m.canonical_name.is_empty() {
-            groups.entry(m.canonical_name.clone()).or_default().push(idx);
+            groups
+                .entry(m.canonical_name.clone())
+                .or_default()
+                .push(idx);
         }
     }
 
@@ -365,15 +402,14 @@ pub fn dedup_models(models: &[UnifiedModel]) -> (Vec<UnifiedModel>, Vec<Duplicat
 }
 
 /// Aggregates models from all online backends, normalizes, deduplicates, and sorts alphabetically A→Z.
-pub async fn aggregate_models(
-    config: &BackendConfig,
-    probes: &[ProbeResult],
-) -> Vec<UnifiedModel> {
+pub async fn aggregate_models(config: &BackendConfig, probes: &[ProbeResult]) -> Vec<UnifiedModel> {
     let client = reqwest::Client::new();
     let mut unified = Vec::new();
 
     // Check online status per probe
-    let ollama_online = probes.iter().any(|p| p.backend == "ollama" && p.is_online());
+    let ollama_online = probes
+        .iter()
+        .any(|p| p.backend == "ollama" && p.is_online());
     let vllm_online = probes.iter().any(|p| p.backend == "vllm" && p.is_online());
     let gguf_online = probes.iter().any(|p| p.backend == "gguf" && p.is_online());
 
@@ -427,9 +463,18 @@ mod tests {
     // trace:verifies FR-002
     #[test]
     fn test_extract_quantization() {
-        assert_eq!(extract_quantization("model.q4_k_m.gguf"), Some("Q4_K_M".to_string()));
-        assert_eq!(extract_quantization("model-mxfp4.gguf"), Some("MXFP4".to_string()));
-        assert_eq!(extract_quantization("model-f16.bin"), Some("F16".to_string()));
+        assert_eq!(
+            extract_quantization("model.q4_k_m.gguf"),
+            Some("Q4_K_M".to_string())
+        );
+        assert_eq!(
+            extract_quantization("model-mxfp4.gguf"),
+            Some("MXFP4".to_string())
+        );
+        assert_eq!(
+            extract_quantization("model-f16.bin"),
+            Some("F16".to_string())
+        );
         assert_eq!(extract_quantization("plain-model"), None);
     }
 
@@ -444,7 +489,10 @@ mod tests {
         ];
 
         let models = aggregate_models(&config, &probes).await;
-        assert!(models.is_empty(), "When all backends offline, must return empty list");
+        assert!(
+            models.is_empty(),
+            "When all backends offline, must return empty list"
+        );
     }
 
     // trace:verifies FR-003
@@ -490,16 +538,25 @@ mod tests {
         assert_eq!(groups[0].canonical_name, "llama3");
         assert_eq!(groups[0].preferred_backend, "ollama");
 
-        let llama_ollama = deduped.iter().find(|m| m.backend == "ollama" && m.canonical_name == "llama3").unwrap();
+        let llama_ollama = deduped
+            .iter()
+            .find(|m| m.backend == "ollama" && m.canonical_name == "llama3")
+            .unwrap();
         assert!(llama_ollama.is_duplicate);
         assert!(llama_ollama.is_preferred);
         assert_eq!(llama_ollama.duplicate_backends, vec!["ollama", "gguf"]);
 
-        let llama_gguf = deduped.iter().find(|m| m.backend == "gguf" && m.canonical_name == "llama3").unwrap();
+        let llama_gguf = deduped
+            .iter()
+            .find(|m| m.backend == "gguf" && m.canonical_name == "llama3")
+            .unwrap();
         assert!(llama_gguf.is_duplicate);
         assert!(!llama_gguf.is_preferred);
 
-        let unique = deduped.iter().find(|m| m.canonical_name == "mellum2").unwrap();
+        let unique = deduped
+            .iter()
+            .find(|m| m.canonical_name == "mellum2")
+            .unwrap();
         assert!(!unique.is_duplicate);
         assert!(!unique.is_preferred);
     }

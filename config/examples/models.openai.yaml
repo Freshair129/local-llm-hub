@@ -1,0 +1,26 @@
+# Replace models.yaml in an operator-owned config directory. Set these variables locally.
+# OpenAI-compatible transport supports Ollama /v1, vLLM, LM Studio, llama.cpp and SGLang.
+endpoints:
+  local-node:
+    provider: openai-compatible
+    base_url: ${LOCAL_MODEL_BASE_URL}
+    api_key_env: LOCAL_MODEL_API_KEY
+    max_concurrency: 1
+    max_queue: 16
+    cloud: false
+models:
+  local:
+    endpoint: local-node
+    model: ${LOCAL_MODEL_NAME}
+    aliases: [chat, coder]
+    roles: [general, orchestrator, software_engineer, code_reviewer]
+    # Declare these only after verifying the actual model/server combination.
+    capabilities:
+      tool_calling: null
+      structured_output: null
+      vision: null
+      coding: null
+      reasoning: null
+      context_length: ${LOCAL_MODEL_CONTEXT_LENGTH}
+    timeout: 60
+    retries: 1

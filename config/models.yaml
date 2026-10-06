@@ -1,0 +1,21 @@
+endpoints:
+  mock-cpu:
+    provider: mock
+    max_concurrency: 1
+    max_queue: 32
+models:
+  mock-local:
+    endpoint: mock-cpu
+    model: deterministic-demo
+    aliases: [chat, coder]
+    roles: [general, orchestrator, software_engineer, code_reviewer]
+    capabilities:
+      tool_calling: true
+      structured_output: true
+      vision: false
+      coding: true
+      reasoning: true
+      context_length: 32768
+      provenance: configured
+    timeout: 30
+    retries: 0

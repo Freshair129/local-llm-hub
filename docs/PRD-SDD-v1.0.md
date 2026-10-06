@@ -186,7 +186,7 @@
 
 **WHEN** อุปกรณ์ภายนอกในวงแลนดาวน์โหลดโมเดล **THEN** system SHALL รองรับ HTTP Range Requests (Resume download) และบังคับใช้ Read-Only Mode เป็นค่าเริ่มต้นเพื่อความปลอดภัย
 
-### FR-018 VRAM Model Advisor & GPU Benchmark Comparison
+### FR-024 VRAM Model Advisor & GPU Benchmark Comparison
 **WHEN** ผู้ใช้เลือกขนาด VRAM หรือรุ่น GPU **THEN** system SHALL แสดง benchmark profiles ที่มีหลักฐาน provenance พร้อมแยกข้อมูลที่วัดจริงออกจากการประเมิน capacity
 
 **WHEN** ผู้ใช้เลือก GPUs เปรียบเทียบ **THEN** system SHALL รองรับได้สูงสุด 6 variants แสดงช่องที่ไม่มีผลทดสอบ และตรวจว่า model weights, suite, runtime, options, stage และ seeds ตรงกันก่อนสรุปผลเปรียบเทียบ

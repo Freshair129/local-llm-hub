@@ -3,17 +3,23 @@
 // trace:implements ARCH-001
 // trace:implements ADR-100
 
+use crate::models::types::{OffloadResult, SymlinkHealth};
+use chrono::Utc;
 use std::fs;
 use std::path::{Path, PathBuf};
-use chrono::Utc;
-use crate::models::types::{SymlinkHealth, OffloadResult};
 
 /// Auto-discovers potential Ollama blob roots and external offload targets
 pub fn discover_known_storage_roots() -> (String, Vec<String>) {
-    let user_profile = std::env::var("USERPROFILE").unwrap_or_else(|_| "C:\\Users\\Default".to_string());
+    let user_profile =
+        std::env::var("USERPROFILE").unwrap_or_else(|_| "C:\\Users\\Default".to_string());
     let default_blob_root = format!("{}\\.ollama\\models\\blobs", user_profile);
 
-    let candidate_drives = ["G:\\.ollama_blobs_root", "O:\\.ollama\\models\\blobs", "D:\\ollama_blobs", "E:\\ollama_blobs"];
+    let candidate_drives = [
+        "G:\\.ollama_blobs_root",
+        "O:\\.ollama\\models\\blobs",
+        "D:\\ollama_blobs",
+        "E:\\ollama_blobs",
+    ];
     let mut discovered = Vec::new();
 
     for candidate in &candidate_drives {
@@ -59,7 +65,12 @@ pub fn audit_symlinks_and_storage(
 
     let entries = match fs::read_dir(&blob_root_path) {
         Ok(e) => e,
-        Err(err) => return Err(format!("Failed to read blob directory '{}': {}", blob_pointer_root, err)),
+        Err(err) => {
+            return Err(format!(
+                "Failed to read blob directory '{}': {}",
+                blob_pointer_root, err
+            ))
+        }
     };
 
     let mut total_blob_count = 0;
@@ -104,7 +115,12 @@ pub fn audit_symlinks_and_storage(
                     if !target_exists || !target_in_storage {
                         bad_symlink_count += 1;
                         sym_status = "Broken Link".to_string();
-                        issues.push(format!("Broken/Divergent link: {} -> {} (exists: {})", name, target.display(), target_exists));
+                        issues.push(format!(
+                            "Broken/Divergent link: {} -> {} (exists: {})",
+                            name,
+                            target.display(),
+                            target_exists
+                        ));
                     }
                 }
                 Err(e) => {
@@ -144,9 +160,11 @@ pub fn audit_symlinks_and_storage(
     // Sort blobs by size descending (largest model blobs first)
     blobs.sort_by(|a, b| b.size_bytes.cmp(&a.size_bytes));
 
-    let reclaimable_gb = (large_real_blob_bytes as f64 / (1024.0 * 1024.0 * 1024.0) * 100.0).round() / 100.0;
-    let default_blobs_gb = (default_blobs_bytes as f64 / (1024.0 * 1024.0 * 1024.0) * 100.0).round() / 100.0;
-    
+    let reclaimable_gb =
+        (large_real_blob_bytes as f64 / (1024.0 * 1024.0 * 1024.0) * 100.0).round() / 100.0;
+    let default_blobs_gb =
+        (default_blobs_bytes as f64 / (1024.0 * 1024.0 * 1024.0) * 100.0).round() / 100.0;
+
     // Calculate target storage size if directory exists
     let mut target_storage_bytes: u64 = 0;
     if storage_root_path.exists() {
@@ -158,7 +176,8 @@ pub fn audit_symlinks_and_storage(
             }
         }
     }
-    let target_storage_gb = (target_storage_bytes as f64 / (1024.0 * 1024.0 * 1024.0) * 100.0).round() / 100.0;
+    let target_storage_gb =
+        (target_storage_bytes as f64 / (1024.0 * 1024.0 * 1024.0) * 100.0).round() / 100.0;
 
     Ok(SymlinkHealth {
         checked_at: Utc::now().to_rfc3339(),
@@ -193,7 +212,10 @@ pub fn execute_blob_offload(
     let dest_path = dest_dir.join(blob_hash);
 
     if !src_path.exists() {
-        return Err(format!("Source blob does not exist: {}", src_path.display()));
+        return Err(format!(
+            "Source blob does not exist: {}",
+            src_path.display()
+        ));
     }
 
     let meta = match fs::symlink_metadata(&src_path) {
@@ -216,8 +238,13 @@ pub fn execute_blob_offload(
 
     // Ensure target storage root directory exists
     if !dest_dir.exists() {
-        fs::create_dir_all(&dest_dir)
-            .map_err(|e| format!("Failed to create destination directory '{}': {}", dest_dir.display(), e))?;
+        fs::create_dir_all(&dest_dir).map_err(|e| {
+            format!(
+                "Failed to create destination directory '{}': {}",
+                dest_dir.display(),
+                e
+            )
+        })?;
     }
 
     // Copy or Move blob to destination
@@ -235,8 +262,7 @@ pub fn execute_blob_offload(
         // Move file across filesystems (copy + delete src)
         fs::copy(&src_path, &dest_path)
             .map_err(|e| format!("Failed to copy blob to destination: {}", e))?;
-        fs::remove_file(&src_path)
-            .map_err(|e| format!("Failed to remove source blob: {}", e))?;
+        fs::remove_file(&src_path).map_err(|e| format!("Failed to remove source blob: {}", e))?;
     }
 
     // Create Windows symlink pointing to destination
@@ -258,7 +284,11 @@ pub fn execute_blob_offload(
         destination_path: dest_path.to_string_lossy().to_string(),
         bytes_freed: blob_bytes,
         success: true,
-        message: format!("Successfully offloaded {:.2} GB to {}", blob_bytes as f64 / (1024.0 * 1024.0 * 1024.0), storage_root),
+        message: format!(
+            "Successfully offloaded {:.2} GB to {}",
+            blob_bytes as f64 / (1024.0 * 1024.0 * 1024.0),
+            storage_root
+        ),
     })
 }
 
@@ -297,7 +327,8 @@ mod tests {
         let real_blob_path = blob_path.join(real_blob_name);
         {
             let mut file = fs::File::create(&real_blob_path).expect("create mock blob");
-            file.write_all(b"sample data content").expect("write sample data");
+            file.write_all(b"sample data content")
+                .expect("write sample data");
             // Set file size to 60MB via set_len if space permits
             let _ = file.set_len(60 * 1024 * 1024);
         }
@@ -320,7 +351,8 @@ mod tests {
         let health = audit_symlinks_and_storage(
             &storage_path.to_string_lossy(),
             &blob_path.to_string_lossy(),
-        ).expect("audit succeeds");
+        )
+        .expect("audit succeeds");
 
         assert!(health.total_blob_count >= 1);
         assert_eq!(health.large_real_blob_count, 1);

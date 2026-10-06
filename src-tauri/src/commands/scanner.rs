@@ -64,23 +64,39 @@ fn read_gguf_string<R: Read>(reader: &mut R) -> Result<String, String> {
 /// Safely skip over a GGUF value according to value type
 fn skip_gguf_value<R: Read + Seek>(reader: &mut R, value_type: u32) -> Result<(), String> {
     match value_type {
-        0 | 1 | 7 => { // UINT8, INT8, BOOL
-            reader.seek(SeekFrom::Current(1)).map_err(|e| e.to_string())?;
+        0 | 1 | 7 => {
+            // UINT8, INT8, BOOL
+            reader
+                .seek(SeekFrom::Current(1))
+                .map_err(|e| e.to_string())?;
         }
-        2 | 3 => { // UINT16, INT16
-            reader.seek(SeekFrom::Current(2)).map_err(|e| e.to_string())?;
+        2 | 3 => {
+            // UINT16, INT16
+            reader
+                .seek(SeekFrom::Current(2))
+                .map_err(|e| e.to_string())?;
         }
-        4 | 5 | 6 => { // UINT32, INT32, FLOAT32
-            reader.seek(SeekFrom::Current(4)).map_err(|e| e.to_string())?;
+        4 | 5 | 6 => {
+            // UINT32, INT32, FLOAT32
+            reader
+                .seek(SeekFrom::Current(4))
+                .map_err(|e| e.to_string())?;
         }
-        8 => { // STRING
+        8 => {
+            // STRING
             let len = read_u64(reader)? as i64;
-            reader.seek(SeekFrom::Current(len)).map_err(|e| e.to_string())?;
+            reader
+                .seek(SeekFrom::Current(len))
+                .map_err(|e| e.to_string())?;
         }
-        10 | 11 | 12 => { // UINT64, INT64, FLOAT64
-            reader.seek(SeekFrom::Current(8)).map_err(|e| e.to_string())?;
+        10 | 11 | 12 => {
+            // UINT64, INT64, FLOAT64
+            reader
+                .seek(SeekFrom::Current(8))
+                .map_err(|e| e.to_string())?;
         }
-        9 => { // ARRAY
+        9 => {
+            // ARRAY
             let item_type = read_u32(reader)?;
             let array_len = read_u64(reader)?;
             for _ in 0..array_len {
@@ -99,7 +115,8 @@ pub fn parse_gguf_header(path: &Path) -> Result<GgufMetadata, String> {
 
     // 1. Verify magic bytes: 'GGUF'
     let mut magic = [0u8; 4];
-    file.read_exact(&mut magic).map_err(|e| format!("Failed to read magic: {}", e))?;
+    file.read_exact(&mut magic)
+        .map_err(|e| format!("Failed to read magic: {}", e))?;
     if &magic != b"GGUF" {
         return Err("Not a valid GGUF file (magic header mismatch)".to_string());
     }
@@ -147,18 +164,22 @@ pub fn parse_gguf_header(path: &Path) -> Result<GgufMetadata, String> {
                 }
             }
             "general.parameter_count" => {
-                if val_type == 10 { // UINT64
+                if val_type == 10 {
+                    // UINT64
                     parameter_count = read_u64(&mut file).ok();
-                } else if val_type == 4 { // UINT32
+                } else if val_type == 4 {
+                    // UINT32
                     parameter_count = read_u32(&mut file).map(|v| v as u64).ok();
                 } else {
                     let _ = skip_gguf_value(&mut file, val_type);
                 }
             }
             k if k.ends_with(".context_length") => {
-                if val_type == 10 { // UINT64
+                if val_type == 10 {
+                    // UINT64
                     context_length = read_u64(&mut file).ok();
-                } else if val_type == 4 { // UINT32
+                } else if val_type == 4 {
+                    // UINT32
                     context_length = read_u32(&mut file).map(|v| v as u64).ok();
                 } else {
                     let _ = skip_gguf_value(&mut file, val_type);
@@ -172,7 +193,11 @@ pub fn parse_gguf_header(path: &Path) -> Result<GgufMetadata, String> {
         }
     }
 
-    let filename = path.file_name().unwrap_or_default().to_string_lossy().to_string();
+    let filename = path
+        .file_name()
+        .unwrap_or_default()
+        .to_string_lossy()
+        .to_string();
     let quant = extract_quantization(&filename);
 
     Ok(GgufMetadata {
@@ -193,7 +218,10 @@ pub fn scan_directory_for_gguf(dir_path: &str) -> Result<Vec<UnifiedModel>, Stri
 
     // AC 5: Reject system directories
     if is_forbidden_path(dir_path) {
-        return Err(format!("Access denied: '{}' is a protected system directory.", dir_path));
+        return Err(format!(
+            "Access denied: '{}' is a protected system directory.",
+            dir_path
+        ));
     }
 
     let root = PathBuf::from(dir_path);
@@ -232,7 +260,11 @@ pub fn scan_directory_for_gguf(dir_path: &str) -> Result<Vec<UnifiedModel>, Stri
                             continue;
                         }
 
-                        let filename = p.file_name().unwrap_or_default().to_string_lossy().to_string();
+                        let filename = p
+                            .file_name()
+                            .unwrap_or_default()
+                            .to_string_lossy()
+                            .to_string();
                         let canonical = normalize_model_name(&filename);
                         let quant = extract_quantization(&filename);
 
@@ -305,20 +337,24 @@ mod tests {
 
             // KV 1: "general.name" = "MockModel"
             let key1 = "general.name";
-            f.write_all(&(key1.len() as u64).to_le_bytes()).expect("k1 len");
+            f.write_all(&(key1.len() as u64).to_le_bytes())
+                .expect("k1 len");
             f.write_all(key1.as_bytes()).expect("k1 bytes");
             f.write_all(&8u32.to_le_bytes()).expect("val type string");
             let val1 = "MockModel";
-            f.write_all(&(val1.len() as u64).to_le_bytes()).expect("v1 len");
+            f.write_all(&(val1.len() as u64).to_le_bytes())
+                .expect("v1 len");
             f.write_all(val1.as_bytes()).expect("v1 bytes");
 
             // KV 2: "general.architecture" = "llama"
             let key2 = "general.architecture";
-            f.write_all(&(key2.len() as u64).to_le_bytes()).expect("k2 len");
+            f.write_all(&(key2.len() as u64).to_le_bytes())
+                .expect("k2 len");
             f.write_all(key2.as_bytes()).expect("k2 bytes");
             f.write_all(&8u32.to_le_bytes()).expect("val type string");
             let val2 = "llama";
-            f.write_all(&(val2.len() as u64).to_le_bytes()).expect("v2 len");
+            f.write_all(&(val2.len() as u64).to_le_bytes())
+                .expect("v2 len");
             f.write_all(val2.as_bytes()).expect("v2 bytes");
         }
 

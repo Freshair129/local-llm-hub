@@ -3,10 +3,10 @@
 // trace:verifies TC-FEAT-005-INTEG
 //! Feature Integration Test: Model aggregation across Ollama, GGUF directory, and normalization.
 
+use std::time::Instant;
 use tauri_app_lib::commands::backends::probe_all_backends;
 use tauri_app_lib::commands::models::aggregate_models;
 use tauri_app_lib::state::BackendConfig;
-use std::time::Instant;
 
 #[tokio::test]
 async fn test_tc_feat_005_model_aggregation_integration() {
@@ -27,15 +27,25 @@ async fn test_tc_feat_005_model_aggregation_integration() {
 
     println!("Total Aggregated Models Found: {}", models.len());
     for m in models.iter().take(5) {
-        println!("  - [{}] {} -> canonical: '{}'", m.backend, m.name, m.canonical_name);
+        println!(
+            "  - [{}] {} -> canonical: '{}'",
+            m.backend, m.name, m.canonical_name
+        );
     }
 
     // Verification 1: Must find models from online Ollama backend
-    assert!(!models.is_empty(), "Aggregated models list should not be empty");
+    assert!(
+        !models.is_empty(),
+        "Aggregated models list should not be empty"
+    );
 
     // Verification 2: Each model must have valid canonical_name
     for m in &models {
-        assert!(!m.canonical_name.is_empty(), "Canonical name must not be empty for {}", m.name);
+        assert!(
+            !m.canonical_name.is_empty(),
+            "Canonical name must not be empty for {}",
+            m.name
+        );
         assert!(!m.backend.is_empty(), "Backend identifier must be set");
     }
 

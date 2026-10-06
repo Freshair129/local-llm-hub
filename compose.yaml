@@ -1,0 +1,21 @@
+services:
+  agent-runtime:
+    build:
+      context: .
+      dockerfile: runtime/Dockerfile
+    environment:
+      LOCAL_LLM_HUB_TOKEN: ${LOCAL_LLM_HUB_TOKEN:?Generate .env with local-llm-hub init first}
+    ports:
+      - "127.0.0.1:8787:8787"
+    volumes:
+      - hub-state:/app/.hub
+      - hub-workspace:/app/workspace
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    init: true
+volumes:
+  hub-state:
+  hub-workspace:
