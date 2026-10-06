@@ -8,10 +8,17 @@ from urllib.parse import urlsplit
 
 import jsonschema
 import yaml
-from pydantic import Field, SecretStr, ValidationError
+from pydantic import Field, SecretStr, StrictBool, ValidationError
 
 from .errors import HubError
-from .models import BUILTIN_TOOLS, Capability, Identifier, ModelDefinition, StrictModel
+from .models import (
+    BUILTIN_TOOLS,
+    Capability,
+    Identifier,
+    InferenceSettings,
+    ModelDefinition,
+    StrictModel,
+)
 from .registry import ModelRegistry
 
 
@@ -23,6 +30,7 @@ class EndpointDefinition(StrictModel):
     cloud: bool = False
     max_concurrency: int = Field(default=1, gt=0, le=128)
     max_queue: int = Field(default=32, ge=0, le=10000)
+    supported_inference_settings: tuple[Literal['top_p', 'presence_penalty', 'reasoning_effort'], ...] = ()
 
 
 class ProjectDefinition(StrictModel):
@@ -50,6 +58,8 @@ class AgentDefinition(StrictModel):
     max_tokens: int = Field(default=1024, gt=0)
     allow_cloud: bool = False
     output_schema: dict[str, Any] | None = None
+    inference_settings: InferenceSettings = Field(default_factory=InferenceSettings)
+    emit_run_evidence: StrictBool = False
 
 
 class RuntimeSettings(StrictModel):
@@ -213,6 +223,20 @@ def load_config(directory: Path, environ: Mapping[str, str] | None = None) -> Hu
                 raise HubError('CONFIG_INVALID', 'Unknown agent model') from error
         elif not any(agent.role in m.roles for m in registry.list()):
             raise HubError('CONFIG_INVALID', 'Agent role has no registered models')
+        required_settings = agent.inference_settings.optional_settings()
+        if required_settings:
+            initial = ([registry.resolve(agent.model)] if agent.model != 'auto' else
+                       [m for m in registry.list() if agent.role in m.roles])
+            checked: set[str] = set()
+            pending = list(initial)
+            while pending:
+                model = pending.pop()
+                if model.id in checked:
+                    continue
+                checked.add(model.id)
+                if required_settings - set(endpoints[model.endpoint].supported_inference_settings):
+                    raise HubError('CONFIG_INVALID', 'Agent settings unsupported by a configured candidate')
+                pending.extend(registry.resolve(fallback) for fallback in model.fallbacks)
     token = env.get(config.runtime.auth_env, '')
     if len(token) < 16 or token in {'replace-with-random-token', 'change-me'}:
         raise HubError('CONFIG_INVALID', 'Set a runtime auth token of at least 16 characters')

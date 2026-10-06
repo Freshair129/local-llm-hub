@@ -12,8 +12,9 @@ import tempfile
 import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
+from hashlib import sha256
 from itertools import islice
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import Any, Literal
 
 import httpx
@@ -23,7 +24,7 @@ from pydantic import Field, ValidationError
 from .config import HubConfig
 from .errors import HubError
 from .memory import MemoryStore, Namespace
-from .models import StrictModel
+from .models import ReadEvidence, StrictModel
 from .permissions import ExecutionIdentity, PermissionPolicy, denied
 
 
@@ -74,6 +75,7 @@ class ToolContext:
     memory: MemoryStore
     delegate: Callable[[str, str], Awaitable[str]] | None = None
     request_id: str | None = None
+    reads: list[ReadEvidence] | None = None
 
 
 @dataclass
@@ -114,7 +116,8 @@ class ToolRegistry:
         jsonschema.Draft202012Validator.check_schema(definition.output_schema)
         self.definitions[definition.name] = definition
 
-    async def execute(self, name: str, arguments: dict[str, Any], execution: ToolContext) -> ToolResult:
+    async def execute(self, name: str, arguments: dict[str, Any], execution: ToolContext,
+                      *, tool_call_id: str | None = None) -> ToolResult:
         if name not in self.definitions:
             raise HubError('TOOL_NOT_FOUND', 'Unknown tool', 404)
         definition = self.definitions[name]
@@ -138,8 +141,19 @@ class ToolRegistry:
             'agent_id': execution.identity.agent_id, 'tool_name': name}))
         raw = result.model_dump_json().encode('utf-8')
         if len(raw) > self.limit:
-            return ToolResult(data={'preview': raw[:self.limit // 4].decode('utf-8', errors='replace')},
-                              truncated=True, original_bytes=len(raw))
+            result = ToolResult(data={'preview': raw[:self.limit // 4].decode('utf-8', errors='replace')},
+                                truncated=True, original_bytes=len(raw))
+        if name == 'filesystem.read' and execution.reads is not None:
+            if not tool_call_id:
+                raise HubError('TOOL_OUTPUT_INVALID', 'Read evidence requires a tool call identity', 502)
+            text = result.data.get('text', result.data.get('preview'))
+            if not isinstance(text, str):
+                raise HubError('TOOL_OUTPUT_INVALID', 'Read result has no text', 502)
+            encoded = text.encode('utf-8')
+            execution.reads.append(ReadEvidence(root=arguments.get('root', 0),
+                path=PurePosixPath(arguments.get('path', '.').replace('\\', '/')).as_posix(),
+                tool_call_id=tool_call_id, sha256=sha256(encoded).hexdigest(), returned_bytes=len(encoded),
+                truncated=result.truncated or bool(result.data.get('truncated', False))))
         return result
 
     async def _native(self, name: str, args: dict[str, Any], ctx: ToolContext) -> Any:

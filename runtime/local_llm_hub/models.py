@@ -44,6 +44,7 @@ class ToolCall(StrictModel):
     id: str
     name: str
     arguments: dict[str, Any] = Field(default_factory=dict)
+    arguments_sha256: str | None = Field(default=None, exclude=True)
 
 
 class Message(StrictModel):
@@ -59,11 +60,59 @@ class ToolSchema(StrictModel):
     parameters: dict[str, Any]
 
 
-class InferenceRequest(StrictModel):
+class InferenceSettings(StrictModel):
+    temperature: float = Field(default=0.2, ge=0, le=2, strict=True, allow_inf_nan=False)
+    top_p: float | None = Field(default=None, gt=0, le=1, strict=True, allow_inf_nan=False)
+    presence_penalty: float | None = Field(default=None, ge=-2, le=2, strict=True, allow_inf_nan=False)
+    reasoning_effort: Literal['none'] | None = None
+
+    def optional_settings(self) -> set[str]:
+        return {name for name in ('top_p', 'presence_penalty', 'reasoning_effort')
+                if getattr(self, name) is not None}
+
+
+class SentSettings(InferenceSettings):
+    max_tokens: int = Field(gt=0)
+
+
+class ProviderAttempt(StrictModel):
+    model_id: str
+    ordinal: int = Field(gt=0)
+    sent_settings: SentSettings
+    outcome: Literal['success', 'error']
+
+
+class ReadEvidence(StrictModel):
+    root: int = Field(ge=0)
+    path: str
+    tool_call_id: str
+    sha256: str
+    returned_bytes: int = Field(ge=0)
+    truncated: bool
+
+
+class RunEvidence(StrictModel):
+    version: Literal['0.1.0'] = '0.1.0'
+    request_id: str
+    session_id: str
+    agent_id: str
+    input_sha256: str
+    output_schema_sha256: str | None
+    output_kind: Literal['text', 'tool_schema']
+    provider_attempts: list[ProviderAttempt]
+    reads: list[ReadEvidence]
+    final_arguments_sha256: str | None
+
+
+class InferenceRequest(InferenceSettings):
     messages: list[Message]
     tools: list[ToolSchema] = Field(default_factory=list)
-    temperature: float = Field(default=0.2, ge=0, le=2)
     max_tokens: int = Field(default=1024, gt=0)
+
+    def sent_settings(self) -> SentSettings:
+        return SentSettings(temperature=self.temperature, top_p=self.top_p,
+            presence_penalty=self.presence_penalty, reasoning_effort=self.reasoning_effort,
+            max_tokens=self.max_tokens)
 
 
 class Usage(StrictModel):
@@ -106,6 +155,7 @@ class RunResult(StrictModel):
     model_id: str
     output: Any
     usage: Usage | None = None
+    evidence: RunEvidence | None = None
 
 
 BUILTIN_TOOLS = frozenset({

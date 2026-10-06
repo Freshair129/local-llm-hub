@@ -130,7 +130,7 @@ class AgentRuntime:
         result = await self.driver.run(agent, text, session.messages, context, budget)
         session.messages = result.messages
         return RunResult(request_id=request_id, session_id=session.id, agent_id=agent.id,
-                         model_id=result.model_id, output=result.output, usage=budget.usage())
+                         model_id=result.model_id, output=result.output, usage=budget.usage(), evidence=result.evidence)
 
     async def close(self) -> None:
         await self.router.close()

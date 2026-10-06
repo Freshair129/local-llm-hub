@@ -9,7 +9,7 @@ from typing import Any, Protocol
 from .config import HubConfig
 from .context import ContextManager
 from .errors import HubError
-from .models import ModelDefinition, RoutedResponse, RouteRequest
+from .models import ModelDefinition, ProviderAttempt, RoutedResponse, RouteRequest
 from .providers import MockProvider, OpenAICompatibleProvider, Provider
 from .registry import ModelRegistry
 from .scheduler import EndpointScheduler
@@ -78,12 +78,14 @@ class ModelRouter:
             raise HubError('MODEL_UNAVAILABLE', 'No permitted model is currently available', 503)
         return eligible
 
-    async def complete(self, request: RouteRequest) -> RoutedResponse:
+    async def complete(self, request: RouteRequest, *, attempts: list[ProviderAttempt] | None = None) -> RoutedResponse:
         candidates = self.candidates(request)
         deadline = time.monotonic() + request.timeout
         last: HubError | None = None
         attempted: list[str] = []
         for model in candidates:
+            if request.inference.optional_settings() - set(self.config.endpoints[model.endpoint].supported_inference_settings):
+                raise HubError('MODEL_CAPABILITY_MISMATCH', 'Candidate does not support requested inference settings', 422)
             try:
                 prepared = self.context.prepare(request.inference,
                     min(request.context_budget, model.capabilities.context_length))
@@ -97,12 +99,14 @@ class ModelRouter:
                 attempted.append(model.id)
                 started = time.monotonic()
                 dispatched = False
+                succeeded = False
                 try:
                     async with asyncio.timeout(remaining):
                         async with self.scheduler.lease(model.endpoint, min(self.config.runtime.queue_timeout, remaining)):
                             async with asyncio.timeout(model.timeout):
                                 dispatched = True
                                 response = await self.providers[model.endpoint].complete(prepared, model)
+                                succeeded = True
                     state = self.states[model.id]
                     state.status = 'available'
                     state.last_success = datetime.now(UTC).isoformat()
@@ -114,6 +118,10 @@ class ModelRouter:
                     if not dispatched:
                         raise
                     last = error
+                finally:
+                    if attempts is not None and dispatched:
+                        attempts.append(ProviderAttempt(model_id=model.id, ordinal=len(attempts) + 1,
+                            sent_settings=prepared.sent_settings(), outcome='success' if succeeded else 'error'))
                 if not dispatched:
                     raise HubError('MODEL_TIMEOUT', 'Routing queue deadline exceeded', 504)
                 self.states[model.id].failure_count += 1

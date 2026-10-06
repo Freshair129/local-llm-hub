@@ -1,5 +1,7 @@
 # trace:verifies FR-019
 import asyncio
+import hashlib
+import json
 
 import httpx
 import pytest
@@ -112,3 +114,82 @@ async def test_http_transport_request_and_malformed_reply() -> None:
     assert response == InferenceResponse(content='ok')
     assert str(requests[0].url) == 'http://provider.invalid/v1/chat/completions'
     await provider.close()
+
+
+async def test_inference_settings_reach_wire() -> None:
+    captured = []
+    raw = '{ "answer": 42 }'
+    def respond(req):
+        captured.append(json.loads(req.content))
+        return httpx.Response(200, json={'choices': [{'message': {'tool_calls': [{
+            'id': 'done', 'function': {'name': 'final_result', 'arguments': raw}}]}, 'finish_reason': 'tool_calls'}]})
+    endpoint = EndpointDefinition(provider='openai-compatible', base_url='http://provider.invalid/v1',
+        supported_inference_settings=('top_p', 'presence_penalty', 'reasoning_effort'))
+    provider = OpenAICompatibleProvider(endpoint, httpx.AsyncClient(transport=httpx.MockTransport(respond)))
+    try:
+        controlled = InferenceRequest(messages=[Message(role='user', content='x')],
+            temperature=1, top_p=0.95, presence_penalty=1.5, reasoning_effort='none', max_tokens=2048)
+        result = await provider.complete(controlled, ModelDefinition(id='x', endpoint='e', model='upstream'))
+        assert {k: captured[0][k] for k in ('temperature', 'top_p', 'presence_penalty', 'reasoning_effort', 'max_tokens')} == {
+            'temperature': 1, 'top_p': 0.95, 'presence_penalty': 1.5, 'reasoning_effort': 'none', 'max_tokens': 2048}
+        assert result.tool_calls[0].arguments_sha256 == hashlib.sha256(raw.encode()).hexdigest()
+        assert 'arguments_sha256' not in result.tool_calls[0].model_dump()
+        await provider.complete(request().inference, ModelDefinition(id='x', endpoint='e', model='upstream'))
+        assert not {'top_p', 'presence_penalty', 'reasoning_effort'} & captured[1].keys()
+    finally:
+        await provider.close()
+
+
+@pytest.mark.parametrize('raw', [
+    '{"x":1,"x":2}', '{"x":{"y":1,"y":2}}', r'{"x":1,"\u0078":2}',
+    '{"x":NaN}', '{"x":Infinity}', '{"x":1e400}', '{"x":1} trailing', '[1,2]',
+])
+async def test_strict_provider_and_tool_json(raw) -> None:
+    body = {'choices': [{'message': {'tool_calls': [{'id': 'x',
+        'function': {'name': 'final_result', 'arguments': raw}}]}, 'finish_reason': 'tool_calls'}]}
+    provider = OpenAICompatibleProvider(EndpointDefinition(provider='openai-compatible', base_url='http://provider.invalid/v1'),
+        httpx.AsyncClient(transport=httpx.MockTransport(lambda _: httpx.Response(200, json=body))))
+    try:
+        with pytest.raises(HubError, match='MODEL_RESPONSE_INVALID'):
+            await provider.complete(request().inference, ModelDefinition(id='x', endpoint='e', model='x'))
+    finally:
+        await provider.close()
+
+
+@pytest.mark.parametrize('raw', [
+    '{"choices":[],"choices":[{"message":{"content":"ok"}}]}',
+    '{"choices":[{"message":{"content":"ok","content":"bad"}}]}',
+    '{"choices":[{"message":{"content":"ok"}}],"unused":NaN}',
+])
+async def test_strict_response_envelope(raw) -> None:
+    provider = OpenAICompatibleProvider(EndpointDefinition(provider='openai-compatible', base_url='http://provider.invalid/v1'),
+        httpx.AsyncClient(transport=httpx.MockTransport(lambda _: httpx.Response(200, content=raw))))
+    try:
+        with pytest.raises(HubError, match='MODEL_RESPONSE_INVALID'):
+            await provider.complete(request().inference, ModelDefinition(id='x', endpoint='e', model='x'))
+    finally:
+        await provider.close()
+
+
+async def test_settings_checked_for_fallback(config: HubConfig) -> None:
+    seen = []
+    class Failing(MockProvider):
+        async def complete(self, request, model):
+            seen.append(model.id)
+            raise HubError('MODEL_TIMEOUT', 'timed out', 504, retryable=True)
+    class Forbidden(MockProvider):
+        async def complete(self, request, model):
+            pytest.fail('unsupported fallback must not dispatch')
+    config.endpoints['cpu'] = config.endpoints['cpu'].model_copy(update={'supported_inference_settings': ('reasoning_effort',)})
+    config.endpoints['other'] = EndpointDefinition(provider='mock')
+    config.models['demo'] = config.models['demo'].model_copy(update={'fallbacks': ('backup',)})
+    config.models['backup'] = config.models['demo'].model_copy(update={'id': 'backup', 'endpoint': 'other', 'fallbacks': (), 'aliases': ()})
+    router = ModelRouter(config, {'cpu': Failing(), 'other': Forbidden()})
+    controlled = request('demo').model_copy(update={'inference': InferenceRequest(
+        messages=[Message(role='user', content='x')], reasoning_effort='none')})
+    try:
+        with pytest.raises(HubError, match='MODEL_CAPABILITY_MISMATCH'):
+            await router.complete(controlled)
+        assert seen == ['demo']
+    finally:
+        await router.close()

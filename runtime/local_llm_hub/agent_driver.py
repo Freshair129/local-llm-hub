@@ -5,7 +5,7 @@ from typing import Any, Protocol
 
 from .config import AgentDefinition, RuntimeSettings
 from .errors import HubError
-from .models import Message, Usage
+from .models import Message, RunEvidence, Usage
 from .tools import ToolContext
 
 
@@ -44,6 +44,7 @@ class DriverResult:
     output: Any
     messages: list[Message]
     model_id: str
+    evidence: RunEvidence | None = None
 
 
 class AgentDriver(Protocol):

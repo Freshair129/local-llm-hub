@@ -1,6 +1,6 @@
 ---
 id: HUB-VERIFICATION
-version: 0.6.0
+version: 0.7.0
 status: active
 superseded_by: null
 date: 2026-10-05
@@ -9,6 +9,10 @@ scope: local engineering checkpoint
 ---
 
 # Implemented checkpoint and verification receipt
+
+## Zuri native client extension, 2026-10-06
+
+The approved P1 extension is tracked in [its own offline verification receipt](../plans/HUB-ZURI-P1-VERIFICATION.md). Historical desktop/Docker/live evidence below is unchanged and does not qualify this new contract against a live model or sidecar. Version 0.6.0 -> 0.7.0 adds this separate verification boundary.
 
 ## Approved repair checkpoint, 2026-10-05
 

@@ -1,6 +1,8 @@
 # trace:implements FR-019
 import json
+import math
 import time
+from hashlib import sha256
 from typing import Any, Protocol
 from uuid import uuid4
 
@@ -31,6 +33,25 @@ class CapabilityProbe(Protocol):
     async def probe(self, provider: Provider, model: ModelDefinition) -> dict[str, bool | None]: ...
 
 
+def strict_json_loads(value: str | bytes) -> Any:
+    def object_pairs(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
+        result: dict[str, Any] = {}
+        for key, item in pairs:
+            if key in result:
+                raise ValueError('Duplicate JSON key')
+            result[key] = item
+        return result
+    def finite_float(value: str) -> float:
+        number = float(value)
+        if not math.isfinite(number):
+            raise ValueError('Non-finite JSON number')
+        return number
+    def invalid_constant(value: str) -> Any:
+        raise ValueError('Non-finite JSON constant')
+    return json.loads(value, object_pairs_hook=object_pairs, parse_float=finite_float,
+                      parse_constant=invalid_constant)
+
+
 class MockProvider:
     """Explicit CPU test/demo provider. Directives are only interpreted in mock mode."""
 
@@ -41,19 +62,20 @@ class MockProvider:
         text = next((m.content for m in reversed(request.messages) if m.role == 'user'), '')
         if text.startswith('tool:'):
             try:
-                data = json.loads(text[5:])
+                data = strict_json_loads(text[5:])
                 call = ToolCall(id=uuid4().hex, name=data['name'].replace('.', '__'), arguments=data.get('arguments', {}))
             except (ValueError, TypeError, KeyError, ValidationError) as error:
                 raise HubError('MODEL_RESPONSE_INVALID', 'Invalid mock tool directive', 502) from error
             return InferenceResponse(tool_calls=[call], finish_reason='tool_calls')
         if text.startswith('json:'):
             try:
-                value = json.loads(text[5:])
+                value = strict_json_loads(text[5:])
             except ValueError as error:
                 raise HubError('MODEL_RESPONSE_INVALID', 'Invalid mock JSON directive', 502) from error
             output_tool = next((t for t in request.tools if t.name.startswith('final_result')), None)
             if output_tool and isinstance(value, dict):
-                return InferenceResponse(tool_calls=[ToolCall(id=uuid4().hex, name=output_tool.name, arguments=value)], finish_reason='tool_calls')
+                return InferenceResponse(tool_calls=[ToolCall(id=uuid4().hex, name=output_tool.name, arguments=value,
+                    arguments_sha256=sha256(text[5:].encode('utf-8')).hexdigest())], finish_reason='tool_calls')
             return InferenceResponse(content=json.dumps(value))
         return InferenceResponse(content=text[5:] if text.startswith('echo:') else f'Mock: {text}')
 
@@ -74,6 +96,8 @@ class OpenAICompatibleProvider:
         return {'Authorization': f'Bearer {key.get_secret_value()}'} if key else {}
 
     async def complete(self, request: InferenceRequest, model: ModelDefinition) -> InferenceResponse:
+        if request.optional_settings() - set(self.endpoint.supported_inference_settings):
+            raise HubError('MODEL_CAPABILITY_MISMATCH', 'Endpoint does not support requested inference settings', 422)
         messages: list[dict[str, Any]] = []
         for message in request.messages:
             item: dict[str, Any] = {'role': message.role, 'content': message.content}
@@ -84,7 +108,7 @@ class OpenAICompatibleProvider:
                     'name': t.name, 'arguments': json.dumps(t.arguments)}} for t in message.tool_calls]
             messages.append(item)
         payload: dict[str, Any] = {'model': model.model, 'messages': messages, 'stream': False,
-            'temperature': request.temperature, 'max_tokens': request.max_tokens}
+            **request.sent_settings().model_dump(exclude_none=True)}
         if request.tools:
             payload['tools'] = [{'type': 'function', 'function': t.model_dump()} for t in request.tools]
         try:
@@ -96,11 +120,13 @@ class OpenAICompatibleProvider:
                     body.extend(chunk)
                     if len(body) > 2_000_000:
                         raise HubError('MODEL_RESPONSE_INVALID', 'Provider response exceeds byte limit', 502)
-            data = json.loads(body)
+            data = strict_json_loads(bytes(body))
             choice = data['choices'][0]
             message = choice['message']
             calls = [ToolCall(id=t['id'], name=t['function']['name'],
-                arguments=json.loads(t['function']['arguments'])) for t in message.get('tool_calls', [])]
+                arguments=strict_json_loads(t['function']['arguments']),
+                arguments_sha256=sha256(t['function']['arguments'].encode('utf-8')).hexdigest())
+                for t in message.get('tool_calls', [])]
             content = message.get('content')
             if not calls and not isinstance(content, str):
                 raise ValueError('Missing content')
@@ -112,7 +138,7 @@ class OpenAICompatibleProvider:
             raise HubError('MODEL_TIMEOUT', 'Provider request timed out', 504, retryable=True) from error
         except httpx.TransportError as error:
             raise HubError('MODEL_UNAVAILABLE', 'Provider transport failed', 503, retryable=True) from error
-        except (ValueError, KeyError, IndexError, TypeError) as error:
+        except (ValueError, KeyError, IndexError, TypeError, AttributeError, RecursionError) as error:
             raise HubError('MODEL_RESPONSE_INVALID', 'Invalid provider response', 502) from error
 
     @staticmethod

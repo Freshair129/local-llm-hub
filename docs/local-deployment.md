@@ -1,6 +1,6 @@
 ---
 id: HUB-DEPLOYMENT-GUIDE
-version: 0.4.0
+version: 0.5.0
 status: active
 superseded_by: null
 ---
@@ -87,3 +87,11 @@ wsl -d Ubuntu -u root -- env LOCAL_LLM_HUB_SOURCE_COMMIT=$sourceCommit python3 /
 0.2.0 -> 0.3.0: add reproducible native test setup and the actual host-storage blocker; preserve the distinction between test provider and real-model acceptance.
 
 0.3.0 -> 0.4.0: record the approved exact-cache purge, Docker/Compose installation and 8/8 CPU-container acceptance, including Linux symlink and cleanup verification.
+
+## Zuri P1 delivery boundary
+
+P1 extends the separately operated native runtime only. No launcher, service startup, installer, Python embedding, model download or Ollama ownership behavior changed. A client first checks authenticated `/v1/capabilities` and fails closed on version/capability mismatch. Native client contract 0.2.0 and evidence 0.1.0 are independent of the unchanged runtime package version 0.1.0.
+
+Zuri adapter/live pilot (P2) and managed sidecar packaging (P3) remain deferred under [CR-HUB-001](plans/CR-HUB-001-zuri-agent-backend.md). Rollback can disable opt-in evidence/client use without modifying memory or existing legacy configuration.
+
+Version diff: 0.4.0 -> 0.5.0: document approved native Zuri P1 contract; live/sidecar readiness is not implied.

@@ -4,7 +4,7 @@ domain: inference-gateway
 owner: Boss
 status: active
 superseded_by: null
-version: 0.4.0
+version: 0.5.0
 priority: P0
 features: [CROSS-FEAT-002]
 depends_on:
@@ -40,3 +40,7 @@ New requirement derived from the approved 0.2.0 architecture.
 0.2.0 -> 0.3.0: approved additive catalog IPC and native desktop acceptance; no streaming or provider extension.
 
 0.3.0 -> 0.4.0: record the executed R5 container packaging acceptance without widening runtime/API contracts.
+
+## Zuri P1 approved extension — 2026-10-06
+
+0.4.0 -> 0.5.0: [CR-HUB-001](../plans/CR-HUB-001-zuri-agent-backend.md) and [SPEC-HUB-ZURI-001](../plans/SPEC-HUB-ZURI-001-agent-backend.md) extend the native client contract only. P1 permits typed inference controls, strict output boundary, opt-in request-bound evidence and capability discovery with offline tests. Existing signatures/permissions/chat subset remain; P2 live integration and P3 sidecar are deferred. The extension passed its [P1 offline checkpoint](../plans/HUB-ZURI-P1-VERIFICATION.md); this does not qualify live Zuri integration or sidecar packaging.

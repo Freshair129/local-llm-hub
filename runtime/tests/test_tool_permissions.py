@@ -1,5 +1,6 @@
 # trace:verifies FR-021
 import asyncio
+import hashlib
 import os
 import subprocess
 import sys
@@ -113,3 +114,22 @@ async def test_exact_shell_policy_and_timeout(config, tmp_path) -> None:
     with pytest.raises(HubError, match='TOOL_TIMEOUT'):
         await registry.execute('shell', {'argv':list(slow)}, ctx)
     await memory.close()
+
+
+async def test_read_evidence_bounded_and_denied(config, tmp_path) -> None:
+    (tmp_path / 'large.txt').write_text('x' * 1000)
+    registry = ToolRegistry(config)
+    registry.limit = 256
+    memory = SQLiteMemory(config.runtime.state_path)
+    ctx = ToolContext(identity(config), PermissionPolicy(config), memory, reads=[])
+    try:
+        returned = await registry.execute('filesystem.read', {'path': 'large.txt'}, ctx, tool_call_id='read-large')
+        observed_text = returned.data.get('text', returned.data.get('preview'))
+        read = ctx.reads[0]
+        assert read.truncated and read.sha256 == hashlib.sha256(observed_text.encode()).hexdigest()
+        assert read.returned_bytes == len(observed_text.encode()) and read.tool_call_id == 'read-large'
+        with pytest.raises(HubError, match='TOOL_PERMISSION_DENIED'):
+            await registry.execute('filesystem.read', {'path': '../escape'}, ctx, tool_call_id='denied')
+        assert len(ctx.reads) == 1
+    finally:
+        await memory.close()

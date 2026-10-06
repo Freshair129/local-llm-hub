@@ -135,6 +135,12 @@ def create_app(config: HubConfig, runtime: AgentRuntime | None = None) -> FastAP
 
     secured = [Depends(authorized)]
 
+    @app.get('/v1/capabilities', dependencies=secured)
+    async def capabilities() -> dict[str, Any]:
+        return {'contract_version': '0.2.0', 'native_agents': True, 'transport': 'buffered',
+            'structured_output': 'tool_schema', 'run_evidence_version': '0.1.0',
+            'inference_settings': ['temperature', 'top_p', 'presence_penalty', 'reasoning_effort']}
+
     @app.exception_handler(HubError)
     async def hub_error(request: Request, error: HubError) -> JSONResponse:
         rid = request.state.request_id
@@ -189,7 +195,13 @@ def create_app(config: HubConfig, runtime: AgentRuntime | None = None) -> FastAP
     @app.post('/v1/agents/{agent_id}/run', dependencies=secured)
     async def run(agent_id: str, body: RunInput, request: Request) -> dict[str, Any]:
         result = await hub.run(agent_id, body.input, body.session_id, request.state.request_id)
-        return result.model_dump(exclude_none=True)
+        output = result.model_dump(exclude_none=True)
+        if result.evidence is not None:
+            evidence = result.evidence.model_dump()
+            for attempt, original in zip(evidence['provider_attempts'], result.evidence.provider_attempts, strict=True):
+                attempt['sent_settings'] = original.sent_settings.model_dump(exclude_none=True)
+            output['evidence'] = evidence
+        return output
 
     @app.post('/v1/chat/completions', dependencies=secured)
     async def chat(body: ChatInput, request: Request) -> dict[str, Any]:

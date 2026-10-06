@@ -1,6 +1,6 @@
 ---
 id: HUB-TARGET-ARCHITECTURE
-version: 0.3.0
+version: 0.4.0
 status: active
 superseded_by: null
 owner: Boss
@@ -264,3 +264,7 @@ The user approved this architecture, the five scoped ADRs and the [phased accept
 Approval delta 0.1.0 → 0.2.0: user approved the design on 2026-10-03; implementation is authorized within these boundaries.
 
 Implementation delta 0.2.0 -> 0.3.0: owned runtime/API, opt-in bridge, tools/memory/delegation and truthful evaluation implemented; see the verification receipt for PASS/FAIL/NOT_RUN boundaries.
+
+## Zuri P1 approved extension — 2026-10-06
+
+0.3.0 -> 0.4.0: [CR-HUB-001](../plans/CR-HUB-001-zuri-agent-backend.md) and [SPEC-HUB-ZURI-001](../plans/SPEC-HUB-ZURI-001-agent-backend.md) extend the native client contract only. P1 permits typed inference controls, strict output boundary, opt-in request-bound evidence and capability discovery with offline tests. Existing signatures/permissions/chat subset remain; P2 live integration and P3 sidecar are deferred. The extension passed its [P1 offline checkpoint](../plans/HUB-ZURI-P1-VERIFICATION.md); live Zuri integration and sidecar packaging remain NOT_RUN.

@@ -1,8 +1,10 @@
 # trace:implements FR-020
+import json
+from hashlib import sha256
 from typing import Any
 
 import jsonschema
-from pydantic_ai import Agent, StructuredDict
+from pydantic_ai import Agent, RunContext, StructuredDict
 from pydantic_ai.exceptions import UnexpectedModelBehavior, UsageLimitExceeded
 from pydantic_ai.messages import (
     ModelMessage,
@@ -24,7 +26,15 @@ from pydantic_ai.usage import RequestUsage, UsageLimits
 from .agent_driver import DriverResult, RunBudget
 from .config import AgentDefinition
 from .errors import HubError
-from .models import InferenceRequest, Message, RouteRequest, ToolCall, ToolSchema
+from .models import (
+    InferenceRequest,
+    Message,
+    ProviderAttempt,
+    RouteRequest,
+    RunEvidence,
+    ToolCall,
+    ToolSchema,
+)
 from .router import ModelRouter
 from .tools import ToolContext, ToolRegistry
 
@@ -77,6 +87,8 @@ class RoutedModel(Model):
         super().__init__()
         self.router, self.agent, self.budget = router, agent, budget
         self.selected = ''
+        self.attempts: list[ProviderAttempt] | None = [] if agent.emit_run_evidence else None
+        self.final_arguments_sha256: str | None = None
 
     @property
     def model_name(self) -> str:
@@ -88,7 +100,7 @@ class RoutedModel(Model):
 
     async def request(self, messages: list[ModelMessage], model_settings: ModelSettings | None,
                       model_request_parameters: ModelRequestParameters) -> ModelResponse:
-        settings, parameters = self.prepare_request(model_settings, model_request_parameters)
+        _, parameters = self.prepare_request(model_settings, model_request_parameters)
         self.budget.consume('requests')
         domain = to_domain(messages)
         if parameters.instruction_parts:
@@ -98,12 +110,22 @@ class RoutedModel(Model):
                 tools=[ToolSchema(name=t.name, description=t.description or '', parameters=t.parameters_json_schema)
                        for t in [*parameters.function_tools, *parameters.output_tools]],
                 max_tokens=self.agent.max_tokens,
-                temperature=(settings or {}).get('temperature', 0.2)),
+                **self.agent.inference_settings.model_dump()),
             model=self.agent.model, role=self.agent.role, required=(*self.agent.requires, *(('structured_output',) if self.agent.output_schema else ())),
             allow_cloud=self.agent.allow_cloud, context_budget=self.agent.context_budget,
-            timeout=self.budget.remaining()))
+            timeout=self.budget.remaining()), attempts=self.attempts)
         self.selected = response.model_id
         body = response.response
+        if self.agent.output_schema is not None:
+            names = {tool.name for tool in parameters.output_tools}
+            finals = [call for call in body.tool_calls if call.name in names]
+            if (body.finish_reason == 'length' or not body.tool_calls or len(finals) > 1 or
+                    (finals and len(body.tool_calls) != 1)):
+                raise HubError('MODEL_RESPONSE_INVALID', 'Structured run requires one unambiguous final output tool', 502)
+            if finals:
+                self.final_arguments_sha256 = finals[0].arguments_sha256
+                if self.agent.emit_run_evidence and self.final_arguments_sha256 is None:
+                    raise HubError('MODEL_RESPONSE_INVALID', 'Final output has no raw argument provenance', 502)
         self.budget.usages.append(body.usage)
         parts: list[ModelResponsePart] = [TextPart(body.content)] if body.content else []
         parts.extend(ToolCallPart(c.name, c.arguments, c.id) for c in body.tool_calls)
@@ -119,19 +141,20 @@ class PydanticDriver:
 
     async def run(self, agent: AgentDefinition, text: str, history: list[Message],
                   context: ToolContext, budget: RunBudget) -> DriverResult:
+        context.reads = [] if agent.emit_run_evidence else None
         selected_tools: list[Tool[Any]] = []
         for name in agent.tools:
             if name not in context.identity.grants:
                 continue
             definition = self.tools.definitions[name]
             def make_handler(tool_name: str) -> Any:
-                async def call(**arguments: Any) -> dict[str, Any]:
+                async def call(ctx: RunContext[None], **arguments: Any) -> dict[str, Any]:
                     budget.consume('tools')
-                    result = await self.tools.execute(tool_name, arguments, context)
+                    result = await self.tools.execute(tool_name, arguments, context, tool_call_id=ctx.tool_call_id)
                     return result.model_dump()
                 return call
             selected_tools.append(Tool.from_schema(make_handler(name), name=name.replace('.', '__'),
-                description=definition.description, json_schema=definition.input_schema, sequential=True))
+                description=definition.description, json_schema=definition.input_schema, sequential=True, takes_ctx=True))
         model = RoutedModel(self.router, agent, budget)
         output: Any = StructuredDict(agent.output_schema) if agent.output_schema else str
         runner: Agent[None, Any] = Agent(model, output_type=output, system_prompt=agent.instructions,
@@ -153,4 +176,13 @@ class PydanticDriver:
         selected = self.router.registry.resolve(model.selected)
         bounded = self.router.context.prepare(InferenceRequest(messages=messages, max_tokens=agent.max_tokens),
             min(agent.context_budget, selected.capabilities.context_length))
-        return DriverResult(result.output, bounded.messages, model.selected)
+        evidence = None
+        if agent.emit_run_evidence:
+            schema = json.dumps(agent.output_schema, sort_keys=True, separators=(',', ':'), ensure_ascii=False, allow_nan=False)
+            evidence = RunEvidence(request_id=context.request_id or '', session_id=context.identity.session_id,
+                agent_id=context.identity.agent_id, input_sha256=sha256(text.encode('utf-8')).hexdigest(),
+                output_schema_sha256=sha256(schema.encode('utf-8')).hexdigest() if agent.output_schema is not None else None,
+                output_kind='tool_schema' if agent.output_schema is not None else 'text',
+                provider_attempts=model.attempts or [], reads=context.reads or [],
+                final_arguments_sha256=model.final_arguments_sha256)
+        return DriverResult(result.output, bounded.messages, model.selected, evidence)
