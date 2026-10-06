@@ -1,6 +1,6 @@
 ---
 id: HUB-ZURI-P1-VERIFICATION
-version: 0.1.0
+version: 0.2.0
 status: active
 superseded_by: null
 owner: Boss
@@ -13,7 +13,7 @@ source_commit: 9263210bc23d5ba40a38b918e83eb4c2329acc01
 
 # Zuri P1 — offline verification
 
-Scope: approved [CR-HUB-001](CR-HUB-001-zuri-agent-backend.md), [SPEC-HUB-ZURI-001](SPEC-HUB-ZURI-001-agent-backend.md). Source is the uncommitted patch on the baseline commit above. This receipt does not claim deployment, live inference, marketing acceptance or sidecar packaging.
+Scope: approved [CR-HUB-001](CR-HUB-001-zuri-agent-backend.md), [SPEC-HUB-ZURI-001](SPEC-HUB-ZURI-001-agent-backend.md). Tested implementation is now source commit `57b965f92c57ad31669a3b24dea760d20f54ee93`, based on the baseline commit above. This receipt does not claim deployment, live inference, marketing acceptance or sidecar packaging.
 
 ## Executed development checks
 
@@ -69,3 +69,9 @@ P2 Zuri adapter/live marketing: NOT_RUN. P3 sidecar: NOT_RUN. Effective provider
 ## Version diff
 
 CR/SPEC/RCA 0.1.0 draft -> 0.2.0 active approval. Five Zuri packets: absent -> 0.1.0 LOCKED. Native client contract: absent -> 0.2.0; evidence: absent -> 0.1.0. Package 0.1.0 and Zuri app 0.5.1 unchanged. New verification 0.1.0.
+
+## Source commit and lineage — 2026-10-06
+
+User authorized commit/push. Source commit `57b965f92c57ad31669a3b24dea760d20f54ee93` contains the tested P1 implementation, tests and approved documents. All 32 Python worktree hashes still match the frozen receipt; no runtime changes followed verification. Five append-only [packet lineage](../lineage/packet-lineage.jsonl) entries bind the shared offline suite and component hashes to that source commit. Historical uncommitted/NOT_RUN statements above describe their earlier checkpoints. Publication targets `origin/feat/local-llm-agent-harness`; this does not merge into main or qualify P2/P3.
+
+Version diff: verification 0.1.0 -> 0.2.0 adds tested-source identity and local checkpoint lineage; native contract, evidence and package versions unchanged.
