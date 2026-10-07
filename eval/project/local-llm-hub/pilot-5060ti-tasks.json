@@ -1,0 +1,14 @@
+[
+  {
+    "id": "FR-002",
+    "name": "Model Name Normalizer",
+    "prompt": "You are an AI Coder working under STD-003 and ADR-100 guard rails.\nImplement this exact specification for FR-002:\n\nSpecification:\n1. Function signature: pub fn normalize_model_name(raw: &str) -> String\n2. Strip registry prefix: 'registry.ollama.ai/library/', 'library/', 'hf.co/'\n3. Strip quantization suffixes: '-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s' (case-insensitive)\n4. Convert result to lowercase\n5. Guard rails: NO unwrap(), NO expect(), NO panic!\n6. Traceability: Include comment '// trace:implements FR-002' directly before function declaration.\n\nOutput ONLY valid Rust code inside a ```rust code block. No conversation.",
+    "testHarness": "\n#[test]\nfn test_normalize_cases() {\n    assert_eq!(normalize_model_name(\"registry.ollama.ai/library/llama3.2:1b-instruct-q4_0\"), \"llama3.2:1b-instruct\");\n    assert_eq!(normalize_model_name(\"hf.co/mradermacher/Qwen3.5-9B-Coder-GGUF:Q4_K_M\"), \"mradermacher/qwen3.5-9b-coder-gguf\");\n    assert_eq!(normalize_model_name(\"library/gemma4:12b\"), \"gemma4:12b\");\n    assert_eq!(normalize_model_name(\"custom-model:latest\"), \"custom-model:latest\");\n}\n"
+  },
+  {
+    "id": "FR-006",
+    "name": "nvidia-smi CSV Parser (Result<T, String>)",
+    "prompt": "You are an AI Coder working under STD-003 and ADR-100 guard rails.\nImplement this exact specification for FR-006:\n\nSpecification:\n1. Define struct:\n#[derive(Debug, PartialEq)]\npub struct GpuStats {\n    pub name: String,\n    pub vram_used_mb: u64,\n    pub vram_total_mb: u64,\n    pub temp_c: u32,\n    pub util_pct: u32,\n}\n2. Function signature: pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>\n3. Given a CSV line like \"NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25\", parse it into GpuStats.\n4. Robust error handling: Return Err(String) if columns are fewer than 5 or numbers fail to parse.\n5. Guard rails: STRICTLY FORBIDDEN to use unwrap(), expect(), or panic! Return Err instead.\n6. Traceability: Include comment '// trace:implements FR-006' directly before function declaration.\n\nOutput ONLY valid Rust code inside a ```rust code block. No conversation.",
+    "testHarness": "\n#[test]\nfn test_parse_valid_csv() {\n    let res = parse_gpu_csv(\"NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25\");\n    assert!(res.is_ok());\n    let stats = res.unwrap();\n    assert_eq!(stats.name, \"NVIDIA GeForce RTX 3060\");\n    assert_eq!(stats.vram_used_mb, 5800);\n    assert_eq!(stats.vram_total_mb, 12288);\n    assert_eq!(stats.temp_c, 35);\n    assert_eq!(stats.util_pct, 25);\n}\n\n#[test]\nfn test_parse_invalid_csv() {\n    assert!(parse_gpu_csv(\"invalid,csv\").is_err());\n    assert!(parse_gpu_csv(\"GPU, not_a_number, 12288, 35, 25\").is_err());\n    assert!(parse_gpu_csv(\"\").is_err());\n}\n"
+  }
+]

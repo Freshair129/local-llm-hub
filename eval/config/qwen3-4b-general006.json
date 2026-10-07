@@ -1,0 +1,43 @@
+{
+  "id": "BENCH-5060TI-GENERAL-006",
+  "version": "1.0.0",
+  "base_commit": "9147dd02d76c766ed2214ae5b7f48973e0ad0921",
+  "source": {
+    "ollama_tag": "qwen3:4b",
+    "ollama_digest": "sha256:359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+    "format": "gguf",
+    "quantization": "Q4_K_M",
+    "parameter_size": "4.0B",
+    "bytes": 2497293931,
+    "hf_repo": "Qwen/Qwen3-4B",
+    "hf_revision": "1cfa9a7208912126459214e8b04321603b3df60c",
+    "hf_url": "https://huggingface.co/Qwen/Qwen3-4B/tree/1cfa9a7208912126459214e8b04321603b3df60c",
+    "hf_weight_match_verified": false
+  },
+  "candidate": {
+    "slug": "qwen3-4b-general006",
+    "alias": "llh-general-qwen3-4b:bench006",
+    "think": true,
+    "timeout_ms": 900000
+  },
+  "options": {
+    "num_ctx": 40960,
+    "num_predict": 32768,
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "min_p": 0,
+    "repeat_penalty": 1,
+    "repeat_last_n": 64,
+    "presence_penalty": 0,
+    "frequency_penalty": 0
+  },
+  "machine": {
+    "gpu_name": "NVIDIA GeForce RTX 5060 Ti",
+    "minimum_free_vram_mib": 12000
+  },
+  "seeds": [42, 43, 44],
+  "tasks_sha256": "d6d002412637430b86c3e9e57cee9f8ef042d7803d62034d67b285efee8c0297",
+  "heldout_sha256": "85c56847c96a5422f73306c907fbccf880e75e0cbbfe55a63e3fae4b1bae9115",
+  "run_directory": "target/benchmark-5060ti/runs/GENERAL-5060TI-QWEN3-4B-2026-10-04"
+}
