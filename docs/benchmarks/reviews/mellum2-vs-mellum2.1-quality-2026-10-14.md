@@ -1,6 +1,6 @@
 # Mellum2 Thinking vs Mellum2.1 Thinking: interim quality comparison
 
-**Status:** Interim. Mellum2 Q4_K_M has completed the repeated FR test (60/60 scored samples). Mellum2 Q6_K has produced no scored samples because model startup ran out of GPU memory; matched HumanEval+ runs also remain pending. This is not the final version comparison.
+**Status:** Interim. The matched FR-002/FR-006 run is complete for Mellum2 and Mellum2.1 at Q4_K_M and Q6_K (60 scored samples per quant per version). Matched HumanEval+ runs for Mellum2 remain pending; this is not the final version comparison.
 
 ## Matched FR-002 / FR-006 test
 
@@ -10,8 +10,10 @@ The prompt and Rust harness were taken from [`benchmark_mellum_thinking_vs_instr
 |---|---|---:|---:|---:|---|
 | Mellum2 Thinking | Q4_K_M | 15/30 (50.0%) | 13/30 (43.3%) | 28/60 (46.7%) | 34.6–59.1% |
 | Mellum2.1 Thinking | Q4_K_M | 27/30 (90.0%) | 26/30 (86.7%) | 53/60 (88.3%) | 77.8–94.2% |
+| Mellum2 Thinking | Q6_K | 15/30 (50.0%) | 14/30 (46.7%) | 29/60 (48.3%) | 36.2–60.7% |
+| Mellum2.1 Thinking | Q6_K | 28/30 (93.3%) | 28/30 (93.3%) | 56/60 (93.3%) | 84.1–97.4% |
 
-Paired outcomes across the same task and seed (42–71): both passed 25; Mellum2 only 3; Mellum2.1 only 28; both failed 4. On these two repository tasks, the Q4 result favors Mellum2.1. The set contains only two function tasks, so it does not establish a general advantage across coding work.
+Paired outcomes across the same task and seed (42–71): for Q4, both passed 25, Mellum2 only 3, Mellum2.1 only 28, and both failed 4. For Q6, both passed 25, Mellum2 only 4, Mellum2.1 only 31, and neither failed 0. The results favor Mellum2.1 at both quantizations on these repository tasks; the fixture contains only two functions, so it does not establish a general advantage across coding work.
 
 Strict pass requires generated code to compile, pass the task tests, include the required adjacent trace comment, and avoid `unwrap`, `expect`, and `panic!`.
 
@@ -20,17 +22,14 @@ Strict pass requires generated code to compile, pass the task tests, include the
 - Hardware: NVIDIA GeForce RTX 3060 12GB; Ollama 0.40.4.
 - Both versions used the same Thinking variant, `num_ctx=16384`, `temperature=0.6`, `top_p=0.95`, `top_k=20`, `repeat_penalty=1.0`, `num_predict=81920`, and seeds 42–71.
 - Models were run serially. The harness checked `/api/ps` before and after each inference, discarded/retried any sample with an unexpected resident model, and unloaded the target between quant groups.
-- Mellum2 Q4 has 60 saved samples. No unexpected resident model was found during those accepted samples. `/api/ps` was empty after stopping at the Q4 boundary.
+- Mellum2 Q4 and Q6 each have 60 scored samples; Mellum2.1 Q4 and Q6 each have 60 scored samples. The Q6 run first hit two CUDA allocation failures before sufficient VRAM was available; those infrastructure attempts are stored separately and excluded from scores. The subsequent Q6 run completed all samples on GPU without CPU offload. `/api/ps` was empty after completion.
 
-## Mellum2 Q6_K load status (2026-10-15)
+## Mellum2 Q6_K execution note
 
-The resumed run attempted Q6_K on the RTX 3060 without CPU offload. Ollama failed during model startup with `cudaMalloc failed` while requesting a CUDA buffer of 10,084,005,888 bytes (about 9,617 MiB). The run produced no response: Q6 has 0/60 scored samples. This is an infrastructure limitation, not a model-quality failure. The benchmark harness records these attempts separately from scored results, and `/api/ps` was empty after each abort.
-
-Reported free VRAM fluctuated from 9,808 MiB to 9,656 MiB around the retries, leaving at most about 191 MiB beyond that single buffer request before runner and context overhead. More VRAM headroom is needed to resume the same full-GPU 16k-context run. No CPU-offloaded result has been substituted.
+The full Q6_K FR run completed with 60/60 scored samples at `num_ctx=16384` and no CPU offload after more VRAM became available. Two earlier CUDA allocation failures are recorded as infrastructure events, not quality failures. The Ollama model list was empty after cleanup.
 
 ## Pending before a final recommendation
 
-- Mellum2 Thinking Q6_K repeated FR run, once sufficient VRAM headroom is available.
 - Matched HumanEval+ (EvalPlus) generation and evaluation for Mellum2 Q4_K_M and Q6_K.
 - Final comparison against the already completed Mellum2.1 Q4_K_M/Q6_K results.
 
