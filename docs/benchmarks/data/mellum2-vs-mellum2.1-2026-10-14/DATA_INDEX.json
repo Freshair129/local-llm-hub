@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 1,
+  "runDate": "2026-10-14",
+  "report": "../reviews/mellum2-vs-mellum2.1-quality-2026-10-14.md",
+  "hardware": "NVIDIA GeForce RTX 3060 12GB",
+  "ollamaVersion": "0.40.4",
+  "frStability": {
+    "fixture": "scripts/benchmark_mellum_thinking_vs_instruct.mjs",
+    "testSetSha256": "d9142c138d5a40a02064564259104c04c0686ef36eec63a3d031c5dab0087200",
+    "tasks": [
+      "FR-002",
+      "FR-006"
+    ],
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71
+    ],
+    "samplesPerModel": 60,
+    "numCtx": 16384,
+    "numPredict": 81920,
+    "options": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "repeat_penalty": 1.0
+    },
+    "rawFiles": [
+      "fr-stability/mellum2-q4-q6.json",
+      "fr-stability/mellum2.1-q4-q6.json"
+    ],
+    "scores": [
+      {
+        "version": "2.0",
+        "n": 60,
+        "strictPass": 28,
+        "wilson95": [
+          0.3463,
+          0.5911
+        ],
+        "quant": "Q4_K_M"
+      },
+      {
+        "version": "2.1",
+        "n": 60,
+        "strictPass": 53,
+        "wilson95": [
+          0.7778,
+          0.942
+        ],
+        "quant": "Q4_K_M"
+      },
+      {
+        "version": "2.0",
+        "n": 60,
+        "strictPass": 29,
+        "wilson95": [
+          0.3618,
+          0.6069
+        ],
+        "quant": "Q6_K"
+      },
+      {
+        "version": "2.1",
+        "n": 60,
+        "strictPass": 56,
+        "wilson95": [
+          0.841,
+          0.974
+        ],
+        "quant": "Q6_K"
+      }
+    ]
+  },
+  "humanEvalPlus": {
+    "dataset": "HumanEval+",
+    "evalplusVersion": "0.3.1",
+    "datasetHash": "fe585eb4df8c88d844eeb463ea4d0302",
+    "tasks": 164,
+    "samplesPerTask": 1,
+    "numCtx": 16384,
+    "numPredict": 8192,
+    "options": {
+      "temperature": 0.0,
+      "top_p": 0.95,
+      "top_k": 20,
+      "repeat_penalty": 1.0,
+      "seed": 1
+    },
+    "scores": [
+      {
+        "basePass": 149,
+        "version": "2.0",
+        "plusPass": 140,
+        "quant": "Q4_K_M"
+      },
+      {
+        "basePass": 147,
+        "version": "2.0",
+        "plusPass": 139,
+        "quant": "Q6_K"
+      },
+      {
+        "basePass": 159,
+        "version": "2.1",
+        "plusPass": 149,
+        "quant": "Q4_K_M"
+      },
+      {
+        "basePass": 159,
+        "version": "2.1",
+        "plusPass": 151,
+        "quant": "Q6_K"
+      }
+    ],
+    "resultsFile": "humanevalplus/task-results.json",
+    "rawFiles": {
+      "2.0-Q4_K_M": "humanevalplus/raw/mellum2-q4.json",
+      "2.0-Q6_K": "humanevalplus/raw/mellum2-q6.json",
+      "2.1-Q4_K_M": "humanevalplus/raw/mellum2.1-q4.json",
+      "2.1-Q6_K": "humanevalplus/raw/mellum2.1-q6.json"
+    }
+  },
+  "modelFiles": [
+    "model-config/Modelfile.mellum2-q4",
+    "model-config/Modelfile.mellum2-q6",
+    "model-config/Modelfile.mellum21-q4",
+    "model-config/Modelfile.mellum21-q6"
+  ],
+  "notes": [
+    "FR per-seed results include scoring checks, retries, contamination events and infrastructure metadata.",
+    "HumanEval+ keeps each task status and failed-test count; generated solution code was omitted from the compact result export.",
+    "Modelfiles use Hugging Face model references instead of machine-specific local blob paths.",
+    "See the benchmark report for output-cap exceptions and infrastructure exclusions."
+  ],
+  "fileSha256": {
+    "fr-stability/mellum2-q4-q6.json": "6a1563e28fef7f479b7fb7af65a69fe49cdf8292e4ec2559df9158de54f8296e",
+    "fr-stability/mellum2.1-q4-q6.json": "43a600dd8caec642659290473c8c5ee75373806c39583c3b8f20c3f7451f082f",
+    "humanevalplus/raw/mellum2-q4.json": "7bb12faf052a94c48055e67a69a7d8d81709185185457c6e400d29339e102810",
+    "humanevalplus/raw/mellum2-q6.json": "a7e79cd7b83aa10b4f5430b6e53eca0e0fdcc701cf202cbc0e12ffb04eaecae3",
+    "humanevalplus/raw/mellum2.1-q4.json": "ba4eed6b9d3be8644932a1620651dccf2f90f3bf415ce6f464e1d38bda92d5bf",
+    "humanevalplus/raw/mellum2.1-q6.json": "bba12e2af5306889c97eddd76fdf233bd54863411445ab16836719c3654c97fe",
+    "humanevalplus/task-results.json": "dcb1b4ee4d0f6f5431321a49f0067a9526f06a9fa464f970b2353d98ccba4042",
+    "model-config/Modelfile.mellum2-q4": "a33040122cfdbcfe32b6c9621601d080eb02c197566a5421fdde883aeec90f3c",
+    "model-config/Modelfile.mellum2-q6": "2caaeb9f59e4dd19e70b73916700c1492994ec3ee5f170dea1ff4afbf7608e71",
+    "model-config/Modelfile.mellum21-q4": "7d69a7fe774234d49fe0900c8d40d54aab6a2964bbb0ee4729851c84cc38b0d3",
+    "model-config/Modelfile.mellum21-q6": "4fe7caba05d94556440597989b4e8a1997222c82e73189eeab358f4cda5b6093"
+  }
+}

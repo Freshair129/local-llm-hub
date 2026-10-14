@@ -72,3 +72,7 @@ Paired outcomes for the HumanEval+ metric:
 - [EvalPlus](https://github.com/evalplus/evalplus)
 - [JetBrains Mellum2 Thinking model card](https://huggingface.co/JetBrains/Mellum2-12B-A2.5B-Thinking-GGUF-Q4_K_M)
 - [JetBrains Mellum2.1 Thinking model card](https://huggingface.co/JetBrains/Mellum2.1-12B-A2.5B-Thinking-GGUF)
+
+## Committed data and model settings
+
+The [data bundle](../data/mellum2-vs-mellum2.1-2026-10-14/DATA_INDEX.json) contains the per-seed FR results, complete HumanEval+ per-task output, a compact pass/fail view, and portable Modelfile snapshots for both versions at Q4 and Q6. SHA-256 checksums are listed in the index.

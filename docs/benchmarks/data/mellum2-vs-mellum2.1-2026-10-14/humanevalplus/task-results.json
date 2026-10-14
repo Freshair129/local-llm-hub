@@ -1,0 +1,4750 @@
+{
+  "schemaVersion": 1,
+  "benchmark": "Mellum2 Thinking vs Mellum2.1 Thinking HumanEval+",
+  "evaluations": [
+    {
+      "modelVersion": "2.0",
+      "quant": "Q4_K_M",
+      "model": "hf.co/JetBrains/Mellum2-12B-A2.5B-Thinking-GGUF-Q4_K_M:Q4_K_M",
+      "evalplusVersion": "0.3.1",
+      "dataset": "HumanEval+",
+      "datasetHash": "fe585eb4df8c88d844eeb463ea4d0302",
+      "tasks": 164,
+      "samplesPerTask": 1,
+      "numCtx": 16384,
+      "numPredict": 8192,
+      "options": {
+        "temperature": 0.0,
+        "top_p": 0.95,
+        "top_k": 20,
+        "repeat_penalty": 1.0,
+        "num_ctx": 16384,
+        "num_predict": 8192,
+        "seed": 1
+      },
+      "greedy": true,
+      "summary": {
+        "basePass": 149,
+        "basePassRate": 0.9085365853658537,
+        "plusPass": 140,
+        "plusPassRate": 0.8536585365853658
+      },
+      "generationFailures": [
+        {
+          "taskId": null,
+          "attempts": null,
+          "error": null,
+          "outcome": null
+        }
+      ],
+      "tasksResults": [
+        {
+          "task_id": "HumanEval/0",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/1",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/2",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/3",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/4",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/5",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/6",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/7",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/8",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/9",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/10",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 4,
+          "plus_fail_test_count": 779
+        },
+        {
+          "task_id": "HumanEval/11",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/12",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/13",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/14",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/15",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/16",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/17",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/18",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/19",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/20",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/21",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/22",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 166
+        },
+        {
+          "task_id": "HumanEval/23",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/24",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 1,
+          "plus_fail_test_count": 30
+        },
+        {
+          "task_id": "HumanEval/25",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/26",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/27",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/28",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/29",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/30",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/31",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/32",
+          "base_status": "fail",
+          "plus_status": "timeout",
+          "base_fail_test_count": 27,
+          "plus_fail_test_count": 114
+        },
+        {
+          "task_id": "HumanEval/33",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/34",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/35",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/36",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/37",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/38",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/39",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 1
+        },
+        {
+          "task_id": "HumanEval/40",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/41",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/42",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/43",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/44",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/45",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/46",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/47",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/48",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/49",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/50",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 479
+        },
+        {
+          "task_id": "HumanEval/51",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/52",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/53",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/54",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 3,
+          "plus_fail_test_count": 119
+        },
+        {
+          "task_id": "HumanEval/55",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 2
+        },
+        {
+          "task_id": "HumanEval/56",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/57",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/58",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/59",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 1,
+          "plus_fail_test_count": 30
+        },
+        {
+          "task_id": "HumanEval/60",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/61",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/62",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/63",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/64",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/65",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/66",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/67",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/68",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/69",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/70",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/71",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/72",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/73",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/74",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/75",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/76",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 5
+        },
+        {
+          "task_id": "HumanEval/77",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/78",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/79",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/80",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/81",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/82",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/83",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/84",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/85",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/86",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/87",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/88",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/89",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/90",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/91",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 1,
+          "plus_fail_test_count": 92
+        },
+        {
+          "task_id": "HumanEval/92",
+          "base_status": "fail",
+          "plus_status": "pass",
+          "base_fail_test_count": 1,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/93",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/94",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/95",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/96",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/97",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 441
+        },
+        {
+          "task_id": "HumanEval/98",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/99",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/100",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/101",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/102",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/103",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 2,
+          "plus_fail_test_count": 117
+        },
+        {
+          "task_id": "HumanEval/104",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/105",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/106",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/107",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/108",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/109",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/110",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/111",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/112",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/113",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/114",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/115",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/116",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/117",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/118",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/119",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/120",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/121",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/122",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/123",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/124",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/125",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/126",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/127",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 2,
+          "plus_fail_test_count": 218
+        },
+        {
+          "task_id": "HumanEval/128",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/129",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/130",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/131",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/132",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/133",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/134",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 24
+        },
+        {
+          "task_id": "HumanEval/135",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/136",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/137",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/138",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/139",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/140",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/141",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/142",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/143",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/144",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/145",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/146",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/147",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/148",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/149",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/150",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/151",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 2
+        },
+        {
+          "task_id": "HumanEval/152",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/153",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/154",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 3
+        },
+        {
+          "task_id": "HumanEval/155",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/156",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/157",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/158",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/159",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/160",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/161",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/162",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/163",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        }
+      ]
+    },
+    {
+      "modelVersion": "2.0",
+      "quant": "Q6_K",
+      "model": "hf.co/JetBrains/Mellum2-12B-A2.5B-Thinking-GGUF-Q6_K:Q6_K",
+      "evalplusVersion": "0.3.1",
+      "dataset": "HumanEval+",
+      "datasetHash": "fe585eb4df8c88d844eeb463ea4d0302",
+      "tasks": 164,
+      "samplesPerTask": 1,
+      "numCtx": 16384,
+      "numPredict": 8192,
+      "options": {
+        "temperature": 0,
+        "top_p": 0.95,
+        "top_k": 20,
+        "repeat_penalty": 1,
+        "num_ctx": 16384,
+        "num_predict": 8192,
+        "seed": 1
+      },
+      "greedy": true,
+      "summary": {
+        "basePass": 147,
+        "basePassRate": 0.8963414634146342,
+        "plusPass": 139,
+        "plusPassRate": 0.8475609756097561
+      },
+      "generationFailures": [
+        {
+          "taskId": "HumanEval/146",
+          "attempts": 3,
+          "error": "HTTP 500 /api/chat: {\"error\":\"prediction aborted, token repeat limit reached\"}",
+          "outcome": "recorded_empty_sample_for_scoring"
+        }
+      ],
+      "tasksResults": [
+        {
+          "task_id": "HumanEval/0",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/1",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/2",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/3",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/4",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/5",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/6",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/7",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/8",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/9",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/10",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 4,
+          "plus_fail_test_count": 779
+        },
+        {
+          "task_id": "HumanEval/11",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/12",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/13",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/14",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/15",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/16",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/17",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/18",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/19",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/20",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/21",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/22",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/23",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/24",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 1,
+          "plus_fail_test_count": 30
+        },
+        {
+          "task_id": "HumanEval/25",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/26",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/27",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/28",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/29",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/30",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/31",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/32",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 221
+        },
+        {
+          "task_id": "HumanEval/33",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/34",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/35",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/36",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/37",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/38",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/39",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 1
+        },
+        {
+          "task_id": "HumanEval/40",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 21
+        },
+        {
+          "task_id": "HumanEval/41",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 5,
+          "plus_fail_test_count": 77
+        },
+        {
+          "task_id": "HumanEval/42",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/43",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/44",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/45",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/46",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/47",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/48",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/49",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/50",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 479
+        },
+        {
+          "task_id": "HumanEval/51",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/52",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/53",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/54",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 3,
+          "plus_fail_test_count": 119
+        },
+        {
+          "task_id": "HumanEval/55",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 2
+        },
+        {
+          "task_id": "HumanEval/56",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/57",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/58",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/59",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/60",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/61",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/62",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/63",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/64",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/65",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/66",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/67",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/68",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/69",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/70",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/71",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/72",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/73",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/74",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/75",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/76",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 3
+        },
+        {
+          "task_id": "HumanEval/77",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/78",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/79",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/80",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/81",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/82",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/83",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/84",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/85",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/86",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 2,
+          "plus_fail_test_count": 192
+        },
+        {
+          "task_id": "HumanEval/87",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/88",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/89",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/90",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/91",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/92",
+          "base_status": "fail",
+          "plus_status": "pass",
+          "base_fail_test_count": 1,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/93",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/94",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/95",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/96",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/97",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/98",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/99",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 1,
+          "plus_fail_test_count": 244
+        },
+        {
+          "task_id": "HumanEval/100",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/101",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/102",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/103",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/104",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 4,
+          "plus_fail_test_count": 999
+        },
+        {
+          "task_id": "HumanEval/105",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/106",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/107",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/108",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/109",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/110",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/111",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/112",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/113",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 3,
+          "plus_fail_test_count": 982
+        },
+        {
+          "task_id": "HumanEval/114",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/115",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 1,
+          "plus_fail_test_count": 393
+        },
+        {
+          "task_id": "HumanEval/116",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/117",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/118",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 1,
+          "plus_fail_test_count": 3
+        },
+        {
+          "task_id": "HumanEval/119",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/120",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/121",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/122",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/123",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/124",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/125",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/126",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/127",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/128",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/129",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 8,
+          "plus_fail_test_count": 136
+        },
+        {
+          "task_id": "HumanEval/130",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/131",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/132",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 30
+        },
+        {
+          "task_id": "HumanEval/133",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/134",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/135",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/136",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/137",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/138",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/139",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/140",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/141",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/142",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/143",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/144",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/145",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 3,
+          "plus_fail_test_count": 963
+        },
+        {
+          "task_id": "HumanEval/146",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/147",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/148",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/149",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/150",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/151",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/152",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/153",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/154",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/155",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/156",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/157",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/158",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/159",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/160",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 16
+        },
+        {
+          "task_id": "HumanEval/161",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/162",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/163",
+          "base_status": "pass",
+          "plus_status": "timeout",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 62
+        }
+      ]
+    },
+    {
+      "modelVersion": "2.1",
+      "quant": "Q4_K_M",
+      "model": "hf.co/JetBrains/Mellum2.1-12B-A2.5B-Thinking-GGUF:Q4_K_M",
+      "evalplusVersion": "0.3.1",
+      "dataset": "HumanEval+",
+      "datasetHash": "fe585eb4df8c88d844eeb463ea4d0302",
+      "tasks": 164,
+      "samplesPerTask": 1,
+      "numCtx": 16384,
+      "numPredict": 8192,
+      "options": {
+        "temperature": 0.0,
+        "top_p": 0.95,
+        "top_k": 20,
+        "repeat_penalty": 1.0,
+        "num_ctx": 16384,
+        "num_predict": 8192,
+        "seed": 1
+      },
+      "greedy": true,
+      "summary": {
+        "basePass": 159,
+        "basePassRate": 0.9695121951219512,
+        "plusPass": 149,
+        "plusPassRate": 0.9085365853658537
+      },
+      "generationFailures": [
+        {
+          "taskId": null,
+          "attempts": null,
+          "error": null,
+          "outcome": null
+        }
+      ],
+      "tasksResults": [
+        {
+          "task_id": "HumanEval/0",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/1",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/2",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/3",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/4",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/5",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/6",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/7",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/8",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/9",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/10",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/11",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/12",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/13",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/14",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/15",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/16",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/17",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/18",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/19",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/20",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/21",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/22",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 166
+        },
+        {
+          "task_id": "HumanEval/23",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/24",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/25",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/26",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/27",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/28",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/29",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/30",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/31",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/32",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 1
+        },
+        {
+          "task_id": "HumanEval/33",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/34",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/35",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/36",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/37",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/38",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/39",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 1
+        },
+        {
+          "task_id": "HumanEval/40",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/41",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/42",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/43",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/44",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/45",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/46",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/47",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 2,
+          "plus_fail_test_count": 439
+        },
+        {
+          "task_id": "HumanEval/48",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/49",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/50",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/51",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/52",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/53",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/54",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/55",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/56",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/57",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/58",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/59",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/60",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/61",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/62",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/63",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/64",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/65",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/66",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/67",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/68",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/69",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/70",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/71",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/72",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/73",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/74",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/75",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 2
+        },
+        {
+          "task_id": "HumanEval/76",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 7
+        },
+        {
+          "task_id": "HumanEval/77",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/78",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/79",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/80",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/81",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/82",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/83",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/84",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/85",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/86",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/87",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/88",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/89",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/90",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/91",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 1
+        },
+        {
+          "task_id": "HumanEval/92",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/93",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/94",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/95",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/96",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/97",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 441
+        },
+        {
+          "task_id": "HumanEval/98",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/99",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/100",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/101",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/102",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/103",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/104",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/105",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/106",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/107",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/108",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/109",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/110",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/111",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/112",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/113",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/114",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/115",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/116",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/117",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/118",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/119",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/120",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/121",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/122",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/123",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/124",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/125",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/126",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/127",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 2,
+          "plus_fail_test_count": 218
+        },
+        {
+          "task_id": "HumanEval/128",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/129",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/130",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/131",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/132",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 30
+        },
+        {
+          "task_id": "HumanEval/133",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/134",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 76
+        },
+        {
+          "task_id": "HumanEval/135",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/136",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/137",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/138",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/139",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/140",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 5
+        },
+        {
+          "task_id": "HumanEval/141",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 4
+        },
+        {
+          "task_id": "HumanEval/142",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/143",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/144",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/145",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/146",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/147",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/148",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/149",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/150",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/151",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/152",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/153",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/154",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/155",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/156",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/157",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/158",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/159",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/160",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/161",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/162",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/163",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        }
+      ]
+    },
+    {
+      "modelVersion": "2.1",
+      "quant": "Q6_K",
+      "model": "hf.co/JetBrains/Mellum2.1-12B-A2.5B-Thinking-GGUF:Q6_K",
+      "evalplusVersion": "0.3.1",
+      "dataset": "HumanEval+",
+      "datasetHash": "fe585eb4df8c88d844eeb463ea4d0302",
+      "tasks": 164,
+      "samplesPerTask": 1,
+      "numCtx": 16384,
+      "numPredict": 8192,
+      "options": {
+        "temperature": 0.0,
+        "top_p": 0.95,
+        "top_k": 20,
+        "repeat_penalty": 1.0,
+        "num_ctx": 16384,
+        "num_predict": 8192,
+        "seed": 1
+      },
+      "greedy": true,
+      "summary": {
+        "basePass": 159,
+        "basePassRate": 0.9695121951219512,
+        "plusPass": 151,
+        "plusPassRate": 0.9207317073170732
+      },
+      "generationFailures": [
+        {
+          "taskId": null,
+          "attempts": null,
+          "error": null,
+          "outcome": null
+        }
+      ],
+      "tasksResults": [
+        {
+          "task_id": "HumanEval/0",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/1",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/2",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/3",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/4",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/5",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/6",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/7",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/8",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/9",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/10",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/11",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/12",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/13",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/14",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/15",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/16",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/17",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/18",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/19",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/20",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/21",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/22",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 166
+        },
+        {
+          "task_id": "HumanEval/23",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/24",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/25",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/26",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/27",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/28",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/29",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/30",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/31",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/32",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 5,
+          "plus_fail_test_count": 24
+        },
+        {
+          "task_id": "HumanEval/33",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/34",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/35",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/36",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/37",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/38",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/39",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 1
+        },
+        {
+          "task_id": "HumanEval/40",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/41",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/42",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/43",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/44",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/45",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/46",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/47",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 2,
+          "plus_fail_test_count": 439
+        },
+        {
+          "task_id": "HumanEval/48",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/49",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/50",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/51",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/52",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/53",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/54",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/55",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/56",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/57",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/58",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/59",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/60",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/61",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/62",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/63",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/64",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/65",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/66",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/67",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/68",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/69",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/70",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/71",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/72",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/73",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/74",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/75",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 3
+        },
+        {
+          "task_id": "HumanEval/76",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 6
+        },
+        {
+          "task_id": "HumanEval/77",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/78",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/79",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/80",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/81",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/82",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/83",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/84",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/85",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/86",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/87",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/88",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/89",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/90",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/91",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 1
+        },
+        {
+          "task_id": "HumanEval/92",
+          "base_status": "fail",
+          "plus_status": "pass",
+          "base_fail_test_count": 1,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/93",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/94",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/95",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/96",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/97",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/98",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/99",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/100",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/101",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/102",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/103",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/104",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/105",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/106",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/107",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/108",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/109",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/110",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/111",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/112",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/113",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/114",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/115",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/116",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 5,
+          "plus_fail_test_count": 551
+        },
+        {
+          "task_id": "HumanEval/117",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/118",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/119",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/120",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/121",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/122",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/123",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/124",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/125",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/126",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/127",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/128",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/129",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/130",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/131",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/132",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 30
+        },
+        {
+          "task_id": "HumanEval/133",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/134",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 24
+        },
+        {
+          "task_id": "HumanEval/135",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/136",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/137",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/138",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/139",
+          "base_status": "pass",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 1
+        },
+        {
+          "task_id": "HumanEval/140",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/141",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/142",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/143",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/144",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/145",
+          "base_status": "fail",
+          "plus_status": "fail",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/146",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/147",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/148",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/149",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/150",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/151",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/152",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/153",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/154",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/155",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/156",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/157",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/158",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/159",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/160",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/161",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/162",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        },
+        {
+          "task_id": "HumanEval/163",
+          "base_status": "pass",
+          "plus_status": "pass",
+          "base_fail_test_count": 0,
+          "plus_fail_test_count": 0
+        }
+      ]
+    }
+  ]
+}
