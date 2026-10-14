@@ -1,0 +1,32 @@
+Let me think about how to approach this coding problem.
+
+Problem: You are an AI Coder working under STD-003 and ADR-100 guard rails.
+Implement this exact specification for FR-002:
+
+Specification:
+1. Function signature: pub fn normalize_model_name(raw: &str) -> String
+2. Strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/'
+3. Strip quantization suffixes: '-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s' (case-insensitive)
+4. Convert result to lowercase
+5. Guard rails: NO unwrap(), NO expect(), NO panic!
+6. Traceability: Include comment '// trace:implements FR-002' directly before function declaration.
+
+Output ONLY valid Rust code inside a ```rust code block.
+
+Approach:
+1.
+2. Strip Quantization Suffixes:
+       We need to handle both prefix-style (e.g., `:q4_0`) and suffix-style (e.g., `-q4_0`) quantization tags. We'll iterate over the list of known suffixes and check if the model name ends with any of them (case-insensitive). If a match is found, we remove the suffix and continue.
+3. Convert to Lowercase:
+       Finally, we convert the entire string to lowercase to ensure a consistent output format.
+4. Guard Rails:
+       We strictly follow the instruction to avoid using `unwrap()`, `expect()`, or `panic!()`. All operations are performed in a safe, fallible manner.
+5. Traceability:
+       The comment `// trace:implements FR-002` is placed directly before the function declaration as requested.
+
+Key considerations:
+- Strip prefixes: We'll use `.trim_start_matches` for each known prefix.
+- Strip suffixes: We'll use `.trim_end_matches` for each known suffix, checking case-insensitively.
+- Lowercase: We'll use `.to_lowercase()`.
+
+Let me implement this solution.

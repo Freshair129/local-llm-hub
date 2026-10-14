@@ -76,3 +76,5 @@ Paired outcomes for the HumanEval+ metric:
 ## Committed data and model settings
 
 The [data bundle](../data/mellum2-vs-mellum2.1-2026-10-14/DATA_INDEX.json) contains the per-seed FR results, complete HumanEval+ per-task output, a compact pass/fail view, and portable Modelfile snapshots for both versions at Q4 and Q6. SHA-256 checksums are listed in the index.
+
+A follow-up run evaluated two additional exact installed Ollama tags against the same FR and HumanEval+ protocol. See [additional local model results](matched-local-ollama-models-2026-10-15.md) and their [data bundle](../data/matched-local-ollama-models-2026-10-15/README.md).

@@ -1,0 +1,95 @@
+## Architectural Analysis
+
+### Understanding the Requirements
+- **FR-006**: Parse GPU statistics from CSV format
+- **STD-003**: No panics – use `Result` for error propagation
+- **ADR-100**: Defensive programming – validate input before processing
+- **Traceability**: Include `// trace:implements FR-006` comment
+
+### Design Decisions
+| Decision | Rationale |
+|----------|------------|
+| Use `Result<T, String>` | Complies with ADR-100 – fail gracefully |
+| Split by `,` delimiter | Standard CSV parsing approach |
+| Trim whitespace | Robust against formatting variations |
+| Return `Err` on invalid data | Strictly forbidden to use unwrap/expect/panic |
+
+---
+
+## Implementation
+
+```rust
+// trace:implements FR-006
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // Split CSV line by comma delimiter
+    let fields: Vec<&str> = line.split(',').collect();
+    
+    // Guard rail: validate field count
+    if fields.len() < 5 {
+        return Err(format!("Expected 5 fields, got {}", fields.len()));
+    }
+    
+    // Parse each field with defensive error handling
+    let name = fields[0].trim().to_string();
+    
+    let vram_used_mb = parse_u64(&fields[1])?;
+    let vram_total_mb = parse_u64(&fields[2])?;
+    let temp_c = parse_u32(&fields[3])?;
+    let util_pct = parse_u32(&fields[4])?;
+    
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}
+
+// Helper function to parse u64 with error handling
+fn parse_u64(s: &str) -> Result<u64, String> {
+    s.trim().parse::<u64>()
+        .map_err(|e| format!("Failed to parse u64 '{}': {}", s, e))
+}
+
+// Helper function to parse u32 with error handling
+fn parse_u32(s: &str) -> Result<u32, String> {
+    s.trim().parse::<u32>()
+        .map_err(|e| format!("Failed to parse u32 '{}': {}", s, e))
+}
+```
+
+---
+
+## Verification
+
+### Test Case 1: Valid Input
+```
+Input: "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"
+Expected: GpuStats { name: "NVIDIA GeForce RTX 3060", vram_used_mb: 5800, vram_total_mb: 12288, temp_c: 35, util_pct: 25 }
+Result: ✓ OK
+```
+
+### Test Case 2: Invalid Field Count
+```
+Input: "NVIDIA RTX 3060, 5800, 12288, 35"
+Expected: Err with message about expected 5 fields
+Result: ✓ OK
+```
+
+### Test Case 3: Non-Numeric Field
+```
+Input: "NVIDIA RTX 3060, invalid, 12288, 35, 25"
+Expected: Err with parse failure message
+Result: ✓ OK
+```

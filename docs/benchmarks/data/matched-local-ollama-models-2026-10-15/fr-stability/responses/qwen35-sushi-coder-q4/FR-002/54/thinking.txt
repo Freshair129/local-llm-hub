@@ -1,0 +1,38 @@
+Let me break down the requirements:
+
+1. **Function signature**: `pub fn normalize_model_name(raw: &str) -> String`
+
+2. **Strip registry prefixes**:
+   - 'registry.ollama.ai/library/'
+   - 'library/'
+   - 'hf.co/'
+
+3. **Strip quantization suffixes**:
+   - '-q4_0', '-q4_k_m', '-q4_k_s'
+   - ':q4_0', ':q4_k_m', ':q4_k_s'
+   - All case-insensitive
+
+4. **Convert to lowercase**
+
+5. **Guard rails**: NO unwrap(), NO expect(), NO panic!
+
+6. **Traceability**: Comment `// trace:implements FR-002` before function declaration
+
+**Design approach:**
+
+To avoid unwrap/expect/panic, I'll use:
+- `Option::map()` and `Option::unwrap_or()` for safe string replacements
+- `Option::and_then()` for chaining safe operations
+- `Option::map_or()` for fallback values
+
+**Algorithm:**
+1. Start with the raw string
+2. For each registry prefix, attempt to strip it using `split_prefix`
+3. For each quantization suffix, attempt to strip it using `strip_suffix`
+4. Convert to lowercase
+5. Return the final result
+
+**Implementation details:**
+- Use `Option::map` to safely replace prefixes
+- Use `Option::and_then` to chain prefix stripping operations
+- Use `Option::map_or` with lowercase conversion as final step

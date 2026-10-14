@@ -1,0 +1,29 @@
+Let me analyze the specification and break down the requirements:
+
+1. **Struct Definition**: Define `GpuStats` with fields:
+   - `name: String`
+   - `vram_used_mb: u64`
+   - `vram_total_mb: u64`
+   - `temp_c: u32`
+   - `util_pct: u32`
+
+2. **Function Signature**: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`
+
+3. **CSV Parsing**: Parse CSV line with 5 comma-separated values
+
+4. **Error Handling**: Return `Err(String)` for:
+   - Fewer than 5 columns
+   - Numbers failing to parse
+
+5. **Guard Rails**: NO unwrap(), expect(), or panic! Use Result pattern only
+
+6. **Traceability**: Add `// trace:implements FR-006` comment before function
+
+7. **Output**: Both struct and function in single code block
+
+Implementation approach:
+- Use `line.split(',')` to split CSV
+- Use `trim()` on each field to handle whitespace
+- Use `parse()` method for numeric parsing which returns `Result`
+- Count fields and return error if < 5
+- Collect all errors into a descriptive String for Result

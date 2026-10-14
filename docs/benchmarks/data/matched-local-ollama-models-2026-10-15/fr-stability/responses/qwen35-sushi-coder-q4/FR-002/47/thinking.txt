@@ -1,0 +1,23 @@
+Let me analyze the specification step by step:
+
+1. **Function signature**: `pub fn normalize_model_name(raw: &str) -> String`
+
+2. **Strip registry prefixes**:
+   - 'registry.ollama.ai/library/'
+   - 'library/'
+   - 'hf.co/'
+
+3. **Strip quantization suffixes**:
+   - '-q4_0', '-q4_k_m', '-q4_k_s'
+   - ':q4_0', ':q4_k_m', ':q4_k_s' (case-insensitive)
+
+4. **Convert to lowercase**
+
+5. **Guard rails**: NO unwrap(), NO expect(), NO panic!
+
+6. **Traceability**: Include comment '// trace:implements FR-002' before function declaration.
+
+I'll implement this using Rust's standard library with safe string manipulation:
+- Use `starts_with()` and `replace()` for prefix/suffix removal
+- Use `to_lowercase()` for case conversion
+- Use `is_empty()` and `is_none()` checks instead of unwrap/expect

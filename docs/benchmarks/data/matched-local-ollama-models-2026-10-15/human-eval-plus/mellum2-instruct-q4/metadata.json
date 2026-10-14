@@ -1,0 +1,42 @@
+{
+  "startedAt": "2026-10-14T20:37:02.334448+00:00",
+  "status": "generation_complete",
+  "config": {
+    "model": "hf.co/JetBrains/Mellum2-12B-A2.5B-Instruct-GGUF-Q4_K_M:Q4_K_M",
+    "backend": "Ollama native /api/chat",
+    "dataset": "HumanEval+ (EvalPlus default version)",
+    "datasetVersion": "default",
+    "datasetTaskCount": 164,
+    "datasetHash": "fe585eb4df8c88d844eeb463ea4d0302",
+    "numCtx": 16384,
+    "numPredict": 8192,
+    "options": {
+      "temperature": 0.0,
+      "top_p": 0.95,
+      "top_k": 20,
+      "repeat_penalty": 1.0,
+      "num_ctx": 16384,
+      "num_predict": 8192,
+      "seed": 1
+    },
+    "greedy": true,
+    "instructionPrefix": "Please provide a self-contained Python script that solves the following problem in a markdown code block:",
+    "evalplusVersion": "0.3.1"
+  },
+  "ollamaVersion": "0.40.4",
+  "contaminationEvents": [
+    {
+      "at": "2026-10-14T20:45:34.991791+00:00",
+      "reason": "after HumanEval+ hf.co/JetBrains/Mellum2-12B-A2.5B-Instruct-GGUF-Q4_K_M:Q4_K_M",
+      "unloaded": [
+        "hf.co/JetBrains/Mellum2-12B-A2.5B-Instruct-GGUF-Q4_K_M:Q4_K_M"
+      ]
+    }
+  ],
+  "unloadedBeforeRun": [],
+  "completedTasks": 164,
+  "lastTaskId": "HumanEval/163",
+  "completedAt": "2026-10-14T20:45:34.090608+00:00",
+  "elapsedSeconds": 511.753,
+  "finalResidentModels": []
+}

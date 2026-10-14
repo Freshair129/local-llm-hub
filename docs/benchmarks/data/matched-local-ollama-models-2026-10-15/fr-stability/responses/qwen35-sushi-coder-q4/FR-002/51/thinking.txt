@@ -1,0 +1,17 @@
+Let me implement this according to the specification:
+
+1. Function signature: `pub fn normalize_model_name(raw: &str) -> String`
+2. Strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/'
+3. Strip quantization suffixes: '-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s' (case-insensitive)
+4. Convert result to lowercase
+5. Guard rails: NO unwrap(), NO expect(), NO panic!
+6. Traceability: Include comment '// trace:implements FR-002' directly before function declaration.
+
+Let me think about the implementation:
+
+1. First, I'll strip the registry prefixes
+2. Then strip quantization suffixes (case-insensitive)
+3. Convert to lowercase
+4. Return the result
+
+For the guard rails, I'll use match statements or if-let patterns instead of unwrap/expect/panic.

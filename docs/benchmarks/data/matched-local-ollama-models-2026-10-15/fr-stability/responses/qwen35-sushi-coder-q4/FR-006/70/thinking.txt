@@ -1,0 +1,73 @@
+Let me analyze the specification carefully:
+
+1. **Struct Definition**: Need to define `GpuStats` with:
+   - `name: String`
+   - `vram_used_mb: u64`
+   - `vram_total_mb: u64`
+   - `temp_c: u32`
+   - `util_pct: u32`
+
+2. **Function**: `parse_gpu_csv(line: &str) -> Result<GpuStats, String>`
+
+3. **Error Handling**: 
+   - Check for fewer than 5 columns
+   - Handle parsing failures for numbers
+   - NO unwrap(), expect(), or panic!
+
+4. **Guard Rails**: STRICTLY FORBIDDEN to use unwrap(), expect(), or panic!
+
+5. **Traceability**: Include comment `// trace:implements FR-006` before function
+
+6. **Output**: Both struct and function in code block
+
+Let me implement this step by step:
+
+```rust
+use std::str::FromStr;
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // Parse CSV by splitting on comma
+    let fields: Vec<&str> = line.split(',').collect();
+    
+    // Check for minimum 5 columns
+    if fields.len() < 5 {
+        return Err(format!("Expected 5 columns, found {}", fields.len()));
+    }
+    
+    // Parse each field with proper error handling
+    let name = fields[0].trim().to_string();
+    let vram_used = u64::from_str(fields[1].trim())
+        .map_err(|e| format!("Failed to parse vram_used: {}", e))?;
+    let vram_total = u64::from_str(fields[2].trim())
+        .map_err(|e| format!("Failed to parse vram_total: {}", e))?;
+    let temp = u32::from_str(fields[3].trim())
+        .map_err(|e| format!("Failed to parse temp: {}", e))?;
+    let util = u32::from_str(fields[4].trim())
+        .map_err(|e| format!("Failed to parse util: {}", e))?;
+    
+    Ok(GpuStats {
+        name,
+        vram_used_mb: vram_used,
+        vram_total_mb: vram_total,
+        temp_c: temp,
+        util_pct: util,
+    })
+}
+```
+
+Key design decisions:
+- Used `split(',')` and `trim()` to handle potential whitespace around values
+- Used `u64::from_str()` and `u32::from_str()` which return `Result` types for safe parsing
+- Each parsing operation uses `.map_err()` to convert parsing errors to String errors
+- Checked field count before attempting to access array indices
+- No unwrap(), expect(), or panic! used anywhere

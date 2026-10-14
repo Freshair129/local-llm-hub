@@ -1,0 +1,16 @@
+Let me analyze the requirements carefully:
+
+1. Define a `GpuStats` struct with specific fields and derives
+2. Implement a `parse_gpu_csv` function that:
+   - Takes a CSV line string
+   - Parses 5 comma-separated values
+   - Returns Result<GpuStats, String>
+3. Error handling must use Err(String) - NO unwrap(), expect(), panic!
+4. Must include comment '// trace:implements FR-006' before the function
+5. Output BOTH the struct and function in one code block
+
+I'll implement this with:
+- Split by comma
+- Parse each field with proper error handling
+- Validate we have exactly 5 fields
+- Return appropriate Err messages for failures

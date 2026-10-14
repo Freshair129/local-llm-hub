@@ -1,0 +1,47 @@
+// trace:implements FR-006
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // Split CSV by comma
+    let parts: Vec<&str> = line.split(',').collect();
+    
+    // Guard: require exactly 5 columns
+    if parts.len() < 5 {
+        return Err(format!("Expected 5 CSV columns, found {}", parts.len()));
+    }
+    
+    // Parse name (String) - can be empty but should be trimmed
+    let name = parts[0].trim().to_string();
+    
+    // Parse vram_used_mb (u64)
+    let vram_used_mb: u64 = parts[1].trim().parse()
+        .map_err(|_| format!("Failed to parse vram_used_mb: '{}'", parts[1]))?;
+    
+    // Parse vram_total_mb (u64)
+    let vram_total_mb: u64 = parts[2].trim().parse()
+        .map_err(|_| format!("Failed to parse vram_total_mb: '{}'", parts[2]))?;
+    
+    // Parse temp_c (u32)
+    let temp_c: u32 = parts[3].trim().parse()
+        .map_err(|_| format!("Failed to parse temp_c: '{}'", parts[3]))?;
+    
+    // Parse util_pct (u32)
+    let util_pct: u32 = parts[4].trim().parse()
+        .map_err(|_| format!("Failed to parse util_pct: '{}'", parts[4]))?;
+    
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}

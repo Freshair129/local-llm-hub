@@ -1,0 +1,23 @@
+Let me think about how to approach this coding problem.
+
+Problem: You are an AI Coder working under STD-003 and ADR-100 guard rails.
+Implement this exact specification for FR-006:
+
+Specification:
+1. Define struct:
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+2. Function signature: pub fn parse_gpu_csv(line: &str) -> Result<
+
+Approach:
+- Split the CSV line by commas
+- Parse each field with parse_u64 or parse_u32, returning Err on failure
+- Return Err if fewer than 5 fields exist
+
+Let me implement this solution.

@@ -1,0 +1,20 @@
+Let me analyze the specification carefully:
+
+1. **Function signature**: `pub fn normalize_model_name(raw: &str) -> String`
+2. **Strip registry prefixes**: 
+   - 'registry.ollama.ai/library/'
+   - 'library/'
+   - 'hf.co/'
+3. **Strip quantization suffixes**: 
+   - '-q4_0', '-q4_k_m', '-q4_k_s' (with dash)
+   - ':q4_0', ':q4_k_m', ':q4_k_s' (with colon)
+   - Case-insensitive matching
+4. **Convert to lowercase**
+5. **Guard rails**: NO unwrap(), NO expect(), NO panic!
+6. **Traceability**: Comment '// trace:implements FR-002' before function
+
+I need to implement this safely without panicking. The approach:
+- Use `split` and `find` operations that return Option
+- Use `if let` or `match` to handle cases safely
+- Use `to_lowercase()` for case conversion
+- Build the result step-by-step with safe string operations

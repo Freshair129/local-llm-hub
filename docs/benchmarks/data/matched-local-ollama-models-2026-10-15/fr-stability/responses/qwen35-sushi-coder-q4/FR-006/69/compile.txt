@@ -1,0 +1,71 @@
+error[E0599]: no associated function or constant named `from_str` found for type `u64` in the current scope
+  --> C:\Users\suanr\.ollama\benchmarks\matched-models-20261015\runs\qwen35-sushi-coder-q4\fr-stability\responses\FR-006\69\test.rs:31:29
+   |
+31 |     let vram_used_mb = u64::from_str(vram_used_str)
+   |                             ^^^^^^^^ associated function or constant not found in `u64`
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: trait `FromStr` which provides `from_str` is implemented but not in scope; perhaps you want to import it
+   |
+ 2 + use std::str::FromStr;
+   |
+help: there is an associated function `from` with a similar name
+   |
+31 -     let vram_used_mb = u64::from_str(vram_used_str)
+31 +     let vram_used_mb = u64::from(vram_used_str)
+   |
+
+error[E0599]: no associated function or constant named `from_str` found for type `u64` in the current scope
+  --> C:\Users\suanr\.ollama\benchmarks\matched-models-20261015\runs\qwen35-sushi-coder-q4\fr-stability\responses\FR-006\69\test.rs:34:30
+   |
+34 |     let vram_total_mb = u64::from_str(vram_total_str)
+   |                              ^^^^^^^^ associated function or constant not found in `u64`
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: trait `FromStr` which provides `from_str` is implemented but not in scope; perhaps you want to import it
+   |
+ 2 + use std::str::FromStr;
+   |
+help: there is an associated function `from` with a similar name
+   |
+34 -     let vram_total_mb = u64::from_str(vram_total_str)
+34 +     let vram_total_mb = u64::from(vram_total_str)
+   |
+
+error[E0599]: no associated function or constant named `from_str` found for type `u32` in the current scope
+  --> C:\Users\suanr\.ollama\benchmarks\matched-models-20261015\runs\qwen35-sushi-coder-q4\fr-stability\responses\FR-006\69\test.rs:37:23
+   |
+37 |     let temp_c = u32::from_str(temp_str)
+   |                       ^^^^^^^^ associated function or constant not found in `u32`
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: trait `FromStr` which provides `from_str` is implemented but not in scope; perhaps you want to import it
+   |
+ 2 + use std::str::FromStr;
+   |
+help: there is an associated function `from` with a similar name
+   |
+37 -     let temp_c = u32::from_str(temp_str)
+37 +     let temp_c = u32::from(temp_str)
+   |
+
+error[E0599]: no associated function or constant named `from_str` found for type `u32` in the current scope
+  --> C:\Users\suanr\.ollama\benchmarks\matched-models-20261015\runs\qwen35-sushi-coder-q4\fr-stability\responses\FR-006\69\test.rs:40:25
+   |
+40 |     let util_pct = u32::from_str(util_str)
+   |                         ^^^^^^^^ associated function or constant not found in `u32`
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: trait `FromStr` which provides `from_str` is implemented but not in scope; perhaps you want to import it
+   |
+ 2 + use std::str::FromStr;
+   |
+help: there is an associated function `from` with a similar name
+   |
+40 -     let util_pct = u32::from_str(util_str)
+40 +     let util_pct = u32::from(util_str)
+   |
+
+error: aborting due to 4 previous errors
+
+For more information about this error, try `rustc --explain E0599`.

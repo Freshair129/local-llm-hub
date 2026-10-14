@@ -1,0 +1,72 @@
+// trace:implements FR-006
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // Split the CSV line by comma
+    let parts: Vec<&str> = line.split(',').collect();
+
+    // Guard rail: Check if we have exactly 5 columns.
+    // If not, return an Err.
+    if parts.len() != 5 {
+        return Err(format!("Invalid CSV format: expected 5 columns, found {}", parts.len()));
+    }
+
+    // Parse fields individually. If any parse fails, return Err.
+    let name = parts[0].trim().to_string();
+    let vram_used_mb = parts[1].trim().parse::<u64>()
+        .map_err(|_| format!("Failed to parse vram_used_mb: {}", parts[1]))?;
+    let vram_total_mb = parts[2].trim().parse::<u64>()
+        .map_err(|_| format!("Failed to parse vram_total_mb: {}", parts[2]))?;
+    let temp_c = parts[3].trim().parse::<u32>()
+        .map_err(|_| format!("Failed to parse temp_c: {}", parts[3]))?;
+    let util_pct = parts[4].trim().parse::<u32>()
+        .map_err(|_| format!("Failed to parse util_pct: {}", parts[4]))?;
+
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_valid_csv() {
+        let input = "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25";
+        let stats = parse_gpu_csv(input);
+        assert!(stats.is_ok());
+        let result = stats.unwrap();
+        assert_eq!(result.name, "NVIDIA GeForce RTX 3060");
+        assert_eq!(result.vram_used_mb, 5800);
+        assert_eq!(result.vram_total_mb, 12288);
+        assert_eq!(result.temp_c, 35);
+        assert_eq!(result.util_pct, 25);
+    }
+
+    #[test]
+    fn test_missing_columns() {
+        let input = "NVIDIA GeForce RTX 3060, 5800, 12288, 35";
+        let result = parse_gpu_csv(input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_invalid_number() {
+        let input = "NVIDIA GeForce RTX 3060, abc, 12288, 35, 25";
+        let result = parse_gpu_csv(input);
+        assert!(result.is_err());
+    }
+}

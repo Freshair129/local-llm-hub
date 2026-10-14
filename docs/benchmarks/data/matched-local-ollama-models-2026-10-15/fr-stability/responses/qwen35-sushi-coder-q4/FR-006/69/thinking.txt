@@ -1,0 +1,23 @@
+Let me analyze this specification carefully:
+
+1. **Struct Definition**: A `GpuStats` struct with 5 fields (name, vram_used_mb, vram_total_mb, temp_c, util_pct) with appropriate types.
+
+2. **Function Signature**: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>` - returns a Result type for error handling.
+
+3. **CSV Parsing**: Need to split by comma and parse 5 fields.
+
+4. **Error Handling**: Must use `Result` - NO unwrap(), expect(), or panic() allowed.
+
+5. **Guard Rails**: STD-003 and ADR-100 require defensive programming.
+
+6. **Traceability**: Add `// trace:implements FR-006` comment before function.
+
+7. **Output**: Both struct and function in one code block.
+
+Let me implement this step-by-step:
+- Split the CSV line by commas
+- Trim whitespace from each field
+- Parse string fields (name) directly
+- Parse numeric fields with proper error handling
+- Return errors for invalid data
+- Return Ok(GpuStats) for valid data

@@ -1,0 +1,24 @@
+Let me think about how to approach this coding problem.
+
+Problem: You are an AI Coder working under STD-003 and ADR-100 guard rails.
+Implement this exact specification for FR-006:
+
+Specification:
+1. Define struct:
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+
+Approach: struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+```
+
+This gives us the final answer: pub struct GpuStats {

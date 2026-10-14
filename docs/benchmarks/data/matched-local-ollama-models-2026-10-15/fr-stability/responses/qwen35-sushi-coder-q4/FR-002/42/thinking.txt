@@ -1,0 +1,19 @@
+Let me analyze the requirements carefully:
+
+1. **Function signature**: `pub fn normalize_model_name(raw: &str) -> String`
+2. **Strip prefixes**: 'registry.ollama.ai/library/', 'library/', 'hf.co/'
+3. **Strip quantization suffixes**: '-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s' (case-insensitive)
+4. **Convert to lowercase**
+5. **Guard rails**: NO unwrap(), NO expect(), NO panic!
+6. **Traceability**: Include comment '// trace:implements FR-002'
+
+I'll implement this using Rust's `std::str::strip_prefix` and `strip_suffix` methods which return `Option` and avoid panics.
+
+Key considerations:
+- Use `strip_prefix` and `strip_suffix` (return Option, safe)
+- Convert suffix matching to lowercase for case-insensitive comparison
+- Trim whitespace after stripping
+- Return empty string if nothing can be stripped and original is empty
+- Never call unwrap() or expect() - handle all Option returns
+
+Let me write the implementation:

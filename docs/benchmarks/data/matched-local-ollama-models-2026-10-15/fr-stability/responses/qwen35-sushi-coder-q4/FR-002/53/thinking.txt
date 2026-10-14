@@ -1,0 +1,22 @@
+Let me think about how to approach this coding problem.
+
+Problem: You are an AI Coder working under STD-003 and ADR-100 guard rails.
+Implement this exact specification for FR-002:
+
+Specification:
+1. Function signature: pub fn normalize_model_name(raw: &str) -> String
+2. Strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/'
+3. Strip quantization suffixes: '-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s' (case-insensitive)
+4. Convert result to lowercase
+5. Guard rails: NO unwrap(), NO expect(), NO panic!
+6. Traceability: Include comment '// trace:implements FR-002' directly before function declaration.
+
+Output ONLY valid Rust code inside a ```rust code block.
+
+Approach:
+- Use Result<T, String> to handle errors without panicking
+- Use match statements for safe pattern matching
+- Use string methods that return Option<String> or handle None explicitly
+- Avoid any .unwrap() or .expect() calls
+
+Let me implement this solution.

@@ -1,0 +1,41 @@
+// trace:implements FR-006
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let mut fields = line.split(',');
+    
+    let name = fields.next().ok_or("Missing name field")?.trim().to_string();
+    
+    let vram_used_mb_str = fields.next().ok_or("Missing vram_used_mb field")?.trim();
+    let vram_used_mb = vram_used_mb_str.parse::<u64>().map_err(|_| "Failed to parse vram_used_mb")?;
+    
+    let vram_total_mb_str = fields.next().ok_or("Missing vram_total_mb field")?.trim();
+    let vram_total_mb = vram_total_mb_str.parse::<u64>().map_err(|_| "Failed to parse vram_total_mb")?;
+    
+    let temp_c_str = fields.next().ok_or("Missing temp_c field")?.trim();
+    let temp_c = temp_c_str.parse::<u32>().map_err(|_| "Failed to parse temp_c")?;
+    
+    let util_pct_str = fields.next().ok_or("Missing util_pct field")?.trim();
+    let util_pct = util_pct_str.parse::<u32>().map_err(|_| "Failed to parse util_pct")?;
+    
+    // Check for extra fields
+    if fields.next().is_some() {
+        return Err("Too many fields".to_string());
+    }
+    
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}

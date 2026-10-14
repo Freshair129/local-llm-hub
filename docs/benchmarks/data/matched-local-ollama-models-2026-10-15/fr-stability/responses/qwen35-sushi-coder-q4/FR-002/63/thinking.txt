@@ -1,0 +1,24 @@
+Let me think about how to approach this coding problem.
+
+Problem: You are an AI Coder working under STD-003 and ADR-100 guard rails.
+Implement this exact specification for FR-002:
+
+Specification:
+1. Function signature: pub fn normalize_model_name(raw: &str) -> String
+2. Strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/'
+3. Strip quantization suffixes: '-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s' (case-insensitive)
+4. Convert result to lowercase
+5. Guard rails: NO unwrap(), NO expect(), NO panic!
+6. Traceability: Include comment '// trace:implements FR-002'
+
+Approach:
+- Strip suffixes before prefixes (since suffixes are shorter)
+- Use case-insensitive matching for suffixes
+- Use trim_end_matches() for efficiency
+
+Key considerations:
+- Error handling: Return Option<String> since invalid input is possible
+- No panics: Use ? operator or match for error handling
+- Efficiency: Use trim_end_matches() instead of manual iteration
+
+Let me implement this solution.

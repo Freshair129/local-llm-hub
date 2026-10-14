@@ -1,0 +1,26 @@
+Let me analyze the requirements for FR-002:
+
+1. Function signature: `pub fn normalize_model_name(raw: &str) -> String`
+2. Strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/'
+3. Strip quantization suffixes: '-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s' (case-insensitive)
+4. Convert result to lowercase
+5. Guard rails: NO unwrap(), NO expect(), NO panic!
+6. Traceability: Include comment '// trace:implements FR-002' directly before function declaration
+
+I need to implement a safe function that:
+- Uses safe string manipulation (split, contains, match)
+- Avoids any panic-prone operations
+- Returns a String (owned)
+- Strips prefixes and suffixes
+- Converts to lowercase
+
+Let me think about the implementation:
+
+1. First, I'll check for and strip each prefix
+2. Then check for and strip each suffix (case-insensitive)
+3. Finally convert to lowercase
+
+For safety, I'll use:
+- `.split()` with `find` to avoid unwrapping
+- `.to_lowercase()` for case conversion
+- Careful index handling to avoid panics

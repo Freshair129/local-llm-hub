@@ -1,0 +1,39 @@
+error[E0308]: mismatched types
+  --> C:\Users\suanr\.ollama\benchmarks\matched-models-20261015\runs\qwen35-sushi-coder-q4\fr-stability\responses\FR-002\52\test.rs:29:94
+   |
+29 |     assert_eq!(normalize_model_name("registry.ollama.ai/library/llama3.2:1b-instruct-q4_0"), "llama3.2:1b-instruct");
+   |                                                                                              ^^^^^^^^^^^^^^^^^^^^^^ expected `Result<String, String>`, found `&str`
+   |
+   = note:   expected enum `Result<String, String>`
+           found reference `&str`
+
+error[E0308]: mismatched types
+  --> C:\Users\suanr\.ollama\benchmarks\matched-models-20261015\runs\qwen35-sushi-coder-q4\fr-stability\responses\FR-002\52\test.rs:30:89
+   |
+30 |     assert_eq!(normalize_model_name("hf.co/mradermacher/Qwen3.5-9B-Coder-GGUF:Q4_K_M"), "mradermacher/qwen3.5-9b-coder-gguf");
+   |                                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Result<String, String>`, found `&str`
+   |
+   = note:   expected enum `Result<String, String>`
+           found reference `&str`
+
+error[E0308]: mismatched types
+  --> C:\Users\suanr\.ollama\benchmarks\matched-models-20261015\runs\qwen35-sushi-coder-q4\fr-stability\responses\FR-002\52\test.rs:31:60
+   |
+31 |     assert_eq!(normalize_model_name("library/gemma4:12b"), "gemma4:12b");
+   |                                                            ^^^^^^^^^^^^ expected `Result<String, String>`, found `&str`
+   |
+   = note:   expected enum `Result<String, String>`
+           found reference `&str`
+
+error[E0308]: mismatched types
+  --> C:\Users\suanr\.ollama\benchmarks\matched-models-20261015\runs\qwen35-sushi-coder-q4\fr-stability\responses\FR-002\52\test.rs:32:61
+   |
+32 |     assert_eq!(normalize_model_name("custom-model:latest"), "custom-model:latest");
+   |                                                             ^^^^^^^^^^^^^^^^^^^^^ expected `Result<String, String>`, found `&str`
+   |
+   = note:   expected enum `Result<String, String>`
+           found reference `&str`
+
+error: aborting due to 4 previous errors
+
+For more information about this error, try `rustc --explain E0308`.

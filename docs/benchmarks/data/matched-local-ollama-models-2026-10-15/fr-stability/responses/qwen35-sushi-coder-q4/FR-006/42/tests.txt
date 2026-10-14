@@ -1,0 +1,10 @@
+
+running 5 tests
+test tests::test_valid_csv ... ok
+test test_parse_invalid_csv ... ok
+test test_parse_valid_csv ... ok
+test tests::test_invalid_number ... ok
+test tests::test_missing_columns ... ok
+
+test result: ok. 5 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.02s
+

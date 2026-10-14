@@ -1,0 +1,22 @@
+Let me break down this task:
+
+1. **FR-006 Specification Analysis:**
+   - Define a `GpuStats` struct with 5 fields (name, vram_used_mb, vram_total_mb, temp_c, util_pct)
+   - Implement `parse_gpu_csv` function that parses CSV strings into GpuStats
+   - Robust error handling - return Err on malformed input
+   - NO unwrap(), expect(), or panic! - use Result type throughout
+   - Add traceability comment before function
+   - Output both struct and function in one code block
+
+2. **Implementation Strategy:**
+   - Split CSV line by commas
+   - Trim whitespace from each field
+   - Parse numeric fields using `parse()` which returns Result
+   - Validate we have exactly 5 fields
+   - Return appropriate errors for each failure case
+
+3. **Verification:**
+   - Check that struct derives Debug and PartialEq
+   - Verify function signature matches spec
+   - Confirm error handling uses Result, not unwrap/expect
+   - Validate traceability comment placement

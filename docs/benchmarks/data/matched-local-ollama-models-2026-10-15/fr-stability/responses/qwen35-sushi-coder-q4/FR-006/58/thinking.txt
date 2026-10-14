@@ -1,0 +1,115 @@
+Let me work through this problem step by step.
+
+First, I need to understand what's being asked: You are an AI Coder working under STD-003 and ADR-100 guard rails.
+Implement this exact specification for FR-006:
+
+Specification:
+1. Define struct:
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+2. Function signature: pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>
+3. Given a CSV line like "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25", parse it into GpuStats.
+4. Robust error handling: Return Err(String) if columns are fewer than 5 or numbers fail to parse.
+5. Guard rails: STRICTLY FORBIDDEN to use unwrap(), expect(), or panic! Return Err instead.
+6. Traceability: Include comment '// trace:implements FR-006' directly before function declaration.
+7. Output BOTH 'pub struct GpuStats' and 'pub fn parse_gpu_csv' inside the ```rust code block.
+
+Key values: 1, 0, ,, 2, ,, 3, ,, 4, ,, 5
+
+Working through the calculation: <analysis>
+Breaking down FR-006 implementation:
+
+1. Struct Definition:
+   - Must derive Debug and PartialEq for testing/debugging
+   - Five fields with appropriate unsigned integer types
+   - Public visibility for external access
+
+2. Function Design:
+   - Takes &str (read-only CSV line)
+   - Returns Result<GpuStats, String> for error propagation
+   - No unwrap()/expect()/panic! - must use match or if-let for error handling
+
+3. Parsing Strategy:
+   - Split by comma delimiter
+   - Check column count (must be exactly 5)
+   - Parse each field with fallible parsing (parse_u64/parse_u32)
+   - Convert name field to String
+   - Wrap any error in Err(String)
+
+4. Guard Rail Compliance:
+   - Never use unwrap(), expect(), or panic!
+   - Always return Err for failures
+   - Include traceability comment before function
+</analysis>
+
+Implementation:
+
+```rust
+// trace:implements FR-006
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // Split CSV line by comma delimiter
+    let parts: Vec<&str> = line.split(',').collect();
+    
+    // Guard rail: Check column count (must be exactly 5)
+    if parts.len() != 5 {
+        return Err(format!("Invalid CSV format: expected 5 columns, found {}", parts.len()));
+    }
+    
+    // Parse each field with error handling (no unwrap/expect/panic!)
+    let name = parts[0].to_string();
+    
+    let vram_used_mb = match parts[1].parse::<u64>() {
+        Ok(n) => n,
+        Err(_) => return Err("Failed to parse vram_used_mb".to_string()),
+    };
+    
+    let vram_total_mb = match parts[2].parse::<u64>() {
+        Ok(n) => n,
+        Err(_) => return Err("Failed to parse vram_total_mb".to_string()),
+    };
+    
+    let temp_c = match parts[3].parse::<u32>() {
+        Ok(n) => n,
+        Err(_) => return Err("Failed to parse temp_c".to_string()),
+    };
+    
+    let util_pct = match parts[4].parse::<u32>() {
+        Ok(n) => n,
+        Err(_) => return Err("Failed to parse util_pct".to_string()),
+    };
+    
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}
+```
+
+Verification with sample input:
+- Input: "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"
+- Split → 5 parts ✓
+- Parse each: all succeed ✓
+- Result: Ok(GpuStats { name: "NVIDIA GeForce RTX 3060", vram_used_mb: 5800, vram_total_mb: 12288, temp_c: 35, util_pct: 25 })
+
+Error cases handled:
+- Wrong column count → Err with descriptive message
+- Non-numeric field → Err with field-specific message

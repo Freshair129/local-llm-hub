@@ -1,0 +1,76 @@
+# Solution: GPU CSV Parser with Guard Rail Compliance
+
+## Architectural Decisions
+
+1. **Error Handling Strategy**: Following ADR-100, I use Rust's `Result` type with explicit `Err` propagation. This provides deterministic failure modes without using forbidden patterns like `unwrap()` or `expect()`.
+
+2. **CSV Parsing**: I'll use Rust's standard library `split(',')` for simplicity and to avoid external dependencies. This is appropriate for a focused utility function.
+
+3. **Type Safety**: The struct uses Rust's strong type system with appropriate unsigned integer types (`u64` for memory values, `u32` for percentages and temperature).
+
+4. **Defensive Programming**: Each field is parsed independently with individual error handling, allowing precise error messages when specific fields fail to parse.
+
+## Implementation
+
+```rust
+// trace:implements FR-006
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // Split CSV line by comma delimiter
+    let fields: Vec<&str> = line.split(',').collect();
+    
+    // Guard rail: Ensure we have exactly 5 columns
+    if fields.len() < 5 {
+        return Err(format!("Expected 5 columns, found {}", fields.len()));
+    }
+    
+    // Parse each field with individual error handling
+    let name = fields[0].trim().to_string();
+    
+    let vram_used_mb: u64 = fields[1].trim().parse()
+        .map_err(|_| format!("Failed to parse vram_used_mb as u64: {}", fields[1]))?;
+    
+    let vram_total_mb: u64 = fields[2].trim().parse()
+        .map_err(|_| format!("Failed to parse vram_total_mb as u64: {}", fields[2]))?;
+    
+    let temp_c: u32 = fields[3].trim().parse()
+        .map_err(|_| format!("Failed to parse temp_c as u32: {}", fields[3]))?;
+    
+    let util_pct: u32 = fields[4].trim().parse()
+        .map_err(|_| format!("Failed to parse util_pct as u32: {}", fields[4]))?;
+    
+    // Guard rail: Prevent unexpected None by using ? operator
+    // This is safe because we've already validated field count
+    
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}
+```
+
+## Verification
+
+Let me verify this implementation against the specification:
+
+| Requirement | Status |
+|-------------|--------|
+| Struct with Debug, PartialEq derives | ✅ |
+| Function returns Result<GpuStats, String> | ✅ |
+| Parses CSV with 5 comma-separated values | ✅ |
+| Returns Err on insufficient columns | ✅ |
+| Returns Err on parse failures | ✅ |
+| No unwrap(), expect(), or panic! | ✅ |
+| Includes traceability comment | ✅ |

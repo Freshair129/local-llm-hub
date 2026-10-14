@@ -1,0 +1,30 @@
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let parts: Vec<&str> = line.split(',').collect();
+
+    if parts.len() < 5 {
+        return Err(String::from("CSV line must contain at least 5 columns"));
+    }
+
+    let name = parts[0].trim().to_string();
+
+    let vram_used_mb = parts[1].trim().parse::<u64>()
+        .map_err(|_| String::from("Failed to parse vram_used_mb"))?;
+
+    let vram_total_mb = parts[2].trim().parse::<u64>()
+        .map_err(|_| String::from("Failed to parse vram_total_mb"))?;
+
+    let temp_c = parts[3].trim().parse::<u32>()
+        .map_err(|_| String::from("Failed to parse temp_c"))?;
+
+    let util_pct = parts[4].trim().parse::<u32>()
+        .map_err(|_| String::from("Failed to parse util_pct"))?;
+
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}

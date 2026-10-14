@@ -1,0 +1,15 @@
+Let me analyze this request carefully:
+
+1. **FR-006 specification**: Parse a GPU CSV line into a `GpuStats` struct with 5 fields
+2. **Field types**: String, u64, u64, u32, u32
+3. **Error handling**: Return `Err(String)` for parsing failures (no unwrap/panic)
+4. **Guard rails**: STD-003 and ADR-100 - no unwrap/expect/panic
+5. **Traceability**: Comment '// trace:implements FR-006' before function
+6. **Output**: Both struct and function in one code block
+
+**Key considerations:**
+- The CSV line has 5 comma-separated values
+- Need to split by comma and trim whitespace
+- Need to parse each field with proper error handling
+- Need to validate column count
+- Need to handle partial parse failures (e.g., first 4 parse ok, 5th fails)

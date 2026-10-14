@@ -1,0 +1,8 @@
+Let me implement this step-by-step:
+
+1. Parse the input string and check for registry prefixes
+2. Check for quantization suffixes (case-insensitive)
+3. Apply all transformations
+4. Return lowercase result with proper error handling
+
+I need to handle all edge cases without panic/unwrap/expect.

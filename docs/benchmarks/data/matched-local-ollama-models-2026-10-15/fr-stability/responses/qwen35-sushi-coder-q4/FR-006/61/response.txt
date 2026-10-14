@@ -1,0 +1,112 @@
+# Solution: GpuStats Parser with Robust Error Handling
+
+## Architecture Decisions
+
+1. **Error Handling Strategy**: Following STD-003, I'll use `Result<T, E>` pattern instead of unwrapping. This ensures fail-fast behavior with clear error messages.
+
+2. **CSV Parsing**: Manual string splitting is used for simplicity. For production, I'd recommend using the `csv` crate with proper quote handling.
+
+3. **Type Safety**: Using `u64` for VRAM values prevents overflow issues with large memory values.
+
+## Implementation
+
+```rust
+// trace:implements FR-006
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // Guard rail: NO unwrap(), expect(), or panic! - returning Err instead
+    
+    // Step 1: Split CSV line by comma
+    let parts: Vec<&str> = line.split(',').collect();
+    
+    // Step 2: Validate column count (need exactly 5 fields)
+    if parts.len() < 5 {
+        return Err(format!("Expected 5 columns, found {}", parts.len()));
+    }
+    
+    // Step 3: Parse each field with error handling
+    let name = parts[0].trim().to_string();
+    
+    let vram_used_mb = parts[1].trim().parse::<u64>()
+        .map_err(|_| format!("Failed to parse vram_used_mb: {}", parts[1]))?;
+    
+    let vram_total_mb = parts[2].trim().parse::<u64>()
+        .map_err(|_| format!("Failed to parse vram_total_mb: {}", parts[2]))?;
+    
+    let temp_c = parts[3].trim().parse::<u32>()
+        .map_err(|_| format!("Failed to parse temp_c: {}", parts[3]))?;
+    
+    let util_pct = parts[4].trim().parse::<u32>()
+        .map_err(|_| format!("Failed to parse util_pct: {}", parts[4]))?;
+    
+    // Step 4: Validate parsed values are reasonable
+    if vram_used_mb > vram_total_mb {
+        return Err(format!("VRAM used ({}) cannot exceed total ({})", 
+                           vram_used_mb, vram_total_mb));
+    }
+    
+    if temp_c > 100 || util_pct > 100 {
+        return Err(format!("Invalid values: temp_c={}, util_pct={}", temp_c, util_pct));
+    }
+    
+    // Step 5: Return successful result
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}
+```
+
+## Verification with Test Cases
+
+```rust
+fn main() {
+    // Test 1: Valid input
+    let valid_line = "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25";
+    match parse_gpu_csv(valid_line) {
+        Ok(stats) => println!("Success: {:?}", stats),
+        Err(e) => println!("Error: {}", e),
+    }
+    
+    // Test 2: Too few columns
+    let short_line = "NVIDIA RTX 3060, 5800, 12288";
+    match parse_gpu_csv(short_line) {
+        Ok(_) => println!("Should have failed!"),
+        Err(e) => println!("Correctly caught error: {}", e),
+    }
+    
+    // Test 3: Invalid number
+    let bad_number = "NVIDIA RTX 3060, abc, 12288, 35, 25";
+    match parse_gpu_csv(bad_number) {
+        Ok(_) => println!("Should have failed!"),
+        Err(e) => println!("Correctly caught error: {}", e),
+    }
+    
+    // Test 4: Invalid VRAM logic
+    let inverted_vram = "NVIDIA RTX 3060, 15000, 12288, 35, 25";
+    match parse_gpu_csv(inverted_vram) {
+        Ok(_) => println!("Should have failed!"),
+        Err(e) => println!("Correctly caught error: {}", e),
+    }
+}
+```
+
+## Expected Output
+```
+Success: GpuStats { name: "NVIDIA GeForce RTX 3060", vram_used_mb: 5800, vram_total_mb: 12288, temp_c: 35, util_pct: 25 }
+Correctly caught error: Expected 5 columns, found 3
+Correctly caught error: Failed to parse vram_used_mb: abc
+Correctly caught error: VRAM used (15000) cannot exceed total (12288)
+```

@@ -1,0 +1,98 @@
+<Thinking>
+1.  **Analyze the Request:**
+    *   **Goal:** Implement a Rust function `parse_gpu_csv` and a struct `GpuStats`.
+    *   **Struct Definition:** `GpuStats` with fields: `name` (String), `vram_used_mb`, `vram_total_mb`, `temp_c`, `util_pct` (all numeric).
+    *   **Function Logic:** Parse a CSV line into the struct.
+    *   **Error Handling:** Use `Result<GpuStats, String>`. Return `Err` on parsing failures (wrong number of columns, bad numbers).
+    *   **Guard Rails:** Do **not** use `unwrap()`, `expect()`, or `panic!`. Strictly use `Result` propagation.
+    *   **Traceability:** Add a comment `// trace:implements FR-006` before the function.
+    *   **Output:** Provide the complete code block.
+
+2.  **Step-by-Step Implementation:**
+    *   **Struct:** Define `GpuStats` with `derive(Debug, PartialEq)` as requested.
+    *   **Parsing Logic:**
+        *   Check if the input string `line` is empty. If so, return `Err`.
+        *   Split the string by comma `,`.
+        *   Check if the resulting vector has exactly 5 elements. If not, return `Err`.
+        *   Iterate through the 5 elements and attempt to parse them into their respective types (`String`, `u64`, `u64`, `u32`, `u32`).
+        *   If any `parse()` returns `None`, propagate the error.
+    *   **Guard Rail Check:** Ensure no `.unwrap()` is called.
+    *   **Comment Insertion:** Place the traceability comment.
+
+3.  **Drafting the Code:**
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats {
+        pub name: String,
+        pub vram_used_mb: u64,
+        pub vram_total_mb: u64,
+        pub temp_c: u32,
+        pub util_pct: u32,
+    }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+        // Implementation...
+    }
+    ```
+
+4.  **Refining Error Handling:**
+    *   Instead of `line.split(',').into_iter()`, use `line.split(',').collect::<Vec<_>>()` to easily check length.
+    *   Use `.parse::<T>()` which returns `Result<T, ParseIntError>`.
+    *   Map the `ParseIntError` to a `String` (e.g., "Failed to parse number: ...") to satisfy the return type `Result<..., String>`.
+    *   Handle the `name` field (String) specifically, as it doesn't need parsing.
+
+5.  **Final Code Construction:** Combine struct and function.
+</think>
+
+Here is the implementation for FR-006, adhering to the strict guard rails and traceability requirements.
+
+```rust
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // 1. Check for empty line
+    if line.is_empty() {
+        return Err("Input line is empty".to_string());
+    }
+
+    // 2. Split by comma
+    let parts: Vec<&str> = line.split(',').collect();
+
+    // 3. Validate column count
+    if parts.len() != 5 {
+        return Err(format!("Expected 5 columns, found {}", parts.len()));
+    }
+
+    // 4. Parse fields into GpuStats
+    // We return Err immediately if parsing fails, avoiding unwrap/panic.
+    let name = parts[0].to_string();
+    let vram_used = parts[1].parse::<u64>()
+        .map_err(|_| format!("Failed to parse vram_used_mb: {}", parts[1]))?;
+    
+    let vram_total = parts[2].parse::<u64>()
+        .map_err(|_| format!("Failed to parse vram_total_mb: {}", parts[2]))?;
+        
+    let temp = parts[3].parse::<u32>()
+        .map_err(|_| format!("Failed to parse temp_c: {}", parts[3]))?;
+        
+    let util = parts[4].parse::<u32>()
+        .map_err(|_| format!("Failed to parse util_pct: {}", parts[4]))?;
+
+    Ok(GpuStats {
+        name,
+        vram_used_mb: vram_used,
+        vram_total_mb: vram_total,
+        temp_c: temp,
+        util_pct: util,
+    })
+}
+```

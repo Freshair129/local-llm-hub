@@ -1,0 +1,9 @@
+EvalPlus evaluation completion record.
+Docker evaluator exit code: 0 (confirmed with docker wait).
+EvalPlus version: 0.3.1
+Dataset: HumanEval+, 164 tasks, hash fe585eb4df8c88d844eeb463ea4d0302
+Samples per task: 1
+HumanEval base: 144/164 (87.8%)
+HumanEval+ extra tests: 138/164 (84.1%)
+Structured per-task output: eval_results.json
+Structured summary: summary.json

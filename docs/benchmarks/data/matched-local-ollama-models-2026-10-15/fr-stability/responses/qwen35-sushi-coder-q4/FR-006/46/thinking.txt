@@ -1,0 +1,17 @@
+Let me break down what needs to be implemented:
+
+1. **Struct definition**: Create `GpuStats` with 5 fields (name, vram_used_mb, vram_total_mb, temp_c, util_pct) with Debug and PartialEq derives.
+
+2. **Function signature**: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`
+
+3. **CSV parsing logic**: Split by comma and parse 5 fields
+
+4. **Error handling**: Return `Err(String)` for:
+   - Fewer than 5 columns
+   - Failed numeric parsing
+
+5. **Guard rails**: NO unwrap(), expect(), or panic() - use Result pattern
+
+6. **Traceability**: Add comment `// trace:implements FR-006` before function
+
+7. **Output**: Both struct and function in one code block

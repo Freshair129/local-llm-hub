@@ -1,0 +1,10 @@
+warning: unused variable: `suffix_upper`
+  --> C:\Users\suanr\.ollama\benchmarks\matched-models-20261015\runs\qwen35-sushi-coder-q4\fr-stability\responses\FR-002\64\test.rs:24:9
+   |
+24 |     let suffix_upper = name.to_uppercase();
+   |         ^^^^^^^^^^^^ help: if this is intentional, prefix it with an underscore: `_suffix_upper`
+   |
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: 1 warning emitted
+

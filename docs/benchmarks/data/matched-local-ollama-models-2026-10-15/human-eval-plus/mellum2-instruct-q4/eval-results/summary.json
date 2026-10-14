@@ -1,0 +1,12 @@
+{
+  "evalplusVersion": "0.3.1",
+  "dataset": "HumanEval+",
+  "datasetHash": "fe585eb4df8c88d844eeb463ea4d0302",
+  "tasks": 164,
+  "samplesPerTask": 1,
+  "basePass": 144,
+  "basePassRate": 0.8780487804878049,
+  "plusPass": 138,
+  "plusPassRate": 0.8414634146341463,
+  "resultsPath": "/output/eval_results.json"
+}

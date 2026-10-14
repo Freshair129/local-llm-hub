@@ -1,0 +1,43 @@
+rust
+// trace:implements FR-006
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let mut parts = line.split(',');
+    
+    let name_part = parts.next().ok_or("Missing GPU name")?;
+    let name = name_part.trim().to_string();
+    
+    let vram_used_str = parts.next().ok_or("Missing VRAM used")?;
+    let vram_used_mb = vram_used_str.trim().parse::<u64>().map_err(|_| "Failed to parse VRAM used as u64")?;
+    
+    let vram_total_str = parts.next().ok_or("Missing VRAM total")?;
+    let vram_total_mb = vram_total_str.trim().parse::<u64>().map_err(|_| "Failed to parse VRAM total as u64")?;
+    
+    let temp_str = parts.next().ok_or("Missing temperature")?;
+    let temp_c = temp_str.trim().parse::<u32>().map_err(|_| "Failed to parse temperature as u32")?;
+    
+    let util_str = parts.next().ok_or("Missing utilization")?;
+    let util_pct = util_str.trim().parse::<u32>().map_err(|_| "Failed to parse utilization as u32")?;
+    
+    // Check for extra columns
+    if parts.next().is_some() {
+        return Err("Too many columns".to_string());
+    }
+    
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}

@@ -1,0 +1,21 @@
+Let me analyze this request carefully:
+
+1. **FR-006 Specification Analysis**:
+   - Define a `GpuStats` struct with 5 fields
+   - Implement `parse_gpu_csv` function to parse CSV lines
+   - Handle errors gracefully (return Err, not unwrap/panic)
+   - Include traceability comment
+
+2. **Guard Rails Compliance**:
+   - STD-003 and ADR-100 require strict error handling
+   - Forbidden: unwrap(), expect(), panic!
+   - Must return Result type
+
+3. **Implementation Details**:
+   - CSV parsing needs to handle whitespace
+   - Each field should be parsed with proper error handling
+   - Return descriptive error messages for debugging/traceability
+
+4. **Verification**:
+   - Test with the provided example: "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"
+   - Verify error cases: fewer columns, invalid numbers

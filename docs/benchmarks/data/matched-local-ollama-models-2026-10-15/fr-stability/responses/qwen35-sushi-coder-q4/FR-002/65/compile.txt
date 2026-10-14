@@ -1,0 +1,56 @@
+error[E0277]: the trait bound `String: Pattern` is not satisfied
+  --> C:\Users\suanr\.ollama\benchmarks\matched-models-20261015\runs\qwen35-sushi-coder-q4\fr-stability\responses\FR-002\65\test.rs:18:42
+   |
+18 |         if name.to_uppercase().ends_with(suffix_upper) {
+   |                                --------- ^^^^^^^^^^^^ the trait `Pattern` is not implemented for `String`
+   |                                |
+   |                                required by a bound introduced by this call
+   |
+   = note: required for `String` to implement `Pattern`
+note: required by a bound in `core::str::<impl str>::ends_with`
+  --> /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library\core\src\str\mod.rs:1426:4
+help: consider borrowing here
+   |
+18 |         if name.to_uppercase().ends_with(&suffix_upper) {
+   |                                          +
+
+error[E0308]: mismatched types
+  --> C:\Users\suanr\.ollama\benchmarks\matched-models-20261015\runs\qwen35-sushi-coder-q4\fr-stability\responses\FR-002\65\test.rs:30:94
+   |
+30 |     assert_eq!(normalize_model_name("registry.ollama.ai/library/llama3.2:1b-instruct-q4_0"), "llama3.2:1b-instruct");
+   |                                                                                              ^^^^^^^^^^^^^^^^^^^^^^ expected `Result<String, String>`, found `&str`
+   |
+   = note:   expected enum `Result<String, String>`
+           found reference `&str`
+
+error[E0308]: mismatched types
+  --> C:\Users\suanr\.ollama\benchmarks\matched-models-20261015\runs\qwen35-sushi-coder-q4\fr-stability\responses\FR-002\65\test.rs:31:89
+   |
+31 |     assert_eq!(normalize_model_name("hf.co/mradermacher/Qwen3.5-9B-Coder-GGUF:Q4_K_M"), "mradermacher/qwen3.5-9b-coder-gguf");
+   |                                                                                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `Result<String, String>`, found `&str`
+   |
+   = note:   expected enum `Result<String, String>`
+           found reference `&str`
+
+error[E0308]: mismatched types
+  --> C:\Users\suanr\.ollama\benchmarks\matched-models-20261015\runs\qwen35-sushi-coder-q4\fr-stability\responses\FR-002\65\test.rs:32:60
+   |
+32 |     assert_eq!(normalize_model_name("library/gemma4:12b"), "gemma4:12b");
+   |                                                            ^^^^^^^^^^^^ expected `Result<String, String>`, found `&str`
+   |
+   = note:   expected enum `Result<String, String>`
+           found reference `&str`
+
+error[E0308]: mismatched types
+  --> C:\Users\suanr\.ollama\benchmarks\matched-models-20261015\runs\qwen35-sushi-coder-q4\fr-stability\responses\FR-002\65\test.rs:33:61
+   |
+33 |     assert_eq!(normalize_model_name("custom-model:latest"), "custom-model:latest");
+   |                                                             ^^^^^^^^^^^^^^^^^^^^^ expected `Result<String, String>`, found `&str`
+   |
+   = note:   expected enum `Result<String, String>`
+           found reference `&str`
+
+error: aborting due to 5 previous errors
+
+Some errors have detailed explanations: E0277, E0308.
+For more information about an error, try `rustc --explain E0277`.

@@ -1,0 +1,48 @@
+pub fn normalize_model_name(raw: &str) -> String {
+    // trace:implements FR-002
+
+    // Helper to safely strip a prefix, returning None if not found
+    fn strip_prefix(s: &str, prefix: &str) -> Option<&str> {
+        if s.starts_with(prefix) {
+            Some(&s[prefix.len()..])
+        } else {
+            None
+        }
+    }
+
+    // Helper to safely strip a suffix (case-insensitive), returning None if not found
+    fn strip_suffix_case_insensitive(s: &str, suffix: &str) -> Option<&str> {
+        let suffix_lower = suffix.to_lowercase();
+        let s_lower = s.to_lowercase();
+        if s_lower.ends_with(&suffix_lower) {
+            let suffix_len = suffix.len();
+            let start = s.len() - suffix_len;
+            Some(&s[start..])
+        } else {
+            None
+        }
+    }
+
+    let mut current = raw;
+
+    // Strip registry prefixes (order matters - longest first)
+    current = strip_prefix(current, "registry.ollama.ai/library/")
+        .or_else(|| strip_prefix(current, "library/"))
+        .or_else(|| strip_prefix(current, "hf.co/"))
+        .unwrap_or(current);
+
+    // Strip quantization suffixes (case-insensitive, order doesn't matter)
+    let quant_suffixes = [
+        "-q4_0", "-q4_k_m", "-q4_k_s",
+        ":q4_0", ":q4_k_m", ":q4_k_s",
+    ];
+
+    for suffix in quant_suffixes.iter() {
+        current = strip_suffix_case_insensitive(current, suffix)
+            .or(Some(current))
+            .unwrap_or(current);
+    }
+
+    // Convert to lowercase
+    current.to_lowercase()
+}

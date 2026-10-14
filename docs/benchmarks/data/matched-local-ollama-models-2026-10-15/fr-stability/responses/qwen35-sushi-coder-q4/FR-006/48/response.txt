@@ -1,0 +1,92 @@
+# Implementation of FR-006: GPU Statistics Parser
+
+## Architectural Decisions
+
+**ADR-100 Compliance**: The implementation uses `Result` type for error handling instead of unwrapping, satisfying the guard rail requirement to never use `unwrap()`, `expect()`, or `panic!`.
+
+**STD-003 Compliance**: The code maintains traceability through the required comment `// trace:implements FR-006` placed directly before the function declaration.
+
+**Error Handling Strategy**: 
+- Use `split(',')` to parse CSV columns
+- Use `parse()` method for string-to-number conversion which returns `Result`
+- Collect all potential errors and return a descriptive `Err` string
+- Only return `Ok` when all 5 fields are successfully parsed
+
+---
+
+## Implementation
+
+```rust
+// trace:implements FR-006
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // Split the CSV line by comma
+    let parts: Vec<&str> = line.split(',').collect();
+    
+    // Validate column count before attempting to parse
+    if parts.len() < 5 {
+        return Err(format!("Expected 5 columns, found {}", parts.len()));
+    }
+    
+    // Parse each field with proper error handling
+    let name = parts[0].to_string();
+    let vram_used_mb = parts[1].parse::<u64>()
+        .map_err(|e| format!("Failed to parse vram_used_mb: {}", e))?;
+    
+    let vram_total_mb = parts[2].parse::<u64>()
+        .map_err(|e| format!("Failed to parse vram_total_mb: {}", e))?;
+    
+    let temp_c = parts[3].parse::<u32>()
+        .map_err(|e| format!("Failed to parse temp_c: {}", e))?;
+    
+    let util_pct = parts[4].parse::<u32>()
+        .map_err(|e| format!("Failed to parse util_pct: {}", e))?;
+    
+    // Return the parsed struct
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}
+```
+
+---
+
+## Verification
+
+**Test Case 1: Valid input**
+```rust
+let result = parse_gpu_csv("NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25");
+assert_eq!(result, Ok(GpuStats {
+    name: "NVIDIA GeForce RTX 3060".to_string(),
+    vram_used_mb: 5800,
+    vram_total_mb: 12288,
+    temp_c: 35,
+    util_pct: 25,
+}));
+```
+
+**Test Case 2: Too few columns**
+```rust
+let result = parse_gpu_csv("NVIDIA GeForce RTX 3060, 5800, 12288");
+assert!(result.is_err());
+assert_eq!(result.unwrap_err(), "Expected 5 columns, found 3");
+```
+
+**Test Case 3: Invalid number parsing**
+```rust
+let result = parse_gpu_csv("NVIDIA GeForce RTX 3060, abc, 12288, 35, 25");
+assert!(result.is_err());
+assert!(result.unwrap_err().contains("Failed to parse vram_used_mb"));
+```

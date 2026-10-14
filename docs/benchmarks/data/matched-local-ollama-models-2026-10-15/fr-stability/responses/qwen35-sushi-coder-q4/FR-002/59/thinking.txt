@@ -1,0 +1,26 @@
+Let me break down the specification:
+
+1. **Function signature**: `pub fn normalize_model_name(raw: &str) -> String`
+   - Takes a string slice reference, returns a String
+
+2. **Strip registry prefixes**:
+   - 'registry.ollama.ai/library/'
+   - 'library/'
+   - 'hf.co/'
+
+3. **Strip quantization suffixes**:
+   - '-q4_0', '-q4_k_m', '-q4_k_s'
+   - ':q4_0', ':q4_k_m', ':q4_k_s'
+   - Case-insensitive matching
+
+4. **Convert to lowercase**
+
+5. **Guard rails**: NO unwrap(), NO expect(), NO panic! - must use safe error handling
+
+6. **Traceability**: Comment '// trace:implements FR-002' before function declaration
+
+Key considerations:
+- Need to handle multiple prefix/suffix removals (in any order)
+- Case-insensitive suffix matching requires checking both upper and lowercase
+- Must avoid panics - use safe string methods
+- Consider edge cases: empty strings, strings with no matches, etc.

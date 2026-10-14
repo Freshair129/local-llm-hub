@@ -1,0 +1,10 @@
+warning: unused import: `std::str::FromStr`
+ --> C:\Users\suanr\.ollama\benchmarks\matched-models-20261015\runs\qwen35-sushi-coder-q4\fr-stability\responses\FR-006\65\test.rs:1:5
+  |
+1 | use std::str::FromStr;
+  |     ^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: 1 warning emitted
+

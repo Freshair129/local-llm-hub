@@ -1,0 +1,28 @@
+Let me analyze this request carefully:
+
+1. The user is asking for a Rust implementation of GPU statistics parsing
+2. They've provided a detailed specification with:
+   - Struct definition with derive macros
+   - Function signature with Result type for error handling
+   - CSV parsing requirements
+   - Error handling guidelines
+   - Guard rails against unwrap/expect/panic
+   - Traceability comment requirement
+   - Output format requirements
+
+3. The CSV format appears to be:
+   - Field 1: GPU name (string)
+   - Field 2: VRAM used (u64)
+   - Field 3: VRAM total (u64)
+   - Field 4: Temperature (u32)
+   - Field 5: Utilization percentage (u32)
+
+4. I need to implement robust parsing that:
+   - Splits on commas
+   - Handles whitespace
+   - Parses numbers with proper error handling
+   - Returns Err for invalid input
+
+5. The guard rails are clear - no unwrap/expect/panic, use Result::unwrap_or_default or similar patterns instead
+
+6. I'll include the traceability comment as specified

@@ -1,0 +1,72 @@
+// trace:implements FR-006
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let mut parts = line.split(',');
+    
+    let name = match parts.next() {
+        Some(n) => n.trim().to_string(),
+        None => return Err("Missing GPU name".to_string()),
+    };
+    
+    let vram_used_mb_str = match parts.next() {
+        Some(v) => v.trim(),
+        None => return Err("Missing VRAM used value".to_string()),
+    };
+    
+    let vram_total_mb_str = match parts.next() {
+        Some(v) => v.trim(),
+        None => return Err("Missing VRAM total value".to_string()),
+    };
+    
+    let temp_c_str = match parts.next() {
+        Some(v) => v.trim(),
+        None => return Err("Missing temperature value".to_string()),
+    };
+    
+    let util_pct_str = match parts.next() {
+        Some(v) => v.trim(),
+        None => return Err("Missing utilization value".to_string()),
+    };
+    
+    // Check for extra columns
+    if parts.next().is_some() {
+        return Err("Too many columns".to_string());
+    }
+    
+    let vram_used_mb = match vram_used_mb_str.parse::<u64>() {
+        Ok(v) => v,
+        Err(_) => return Err("Failed to parse VRAM used as u64".to_string()),
+    };
+    
+    let vram_total_mb = match vram_total_mb_str.parse::<u64>() {
+        Ok(v) => v,
+        Err(_) => return Err("Failed to parse VRAM total as u64".to_string()),
+    };
+    
+    let temp_c = match temp_c_str.parse::<u32>() {
+        Ok(v) => v,
+        Err(_) => return Err("Failed to parse temperature as u32".to_string()),
+    };
+    
+    let util_pct = match util_pct_str.parse::<u32>() {
+        Ok(v) => v,
+        Err(_) => return Err("Failed to parse utilization as u32".to_string()),
+    };
+    
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}

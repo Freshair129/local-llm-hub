@@ -1,0 +1,42 @@
+{
+  "startedAt": "2026-10-14T21:31:42.084832+00:00",
+  "status": "generation_complete",
+  "config": {
+    "model": "hf.co/bigatuna/Qwen3.5-9b-Sushi-Coder-RL-GGUF:Q4_K_M",
+    "backend": "Ollama native /api/chat",
+    "dataset": "HumanEval+ (EvalPlus default version)",
+    "datasetVersion": "default",
+    "datasetTaskCount": 164,
+    "datasetHash": "fe585eb4df8c88d844eeb463ea4d0302",
+    "numCtx": 16384,
+    "numPredict": 8192,
+    "options": {
+      "temperature": 0.0,
+      "top_p": 0.95,
+      "top_k": 20,
+      "repeat_penalty": 1.0,
+      "num_ctx": 16384,
+      "num_predict": 8192,
+      "seed": 1
+    },
+    "greedy": true,
+    "instructionPrefix": "Please provide a self-contained Python script that solves the following problem in a markdown code block:",
+    "evalplusVersion": "0.3.1"
+  },
+  "ollamaVersion": "0.40.4",
+  "contaminationEvents": [
+    {
+      "at": "2026-10-14T22:37:28.379574+00:00",
+      "reason": "after HumanEval+ hf.co/bigatuna/Qwen3.5-9b-Sushi-Coder-RL-GGUF:Q4_K_M",
+      "unloaded": [
+        "hf.co/bigatuna/Qwen3.5-9b-Sushi-Coder-RL-GGUF:Q4_K_M"
+      ]
+    }
+  ],
+  "unloadedBeforeRun": [],
+  "completedTasks": 164,
+  "lastTaskId": "HumanEval/163",
+  "completedAt": "2026-10-14T22:37:27.752357+00:00",
+  "elapsedSeconds": 3945.66,
+  "finalResidentModels": []
+}

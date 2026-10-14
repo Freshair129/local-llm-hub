@@ -1,0 +1,86 @@
+# Implementation of FR-006
+
+## Analysis
+
+This task requires:
+1. A struct for GPU statistics with appropriate types
+2. A robust CSV parser function
+3. Strict error handling (no panics)
+4. Traceability comments
+5. Both definitions in one output
+
+## Implementation
+
+```rust
+use std::str::FromStr;
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // Split CSV line by comma
+    let parts: Vec<&str> = line.trim().split(',').collect();
+    
+    // Guard rail: Check column count - return Err if fewer than 5 columns
+    if parts.len() < 5 {
+        return Err(format!("Expected 5 columns, found {}", parts.len()));
+    }
+    
+    // Parse each field with proper error handling
+    let name = parts[0].trim().to_string();
+    
+    let vram_used: u64 = match u64::from_str(parts[1].trim()) {
+        Ok(val) => val,
+        Err(_) => return Err(format!("Failed to parse vram_used as u64: {}", parts[1].trim())),
+    };
+    
+    let vram_total: u64 = match u64::from_str(parts[2].trim()) {
+        Ok(val) => val,
+        Err(_) => return Err(format!("Failed to parse vram_total as u64: {}", parts[2].trim())),
+    };
+    
+    let temp: u32 = match u32::from_str(parts[3].trim()) {
+        Ok(val) => val,
+        Err(_) => return Err(format!("Failed to parse temp as u32: {}", parts[3].trim())),
+    };
+    
+    let util: u32 = match u32::from_str(parts[4].trim()) {
+        Ok(val) => val,
+        Err(_) => return Err(format!("Failed to parse util_pct as u32: {}", parts[4].trim())),
+    };
+    
+    Ok(GpuStats {
+        name,
+        vram_used_mb: vram_used,
+        vram_total_mb: vram_total,
+        temp_c: temp,
+        util_pct: util,
+    })
+}
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// Example usage demonstrating the function works correctly
+fn main() {
+    let line = "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25";
+    match parse_gpu_csv(line) {
+        Ok(stats) => println!("{:?}", stats),
+        Err(e) => println!("Error: {}", e),
+    }
+}
+```
+
+## Key Design Decisions
+
+| Decision | Reasoning |
+|----------|-----------|
+| `u64::from_str()` instead of `parse()` | More explicit error propagation |
+| Check column count before accessing indices | Prevents index out-of-bounds |
+| Trim whitespace from all fields | Handles CSV formatting variations |
+| Return descriptive error messages | Easier debugging and logging |
+| No unwrap()/expect()/panic! | Adheres to guard rail requirements |

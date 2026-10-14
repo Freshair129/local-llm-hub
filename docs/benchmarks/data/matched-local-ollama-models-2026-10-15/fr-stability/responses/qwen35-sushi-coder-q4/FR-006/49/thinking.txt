@@ -1,0 +1,36 @@
+Let me analyze this specification carefully:
+
+1. **Struct Definition**: Need to define `GpuStats` with the specified fields and derive `Debug` and `PartialEq`
+2. **Function**: `parse_gpu_csv(line: &str) -> Result<GpuStats, String>`
+3. **Parsing logic**: Split CSV line by comma, parse 5 fields
+4. **Error handling**: Return `Err(String)` for insufficient columns or parse failures
+5. **Guard rails**: NO unwrap(), expect(), or panic() - use proper error handling
+6. **Traceability**: Comment `// trace:implements FR-006` before function
+7. **Output**: Include both struct and function in code block
+
+Let me implement this step-by-step:
+
+```rust
+use std::str::Split;
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // Implementation with proper error handling
+}
+```
+
+Key considerations:
+- Use `line.split(',')` and collect into a vector
+- Check length before accessing
+- Use `parse()` methods and handle `Err` with `?` or explicit match
+- Use `Ok()` for success, `Err()` for failure
+- No unwrap/expect/panic anywhere

@@ -1,0 +1,35 @@
+Let me implement the normalize_model_name function according to the specification.
+
+Requirements:
+1. Strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/'
+2. Strip quantization suffixes: '-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s' (case-insensitive)
+3. Convert result to lowercase
+4. NO unwrap(), NO expect(), NO panic!
+5. Include comment '// trace:implements FR-002' before function declaration
+
+My approach:
+- Use `rsplit` with `maxsplit: 1` for stripping suffixes - this is safe and won't panic
+- Use `split` with `maxsplit: 1` for stripping prefixes - safe operation
+- Use `chars()` with `copied()` and `is_ascii_lowercase()` for case conversion - no panics
+- Return empty string if input is empty or becomes empty after stripping
+
+Let me verify the logic:
+- Input: "registry.ollama.ai/library/ggml/gemma:2b"
+  - Strip prefix: "ggml/gemma:2b"
+  - Strip suffix ":2b" (not in list, so stays)
+  - Lowercase: "ggml/gemma:2b" ✓
+
+- Input: "library/mistral:7b-q4_0"
+  - Strip prefix "library/": "mistral:7b-q4_0"
+  - Strip suffix "-q4_0": "mistral:7b"
+  - Lowercase: "mistral:7b" ✓
+
+- Input: "hf.co/mistralai/Mistral-7B-Instruct-v0.2-q4_k_m"
+  - Strip prefix "hf.co/": "mistralai/Mistral-7B-Instruct-v0.2-q4_k_m"
+  - Strip suffix "-q4_k_m": "mistralai/Mistral-7B-Instruct-v0.2"
+  - Lowercase: "mistralai/mistral-7b-instruct-v0.2" ✓
+
+- Input: "gemma:7b"
+  - No prefix to strip
+  - No suffix to strip
+  - Lowercase: "gemma:7b" ✓

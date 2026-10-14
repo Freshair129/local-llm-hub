@@ -1,0 +1,17 @@
+Let me analyze the requirements carefully:
+
+1. **Struct Definition**: Need to define `GpuStats` with fields: name (String), vram_used_mb (u64), vram_total_mb (u64), temp_c (u32), util_pct (u32) with Debug and PartialEq derives.
+
+2. **Function Signature**: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`
+
+3. **Parsing Logic**: Parse CSV line "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25" into GpuStats
+
+4. **Error Handling**: Return `Err(String)` for:
+   - Fewer than 5 columns
+   - Numbers that fail to parse
+
+5. **Guard Rails**: NO unwrap(), expect(), or panic() - must use Result
+
+6. **Traceability**: Comment `// trace:implements FR-006` before function
+
+7. **Output**: Both struct and function in one code block

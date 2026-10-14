@@ -1,0 +1,35 @@
+Let me break down the requirements for FR-006:
+
+1. **Struct Definition**: Need to define `GpuStats` with fields:
+   - `name: String`
+   - `vram_used_mb: u64`
+   - `vram_total_mb: u64`
+   - `temp_c: u32`
+   - `util_pct: u32`
+   - With `#[derive(Debug, PartialEq)]`
+
+2. **Function**: `parse_gpu_csv` that takes a CSV line and returns `Result<GpuStats, String>`
+
+3. **CSV Parsing**: Parse comma-separated values into the struct
+
+4. **Error Handling**: Return `Err(String)` for:
+   - Fewer than 5 columns
+   - Parsing failures for numeric fields
+
+5. **Guard Rails**: NO unwrap(), expect(), or panic! - must use proper error handling
+
+6. **Traceability**: Add comment `// trace:implements FR-006` before function
+
+7. **Output**: Both struct and function in single code block
+
+Let me implement this step-by-step:
+
+**Step 1**: Define the struct with proper derives
+
+**Step 2**: Create the parsing function with:
+- Split by comma
+- Check column count
+- Parse each field with proper error messages
+- Return appropriate errors
+
+**Step 3**: Ensure all error paths return `Err(String)` without panicking

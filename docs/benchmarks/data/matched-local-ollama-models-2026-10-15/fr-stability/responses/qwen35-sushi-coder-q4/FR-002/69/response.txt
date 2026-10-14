@@ -1,0 +1,45 @@
+# Rust Implementation for Model Name Normalization
+
+## Architectural Decisions
+
+1. **String slicing with checks before access to avoid panicking.**
+2. **Prefix matching with explicit `contains` checks** - no regex overhead.
+3. **Suffix matching with `to_lowercase()`** for case-insensitive comparison.
+4. **Using `chars()` iterator** for safe character-by-character processing.
+5. **No unwrapping** - all operations guarded with `if let` or `matches!`.
+
+## Implementation
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut normalized = raw.to_string();
+    
+    // Strip registry prefixes
+    let prefixes = ["registry.ollama.ai/library/", "library/", "hf.co/"];
+    for prefix in &prefixes {
+        if normalized.starts_with(prefix) {
+            normalized = normalized[prefix.len()..].to_string();
+            break;
+        }
+    }
+    
+    // Strip quantization suffixes (case-insensitive)
+    let quant_suffixes = [
+        "-q4_0", "-q4_k_m", "-q4_k_s",
+        ":q4_0", ":q4_k_m", ":q4_k_s"
+    ];
+    let lower_normalized = normalized.to_lowercase();
+    for suffix in &quant_suffixes {
+        if lower_normalized.ends_with(suffix) {
+            normalized = normalized[..normalized.len() - suffix.len()].to_string();
+            break;
+        }
+    }
+    
+    // Convert to lowercase
+    normalized = normalized.to_lowercase();
+    
+    normalized
+}
+```

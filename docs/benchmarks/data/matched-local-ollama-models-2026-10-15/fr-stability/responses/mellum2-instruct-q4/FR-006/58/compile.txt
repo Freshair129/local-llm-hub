@@ -1,0 +1,27 @@
+error[E0425]: cannot find function `parse_gpu_csv` in this scope
+ --> C:\Users\suanr\.ollama\benchmarks\matched-models-20261015\runs\mellum2-instruct-q4\fr-stability\responses\FR-006\58\test.rs:5:15
+  |
+5 |     let res = parse_gpu_csv("NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25");
+  |               ^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `parse_gpu_csv` in this scope
+  --> C:\Users\suanr\.ollama\benchmarks\matched-models-20261015\runs\mellum2-instruct-q4\fr-stability\responses\FR-006\58\test.rs:17:13
+   |
+17 |     assert!(parse_gpu_csv("invalid,csv").is_err());
+   |             ^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `parse_gpu_csv` in this scope
+  --> C:\Users\suanr\.ollama\benchmarks\matched-models-20261015\runs\mellum2-instruct-q4\fr-stability\responses\FR-006\58\test.rs:18:13
+   |
+18 |     assert!(parse_gpu_csv("GPU, not_a_number, 12288, 35, 25").is_err());
+   |             ^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `parse_gpu_csv` in this scope
+  --> C:\Users\suanr\.ollama\benchmarks\matched-models-20261015\runs\mellum2-instruct-q4\fr-stability\responses\FR-006\58\test.rs:19:13
+   |
+19 |     assert!(parse_gpu_csv("").is_err());
+   |             ^^^^^^^^^^^^^ not found in this scope
+
+error: aborting due to 4 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

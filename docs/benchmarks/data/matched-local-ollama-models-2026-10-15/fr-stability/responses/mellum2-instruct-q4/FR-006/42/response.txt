@@ -1,0 +1,43 @@
+rust
+// trace:implements FR-006
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let mut parts = line.split(',');
+    
+    let name_part = parts.next().ok_or("Missing name")?;
+    let vram_used_part = parts.next().ok_or("Missing vram_used_mb")?;
+    let vram_total_part = parts.next().ok_or("Missing vram_total_mb")?;
+    let temp_part = parts.next().ok_or("Missing temp_c")?;
+    let util_part = parts.next().ok_or("Missing util_pct")?;
+    
+    // Check if there are extra parts
+    if parts.next().is_some() {
+        return Err("Too many columns".to_string());
+    }
+    
+    let name = name_part.trim().to_string();
+    
+    let vram_used_mb = vram_used_part.trim().parse::<u64>()
+        .map_err(|_| "Failed to parse vram_used_mb as u64")?;
+    let vram_total_mb = vram_total_part.trim().parse::<u64>()
+        .map_err(|_| "Failed to parse vram_total_mb as u64")?;
+    let temp_c = temp_part.trim().parse::<u32>()
+        .map_err(|_| "Failed to parse temp_c as u32")?;
+    let util_pct = util_part.trim().parse::<u32>()
+        .map_err(|_| "Failed to parse util_pct as u32")?;
+    
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}

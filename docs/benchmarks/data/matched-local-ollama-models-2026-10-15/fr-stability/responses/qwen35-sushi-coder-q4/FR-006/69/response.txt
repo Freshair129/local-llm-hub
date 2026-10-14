@@ -1,0 +1,83 @@
+<analysis>
+Breaking down the implementation requirements:
+
+1. **Struct GpuStats**: Contains 5 fields with appropriate types:
+   - name: String (text identifier)
+   - vram_used_mb: u64 (unsigned 64-bit for memory usage)
+   - vram_total_mb: u64 (unsigned 64-bit for total memory)
+   - temp_c: u32 (unsigned 32-bit for temperature)
+   - util_pct: u32 (unsigned 32-bit for utilization percentage)
+
+2. **parse_gpu_csv function**:
+   - Split CSV line by comma delimiter
+   - Trim whitespace from each field
+   - Parse numeric fields with proper error handling
+   - Return Result::Err for any parsing failure
+   - Return Result::Ok for successful parsing
+
+3. **Error Handling Strategy**:
+   - Check column count first (must be exactly 5)
+   - Parse name as String (no error possible for non-empty string)
+   - Parse vram fields with `u64::from_str()`
+   - Parse temperature with `u32::from_str()`
+   - Parse utilization with `u32::from_str()`
+   - Collect and return descriptive error messages
+
+4. **Guard Rail Compliance**:
+   - No unwrap()/expect()/panic! used
+   - All errors returned via Result
+   - Defensive checks for column count
+</analysis>
+
+```rust
+// trace:implements FR-006
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // Split CSV line by comma delimiter
+    let parts: Vec<&str> = line.split(',').collect();
+    
+    // Check column count - must be exactly 5 fields
+    if parts.len() != 5 {
+        return Err(format!(
+            "Invalid CSV format: expected 5 columns, found {}",
+            parts.len()
+        ));
+    }
+    
+    // Trim whitespace from each field
+    let name = parts[0].trim().to_string();
+    let vram_used_str = parts[1].trim();
+    let vram_total_str = parts[2].trim();
+    let temp_str = parts[3].trim();
+    let util_str = parts[4].trim();
+    
+    // Parse numeric fields with proper error handling
+    let vram_used_mb = u64::from_str(vram_used_str)
+        .map_err(|_| format!("Failed to parse vram_used_mb: '{}'", vram_used_str))?;
+    
+    let vram_total_mb = u64::from_str(vram_total_str)
+        .map_err(|_| format!("Failed to parse vram_total_mb: '{}'", vram_total_str))?;
+    
+    let temp_c = u32::from_str(temp_str)
+        .map_err(|_| format!("Failed to parse temp_c: '{}'", temp_str))?;
+    
+    let util_pct = u32::from_str(util_str)
+        .map_err(|_| format!("Failed to parse util_pct: '{}'", util_str))?;
+    
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}
+```
