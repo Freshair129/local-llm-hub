@@ -1,6 +1,6 @@
 # Mellum2 Thinking vs Mellum2.1 Thinking: interim quality comparison
 
-**Status:** Interim. Mellum2 Q4_K_M has completed the repeated FR test. Mellum2 Q6_K and the matched HumanEval+ runs remain pending; this is not the final version comparison.
+**Status:** Interim. Mellum2 Q4_K_M has completed the repeated FR test (60/60 scored samples). Mellum2 Q6_K has produced no scored samples because model startup ran out of GPU memory; matched HumanEval+ runs also remain pending. This is not the final version comparison.
 
 ## Matched FR-002 / FR-006 test
 
@@ -22,9 +22,15 @@ Strict pass requires generated code to compile, pass the task tests, include the
 - Models were run serially. The harness checked `/api/ps` before and after each inference, discarded/retried any sample with an unexpected resident model, and unloaded the target between quant groups.
 - Mellum2 Q4 has 60 saved samples. No unexpected resident model was found during those accepted samples. `/api/ps` was empty after stopping at the Q4 boundary.
 
+## Mellum2 Q6_K load status (2026-10-15)
+
+The resumed run attempted Q6_K on the RTX 3060 without CPU offload. Ollama failed during model startup with `cudaMalloc failed` while requesting a CUDA buffer of 10,084,005,888 bytes (about 9,617 MiB). The run produced no response: Q6 has 0/60 scored samples. This is an infrastructure limitation, not a model-quality failure. The benchmark harness records these attempts separately from scored results, and `/api/ps` was empty after each abort.
+
+Reported free VRAM fluctuated from 9,808 MiB to 9,656 MiB around the retries, leaving at most about 191 MiB beyond that single buffer request before runner and context overhead. More VRAM headroom is needed to resume the same full-GPU 16k-context run. No CPU-offloaded result has been substituted.
+
 ## Pending before a final recommendation
 
-- Mellum2 Thinking Q6_K repeated FR run.
+- Mellum2 Thinking Q6_K repeated FR run, once sufficient VRAM headroom is available.
 - Matched HumanEval+ (EvalPlus) generation and evaluation for Mellum2 Q4_K_M and Q6_K.
 - Final comparison against the already completed Mellum2.1 Q4_K_M/Q6_K results.
 
