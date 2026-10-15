@@ -5,12 +5,12 @@
 
 import { invoke } from './api.js';
 import { store } from './state.js';
-import { formatBytes, formatTokens } from './model.js';
+import { formatTokens } from './model.js';
 import { showToast } from './toast.js';
+import { getModelLifecyclePresentation } from './model_lifecycle.js';
 
 let activeModalEl = null;
 let activeEscapeHandler = null;
-let quotaTimerInterval = null;
 
 function renderSimpleMarkdown(md) {
   if (!md) return '<p class="text-white/40 italic text-xs">No markdown documentation provided for this model.</p>';
@@ -48,17 +48,17 @@ export async function openModelCard(modelId, backend = 'ollama', localPath = nul
     id: modelId,
     name: modelId,
     backend,
-    format: 'GGUF',
-    size_bytes: 4 * 1024 * 1024 * 1024,
-    quantization: 'Q4_K_M',
-    context_window_tokens: 131072,
-    stats: { total_tasks: 12, successful_tasks: 12, avg_tps: 132.4, total_tokens: 48200 }
+    format: 'Unknown',
+    size_bytes: 0,
+    quantization: null,
+    stats: { total_tasks: 0, successful_tasks: 0, avg_tps: 0, total_tokens: 0 }
   };
 
   const stats = model.stats || { total_tasks: 0, successful_tasks: 0, avg_tps: 0, total_tokens: 0 };
+  const lifecycle = getModelLifecyclePresentation(model);
   const taskRate = stats.total_tasks > 0 
     ? ((stats.successful_tasks / stats.total_tasks) * 100).toFixed(1) 
-    : '99.8';
+    : null;
 
   const isCoder = /code|coder|deepseek|qwen/i.test(model.name);
   const isVision = /vision|llava|vl|moondream/i.test(model.name);
@@ -127,7 +127,7 @@ export async function openModelCard(modelId, backend = 'ollama', localPath = nul
                       <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                       <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
                     </span>
-                    <span class="text-xs font-medium text-white/70 tracking-wide uppercase">${model.is_active ? 'Active' : 'Ready'}</span>
+                    <span class="text-xs font-medium text-white/70 tracking-wide uppercase">${lifecycle.statusLabel}</span>
                   </div>
                 </div>
 
@@ -152,35 +152,27 @@ export async function openModelCard(modelId, backend = 'ollama', localPath = nul
                       <i class="ph ph-check-square-offset"></i>
                       <span class="text-[10px] uppercase tracking-widest font-semibold">Tasks</span>
                     </div>
-                    <div class="text-2xl font-medium">${stats.total_tasks > 0 ? stats.total_tasks : '12.4k'}</div>
+                    <div class="text-2xl font-medium">${stats.total_tasks}</div>
                   </div>
                   <!-- Accuracy -->
                   <div class="p-4 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] transition-colors">
                     <div class="flex items-center gap-2 text-white/40 mb-1">
                       <i class="ph ph-target"></i>
-                      <span class="text-[10px] uppercase tracking-widest font-semibold">${stats.avg_tps > 0 ? 'Speed' : 'Accuracy'}</span>
+                      <span class="text-[10px] uppercase tracking-widest font-semibold">${stats.avg_tps > 0 ? 'Speed' : stats.total_tasks > 0 ? 'Success rate' : 'Runs'}</span>
                     </div>
-                    <div class="text-2xl font-medium text-glow">${stats.avg_tps > 0 ? `${stats.avg_tps} t/s` : `${taskRate}%`}</div>
+                    <div class="text-2xl font-medium text-glow">${stats.avg_tps > 0 ? `${stats.avg_tps} t/s` : taskRate === null ? 'Unavailable' : `${taskRate}%`}</div>
                   </div>
                 </div>
 
-                <!-- Token Limit Bar with Live Countdown (Requested Updates) -->
+                <!-- Recorded token usage; no context limit is supplied by the model catalog. -->
                 <div class="mb-6">
                   <div class="flex justify-between items-center text-xs mb-2">
-                    <span class="text-white/50 font-medium">Token Limit / Quota</span>
-                    <div class="flex items-center gap-1.5 text-raycast-coral font-medium">
-                      <i class="ph ph-hourglass-high animate-pulse"></i>
-                      <span id="quota-timer">14:59</span>
-                    </div>
-                  </div>
-                  <div class="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                    <div class="h-full bg-gradient-to-r from-raycast-coral/60 to-raycast-coral rounded-full relative" style="width: 78%;">
-                      <div class="absolute top-0 right-0 bottom-0 w-4 bg-white/30 blur-[2px]"></div>
-                    </div>
+                    <span class="text-white/50 font-medium">Recorded token usage</span>
+                    <span class="text-xs text-white/50">${stats.total_tasks > 0 ? formatTokens(stats.total_tokens) : 'Unavailable'}</span>
                   </div>
                   <div class="flex justify-between text-[10px] text-white/30 mt-1">
-                    <span>Remaining: ${formatTokens(stats.total_tokens || 78000)}</span>
-                    <span>Quota: 128k Context Window</span>
+                    <span>Total tokens: ${stats.total_tasks > 0 ? formatTokens(stats.total_tokens) : 'Unavailable'}</span>
+                    <span>Context limit: Unavailable</span>
                   </div>
                 </div>
 
@@ -633,24 +625,6 @@ export async function openModelCard(modelId, backend = 'ollama', localPath = nul
     tempVal.textContent = parseFloat(tempSlider.value).toFixed(1);
   });
 
-  // --- Token Quota Count Down Timer ---
-  const timerSpan = activeModalEl.querySelector('#quota-timer');
-  let timeLeft = 14 * 60 + 59; // Starts at 14m 59s
-
-  function updateTimer() {
-    if (!timerSpan) return;
-    const minutes = Math.floor(timeLeft / 60);
-    const seconds = timeLeft % 60;
-    timerSpan.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    
-    if (timeLeft <= 0) {
-      timeLeft = 15 * 60;
-    } else {
-      timeLeft--;
-    }
-  }
-  quotaTimerInterval = setInterval(updateTimer, 1000);
-
   // --- Command Palette Logic ---
   const cmdPalette = activeModalEl.querySelector('#cmd-palette');
   const cmdModalInner = activeModalEl.querySelector('#cmd-modal-inner');
@@ -798,10 +772,6 @@ export async function openModelCard(modelId, backend = 'ollama', localPath = nul
 }
 
 export function closeModelCard() {
-  if (quotaTimerInterval) {
-    clearInterval(quotaTimerInterval);
-    quotaTimerInterval = null;
-  }
   if (activeEscapeHandler) {
     document.removeEventListener('keydown', activeEscapeHandler);
     activeEscapeHandler = null;

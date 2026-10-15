@@ -18,7 +18,10 @@ pub mod proxy;
 pub mod scanner;
 pub mod share;
 pub mod storage;
+
 pub mod swarm;
+#[cfg(test)]
+pub(crate) mod test_support;
 pub mod updater;
 
 pub use backends::*;

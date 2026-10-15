@@ -16,13 +16,14 @@ let isInitialized = false;
 
 // Telemetry State
 let currentTelemetry = {
-  gpuTemp: 52,
-  gpuUtil: 44,
-  gpuFan: 48,
+  gpuName: 'GPU identity unavailable',
+  gpuTemp: null,
+  gpuUtil: null,
+  gpuFan: null,
   cpuTemp: 48,
   cpuUtil: 34,
-  vramUsed: 7.6,
-  vramTotal: 12.0,
+  vramUsed: null,
+  vramTotal: null,
   ramUsed: 8.4,
   ramTotal: 32.0
 };
@@ -428,11 +429,22 @@ export function updateDigitalTwinTelemetry(data) {
   // Update UI overlay tags
   const elGpuTemp = document.getElementById('twin-stat-gpu-temp');
   const elGpuUtil = document.getElementById('twin-stat-gpu-util');
+  const elGpuName = document.getElementById('twin-gpu-name');
+  const elGpuVram = document.getElementById('twin-stat-vram');
   const elCpuTemp = document.getElementById('twin-stat-cpu-temp');
   const elCpuUtil = document.getElementById('twin-stat-cpu-util');
 
-  if (elGpuTemp) elGpuTemp.textContent = `${currentTelemetry.gpuTemp}°C`;
-  if (elGpuUtil) elGpuUtil.textContent = `${currentTelemetry.gpuUtil}%`;
+  if (elGpuTemp) elGpuTemp.textContent = Number.isFinite(currentTelemetry.gpuTemp)
+    ? `${currentTelemetry.gpuTemp}°C`
+    : 'Unavailable';
+  if (elGpuUtil) elGpuUtil.textContent = Number.isFinite(currentTelemetry.gpuUtil)
+    ? `${currentTelemetry.gpuUtil}%`
+    : 'Unavailable';
+  if (elGpuName) elGpuName.textContent = currentTelemetry.gpuName || 'GPU identity unavailable';
+  if (elGpuVram) elGpuVram.textContent = Number.isFinite(currentTelemetry.vramUsed)
+    && Number.isFinite(currentTelemetry.vramTotal)
+    ? `${currentTelemetry.vramUsed.toFixed(1)} / ${currentTelemetry.vramTotal.toFixed(1)} GB`
+    : 'Unavailable';
   if (elCpuTemp) elCpuTemp.textContent = `${currentTelemetry.cpuTemp}°C`;
   if (elCpuUtil) elCpuUtil.textContent = `${currentTelemetry.cpuUtil}%`;
 
@@ -452,7 +464,9 @@ export function updateDigitalTwinTelemetry(data) {
 
   if (gpuBodyMaterial) {
     const t = currentTelemetry.gpuTemp;
-    if (t < 55) {
+    if (!Number.isFinite(t)) {
+      gpuBodyMaterial.emissive.setHex(0x202820);
+    } else if (t < 55) {
       gpuBodyMaterial.emissive.setHex(0x7cf26b);
     } else if (t < 72) {
       gpuBodyMaterial.emissive.setHex(0xff8a1e);
@@ -474,7 +488,7 @@ function animate() {
   }
 
   // Spin GPU Dual Fans
-  if (gpuFan1Group && gpuFan2Group) {
+  if (gpuFan1Group && gpuFan2Group && Number.isFinite(currentTelemetry.gpuFan)) {
     const gpuFanSpeed = 0.06 + (currentTelemetry.gpuFan / 100) * 0.35;
     gpuFan1Group.rotation.z += gpuFanSpeed;
     gpuFan2Group.rotation.z += gpuFanSpeed;

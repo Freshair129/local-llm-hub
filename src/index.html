@@ -125,9 +125,9 @@
           <div class="vram-badge" id="stat-gpu-vram">
             <span class="vram-lbl">VRAM</span>
             <div class="gauge-track" style="width:40px; height:5px;">
-              <div class="gauge-fill" id="gpu-bar" style="width: 63%;"></div>
+              <div class="gauge-fill" id="gpu-bar" style="width: 0%;"></div>
             </div>
-            <span class="vram-val" id="gpu-mem-text">0.8/12G</span>
+            <span class="vram-val" id="gpu-mem-text">Unavailable</span>
           </div>
 
           <!-- All Systems Nominal Health Pill -->
@@ -401,10 +401,10 @@
 
           <!-- Bottom Mascot Avatar in Rail -->
           <div class="sidebar-footer">
-            <div class="mascot-avatar" id="agent-mascot-avatar" title="Local CUDA Agent: RTX 3060 Active">
+            <div class="mascot-avatar" id="agent-mascot-avatar" title="Local LLM Hub">
               🤖
             </div>
-            <div class="mascot-lbl s-lbl">RTX 3060 CUDA</div>
+            <div class="mascot-lbl s-lbl">Local Inference</div>
           </div>
         </aside>
 
@@ -563,24 +563,24 @@
                       <span style="font-size:22px;">🎮</span>
                       <div>
                         <h3 style="font-size:16px; font-weight:700; color:#fff; margin:0;">GPU Sector</h3>
-                        <p style="font-size:11.5px; color:var(--mut); margin:2px 0 0 0;">NVIDIA GeForce RTX 3060 (12GB GDDR6)</p>
+                        <p style="font-size:11.5px; color:var(--mut); margin:2px 0 0 0;" id="sector-gpu-name">GPU identity unavailable</p>
                       </div>
                     </div>
-                    <span class="badge" style="background:rgba(124,242,107,0.15); color:var(--green); font-family:var(--mono); font-size:11px;" id="sector-gpu-clock">1,777 MHz</span>
+                    <span class="badge" style="background:rgba(124,242,107,0.15); color:var(--green); font-family:var(--mono); font-size:11px;" id="sector-gpu-clock">Unavailable</span>
                   </div>
 
                   <!-- GPU Big Metric & Live Waveform Chart -->
                   <div style="background:rgba(0,0,0,0.35); border:1px solid rgba(124,242,107,0.2); border-radius:12px; padding:12px;">
                     <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:8px;">
                       <div style="display:flex; align-items:baseline; gap:10px;">
-                        <span style="font-size:26px; font-weight:800; color:var(--green); font-family:var(--mono);" id="sector-gpu-util">13.0%</span>
-                        <span style="font-size:13px; color:#60a5fa; font-family:var(--mono);" id="sector-gpu-vram-text">0.8 / 12.0 GB VRAM</span>
+                        <span style="font-size:26px; font-weight:800; color:var(--green); font-family:var(--mono);" id="sector-gpu-util">Unavailable</span>
+                        <span style="font-size:13px; color:#60a5fa; font-family:var(--mono);" id="sector-gpu-vram-text">Unavailable VRAM</span>
                       </div>
                       <div style="font-size:11.5px; color:var(--mut);">GPU Compute &amp; 3D Engine</div>
                     </div>
                     <svg class="perf-svg-chart" id="svg-sector-gpu" viewBox="0 0 400 80" preserveAspectRatio="none" style="height:80px;">
-                      <path id="path-fill-sector-gpu" fill="rgba(124,242,107,0.18)" d="M0,80 L400,80 Z"></path>
-                      <path id="path-line-sector-gpu" fill="none" stroke="#7cf26b" stroke-width="2" d="M0,70 L400,70"></path>
+                      <path id="path-fill-sector-gpu" fill="rgba(124,242,107,0.18)" d=""></path>
+                      <path id="path-line-sector-gpu" fill="none" stroke="#7cf26b" stroke-width="2" d=""></path>
                     </svg>
                   </div>
 
@@ -588,15 +588,15 @@
                   <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px;">
                     <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); padding:10px; border-radius:10px;">
                       <div style="font-size:10.5px; color:var(--mut);">Core Temp</div>
-                      <div style="font-size:15px; font-weight:700; color:var(--green); font-family:var(--mono); margin-top:2px;" id="sector-gpu-temp">35.0 °C</div>
+                      <div style="font-size:15px; font-weight:700; color:var(--green); font-family:var(--mono); margin-top:2px;" id="sector-gpu-temp">Unavailable</div>
                     </div>
                     <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); padding:10px; border-radius:10px;">
                       <div style="font-size:10.5px; color:var(--mut);">Hotspot Temp</div>
-                      <div style="font-size:15px; font-weight:700; color:var(--amber); font-family:var(--mono); margin-top:2px;" id="sector-gpu-hotspot">47.0 °C</div>
+                      <div style="font-size:15px; font-weight:700; color:var(--amber); font-family:var(--mono); margin-top:2px;" id="sector-gpu-hotspot">Unavailable</div>
                     </div>
                     <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); padding:10px; border-radius:10px;">
                       <div style="font-size:10.5px; color:var(--mut);">Board Power</div>
-                      <div style="font-size:15px; font-weight:700; color:#fff; font-family:var(--mono); margin-top:2px;" id="sector-gpu-power">16.7 W</div>
+                      <div style="font-size:15px; font-weight:700; color:#fff; font-family:var(--mono); margin-top:2px;" id="sector-gpu-power">Unavailable</div>
                     </div>
                   </div>
                 </div>
@@ -717,7 +717,7 @@
                   <div class="perf-mini-sparkline" id="spark-gpu0"></div>
                   <div>
                     <div class="perf-device-name">GPU 0</div>
-                    <div class="perf-device-sub" id="perf-sub-gpu0">NVIDIA GeForce...<br><span id="perf-sub-gpu0-val">13% (35 °C)</span></div>
+                    <div class="perf-device-sub"><span id="perf-sub-gpu0-name">GPU identity unavailable</span><br><span id="perf-sub-gpu0-val">GPU monitoring unavailable</span></div>
                   </div>
                 </div>
               </div>
@@ -729,7 +729,7 @@
                   <div>
                     <div class="perf-main-title" id="perf-view-title">GPU</div>
                   </div>
-                  <div class="perf-device-full-name" id="perf-view-fullname">NVIDIA GeForce RTX 3060</div>
+                  <div class="perf-device-full-name" id="perf-view-fullname">GPU identity unavailable</div>
                 </div>
 
                 <!-- 4 Sub-Engines 2x2 Grid (3D, Copy, Video Encode, Video Decode) -->
@@ -738,7 +738,7 @@
                   <div class="perf-graph-card">
                     <div class="perf-graph-title-row">
                       <span>∨ 3D</span>
-                      <span class="perf-graph-val" id="perf-val-3d">13%</span>
+                      <span class="perf-graph-val" id="perf-val-3d">Unavailable</span>
                     </div>
                     <svg class="perf-svg-chart" id="svg-chart-3d" viewBox="0 0 300 90" preserveAspectRatio="none">
                       <path id="path-fill-3d" fill="rgba(56,189,248,0.18)" d="M0,90 L300,90 Z"></path>
@@ -789,7 +789,7 @@
                   <div class="perf-graph-card">
                     <div class="perf-graph-title-row">
                       <span>Dedicated GPU memory usage</span>
-                      <span class="perf-graph-val" style="color:#60a5fa;">12.0 GB</span>
+                      <span class="perf-graph-val" style="color:#60a5fa;" id="perf-vram-total">Unavailable</span>
                     </div>
                     <svg class="perf-svg-chart" id="svg-chart-vram" viewBox="0 0 600 90" preserveAspectRatio="none">
                       <path id="path-fill-vram" fill="rgba(96,165,250,0.2)" d="M0,90 L600,90 Z"></path>
@@ -828,11 +828,11 @@
                 <div class="perf-specs-matrix" id="perf-specs-matrix">
                   <div class="perf-spec-item">
                     <div class="perf-spec-label">Utilization</div>
-                    <div class="perf-spec-val" id="spec-gpu-util">13%</div>
+                    <div class="perf-spec-val" id="spec-gpu-util">Unavailable</div>
                   </div>
                   <div class="perf-spec-item">
                     <div class="perf-spec-label">Dedicated GPU memory</div>
-                    <div class="perf-spec-val" id="spec-gpu-dedicated">0.8/12.0 GB</div>
+                    <div class="perf-spec-val" id="spec-gpu-dedicated">Unavailable</div>
                   </div>
                   <div class="perf-spec-item">
                     <div class="perf-spec-label">Driver version:</div>
@@ -844,7 +844,7 @@
                   </div>
                   <div class="perf-spec-item">
                     <div class="perf-spec-label">GPU Memory</div>
-                    <div class="perf-spec-val" id="spec-gpu-total-mem">0.9/28.0 GB</div>
+                    <div class="perf-spec-val" id="spec-gpu-total-mem">Unavailable</div>
                   </div>
                   <div class="perf-spec-item">
                     <div class="perf-spec-label">Shared GPU memory</div>
@@ -860,7 +860,7 @@
                   </div>
                   <div class="perf-spec-item">
                     <div class="perf-spec-label">GPU Temperature</div>
-                    <div class="perf-spec-val" style="color:var(--green);" id="spec-gpu-temp">35 °C</div>
+                    <div class="perf-spec-val" style="color:var(--green);" id="spec-gpu-temp">Unavailable</div>
                   </div>
                   <div class="perf-spec-item">
                     <div class="perf-spec-label">Hardware reserved memory:</div>
@@ -975,7 +975,7 @@
             <div class="view-header">
               <div class="view-heading">
                 <h1>GPU Telemetry &amp; MSI Afterburner Control Center</h1>
-                <p>Complete NVIDIA RTX 3060 telemetry with interactive clock offsets, power target %, and fan curve control</p>
+                <p>Available GPU sensors. Local tuning controls cannot apply core, memory, or power settings.</p>
               </div>
               <div class="view-actions">
                 <span class="badge" style="background:rgba(255,138,30,0.15); color:var(--amber); padding:6px 12px; font-weight:700;">
@@ -988,41 +988,41 @@
               <!-- Left Column: GPU Deep Telemetry -->
               <div class="model-card" style="padding:22px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                  <h3 style="color:#60a5fa; font-size:16px; margin:0;">🎮 RTX 3060 Live Telemetry</h3>
-                  <span class="badge" style="background:rgba(96,165,250,0.15); color:#60a5fa; font-size:11px;">12GB GDDR6</span>
+                  <h3 id="gpu-tuning-title" style="color:#60a5fa; font-size:16px; margin:0;">GPU Live Telemetry</h3>
+                  <span class="badge" style="background:rgba(96,165,250,0.15); color:#60a5fa; font-size:11px;">Available sensors only</span>
                 </div>
 
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:16px;">
                   <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px;">
                     <div style="font-size:11.5px; color:var(--mut);">GPU Core Clock</div>
-                    <div style="font-size:22px; font-weight:800; color:#fff; margin-top:2px;" id="gpu-val-core-clock">1,777 MHz</div>
+                    <div style="font-size:22px; font-weight:800; color:#fff; margin-top:2px;" id="gpu-val-core-clock">Unavailable</div>
                   </div>
                   <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px;">
                     <div style="font-size:11.5px; color:var(--mut);">Memory Clock</div>
-                    <div style="font-size:22px; font-weight:800; color:#fff; margin-top:2px;" id="gpu-val-mem-clock">7,500 MHz</div>
+                    <div style="font-size:22px; font-weight:800; color:#fff; margin-top:2px;" id="gpu-val-mem-clock">Unavailable</div>
                   </div>
                   <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px;">
                     <div style="font-size:11.5px; color:var(--mut);">GPU Core Temp</div>
-                    <div style="font-size:22px; font-weight:800; color:var(--green); margin-top:2px;" id="gpu-val-core-temp">52.0 °C</div>
+                    <div style="font-size:22px; font-weight:800; color:var(--green); margin-top:2px;" id="gpu-val-core-temp">Unavailable</div>
                   </div>
                   <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px;">
                     <div style="font-size:11.5px; color:var(--mut);">GPU Hotspot Temp</div>
-                    <div style="font-size:22px; font-weight:800; color:var(--amber); margin-top:2px;" id="gpu-val-hotspot-temp">64.2 °C</div>
+                    <div style="font-size:22px; font-weight:800; color:var(--amber); margin-top:2px;" id="gpu-val-hotspot-temp">Unavailable</div>
                   </div>
                   <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px;">
                     <div style="font-size:11.5px; color:var(--mut);">Board Power Draw</div>
-                    <div style="font-size:22px; font-weight:800; color:#fff; margin-top:2px;" id="gpu-val-power-draw">142 W / 170 W</div>
+                    <div style="font-size:22px; font-weight:800; color:#fff; margin-top:2px;" id="gpu-val-power-draw">Unavailable</div>
                   </div>
                   <div style="background:rgba(255,255,255,0.03); padding:12px; border-radius:8px;">
                     <div style="font-size:11.5px; color:var(--mut);">Fan Speed &amp; Duty</div>
-                    <div style="font-size:22px; font-weight:800; color:var(--cyan); margin-top:2px;" id="gpu-val-fan-rpm">1,350 RPM (45%)</div>
+                    <div style="font-size:22px; font-weight:800; color:var(--cyan); margin-top:2px;" id="gpu-val-fan-rpm">Unavailable</div>
                   </div>
                 </div>
 
                 <div style="font-size:12px; color:var(--faint); line-height:1.6;">
-                  <div>• PCIe Link Speed: <b>PCIe Gen4 x16 @ x16</b></div>
-                  <div>• CUDA Core Utilization: <b id="gpu-val-cuda-load">44.0%</b></div>
-                  <div>• Memory Bandwidth: <b>360.0 GB/s (192-bit)</b></div>
+                  <div>• PCIe Link Speed: <b>Unavailable</b></div>
+                  <div>• CUDA Core Utilization: <b id="gpu-val-cuda-load">Unavailable</b></div>
+                  <div>• Memory Bandwidth: <b>Unavailable</b></div>
                 </div>
               </div>
 
@@ -1136,7 +1136,7 @@
             <div class="view-header">
               <div class="view-heading">
                 <h1>3D Hardware Digital Twin</h1>
-                <p>Interactive 3D simulation of NVIDIA GeForce RTX 3060, Motherboard, Heatsink fan, and NVMe SSD telemetry</p>
+                <p>Interactive 3D reference layout with readouts from available hardware sensors</p>
               </div>
               <div class="view-actions">
                 <span class="badge" style="background:rgba(124,242,107,0.15); color:var(--green); padding:6px 12px; font-weight:700;">
@@ -1152,7 +1152,7 @@
                 <div class="twin-hud-overlay">
                   <div class="twin-hud-chip">
                     <span style="color:var(--green);">🎮 GPU:</span>
-                    <span id="twin-stat-gpu-temp">52°C</span> · <span id="twin-stat-gpu-util">44%</span>
+                    <span id="twin-stat-gpu-temp">Unavailable</span> · <span id="twin-stat-gpu-util">Unavailable</span>
                   </div>
                   <div class="twin-hud-chip">
                     <span style="color:var(--cyan);">🧠 CPU:</span>
@@ -1160,14 +1160,14 @@
                   </div>
                   <div class="twin-hud-chip">
                     <span style="color:var(--amber);">⚡ VRAM:</span>
-                    <span>7.6 / 12 GB</span>
+                    <span id="twin-stat-vram">Unavailable</span>
                   </div>
                 </div>
 
                 <!-- Camera Presets Floating Toolbar -->
                 <div class="twin-cam-toolbar">
                   <button type="button" class="twin-cam-btn active" id="btn-cam-default">🎥 Isometric</button>
-                  <button type="button" class="twin-cam-btn" id="btn-cam-gpu">🎮 RTX 3060 Focus</button>
+                  <button type="button" class="twin-cam-btn" id="btn-cam-gpu">🎮 GPU Focus</button>
                   <button type="button" class="twin-cam-btn" id="btn-cam-cpu">🧠 CPU Cooler</button>
                   <button type="button" class="twin-cam-btn" id="btn-cam-top">📐 Top-Down PCB</button>
                 </div>
@@ -1177,9 +1177,9 @@
               <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:16px;">
                 <div class="model-card" style="padding:16px;">
                   <span style="font-size:11px; font-weight:700; color:var(--green); font-family:var(--mono);">3D GPU COMPONENT</span>
-                  <div style="font-weight:700; font-size:15px; color:#fff; margin-top:4px;">NVIDIA GeForce RTX 3060</div>
-                  <div style="font-size:12px; color:var(--mut); margin-top:4px;">GA106 Core · 3584 CUDA Cores · 12GB GDDR6 (192-bit)</div>
-                  <div style="font-size:12px; color:var(--faint); margin-top:8px;">Dual cooling fans dynamically rotating with real-time fan curve</div>
+                  <div id="twin-gpu-name" style="font-weight:700; font-size:15px; color:#fff; margin-top:4px;">GPU identity unavailable</div>
+                  <div style="font-size:12px; color:var(--mut); margin-top:4px;">Hardware specifications unavailable</div>
+                  <div style="font-size:12px; color:var(--faint); margin-top:8px;">Reference geometry; cooling state is shown only when a sensor provides it</div>
                 </div>
 
                 <div class="model-card" style="padding:16px;">
@@ -1228,27 +1228,27 @@
             <div class="storage-kpi-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-top:20px;">
               <div class="storage-kpi-tile">
                 <span class="metric-label">TOTAL CHANNELS</span>
-                <span class="metric-val cyan" id="kpi-sensor-total">102</span>
+                <span class="metric-val cyan" id="kpi-sensor-total">Unavailable</span>
                 <div style="font-size:12px; color:var(--mut); margin-top:4px;">Live Sensor Tree</div>
               </div>
               <div class="storage-kpi-tile">
                 <span class="metric-label">CPU PACKAGE TEMP</span>
-                <span class="metric-val green" id="kpi-sensor-cputemp">48.0 °C</span>
-                <div style="font-size:12px; color:var(--mut); margin-top:4px;">Core i7-8700K (12T)</div>
+                <span class="metric-val green" id="kpi-sensor-cputemp">Unavailable</span>
+                <div style="font-size:12px; color:var(--mut); margin-top:4px;">CPU temperature sensor</div>
               </div>
               <div class="storage-kpi-tile">
                 <span class="metric-label">GPU HOTSPOT TEMP</span>
-                <span class="metric-val amber" id="kpi-sensor-gpuhotspot">64.2 °C</span>
-                <div style="font-size:12px; color:var(--mut); margin-top:4px;">RTX 3060 12GB GDDR6</div>
+                <span class="metric-val amber" id="kpi-sensor-gpuhotspot">Unavailable</span>
+                <div style="font-size:12px; color:var(--mut); margin-top:4px;">GPU temperature sensor</div>
               </div>
               <div class="storage-kpi-tile">
                 <span class="metric-label">+12V MAINBOARD RAIL</span>
-                <span class="metric-val cyan" id="kpi-sensor-v12">12.09 V</span>
-                <div style="font-size:12px; color:var(--mut); margin-top:4px;">Nuvoton NCT6795D</div>
+                <span class="metric-val cyan" id="kpi-sensor-v12">Unavailable</span>
+                <div style="font-size:12px; color:var(--mut); margin-top:4px;">Mainboard voltage sensor</div>
               </div>
               <div class="storage-kpi-tile">
                 <span class="metric-label">COOLING FANS</span>
-                <span class="metric-val green" id="kpi-sensor-fans">3 Active</span>
+                <span class="metric-val green" id="kpi-sensor-fans">Unavailable</span>
                 <div style="font-size:12px; color:var(--mut); margin-top:4px;">PWM Fan Headers</div>
               </div>
             </div>
@@ -1261,7 +1261,7 @@
                   <span style="font-size:12px; font-weight:700; color:var(--mut); margin-right:4px;">HARDWARE:</span>
                   <button type="button" class="btn btn-ghost sensor-hw-filter active" data-hw="all" style="padding:4px 10px; font-size:11px;">All</button>
                   <button type="button" class="btn btn-ghost sensor-hw-filter" data-hw="intel" style="padding:4px 10px; font-size:11px;">CPU (i7-8700K)</button>
-                  <button type="button" class="btn btn-ghost sensor-hw-filter" data-hw="nvidia" style="padding:4px 10px; font-size:11px;">GPU (RTX 3060)</button>
+                  <button type="button" class="btn btn-ghost sensor-hw-filter" data-hw="nvidia" style="padding:4px 10px; font-size:11px;">GPU</button>
                   <button type="button" class="btn btn-ghost sensor-hw-filter" data-hw="nuvoton" style="padding:4px 10px; font-size:11px;">Motherboard</button>
                   <button type="button" class="btn btn-ghost sensor-hw-filter" data-hw="storage" style="padding:4px 10px; font-size:11px;">Storage</button>
                   <button type="button" class="btn btn-ghost sensor-hw-filter" data-hw="system" style="padding:4px 10px; font-size:11px;">RAM &amp; Net</button>
@@ -1716,7 +1716,7 @@
                   <span style="font-weight:700; font-size:16px; color:#fff;">Ollama Engine</span>
                   <span class="badge" style="background:rgba(124,242,107,0.15); color:var(--green);">● Online</span>
                 </div>
-                <div style="font-size:12px; color:var(--mut); margin-bottom:10px;">Primary Local Daemon (RTX 3060 CUDA)</div>
+                <div style="font-size:12px; color:var(--mut); margin-bottom:10px;">Primary Local Inference Endpoint</div>
                 <div style="font-family:var(--mono); font-size:12px; background:rgba(0,0,0,0.4); padding:8px 12px; border-radius:6px; color:var(--green);">
                   http://127.0.0.1:11434
                 </div>
