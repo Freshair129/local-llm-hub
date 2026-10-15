@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Authenticated shared GPU lease acquire/status/heartbeat/release endpoints with real NVIDIA VRAM telemetry, persistent timeout/restart orphaning, and provider-idle release receipts. Same-owner release retries are idempotent; the Hub coordinates leases and never manages provider or model processes.
+
 ### Fixed
 
 - Model lifecycle controls now display unknown state when Ollama `/api/ps` cannot be parsed or reached, preserve model tags and quantization in identity checks, require a valid completed response, and refresh state after an operation.

@@ -81,6 +81,7 @@ class RuntimeSettings(StrictModel):
     tool_timeout: float = Field(default=10, gt=0, le=120)
     tool_output_bytes: int = Field(default=16384, ge=256, le=1048576)
     health_interval: float = Field(default=30, gt=0)
+    gpu_lease_heartbeat_timeout_seconds: float = Field(default=30, gt=0, le=3600)
 
 
 class HubConfig(StrictModel):

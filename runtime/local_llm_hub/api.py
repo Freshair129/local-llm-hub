@@ -4,8 +4,8 @@ import hmac
 import json
 import logging
 import time
-from collections.abc import AsyncIterator
-from contextlib import asynccontextmanager, suppress
+from collections.abc import AsyncIterator, Callable
+from contextlib import asynccontextmanager
 from typing import Any, Literal
 from uuid import uuid4
 
@@ -19,6 +19,13 @@ from starlette.types import Message as ASGIMessage
 from .agents import AgentRuntime
 from .config import HubConfig
 from .errors import HubError
+from .gpu_leases import (
+    AcquireGpuLease,
+    GpuLeaseManager,
+    GpuTelemetryReader,
+    HeartbeatGpuLease,
+    ReleaseGpuLease,
+)
 from .models import InferenceRequest, Message, RouteRequest, StrictModel
 
 logger = logging.getLogger('local_llm_hub')
@@ -104,27 +111,48 @@ class RequestBoundary:
             await asyncio.gather(app_task, watcher, return_exceptions=True)
 
 
-def create_app(config: HubConfig, runtime: AgentRuntime | None = None) -> FastAPI:
+def create_app(config: HubConfig, runtime: AgentRuntime | None = None, *,
+               gpu_telemetry_reader: GpuTelemetryReader | None = None,
+               gpu_lease_clock: Callable[[], float] | None = None) -> FastAPI:
     hub = runtime or AgentRuntime(config)
+    lease_manager = GpuLeaseManager(
+        config.runtime.state_path.with_name('gpu-leases.sqlite3'),
+        telemetry_reader=gpu_telemetry_reader,
+        heartbeat_timeout_seconds=config.runtime.gpu_lease_heartbeat_timeout_seconds,
+        clock=gpu_lease_clock or time.time,
+    )
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+        await lease_manager.start()
         async def monitor() -> None:
             while True:
                 await hub.router.probe()
                 await asyncio.sleep(config.runtime.health_interval)
+
+        async def lease_monitor() -> None:
+            interval = min(5.0, max(0.25, lease_manager.heartbeat_timeout_seconds / 4))
+            while True:
+                await asyncio.sleep(interval)
+                try:
+                    await lease_manager.expire_due_leases()
+                except HubError as error:
+                    logger.warning(json.dumps({'event': 'gpu_lease_sweep_failed', 'code': error.code}))
+
         task = asyncio.create_task(monitor())
+        lease_task = asyncio.create_task(lease_monitor())
         try:
             yield
         finally:
-            task.cancel()
-            with suppress(asyncio.CancelledError):
-                await task
+            for background_task in (task, lease_task):
+                background_task.cancel()
+            await asyncio.gather(task, lease_task, return_exceptions=True)
             await hub.close()
 
     app = FastAPI(title='Local LLM Hub', version='0.1.0', lifespan=lifespan,
                   docs_url=None, redoc_url=None, openapi_url=None)
     app.state.hub = hub
+    app.state.gpu_lease_manager = lease_manager
     app.add_middleware(RequestBoundary)
 
     async def authorized(request: Request) -> None:
@@ -140,6 +168,22 @@ def create_app(config: HubConfig, runtime: AgentRuntime | None = None) -> FastAP
         return {'contract_version': '0.2.0', 'native_agents': True, 'transport': 'buffered',
             'structured_output': 'tool_schema', 'run_evidence_version': '0.1.0',
             'inference_settings': ['temperature', 'top_p', 'presence_penalty', 'reasoning_effort']}
+
+    @app.post('/v1/gpu/leases/acquire', dependencies=secured, status_code=201)
+    async def acquire_gpu_lease(body: AcquireGpuLease) -> dict[str, object]:
+        return await lease_manager.acquire(body)
+
+    @app.get('/v1/gpu/leases/status', dependencies=secured)
+    async def gpu_lease_status(gpu_uuid: str | None = None) -> dict[str, object]:
+        return await lease_manager.status(gpu_uuid)
+
+    @app.post('/v1/gpu/leases/{lease_id}/heartbeat', dependencies=secured)
+    async def heartbeat_gpu_lease(lease_id: str, body: HeartbeatGpuLease) -> dict[str, object]:
+        return await lease_manager.heartbeat(lease_id, body)
+
+    @app.post('/v1/gpu/leases/{lease_id}/release', dependencies=secured)
+    async def release_gpu_lease(lease_id: str, body: ReleaseGpuLease) -> dict[str, object]:
+        return await lease_manager.release(lease_id, body)
 
     @app.exception_handler(HubError)
     async def hub_error(request: Request, error: HubError) -> JSONResponse:
