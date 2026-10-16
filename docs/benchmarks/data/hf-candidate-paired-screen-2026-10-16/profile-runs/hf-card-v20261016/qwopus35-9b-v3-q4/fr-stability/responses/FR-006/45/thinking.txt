@@ -1,0 +1,119 @@
+The user wants me to implement a Rust specification for FR-006 with specific guard rails (STD-003 and ADR-100) and requirements:
+
+1. Define a struct `GpuStats` with specific fields and derives
+2. Implement a function `parse_gpu_csv` that parses a CSV line
+3. Handle errors robustly without using unwrap(), expect(), or panic!
+4. Include traceability comment '// trace:implements FR-006' before the function
+5. Output both the struct and function in a Rust code block
+
+Let me break down the requirements:
+
+Struct definition:
+- `#[derive(Debug, PartialEq)]`
+- Fields: `name: String`, `vram_used_mb: u64`, `vram_total_mb: u64`, `temp_c: u32`, `util_pct: u32`
+
+Function:
+- Signature: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`
+- Parse CSV like: "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"
+- Handle errors: fewer than 5 columns or parse failures return Err(String)
+- NO unwrap(), expect(), or panic! - use Ok/Err instead
+- Include comment `// trace:implements FR-006` before function declaration
+
+Implementation steps:
+1. Define the struct with derive macros
+2. Implement the parsing function:
+   - Split by comma
+   - Check if we have at least 5 parts (handle potential whitespace)
+   - Parse each field:
+     - name: String (trim whitespace)
+     - vram_used_mb: u64 (parse from string)
+     - vram_total_mb: u64 (parse from string)
+     - temp_c: u32 (parse from string)
+     - util_pct: u32 (parse from string)
+   - Return Result::Ok(GpuStats) or Result::Err(String)
+
+Edge cases to handle:
+- Extra whitespace around fields
+- Empty lines
+- Lines with fewer than 5 fields
+- Non-numeric values in numeric fields
+- Leading/trailing whitespace in the line
+
+Let me write the code:
+
+```rust
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // Split by comma and trim whitespace from each field
+    let fields: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+    
+    // Check if we have at least 5 fields
+    if fields.len() < 5 {
+        return Err(format!("Expected at least 5 fields, got {}", fields.len()));
+    }
+    
+    // Parse each field
+    let name = fields[0].to_string();
+    let vram_used_mb: u64 = fields[1].parse()
+        .map_err(|_| format!("Failed to parse vram_used_mb: {}", fields[1]))?;
+    let vram_total_mb: u64 = fields[2].parse()
+        .map_err(|_| format!("Failed to parse vram_total_mb: {}", fields[2]))?;
+    let temp_c: u32 = fields[3].parse()
+        .map_err(|_| format!("Failed to parse temp_c: {}", fields[3]))?;
+    let util_pct: u32 = fields[4].parse()
+        .map_err(|_| format!("Failed to parse util_pct: {}", fields[4]))?;
+    
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}
+```
+
+Wait, I should double-check the requirements:
+- STD-003 and ADR-100 guard rails mentioned - these seem to be internal constraints that mean: follow the exact spec, no unsafe operations, robust error handling
+- STRICTLY FORBIDDEN to use unwrap(), expect(), or panic! - I haven't used any of these
+- Return Err(String) if columns are fewer than 5 or numbers fail to parse - done
+- Traceability comment '// trace:implements FR-006' directly before function declaration - done
+- Output BOTH struct and function inside the code block - done
+
+The code looks correct. Let me verify the parsing logic once more:
+- Split by comma
+- Trim each field
+- Check length >= 5
+- Parse fields 1-4 as u64 (vram_used, vram_total)
+- Parse fields 3-4 as u32 (temp, util)
+- Wait, indices: 
+  - fields[0] = name
+  - fields[1] = vram_used_mb
+  - fields[2] = vram_total_mb
+  - fields[3] = temp_c
+  - fields[4] = util_pct
+  
+Yes, that's correct.
+
+One small improvement: I should handle the case where fields might be empty strings after trimming, but the parse() method will handle that anyway (empty string parse will fail with appropriate error).
+
+The error messages are descriptive enough.
+
+Final check:
+- Struct definition: ✓
+- Function signature: ✓
+- Robust error handling: ✓
+- No unwrap/expect/panic: ✓
+- Traceability comment: ✓
+- Both in same code block: ✓
+
+I'm ready to output the solution.

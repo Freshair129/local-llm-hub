@@ -1,0 +1,57 @@
+// trace:implements FR-006
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // trace:implements FR-006
+
+    // Split the line into columns
+    let columns: Vec<&str> = line.split(',').collect();
+
+    // Check if there are at least 5 columns
+    if columns.len() < 5 {
+        return Err(format!("Invalid number of columns: expected at least 5, got {}", columns.len()));
+    }
+
+    // Try to parse each column
+    let name = match columns[0].parse::<String>() {
+        Ok(name) => name,
+        Err(_) => return Err(format!("Failed to parse name column")),
+    };
+
+    let vram_used_mb = match columns[1].parse::<u64>() {
+        Ok(vram) => vram,
+        Err(_) => return Err(format!("Failed to parse vram_used_mb column")),
+    };
+
+    let vram_total_mb = match columns[2].parse::<u64>() {
+        Ok(vram) => vram,
+        Err(_) => return Err(format!("Failed to parse vram_total_mb column")),
+    };
+
+    let temp_c = match columns[3].parse::<u32>() {
+        Ok(temp) => temp,
+        Err(_) => return Err(format!("Failed to parse temp_c column")),
+    };
+
+    let util_pct = match columns[4].parse::<u32>() {
+        Ok(util) => util,
+        Err(_) => return Err(format!("Failed to parse util_pct column")),
+    };
+
+    // Return the parsed GpuStats
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}

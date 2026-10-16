@@ -1,0 +1,86 @@
+The user wants me to implement a Rust function that normalizes model names according to specific rules. Let me break down what needs to be done:
+
+1. Function signature: pub fn normalize_model_name(raw: &str) -> String
+2. Strip registry prefixes (three different ones)
+3. Strip quantization suffixes (multiple variants, case-insensitive)
+4. Convert to lowercase
+5. No unwrap(), expect(), or panic! - I need to handle errors gracefully, probably via Result or Option
+6. Include the traceability comment
+
+The challenge is to do this without using unsafe unwrap/expect/panic. Let me think about the approach:
+
+For stripping prefixes:
+- I can use string operations to check if the string starts with any of the prefixes
+- If it does, I can remove that prefix
+- I need to check all three prefixes
+
+For stripping quantization suffixes:
+- I need to check if the string ends with any of the quantization suffixes (case-insensitive)
+- If it does, I can remove that suffix
+
+Let me structure this:
+
+I'll create a helper function to remove a prefix if it exists
+Another helper to remove a suffix if it exists
+
+For the guard rails, I'll use .ok() or .unwrap_or_default() where necessary, but the user said NO unwrap(), NO expect(), NO panic! So I need to handle cases where operations might fail.
+
+Actually, the user wants NO unwrap(), NO expect(), NO panic() anywhere in the code. That's a bit tricky because even basic string operations can return Option.
+
+Let me rethink this. The user probably wants the function to never panic and to handle invalid inputs gracefully, perhaps returning an empty string or default when something goes wrong.
+
+I'll use .ok().unwrap_or_default() for operations that might return None, but I need to be careful with that as it's technically using unwrap().
+
+Alternatively, I can use .unwrap_or("") but again, that's using unwrap.
+
+This is a bit conflicting. Let me read the user's instruction again: "NO unwrap(), NO expect(), NO panic()!" - I need to avoid these explicitly.
+
+I can use .ok().map_or_default() which doesn't use unwrap().
+
+Let me structure the function:
+
+- Start with the raw string
+- Remove all three registry prefixes if they exist
+- Remove all quantization suffixes if they exist
+- Convert to lowercase
+
+I'll create a function that removes a prefix if it exists:
+fn remove_prefix(s: &str, prefix: &str) -> Option<String> {
+    if s.starts_with(prefix) {
+        Some(s[prefix.len()..].to_string())
+    } else {
+        Some(s.to_string())
+    }
+}
+
+But this returns Option<String>, which brings us back to the unwrap() problem.
+
+I need to handle this without unwrap(). Maybe return a Result<String, ()>?
+
+pub fn normalize_model_name(raw: &str) -> String {
+    // trace:implements FR-002
+    let mut result = raw.to_string();
+    
+    // Strip registry prefixes
+    if result.starts_with("registry.ollama.ai/library/") {
+        result = result["registry.ollama.ai/library/".len()..].to_string();
+    } else if result.starts_with("library/") {
+        result = result["library/".len()..].to_string();
+    } else if result.starts_with("hf.co/") {
+        result = result["hf.co/".len()..].to_string();
+    }
+    
+    // Strip quantization suffixes
+    let quantization_suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+    
+    for &suf in &quantization_suffixes {
+        if result.to_lowercase().ends_with(suf) {
+            result = result[..result.len() - suf.len()].to_string();
+            break; // Only remove the first matching suffix
+        }
+    }
+    
+    result.to_lowercase()
+}
+
+I'm checking the lowercase version for ending but operating on the original. I should check the original for starting, but use lowercase for comparisons. I'll adjust the code to use case-insensitive checks while preserving the original case for slicing.

@@ -1,0 +1,268 @@
+I need to implement the `normalize_model_name` function according to the exact specification. Let me break down the requirements:
+
+1. **Function signature**: `pub fn normalize_model_name(raw: &str) -> String`
+
+2. **Strip registry prefixes**: `'registry.ollama.ai/library/', 'library/', 'hf.co/'`
+   - These are prefix strings that might appear at the start of the input string.
+   - Need to check if the string starts with any of these and remove them.
+
+3. **Strip quantization suffixes**: `'-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s'` (case-insensitive)
+   - These are suffixes that might appear at the end of the string.
+   - Case-insensitive means I need to handle uppercase variants too: `'Q4_0', 'Q4_K_M', 'Q4_K_S'`, etc.
+   - Need to check if the string ends with any of these and remove them.
+
+4. **Convert result to lowercase**: After stripping, convert the entire result to lowercase.
+
+5. **Guard rails**: NO unwrap(), NO expect(), NO panic!
+   - This means I must use safe operations only.
+   - For checking prefixes/suffixes, I'll use methods that return `Option` or `bool` and handle them without unwrapping.
+   - For converting to lowercase, `to_lowercase()` is safe.
+
+6. **Traceability**: Include comment `// trace:implements FR-002` directly before function declaration.
+
+Let me think about the implementation:
+
+**Step 1: Strip registry prefixes**
+- I can use `raw.strip_prefix(...)` which returns an `Option<&str>`. This is safe and doesn't unwrap.
+- Since there are multiple possible prefixes, I need to try each one. I'll chain them with `or_else` or just handle the result stepwise.
+- After stripping, if the prefix was found, the result is `Some(new)`, else `None`. But since I'm working with a reference, I need to get the actual string. I can use pattern matching on the `Option`.
+
+**Step 2: Strip quantization suffixes (case-insensitive)**
+- For case-insensitive suffix stripping, I can convert the string to uppercase temporarily and compare with uppercase versions of the suffixes? But that would require creating a new string each time.
+- Better approach: Since the suffixes are known, I can check if the string ends with any of the suffixes using `raw.strip_suffix(...)`. However, `strip_suffix` is case-sensitive. To make it case-insensitive, I could convert the entire string to lowercase first? But that would affect the order of operations.
+- The spec says "case-insensitive", so I need to handle both uppercase and lowercase versions of the suffixes.
+- One way: Convert the input string to a form where I can check suffixes case-insensitively. Since the final result is lowercased anyway, maybe I can just strip the suffixes from the original string (case-sensitive) and then after processing, convert everything to lowercase. But the suffixes might be uppercase in the input.
+- To handle case-insensitive stripping without creating too many intermediate strings, I could use `raw.to_lowercase()` first? No, because that would also lower the prefix part. But since we will ultimately convert to lowercase anyway, it might be okay to strip suffixes from the original string (case-sensitive) and then convert to lowercase at the end. However, if the suffix is uppercase, `strip_suffix` won't find it.
+- Alternative: I can check both the original and the lowercased version for suffix stripping. But that's messy.
+- Since the spec says "case-insensitive", I think the intended behavior is that regardless of case, the suffix should be stripped. So I need to handle uppercase variants.
+- One approach: Convert the string to a form where I can check suffixes case-insensitively. Since Rust doesn't have built-in case-insensitive suffix stripping, I might need to manually check.
+- But given the constraints (no panic), I can use `raw.strip_suffix(...)` and then if it returns `None`, try with uppercase version? That could be done with `or_else`.
+- However, to keep it simple and safe, maybe I should just strip the suffixes from the original string (case-sensitive) and then after all stripping, convert to lowercase. But that would fail for uppercase suffixes.
+- Wait, the spec says "Strip quantization suffixes: '-q4_0', ... (case-insensitive)". So the suffixes should be stripped regardless of case. Since the final result is lowercased, maybe I can just strip the suffixes from the original string (case-sensitive) and then after stripping, convert to lowercase. But if the suffix is uppercase, I won't strip it.
+- To handle case-insensitive stripping, I could use `raw.to_lowercase()` first? But that would also lower the prefix part. But since we will lower anyway at the end, maybe it's okay. But the prefix stripping should happen before suffix stripping? The spec doesn't specify order, but typically you strip prefixes first, then suffixes, then lowercase.
+- Let me think: The registry prefixes are case-sensitive (they are given in lowercase), so I can strip them exactly as given.
+- For suffixes, they are given in lowercase, but the input might have uppercase. So I need to handle case-insensitive matching.
+- Since I'm allowed to use `to_lowercase()` at the end, maybe I can convert the string to lowercase for suffix stripping? But that would also affect the prefix stripping if I do it too early.
+- Better: Strip prefixes from the original string (case-sensitive), then strip suffixes from the lowercased version of the remaining string? But that might be overcomplicating.
+- Another idea: Since the suffixes are known, I can check both the original and the lowercased string for suffix stripping. For example, after stripping prefix, get `rest`, then convert to lowercase for suffix checking, but that would require creating a new string.
+- Given the guard rails (no panic), I must avoid unwrap/expect. So I need to handle the Option results.
+- Let me try a straightforward approach:
+  - Check if `raw` starts with any of the prefix strings using `strip_prefix`. If yes, get the remainder.
+  - Then, for suffix stripping, since it's case-insensitive, I can convert the remainder to lowercase and then strip the lowercase suffixes. But that would also lower the entire string, which is fine because we will ultimately convert to lowercase anyway. However, if the remainder has uppercase letters in the middle, converting to lowercase first would make them lowercase, which is okay for suffix stripping but might affect the final output.
+  - Actually, since we will convert to lowercase at the end, it's safe to do suffix stripping on the lowercased version of the remainder.
+  - So steps:
+    1. Strip prefix from original `raw`. If no prefix matches, keep original.
+    2. Convert the result (after prefix stripping) to lowercase.
+    3. From this lowercased string, strip suffixes (which are now lowercase).
+    4. The result is already lowercase, so we can just return it.
+  - But wait, the spec says "Strip quantization suffixes: ... (case-insensitive)". If I convert to lowercase first, then strip suffixes, that's case-insensitive for the suffixes because the suffixes are now lowercase and match exactly.
+  - However, if the original string had uppercase letters in the middle, converting to lowercase would make them lowercase, which is fine.
+  - So this approach seems valid.
+  - But I need to be careful: the prefix stripping should happen before suffix stripping. Also, after stripping prefix, I convert to lowercase, then strip suffixes from the lowercased string.
+  - Let me write the code accordingly.
+
+**Implementation details**:
+- Use `raw.strip_prefix(...)` which returns `Option<&str>`. Since I need to get the actual string, I can match on the Option.
+- For multiple prefixes, I can chain them: if `raw` starts with `registry.ollama.ai/library/`, strip it; else if starts with `library/`, strip it; else if starts with `hf.co/`, strip it; else keep original.
+- Then convert to lowercase using `to_lowercase()`.
+- Then for suffixes, since they are now lowercase, I can use `strip_suffix` for each suffix variant. But note that the suffixes are given as `'-q4_0'`, etc., so after lowercasing, they will be exactly those strings.
+- However, I need to handle all suffix variants: `-q4_0`, `-q4_k_m`, `-q4_k_s`, and also the colon-prefixed versions: `:q4_0`, `:q4_k_m`, `:q4_k_s`.
+- Since the string is now lowercase, I can strip each of these suffixes in any order. Use `or_else` to chain them.
+- Finally, return the result.
+
+But wait, after stripping prefix, I convert to lowercase. Then I strip suffixes from the lowercased string. That should be fine.
+
+Let me write the code:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut s = raw;
+    // Strip registry prefixes
+    if s.starts_with("registry.ollama.ai/library/") {
+        s = s.strip_prefix("registry.ollama.ai/library/").unwrap();
+    } else if s.starts_with("library/") {
+        s = s.strip_prefix("library/").unwrap();
+    } else if s.starts_with("hf.co/") {
+        s = s.strip_prefix("hf.co/").unwrap();
+    }
+    // Convert to lowercase
+    s = s.to_lowercase();
+    // Strip quantization suffixes (case-insensitive, now all lowercase)
+    if s.ends_with("-q4_0") {
+        s = s.strip_suffix("-q4_0").unwrap();
+    } else if s.ends_with("-q4_k_m") {
+        s = s.strip_suffix("-q4_k_m").unwrap();
+    } else if s.ends_with("-q4_k_s") {
+        s = s.strip_suffix("-q4_k_s").unwrap();
+    } else if s.ends_with(":q4_0") {
+        s = s.strip_suffix(":q4_0").unwrap();
+    } else if s.ends_with(":q4_k_m") {
+        s = s.strip_suffix(":q4_k_m").unwrap();
+    } else if s.ends_with(":q4_k_s") {
+        s = s.strip_suffix(":q4_k_s").unwrap();
+    }
+    s
+}
+```
+
+Wait, I'm using `unwrap()` here. That violates the guard rails: "NO unwrap(), NO expect(), NO panic!". I must avoid unwrap.
+
+So I need to use pattern matching on the Option results of `strip_prefix` and `strip_suffix`.
+
+Let me rewrite without unwrap:
+
+After stripping prefix, I have a mutable `s`. But `strip_prefix` returns `Option<&str>`, so I cannot assign directly without unwrapping.
+
+I can use a loop or match. Since there are only a few prefixes, I can write nested if-else with pattern matching.
+
+Similarly for suffixes, after lowercasing, I need to strip suffixes case-insensitively, but now the string is lowercase, so `ends_with` will work correctly. But `strip_suffix` returns `Option<&str>`, so I must handle that.
+
+I can do:
+
+```rust
+let mut s = raw;
+// Strip prefix
+if s.starts_with("registry.ollama.ai/library/") {
+    match s.strip_prefix("registry.ollama.ai/library/") {
+        Some(rest) => s = rest,
+        None => {}
+    }
+} else if s.starts_with("library/") {
+    match s.strip_prefix("library/") {
+        Some(rest) => s = rest,
+        None => {}
+    }
+} else if s.starts_with("hf.co/") {
+    match s.strip_prefix("hf.co/") {
+        Some(rest) => s = rest,
+        None => {}
+    }
+}
+// Convert to lowercase
+s = s.to_lowercase();
+// Strip suffixes
+if s.ends_with("-q4_0") {
+    match s.strip_suffix("-q4_0") {
+        Some(rest) => s = rest,
+        None => {}
+    }
+} else if s.ends_with("-q4_k_m") {
+    match s.strip_suffix("-q4_k_m") {
+        Some(rest) => s = rest,
+        None => {}
+    }
+} else if s.ends_with("-q4_k_s") {
+    match s.strip_suffix("-q4_k_s") {
+        Some(rest) => s = rest,
+        None => {}
+    }
+} else if s.ends_with(":q4_0") {
+    match s.strip_suffix(":q4_0") {
+        Some(rest) => s = rest,
+        None => {}
+    }
+} else if s.ends_with(":q4_k_m") {
+    match s.strip_suffix(":q4_k_m") {
+        Some(rest) => s = rest,
+        None => {}
+    }
+} else if s.ends_with(":q4_k_s") {
+    match s.strip_suffix(":q4_k_s") {
+        Some(rest) => s = rest,
+        None => {}
+    }
+}
+s
+```
+
+But this is very verbose. However, it's safe and adheres to the guard rails.
+
+Alternatively, I can use `if let` for each case:
+
+```rust
+if let Some(rest) = s.strip_prefix("registry.ollama.ai/library/") {
+    s = rest;
+} else if let Some(rest) = s.strip_prefix("library/") {
+    s = rest;
+} else if let Some(rest) = s.strip_prefix("hf.co/") {
+    s = rest;
+}
+```
+
+But `if let` also avoids unwrap. That's good.
+
+Similarly for suffixes:
+
+```rust
+if let Some(rest) = s.strip_suffix("-q4_0") {
+    s = rest;
+} else if let Some(rest) = s.strip_suffix("-q4_k_m") {
+    s = rest;
+} ...
+```
+
+That's cleaner.
+
+So I'll use `if let` for each prefix and suffix.
+
+Also, after stripping prefix, I convert to lowercase. Then strip suffixes from the lowercased string.
+
+But note: the suffix stripping should be done on the lowercased string, which is already all lowercase, so `ends_with` will match exactly.
+
+One more thing: The spec says "Strip quantization suffixes: '-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s' (case-insensitive)". Since we convert to lowercase first, the suffixes are now exactly those strings, so case-insensitive is satisfied.
+
+Now, let me write the final code with comments.
+
+Also, I need to include the trace comment `// trace:implements FR-002` directly before function declaration.
+
+Let me assemble the code:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut s = raw;
+    // Strip registry prefixes
+    if let Some(rest) = s.strip_prefix("registry.ollama.ai/library/") {
+        s = rest;
+    } else if let Some(rest) = s.strip_prefix("library/") {
+        s = rest;
+    } else if let Some(rest) = s.strip_prefix("hf.co/") {
+        s = rest;
+    }
+    // Convert to lowercase
+    s = s.to_lowercase();
+    // Strip quantization suffixes (case-insensitive, now all lowercase)
+    if let Some(rest) = s.strip_suffix("-q4_0") {
+        s = rest;
+    } else if let Some(rest) = s.strip_suffix("-q4_k_m") {
+        s = rest;
+    } else if let Some(rest) = s.strip_suffix("-q4_k_s") {
+        s = rest;
+    } else if let Some(rest) = s.strip_suffix(":q4_0") {
+        s = rest;
+    } else if let Some(rest) = s.strip_suffix(":q4_k_m") {
+        s = rest;
+    } else if let Some(rest) = s.strip_suffix(":q4_k_s") {
+        s = rest;
+    }
+    s
+}
+```
+
+This looks correct. It uses only safe operations, no unwrap/expect/panic, and includes the trace comment.
+
+I should double-check: Are there any edge cases?
+- If the string is exactly a prefix, `strip_prefix` will return `Some("")`, and we assign empty string. That's fine.
+- If the string is exactly a suffix after lowercasing, `strip_suffix` will return `Some("")`, which is also fine.
+- If no prefix matches, we keep original and then lowercase it.
+- If no suffix matches, we keep as is (already lowercased).
+- The order: strip prefixes first, then lowercase, then strip suffixes. That seems correct because the suffixes are defined on the model name without registry prefix, but with possible quantization suffix. Lowercasing after prefix stripping ensures that the suffix stripping works correctly.
+
+One potential issue: What if the string has a prefix and a suffix? We strip prefix first, then lowercase, then strip suffix. That should be fine.
+
+Also, the spec says "Strip registry prefixes" and "Strip quantization suffixes", so order is not specified, but typically you strip prefixes first. Then lowercase. Then suffixes. That's what I did.
+
+I think this implementation meets all requirements.
+
+Now, output only the Rust code inside a ```rust block.

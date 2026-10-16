@@ -1,0 +1,27 @@
+error[E0599]: no method named `ok_or` found for enum `Result<T, E>` in the current scope
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-006\45\test.rs:19:55
+   |
+19 |     let vram_used_mb = parts[1].trim().parse::<u64>().ok_or("Invalid VRAM used value")?;
+   |                                                       ^^^^^ method not found in `Result<u64, ParseIntError>`
+
+error[E0599]: no method named `ok_or` found for enum `Result<T, E>` in the current scope
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-006\45\test.rs:20:56
+   |
+20 |     let vram_total_mb = parts[2].trim().parse::<u64>().ok_or("Invalid VRAM total value")?;
+   |                                                        ^^^^^ method not found in `Result<u64, ParseIntError>`
+
+error[E0599]: no method named `ok_or` found for enum `Result<T, E>` in the current scope
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-006\45\test.rs:21:49
+   |
+21 |     let temp_c = parts[3].trim().parse::<u32>().ok_or("Invalid temperature value")?;
+   |                                                 ^^^^^ method not found in `Result<u32, ParseIntError>`
+
+error[E0599]: no method named `ok_or` found for enum `Result<T, E>` in the current scope
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-006\45\test.rs:22:51
+   |
+22 |     let util_pct = parts[4].trim().parse::<u32>().ok_or("Invalid utilization value")?;
+   |                                                   ^^^^^ method not found in `Result<u32, ParseIntError>`
+
+error: aborting due to 4 previous errors
+
+For more information about this error, try `rustc --explain E0599`.

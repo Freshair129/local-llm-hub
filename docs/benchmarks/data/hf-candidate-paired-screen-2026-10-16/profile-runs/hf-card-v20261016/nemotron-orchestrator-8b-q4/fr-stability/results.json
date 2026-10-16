@@ -1,0 +1,563 @@
+{
+  "metadata": {
+    "startedAt": "2026-10-16T17:04:22.553Z",
+    "ollamaVersion": "0.40.5",
+    "hardware": "NVIDIA GeForce RTX 3060 12GB",
+    "testSetSource": "https://github.com/Freshair129/local-llm-hub/blob/main/scripts/benchmark_mellum_thinking_vs_instruct.mjs",
+    "testSetSha256": "d9142c138d5a40a02064564259104c04c0686ef36eec63a3d031c5dab0087200",
+    "tasks": [
+      "FR-002",
+      "FR-006"
+    ],
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "model": {
+      "key": "nemotron-orchestrator-8b-q4",
+      "label": "Nemotron Orchestrator 8B i1 Q4_K_M",
+      "tag": "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M"
+    },
+    "profile": {
+      "id": "hf-card-v20261016",
+      "label": "Nemotron card; matched sampler and 16K context",
+      "num_ctx": 16384,
+      "num_predict": 81920,
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "repeat_penalty": 1
+      },
+      "systemPrompt": null,
+      "settingsSource": "The GGUF card supplies the model/template but no exact sampler values; uses the shared Mellum sampler as a documented fallback and a matched 16K task context."
+    },
+    "expectedSamples": 10,
+    "execution": "Exactly one F-store model per run; unload before/after; check /api/ps around every inference; contaminated attempts are discarded and retried up to three times.",
+    "qualityMetric": "Strict pass requires fenced code, Rust compile, all harness tests, adjacent trace comment, and no unwrap/expect/panic!.",
+    "finalResidentModels": [],
+    "interrupted": false,
+    "completedAt": "2026-10-16T17:07:48.965Z",
+    "summaries": [
+      {
+        "task": "FR-002",
+        "n": 5,
+        "compiled": 3,
+        "testsPassed": 1,
+        "strictPass": 1
+      },
+      {
+        "task": "FR-006",
+        "n": 5,
+        "compiled": 2,
+        "testsPassed": 2,
+        "strictPass": 0
+      },
+      {
+        "task": "ALL",
+        "n": 10,
+        "strictPass": 1
+      }
+    ]
+  },
+  "results": [
+    {
+      "task": "FR-002",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "nemotron-orchestrator-8b-q4",
+      "model": "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 21874,
+      "promptTokens": 189,
+      "generatedTokens": 917,
+      "generationTokensPerSecond": 57.882494244415994,
+      "thinkingChars": 2667,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+          "size": 7339371396,
+          "sizeVram": 7339371396,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... FAILED\n\nfailures:\n\n---- test_normalize_cases stdout ----\n\nthread 'test_normalize_cases' (41848) panicked at <LOCAL_BENCHMARK_ROOT>\\hf-card-v20261016\\nemotron-orchestrator-8b-q4\\fr-stability\\responses\\FR-002\\42\\test.rs:37:5:\nassertion `left == right` failed\n  left: \"mradermacher/qwen3.5-9b-coder-gguf:q4_k_m\"\n right: \"mradermacher/qwen3.5-9b-coder-gguf\"\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_normalize_cases\n\ntest result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "nemotron-orchestrator-8b-q4",
+      "model": "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 12462,
+      "promptTokens": 189,
+      "generatedTokens": 459,
+      "generationTokensPerSecond": 58.732423778365586,
+      "thinkingChars": 988,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+          "size": 7339371396,
+          "sizeVram": 7339371396,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "nemotron-orchestrator-8b-q4",
+      "model": "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 19757,
+      "promptTokens": 189,
+      "generatedTokens": 830,
+      "generationTokensPerSecond": 58.531882175180144,
+      "thinkingChars": 1210,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+          "size": 7339371396,
+          "sizeVram": 7339371396,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... FAILED\n\nfailures:\n\n---- test_normalize_cases stdout ----\n\nthread 'test_normalize_cases' (40728) panicked at <LOCAL_BENCHMARK_ROOT>\\hf-card-v20261016\\nemotron-orchestrator-8b-q4\\fr-stability\\responses\\FR-002\\44\\test.rs:65:5:\nassertion `left == right` failed\n  left: \"llama3.2:1b-instruc\"\n right: \"llama3.2:1b-instruct\"\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_normalize_cases\n\ntest result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "nemotron-orchestrator-8b-q4",
+      "model": "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 24010,
+      "promptTokens": 189,
+      "generatedTokens": 1143,
+      "generationTokensPerSecond": 58.173596424568316,
+      "thinkingChars": 3809,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+          "size": 7339371396,
+          "sizeVram": 7339371396,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": false,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "nemotron-orchestrator-8b-q4",
+      "model": "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 25095,
+      "promptTokens": 189,
+      "generatedTokens": 1148,
+      "generationTokensPerSecond": 57.825972132414826,
+      "thinkingChars": 3886,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+          "size": 7339371396,
+          "sizeVram": 7339371396,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "nemotron-orchestrator-8b-q4",
+      "model": "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 15170,
+      "promptTokens": 275,
+      "generatedTokens": 615,
+      "generationTokensPerSecond": 58.6280800476346,
+      "thinkingChars": 996,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+          "size": 7339371396,
+          "sizeVram": 7339371396,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": false,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "nemotron-orchestrator-8b-q4",
+      "model": "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 22900,
+      "promptTokens": 275,
+      "generatedTokens": 1010,
+      "generationTokensPerSecond": 58.30759380205288,
+      "thinkingChars": 2214,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+          "size": 7339371396,
+          "sizeVram": 7339371396,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "nemotron-orchestrator-8b-q4",
+      "model": "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 25457,
+      "promptTokens": 275,
+      "generatedTokens": 1134,
+      "generationTokensPerSecond": 58.2139498180352,
+      "thinkingChars": 2286,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+          "size": 7339371396,
+          "sizeVram": 7339371396,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "nemotron-orchestrator-8b-q4",
+      "model": "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 18369,
+      "promptTokens": 275,
+      "generatedTokens": 817,
+      "generationTokensPerSecond": 58.43823007553195,
+      "thinkingChars": 1452,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+          "size": 7339371396,
+          "sizeVram": 7339371396,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": false,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "nemotron-orchestrator-8b-q4",
+      "model": "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 19110,
+      "promptTokens": 275,
+      "generatedTokens": 872,
+      "generationTokensPerSecond": 58.271226363399684,
+      "thinkingChars": 1035,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+          "size": 7339371396,
+          "sizeVram": 7339371396,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": false,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    }
+  ],
+  "contaminationLog": [
+    {
+      "at": "2026-10-16T17:04:44.682Z",
+      "task": "FR-002",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:04:45.018Z",
+      "reason": "foreign model before FR-002|43",
+      "unloaded": [
+        "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:04:57.497Z",
+      "task": "FR-002",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:04:57.665Z",
+      "reason": "foreign model before FR-002|44",
+      "unloaded": [
+        "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:05:17.439Z",
+      "task": "FR-002",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:05:17.615Z",
+      "reason": "foreign model before FR-002|45",
+      "unloaded": [
+        "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:05:41.649Z",
+      "task": "FR-002",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:05:41.831Z",
+      "reason": "foreign model before FR-002|46",
+      "unloaded": [
+        "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:06:06.930Z",
+      "task": "FR-006",
+      "seed": 42,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:06:07.093Z",
+      "reason": "foreign model before FR-006|42",
+      "unloaded": [
+        "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:06:22.270Z",
+      "task": "FR-006",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:06:22.448Z",
+      "reason": "foreign model before FR-006|43",
+      "unloaded": [
+        "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:06:45.359Z",
+      "task": "FR-006",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:06:45.522Z",
+      "reason": "foreign model before FR-006|44",
+      "unloaded": [
+        "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:07:10.987Z",
+      "task": "FR-006",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:07:11.155Z",
+      "reason": "foreign model before FR-006|45",
+      "unloaded": [
+        "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:07:29.539Z",
+      "task": "FR-006",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:07:29.705Z",
+      "reason": "foreign model before FR-006|46",
+      "unloaded": [
+        "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:07:48.962Z",
+      "reason": "final cleanup for hf-card-v20261016 hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M",
+      "unloaded": [
+        "hf.co/mradermacher/Nemotron-Orchestrator-8B-Claude-4.5-Opus-Distill-i1-GGUF:Q4_K_M"
+      ]
+    }
+  ],
+  "infrastructureFailures": []
+}

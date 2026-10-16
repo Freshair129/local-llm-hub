@@ -1,0 +1,94 @@
+The user wants me to implement a specific Rust specification for FR-006. Let me break down the requirements:
+
+1. Define a struct `GpuStats` with fields:
+   - `name: String`
+   - `vram_used_mb: u64`
+   - `vram_total_mb: u64`
+   - `temp_c: u32`
+   - `util_pct: u32`
+   - With derives: `Debug`, `PartialEq`
+
+2. Function signature: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`
+
+3. Parse CSV line like "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"
+
+4. Robust error handling:
+   - Return Err if fewer than 5 columns
+   - Return Err if numbers fail to parse
+
+5. Guard rails:
+   - STRICTLY FORBIDDEN to use unwrap(), expect(), or panic!
+   - Must return Err instead
+
+6. Traceability:
+   - Include comment '// trace:implements FR-006' directly before function declaration
+
+7. Output BOTH struct and function inside ```rust code block
+
+Let me write the code:
+
+```rust
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // Split by comma, trim whitespace
+    let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+    
+    // Check if we have at least 5 columns
+    if parts.len() < 5 {
+        return Err(format!("Expected at least 5 columns, got {}", parts.len()));
+    }
+    
+    // Parse the name (first field)
+    let name = parts[0].to_string();
+    
+    // Parse vram_used_mb
+    let vram_used_mb = parts[1].parse::<u64>()
+        .map_err(|_| format!("Failed to parse vram_used_mb: {}", parts[1]))?;
+    
+    // Parse vram_total_mb
+    let vram_total_mb = parts[2].parse::<u64>()
+        .map_err(|_| format!("Failed to parse vram_total_mb: {}", parts[2]))?;
+    
+    // Parse temp_c
+    let temp_c = parts[3].parse::<u32>()
+        .map_err(|_| format!("Failed to parse temp_c: {}", parts[3]))?;
+    
+    // Parse util_pct
+    let util_pct = parts[4].parse::<u32>()
+        .map_err(|_| format!("Failed to parse util_pct: {}", parts[4]))?;
+    
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}
+```
+
+Wait, I need to check if there are any issues:
+- The struct definition looks correct
+- The function uses `.parse()` which returns a Result, so I'm using map_err to convert parse errors to String errors
+- I'm checking for at least 5 columns
+- No unwrap(), expect(), or panic! is used
+- The traceability comment is placed correctly before the function
+
+One thing to consider: what if there are more than 5 columns? The specification says "fewer than 5", so if there are more, we should probably just ignore the extra ones or handle them gracefully. The current implementation ignores extra columns, which is fine.
+
+Also, I should consider if the parsing needs to handle negative numbers or if the input is guaranteed to be unsigned. The struct fields are unsigned (u64, u32), so the parsing should handle unsigned integers. If the input has negative numbers, `.parse::<u64>()` will return an error, which is appropriate.
+
+Let me double-check the traceability requirement: "Include comment '// trace:implements FR-006' directly before function declaration." This means it should be immediately before the `pub fn` line.
+
+Also, the output must contain BOTH the struct and the function.
+
+The code looks good. I'll present it now.

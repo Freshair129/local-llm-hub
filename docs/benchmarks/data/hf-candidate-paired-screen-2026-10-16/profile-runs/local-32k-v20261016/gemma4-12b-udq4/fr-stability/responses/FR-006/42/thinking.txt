@@ -1,0 +1,88 @@
+*   Role: AI Coder under STD-003 and ADR-100 (implies strict adherence to requirements, no extra fluff, robust error handling).
+    *   Task: Implement FR-006.
+    *   Specification:
+        *   Struct: `GpuStats` with fields `name` (String), `vram_used_mb` (u64), `vram_total_mb` (u64), `temp_c` (u32), `util_pct` (u32).
+        *   Function: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`.
+        *   Input format: "Name, vram_used, vram_total, temp, util".
+        *   Error Handling: Return `Err(String)` for short lines or parsing failures.
+        *   Forbidden: `unwrap()`, `expect()`, `panic!`.
+        *   Traceability: Comment `// trace:implements FR-006` before the function.
+        *   Output format: Rust code block containing both struct and function.
+
+    *   Input: `line: &str`.
+    *   Split by comma: `line.split(',')`.
+    *   Trim whitespace from each element.
+    *   Check length: Must be at least 5.
+    *   Parse fields:
+        *   `name`: first element.
+        *   `vram_used_mb`: second element (u64).
+        *   `vram_total_mb`: third element (u64).
+        *   `temp_c`: fourth element (u32).
+        *   `util_pct`: fifth element (u32).
+    *   Use `parse().map_err(|e| e.to_string())` to handle errors without `unwrap()`.
+
+    *   `line.split(',')` creates an iterator.
+    *   `collect::<Vec<&str>>()` to check length easily, or iterate and count.
+    *   Iterating through the split:
+        ```rust
+        let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+        if parts.len() < 5 {
+            return Err("Insufficient columns".to_string());
+        }
+        ```
+    *   Parsing:
+        ```rust
+        let name = parts[0].to_string();
+        let vram_used_mb = parts[1].parse::<u64>().map_err(|e| e.to_string())?;
+        let vram_total_mb = parts[2].parse::<u64>().map_err(|e| e.to_string())?;
+        let temp_c = parts[3].parse::<u32>().map_err(|e| e.to_string())?;
+        let util_pct = parts[4].parse::<u32>().map_err(|e| e.to_string())?;
+        ```
+    *   Return `Ok(GpuStats { ... })`.
+
+    *   `unwrap()`? No.
+    *   `expect()`? No.
+    *   `panic!`? No.
+    *   Trace comment included? Yes.
+    *   Struct fields correct? Yes.
+    *   Function signature correct? Yes.
+
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats {
+        pub name: String,
+        pub vram_used_mb: u64,
+        pub vram_total_mb: u64,
+        pub temp_c: u32,
+        pub util_pct: u32,
+    }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+        let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+
+        if parts.len() < 5 {
+            return Err(format!("Expected at least 5 columns, found {}", parts.len()));
+        }
+
+        let name = parts[0].to_string();
+        let vram_used_mb = parts[1].parse::<u64>().map_err(|e| e.to_string())?;
+        let vram_total_mb = parts[2].parse::<u64>().map_err(|e| e.to_string())?;
+        let temp_c = parts[3].parse::<u32>().map_err(|e| e.to_string())?;
+        let util_pct = parts[4].parse::<u32>().map_err(|e| e.to_string())?;
+
+        Ok(GpuStats {
+            name,
+            vram_used_mb,
+            vram_total_mb,
+            temp_c,
+            util_pct,
+        })
+    }
+    ```
+
+    *   Struct definition matches exactly.
+    *   Function signature matches exactly.
+    *   No forbidden methods used.
+    *   Trace comment present.
+    *   Output contains both items.

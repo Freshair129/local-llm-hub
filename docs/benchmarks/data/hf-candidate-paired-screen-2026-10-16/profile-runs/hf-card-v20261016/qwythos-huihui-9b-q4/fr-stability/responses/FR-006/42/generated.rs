@@ -1,0 +1,47 @@
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let tokens: Vec<&str> = line.split(',').collect();
+
+    if tokens.len() < 5 {
+        return Err(format!("Expected 5 CSV columns, got {}", tokens.len()));
+    }
+
+    let name = tokens[0].trim().to_string();
+
+    let vram_used = tokens[1]
+        .trim()
+        .parse::<u64>()
+        .map_err(|_| "VRAM used parse failed".to_string())?;
+
+    let vram_total = tokens[2]
+        .trim()
+        .parse::<u64>()
+        .map_err(|_| "VRAM total parse failed".to_string())?;
+
+    let temp = tokens[3]
+        .trim()
+        .parse::<u32>()
+        .map_err(|_| "Temp parse failed".to_string())?;
+
+    let util = tokens[4]
+        .trim()
+        .parse::<u32>()
+        .map_err(|_| "Util parse failed".to_string())?;
+
+    Ok(GpuStats {
+        name,
+        vram_used_mb: vram_used,
+        vram_total_mb: vram_total,
+        temp_c: temp,
+        util_pct: util,
+    })
+}

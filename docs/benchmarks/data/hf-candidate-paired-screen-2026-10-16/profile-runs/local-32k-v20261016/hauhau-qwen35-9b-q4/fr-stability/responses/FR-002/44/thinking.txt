@@ -1,0 +1,493 @@
+Thinking Process:
+
+1.  **Analyze the Request:**
+    *   **Role:** AI Coder working under STD-003 and ADR-100 guard rails.
+    *   **Task:** Implement function `normalize_model_name` according to specific rules.
+    *   **Specification:**
+        1.  Function signature: `pub fn normalize_model_name(raw: &str) -> String`
+        2.  Strip registry prefixes: `'registry.ollama.ai/library/'`, `'library/'`, `'hf.co/'`
+        3.  Strip quantization suffixes: `'-q4_0'`, `'-q4_k_m'`, `'-q4_k_s'`, `':q4_0'`, `':q4_k_m'`, `':q4_k_s'` (case-insensitive)
+        4.  Convert result to lowercase
+        5.  Guard rails: NO `unwrap()`, NO `expect()`, NO `panic!`
+        6.  Traceability: Include comment `// trace:implements FR-002` directly before function declaration.
+    *   **Output Format:** ONLY valid Rust code inside a ```rust code block.
+
+2.  **Drafting the Implementation:**
+
+    *   *Signature:* `pub fn normalize_model_name(raw: &str) -> String`
+    *   *Comment:* `// trace:implements FR-002`
+    *   *Prefix Stripping:* Need to remove these specific strings from the beginning of the string if they exist.
+        *   `registry.ollama.ai/library/`
+        *   `library/`
+        *   `hf.co/`
+    *   *Suffix Stripping:* Need to remove these specific strings from the end of the string if they exist (case-insensitive).
+        *   `'-q4_0'`, `'-q4_k_m'`, `'-q4_k_s'`
+        *   `':q4_0'`, `':q4_k_m'`, `':q4_k_s'`
+    *   *Lowercasing:* `.to_lowercase()`
+    *   *Guard Rails:* Use `get()`, `starts_with()`, `ends_with()`, or regex with safe methods. Avoid `.unwrap()` and `.expect()`.
+
+3.  **Refining the Logic (Step-by-Step):**
+
+    *   *Input:* `raw: &str`
+    *   *Step 1: Prefix Removal.*
+        Check if string starts with `registry.ollama.ai/library/`. If so, remove it.
+        Check if string starts with `library/`. If so, remove it.
+        Check if string starts with `hf.co/`. If so, remove it.
+        Order matters or can be combined. Usually, `registry.ollama.ai/library/` implies `library/` but `library/` might also appear alone. Since `registry.ollama.ai/library/` is longer, checking it first or using a loop to strip common prefixes works. Let's do sequential checks.
+        Actually, a simpler way is to check `starts_with` and `strip_prefix`.
+        Since `registry.ollama.ai/library/` contains `library/`, checking the long one first is safer to avoid double stripping or logic errors, though `strip_prefix` only removes the exact match.
+        Let's create a helper or just sequential `strip_prefix` checks.
+        Wait, `strip_prefix` returns an `Option<&str>`. To avoid `unwrap`, use `if let Some(rest) = s.strip_prefix(...) { s = rest; }`.
+
+    *   *Step 2: Suffix Removal.*
+        Check for suffixes. Since they are case-insensitive, we might need to compare lowercased versions or use regex. Given the specific list, checking `ends_with` with case-insensitive comparison is needed.
+        Or, convert to lowercase first? The spec says "Convert result to lowercase". It doesn't specify order between suffix stripping and lowercasing, but usually, stripping is done on the original or lowercased.
+        Let's look at the suffixes: `'-q4_0'`, `'-q4_k_m'`, `'-q4_k_s'`, `':q4_0'`, `':q4_k_m'`, `':q4_k_s'`.
+        They contain colons `:` and hyphens `-`.
+        Common pattern: `model-name-q4_0` or `model-name:q4_0`.
+        Let's lower case the string first to make suffix matching easier? Or match case-insensitively.
+        If I lower case first, then `"-q4_0"` becomes `"-q4_0"`.
+        Let's do prefix stripping first (case-sensitive usually, as prefixes are usually exact), then suffix stripping (case-insensitive), then lower case. Or lower case everything then strip.
+        Spec: "Strip ... suffixes ... (case-insensitive)". "Convert result to lowercase".
+        If I lower case the whole string first, suffix matching becomes case-sensitive (e.g., `Model-Q4_0` -> `model-q4_0`).
+        Let's try:
+        1. Prefix strip (exact matches provided).
+        2. Suffix strip (case-insensitive).
+        3. Lowercase.
+        Or:
+        1. Lowercase.
+        2. Prefix strip (exact).
+        3. Suffix strip (exact now).
+        If I lowercase first, `Registry.Ollama.ai/Library/` becomes `registry.ollama.ai/library/`.
+        Let's assume the input might be mixed case.
+        Strategy:
+        1. Create a mutable copy or work on `raw`.
+        2. Apply prefix removals.
+        3. Apply suffix removals (case-insensitive check).
+        4. Apply lowercasing.
+        Actually, doing lowercasing first simplifies suffix matching.
+        Let's check the spec again: "Strip registry prefixes... Strip quantization suffixes... Convert result to lowercase".
+        Often, prefixes like `registry.ollama.ai/library/` are case-sensitive in URLs.
+        But to be safe and robust:
+        1. Strip prefixes.
+        2. Strip suffixes (case-insensitive).
+        3. Lowercase.
+        
+        Wait, `strip_prefix` returns `Option`.
+        Example: `raw = "Registry/Ollama/Ai/Library/Model-Q4_0"`
+        Prefix: `registry.ollama.ai/library/` (case sensitive match?) Spec says "Strip registry prefixes: 'registry.ollama.ai/library/'". Usually implies exact string.
+        Let's implement sequential `strip_prefix`.
+        
+        Prefixes:
+        - `registry.ollama.ai/library/`
+        - `library/`
+        - `hf.co/`
+        
+        Suffixes (case-insensitive):
+        - `q4_0`, `q4_k_m`, `q4_k_s` (with `-` or `:` before).
+        - `:q4_0`, `:q4_k_m`, `:q4_k_s`.
+        - `-q4_0`, `-q4_k_m`, `-q4_k_s`.
+        
+        Implementation detail:
+        `let mut name = raw.to_lowercase();` -> This handles case-insensitivity for suffixes and final output.
+        Then strip prefixes (now lowercase).
+        Then strip suffixes (now lowercase).
+        Wait, if I lowercase first, `Registry/...` becomes `registry/...`.
+        Prefixes provided: `'registry.ollama.ai/library/'`, `'library/'`, `'hf.co/'`.
+        These look like lowercase constants.
+        So:
+        1. `let mut s = raw.to_lowercase();`
+        2. Check prefix `registry.ollama.ai/library/`. If `s` starts with it, `s = &s[...len..]`.
+        3. Check prefix `library/`. If `s` starts with it, `s = &s[...len..]`.
+        4. Check prefix `hf.co/`. If `s` starts with it, `s = &s[...len..]`.
+        5. Check suffix `-q4_0`, `-q4_k_m`, `-q4_k_s`.
+        6. Check suffix `:q4_0`, `:q4_k_m`, `:q4_k_s`.
+        7. Return `s.to_string()`.
+        
+        To avoid `unwrap`, use `if s.starts_with(...)` then slice.
+        For suffixes, `if s.ends_with(...)` then slice.
+        Since multiple suffixes can exist (though unlikely for one model), check all.
+        Since `strip_prefix` and `strip_suffix` are available, using `strip_prefix` is cleaner if we know the start.
+        For suffixes, `if s.ends_with(...)` then `s = &s[..s.len() - suffix.len()]`.
+
+        Refined Logic:
+        ```rust
+        let mut name = raw.to_lowercase(); // Normalize case early for suffix matching
+        
+        // 1. Strip Prefixes
+        if name.starts_with("registry.ollama.ai/library/") {
+            name = name[23..].to_string(); // Length of prefix
+        }
+        if name.starts_with("library/") {
+            name = name[8..].to_string();
+        }
+        if name.starts_with("hf.co/") {
+            name = name[6..].to_string();
+        }
+        
+        // 2. Strip Suffixes (Quantization)
+        let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+        for suffix in suffixes {
+            if name.ends_with(suffix) {
+                name = name[..name.len() - suffix.len()].to_string();
+                break; // Only strip one suffix usually
+            }
+        }
+        
+        name
+        ```
+        Wait, `name` is `&str` initially.
+        `raw: &str`
+        `let mut name = raw.to_lowercase();` -> `name` is `String`.
+        Slicing `name` works.
+        
+        Wait, `registry.ollama.ai/library/` length:
+        `r e g i s t r y . o l l a m a . a i / l i b r a r y /`
+        123456789012345678901234567
+        `r` (1) ... `y` (12) `.` (13) ...
+        Let's count:
+        `registry` (9)
+        `.` (1)
+        `ollama` (6)
+        `.` (1)
+        `ai` (2)
+        `/` (1)
+        `library` (7)
+        `/` (1)
+        Total: 9+1+6+1+2+1+7+1 = 28.
+        Let's verify.
+        `registry` = 9
+        `.` = 1
+        `ollama` = 6
+        `.` = 1
+        `ai` = 2
+        `/` = 1
+        `library` = 7
+        `/` = 1
+        Sum: 9+1+6+1+2+1+7+1 = 28.
+        
+        `library/` = 8.
+        `hf.co/` = 6.
+        
+        Suffixes:
+        `-q4_0` (6)
+        `-q4_k_m` (8)
+        `-q4_k_s` (8)
+        `:q4_0` (5)
+        `:q4_k_m` (8)
+        `:q4_k_s` (8)
+
+        One edge case: `registry.ollama.ai/library/library-Model` vs `library/Model`.
+        If `name` becomes `library-Model` after stripping `registry.ollama.ai/library/`, does `library/` apply?
+        `library-Model` starts with `library-`, not `library/`.
+        So order of prefix checks:
+        1. Longest prefix `registry.ollama.ai/library/`
+        2. `library/`
+        3. `hf.co/`
+        
+        Suffixes:
+        Check all.
+        
+        Guard rails: No `unwrap`, `expect`, `panic!`.
+        Use `String` for mutable slicing.
+        
+        Traceability comment: `// trace:implements FR-002` before function.
+
+4.  **Final Code Structure:**
+    ```rust
+    // trace:implements FR-002
+    pub fn normalize_model_name(raw: &str) -> String {
+        let mut name = raw.to_lowercase();
+
+        // Strip registry prefixes
+        if name.starts_with("registry.ollama.ai/library/") {
+            let len = "registry.ollama.ai/library/".len();
+            name = name.slice(len..).to_string();
+        }
+        if name.starts_with("library/") {
+            let len = "library/".len();
+            name = name.slice(len..).to_string();
+        }
+        if name.starts_with("hf.co/") {
+            let len = "hf.co/".len();
+            name = name.slice(len..).to_string();
+        }
+
+        // Strip quantization suffixes (case-insensitive handled by initial to_lowercase)
+        let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+        for suffix in suffixes {
+            if name.ends_with(suffix) {
+                let len = suffix.len();
+                name = name.slice(..name.len() - len).to_string();
+                break;
+            }
+        }
+
+        name
+    }
+    ```
+    Wait, `String` slice syntax is `name.slice(start..end)`? In Rust, `String` doesn't have a `slice` method directly like slices on `&str`.
+    `name` is `String`. `name = name.slice(...)`.
+    Actually, `String` implements `Deref<Target = str>`. So `name.slice(..)` works?
+    No, `String` is owned. `name[..n]` returns `&str`. `name[n..]` returns `&str`.
+    To assign back, need `.to_string()`.
+    `name = name[..name.len()-len].to_string()`
+    `name = &name[..name.len()-len]` creates `&str`.
+    So `name = name[..name.len() - len].to_string();` is correct.
+    Or `let prefix_len = ...; name = name[prefix_len..].to_string();` (works on `&str` slice, `name` is `String`, so `name[prefix_len..]` is `&str`).
+    Wait, `name` is `String`. `name[prefix_len..]` returns `&str`.
+    `name = &name[prefix_len..]` would assign `&str` to `String`.
+    So `name = name[prefix_len..].to_string();` is correct.
+    Let's check `name = name[..name.len() - len].to_string();`.
+    Actually, `name` is `String`. `name[prefix_len..]` is `&str`.
+    So `name = name[prefix_len..].to_string();` is correct.
+    Wait, `name` is `String`.
+    `let s = "abc".to_string();`
+    `let sub = s[1..].to_string();` -> `String`.
+    So `name = &name[prefix_len..].to_string();` or just `name = name[prefix_len..].to_string();`.
+    Wait, `name` is `String`. `name[prefix_len..]` is `&str`.
+    So `name = name[prefix_len..].to_string();` is correct.
+
+    Let's re-verify `name` type.
+    `let mut name = raw.to_lowercase();` -> `String`.
+    `name[prefix_len..]` -> `&str`.
+    `name[prefix_len..].to_string()` -> `String`.
+    So `name = name[prefix_len..].to_string();` is correct.
+
+    Wait, `registry.ollama.ai/library/` length.
+    `registry` (9) + `.` (1) + `ollama` (6) + `.` (1) + `ai` (2) + `/` (1) + `library` (7) + `/` (1) = 28.
+    `library/` length = 8.
+    `hf.co/` length = 6.
+    Suffixes:
+    `-q4_0` = 6.
+    `-q4_k_m` = 8.
+    `-q4_k_s` = 8.
+    `:q4_0` = 5.
+    `:q4_k_m` = 8.
+    `:q4_k_s` = 8.
+
+    One detail: `name` is `String`.
+    `name[prefix_len..]` works.
+    `name[..name.len()-len]` works.
+
+    Let's check if `name` is empty after stripping.
+    `name = name[..name.len() - len].to_string();`
+    If `name.len() < len`, `..` might panic or wrap?
+    `name[..name.len() - len]` if `len > name.len()`?
+    `name.len() - len` would be negative.
+    So need to ensure `name.len() >= len`.
+    `if name.len() >= len && name.ends_with(suffix)`
+    Since `ends_with` checks length too (usually).
+    `str::ends_with` checks logical suffix.
+    So `if name.ends_with(suffix)` ensures length is sufficient.
+    Wait, `String::ends_with` is a method on `&str`.
+    `name.ends_with(suffix)`.
+    If true, `name.len() >= suffix.len()` is guaranteed.
+    So `name[..name.len() - suffix.len()].to_string()` is safe.
+
+    Prefixes:
+    `if name.starts_with(prefix)` ensures length is sufficient.
+    `name[prefix.len()..].to_string()` is safe.
+
+    So the logic holds.
+
+    Double check: `name` starts as `String`.
+    `name[prefix_len..]` is `&str`.
+    `name[prefix_len..].to_string()` is `String`.
+    Correct.
+
+    One more check: Order of prefix stripping.
+    If `name` is `registry.ollama.ai/library/library/Model`.
+    1. `starts_with("registry.ollama.ai/library/")` -> Yes.
+       `name` becomes `library/Model`.
+    2. `starts_with("library/")` -> Yes.
+       `name` becomes `Model`.
+    3. `starts_with("hf.co/")` -> No.
+    Result `Model`.
+    Seems correct.
+
+    If `name` is `library/Model`.
+    1. `starts_with("registry.ollama.ai/library/")` -> No.
+    2. `starts_with("library/")` -> Yes.
+       `name` becomes `Model`.
+    3. `starts_with("hf.co/")` -> No.
+    Result `Model`.
+
+    If `name` is `hf.co/Model`.
+    1. `starts_with("registry.ollama.ai/library/")` -> No.
+    2. `starts_with("library/")` -> No.
+    3. `starts_with("hf.co/")` -> Yes.
+       `name` becomes `Model`.
+    Result `Model`.
+
+    Suffix stripping:
+    `Model-Q4_0`.
+    1. Prefixes: No change.
+    2. Suffixes: `-q4_0` matches.
+       `name` becomes `Model`.
+    Result `Model`.
+
+    Lowercase: Done at start.
+
+    Looks solid.
+
+    Wait, one detail: `name` is `String`.
+    `let mut name = raw.to_lowercase();`
+    `name` is `String`.
+    `name[prefix_len..]` works on `String`?
+    Yes, `String` implements `Index<RangeToInclusive>`?
+    `impl Index<RangeFrom> for String { type Output = &str; }`
+    `impl Index<RangeFull> for String { type Output = &str; }`
+    So `name[prefix_len..]` returns `&str`.
+    `name[..name.len() - len]` returns `&str`.
+    So `name = name[prefix_len..].to_string();` is correct.
+
+    Final check on imports? None needed for basic `String`, `to_lowercase`, `starts_with`, `ends_with`.
+
+    Wait, `raw` is `&str`. `raw.to_lowercase()` returns `String`.
+    So `name` is `String`.
+
+    One edge case: `registry.ollama.ai/library/` vs `library/`.
+    If input is `registry.ollama.ai/library/model`.
+    Prefix 1: `registry.ollama.ai/library/` (28 chars).
+    `name` becomes `model`.
+    Prefix 2: `library/` (8 chars).
+    `name` starts with `model`. `starts_with("library/")` is false.
+    Correct.
+
+    What if input is `registry.ollama.ai/library/library/model`.
+    Prefix 1: `registry.ollama.ai/library/`.
+    `name` becomes `library/model`.
+    Prefix 2: `library/`.
+    `name` becomes `model`.
+    Correct.
+
+    What if input is `registry.ollama.ai/library/model:q4_0`.
+    Prefix 1: `registry.ollama.ai/library/`.
+    `name` becomes `model:q4_0`.
+    Suffixes: `:q4_0`.
+    `name` becomes `model`.
+    Correct.
+
+    What if input is `registry.ollama.ai/library/model-q4_0`.
+    Prefix 1: `registry.ollama.ai/library/`.
+    `name` becomes `model-q4_0`.
+    Suffixes: `-q4_0`.
+    `name` becomes `model`.
+    Correct.
+
+    What if input is `Registry/Ollama/Ai/Library/Model-Q4_0`.
+    Lowercase: `registry/ollama/ai/library/model-q4_0`.
+    Prefix 1: `registry.ollama.ai/library/`.
+    `name` becomes `model-q4_0`.
+    Suffixes: `-q4_0`.
+    `name` becomes `model`.
+    Correct.
+
+    Wait, `registry.ollama.ai/library/` vs `registry/ollama/ai/library/`.
+    Spec says: `'registry.ollama.ai/library/'`.
+    So `registry/ollama/ai/library/` (slashes) vs `registry.ollama.ai/library/` (dots).
+    My code uses `registry.ollama.ai/library/`.
+    Correct.
+
+    Wait, `raw.to_lowercase()` creates a new `String`.
+    `name` is `String`.
+    `name[prefix_len..]` is `&str`.
+    `name[prefix_len..].to_string()` is `String`.
+    So `name = ...` is correct.
+
+    Let's write the code.
+
+    ```rust
+    // trace:implements FR-002
+    pub fn normalize_model_name(raw: &str) -> String {
+        let mut name = raw.to_lowercase();
+
+        // Strip registry prefixes
+        if name.starts_with("registry.ollama.ai/library/") {
+            let prefix_len = "registry.ollama.ai/library/".len();
+            name = &name[prefix_len..].to_string();
+        }
+        if name.starts_with("library/") {
+            let prefix_len = "library/".len();
+            name = &name[prefix_len..].to_string();
+        }
+        if name.starts_with("hf.co/") {
+            let prefix_len = "hf.co/".len();
+            name = &name[prefix_len..].to_string();
+        }
+
+        // Strip quantization suffixes (case-insensitive handled by initial to_lowercase)
+        let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+        for suffix in suffixes {
+            if name.ends_with(suffix) {
+                let suffix_len = suffix.len();
+                name = &name[..name.len() - suffix_len].to_string();
+                break;
+            }
+        }
+
+        name
+    }
+    ```
+    Wait, `&name[prefix_len..].to_string()` vs `name[prefix_len..].to_string()`.
+    `name` is `String`.
+    `name[prefix_len..]` is `&str`.
+    `&name[prefix_len..].to_string()` creates a `String` from the `&str` slice, but the `&` is redundant if assigning to `String`.
+    `name = name[prefix_len..].to_string();`
+    Let's check `String` assignment.
+    `let s: String;`
+    `s = "abc".to_string();`
+    `s = "abc"[1..].to_string();`
+    So `name = name[prefix_len..].to_string();` is correct.
+    The `&` in `&name[prefix_len..]` makes it `&String`? No, `name[...]` is `&str`. `&(...)` makes it `&&str`.
+    So `name = name[prefix_len..].to_string();` is cleaner.
+    Wait, `name` is `String`.
+    `name[prefix_len..]` returns `&str`.
+    `.to_string()` returns `String`.
+    So `name = name[prefix_len..].to_string();` is correct.
+
+    Wait, `name = &name[..name.len() - suffix_len].to_string();`
+    `name[..name.len() - suffix_len]` is `&str`.
+    `.to_string()` is `String`.
+    So `name = name[..name.len() - suffix_len].to_string();` is correct.
+
+    I will use `let prefix_len = ...` for clarity.
+
+    One small optimization/cleanliness:
+    `let mut name = raw.to_lowercase();`
+    Then prefix checks.
+    Then suffix checks.
+
+    Wait, `raw` is `&str`. `raw.to_lowercase()` consumes it? No, `to_lowercase` returns `String`.
+    So `name` is `String`.
+
+    Final check on comment: `// trace:implements FR-002` directly before function declaration.
+    So:
+    ```rust
+    // trace:implements FR-002
+    pub fn normalize_model_name(raw: &str) -> String {
+    ```
+    Yes.
+
+    One more thing: `name` variable name. `raw` is input. `name` is mutable output.
+    Seems fine.
+
+    Wait, `registry.ollama.ai/library/` length calculation.
+    `r` `e` `g` `i` `s` `t` `r` `y` (9)
+    `.` (1)
+    `o` `l` `l` `a` `m` `a` (6)
+    `.` (1)
+    `a` `i` (2)
+    `/` (1)
+    `l` `i` `b` `r` `a` `r` `y` (7)
+    `/` (1)
+    Total: 9+1+6+1+2+1+7+1 = 28.
+    `library/` = 8.
+    `hf.co/` = 6.
+    `:q4_0` = 5.
+    `-q4_0` = 6.
+    `:q4_k_m` = 8.
+    `-q4_k_m` = 8.
+
+    Okay, ready to write.

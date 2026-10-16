@@ -1,0 +1,253 @@
+Thinking Process:
+
+1.  **Analyze the Request:**
+    *   **Role:** AI Coder working under STD-003 and ADR-100 guard rails.
+    *   **Task:** Implement FR-006 specification.
+    *   **Specification Details:**
+        1.  Define `GpuStats` struct with specific fields (`name`, `vram_used_mb`, `vram_total_mb`, `temp_c`, `util_pct`) and derives (`Debug`, `PartialEq`).
+        2.  Define function `parse_gpu_csv` with signature `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`.
+        3.  Parse a specific CSV format: `"NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"`.
+        4.  Error handling: Return `Err(String)` if fewer than 5 columns or if number parsing fails.
+        5.  Guard Rails: **STRICTLY FORBIDDEN** to use `unwrap()`, `expect()`, or `panic!`. Use `Err` instead.
+        6.  Traceability: Include comment `// trace:implements FR-006` directly before the function declaration.
+        7.  Output Format: Both struct and function inside a single ```rust code block.
+
+2.  **Drafting the Code:**
+
+    *   *Struct Definition:*
+        ```rust
+        #[derive(Debug, PartialEq)]
+        pub struct GpuStats {
+            pub name: String,
+            pub vram_used_mb: u64,
+            pub vram_total_mb: u64,
+            pub temp_c: u32,
+            pub util_pct: u32,
+        }
+        ```
+
+    *   *Function Definition:*
+        ```rust
+        // trace:implements FR-006
+        pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+            // Implementation details
+        }
+        ```
+
+    *   *Parsing Logic:*
+        *   Split the line by commas.
+        *   Check length (must be >= 5).
+        *   Trim whitespace from each part.
+        *   Parse numbers (`vram_used_mb`, `vram_total_mb`, `temp_c`, `util_pct`) into their respective types.
+        *   Handle parsing errors by returning `Err`.
+        *   Ensure no `unwrap()`, `expect()`, or `panic!` are used.
+
+    *   *Refining Error Handling:*
+        *   Splitting: `line.split(',').collect::<Vec<_>>()`
+        *   Length check: `if parts.len() < 5 { return Err(format!("Expected 5 columns, found {}", parts.len())); }`
+        *   Parsing: Use `parse()` methods.
+            *   `name`: `parts[0].trim().to_string()`
+            *   `vram_used_mb`: `parts[1].trim().parse::<u64>()`
+            *   `vram_total_mb`: `parts[2].trim().parse::<u64>()`
+            *   `temp_c`: `parts[3].trim().parse::<u32>()`
+            *   `util_pct`: `parts[4].trim().parse::<u32>()`
+        *   Wrap `parse()` results in `map_err` or match `Err`.
+
+    *   *Combining into Final Block:*
+        Ensure the comment is *directly* before the function declaration.
+
+3.  **Reviewing against Guard Rails (STD-003, ADR-100):**
+    *   *STD-003 (Standard 003 - likely refers to strict type safety/error handling):* Avoid panics.
+    *   *ADR-100 (Architecture Decision 100 - likely refers to robustness):* Use `Result`.
+    *   *FR-006 (Feature Request 006):* Match exact spec.
+    *   *Forbidden:* `unwrap()`, `expect()`, `panic!`.
+
+4.  **Constructing the Final Output:**
+
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats {
+        pub name: String,
+        pub vram_used_mb: u64,
+        pub vram_total_mb: u64,
+        pub temp_c: u32,
+        pub util_pct: u32,
+    }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+        let parts: Vec<&str> = line.split(',').collect();
+        if parts.len() < 5 {
+            return Err(format!("Expected 5 columns, found {}", parts.len()));
+        }
+
+        let name = parts[0].trim().to_string();
+        let vram_used_mb = parts[1].trim().parse::<u64>()?;
+        let vram_total_mb = parts[2].trim().parse::<u64>()?;
+        let temp_c = parts[3].trim().parse::<u32>()?;
+        let util_pct = parts[4].trim().parse::<u32>()?;
+
+        Ok(GpuStats {
+            name,
+            vram_used_mb,
+            vram_total_mb,
+            temp_c,
+            util_pct,
+        })
+    }
+    ```
+
+    *Wait, check the `parts[i].trim().parse()` usage.*
+    Using `?` operator is allowed and preferred over `unwrap` inside the function, but I need to make sure the `Result` return type propagates correctly.
+    `parse()` returns `Result<T, ParseIntError>`. Using `?` converts `Err` to the function's `Result<String, ...>`.
+    Since the function returns `Result<GpuStats, String>`, `?` will convert `ParseIntError` into `String` via `ToString` implementation of `ParseIntError`. This satisfies the "Return Err(String)" requirement.
+
+    *Check Field Names vs Spec:*
+    Spec: `vram_used_mb`, `vram_total_mb`, `temp_c`, `util_pct`.
+    My Draft: Same.
+
+    *Check Traceability Comment:*
+    Spec: `// trace:implements FR-006` directly before function declaration.
+    My Draft: Same.
+
+    *Check Forbidden Keywords:*
+    `unwrap()`, `expect()`, `panic!`.
+    My Draft uses `?` operator and `format!`. No forbidden keywords.
+
+5.  **Final Polish:**
+    Make sure the struct and function are in the same block.
+
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats {
+        pub name: String,
+        pub vram_used_mb: u64,
+        pub vram_total_mb: u64,
+        pub temp_c: u32,
+        pub util_pct: u32,
+    }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+        let parts: Vec<&str> = line.split(',').collect();
+
+        if parts.len() < 5 {
+            return Err(format!("Expected 5 columns, found {}", parts.len()));
+        }
+
+        let name = parts[0].trim().to_string();
+        let vram_used_mb = parts[1].trim().parse::<u64>()?;
+        let vram_total_mb = parts[2].trim().parse::<u64>()?;
+        let temp_c = parts[3].trim().parse::<u32>()?;
+        let util_pct = parts[4].trim().parse::<u32>()?;
+
+        Ok(GpuStats {
+            name,
+            vram_used_mb,
+            vram_total_mb,
+            temp_c,
+            util_pct,
+        })
+    }
+    ```
+    Looks good.
+
+6.  **Double Check STD-003/ADR-100 implications (Simulated):**
+    *   STD-003 usually implies strict adherence to types. `String` for name, `u64`/`u32` for numbers.
+    *   ADR-100 implies robustness. `Result` propagation.
+    *   FR-006 is the specific feature.
+    *   Output must be exactly one code block.
+
+    One small detail: `parts[0]` to `parts[4]` access. Since we check `parts.len() < 5`, indices 0-4 are safe.
+    `parse()` returns `Result`. `?` propagates error.
+    If `parse` fails, `?` returns `Err(ParseIntError)`.
+    Does `Result<GpuStats, String>` accept `ParseIntError` directly?
+    `parse::<u64>()?` converts `Err(ParseIntError)` to `Err(ParseIntError)`.
+    The function signature is `Result<GpuStats, String>`.
+    To make `?` work with `String` error type, `ParseIntError` must implement `Into<String>` or be convertible.
+    `std::str::ParseIntError` implements `std::error::Error`.
+    Using `?` on `Result<T, E>` where `E` is `ParseIntError` inside a function returning `Result<T, String>` requires `ParseIntError` to be convertible to `String`.
+    Actually, `?` allows automatic conversion if `E` implements `Into<U>`.
+    `std::str::ParseIntError` implements `std::fmt::Display`.
+    Usually, `?` works if the error type matches.
+    `parse::<u64>()` returns `Result<u64, std::num::ParseIntError>`.
+    Function returns `Result<..., String>`.
+    To make `?` work seamlessly, `ParseIntError` needs to be converted to `String`.
+    `std::num::ParseIntError` implements `std::fmt::Display`.
+    Often `?` requires `From<ParseIntError> for String` or similar.
+    Actually, Rust's `?` operator uses `From` trait.
+    `impl From<ParseIntError> for String` exists?
+    `ParseIntError` has a `Display` implementation.
+    To be safe and strictly adhere to `Result<GpuStats, String>`, I should explicitly convert the error or use `map_err`.
+    However, `?` works if `E: Into<U>`.
+    `ParseIntError` implements `Into<String>`?
+    Let's check. `ParseIntError` implements `std::fmt::Display`.
+    Usually, `?` with `Result<T, E>` in `fn(...) -> Result<T, U>` requires `E: Into<U>`.
+    `std::num::ParseIntError` implements `Into<String>` (via `Display` trait bound often used by `?`).
+    Actually, `ParseIntError` implements `FromStr`.
+    Let's use `map_err` or `ToString` explicitly to be 100% sure, or rely on the standard `?` behavior which often autoboxes to `String` if `ToString` is implemented.
+    `ParseIntError` implements `std::fmt::Display`.
+    `Result<T, E> -> Result<T, String>`: `E` must be convertible to `String`.
+    `ParseIntError` implements `Into<String>`?
+    Yes, `std::num::ParseIntError` implements `std::fmt::Display`, and `From` implementations often bridge this.
+    But to be strictly safe without relying on implicit conversions that might vary:
+    `parts[1].trim().parse::<u64>().map_err(|e| e.to_string())?` is verbose.
+    Or just `let val = parts[1].trim().parse::<u64>(); match val { Ok(v) => v, Err(e) => return Err(e.to_string()) }`
+    Or simpler: `parse::<u64>()?` where the error type is inferred.
+    If I write `-> Result<GpuStats, String>`, and I call `x.parse::<u64>()?`, the compiler infers `u64` is parsed. The error is `ParseIntError`.
+    The function return error type is `String`.
+    `ParseIntError` implements `Into<String>` (via `ToString` trait).
+    So `?` works.
+    Let's verify `std::num::ParseIntError`.
+    It implements `Display`.
+    `From<ParseIntError> for String` is not standard lib directly, but `?` uses `Into`.
+    `impl Into<String> for ParseIntError` is provided by `std`?
+    Actually, `ParseIntError` implements `std::fmt::Display`.
+    `?` requires `E: Into<U>`.
+    `ParseIntError` implements `Into<String>`?
+    Yes, `std::error::Error` is implemented.
+    Commonly `?` works and converts to `String` automatically in `Result<..., String>` contexts.
+    To be absolutely robust and "STD-003" compliant (explicit):
+    `let vram_used_mb = parts[1].trim().parse::<u64>().map_err(|e| e.to_string())?;`
+    Or simply:
+    `let vram_used_mb = parts[1].trim().parse::<u64>()?;`
+    I will use `.map_err(|e| e.to_string())?` to ensure the error type matches `String` explicitly, satisfying ADR-100 robustness.
+    Wait, `ParseIntError` implements `Display`. `?` uses `Into`.
+    `impl Into<String> for ParseIntError` exists in `std`.
+    So `parse::<u64>()?` is fine.
+    But `parts[0].trim().to_string()` is for `name`.
+    Let's keep it clean.
+    I will use `.map_err(|e| e.to_string())?` for the numeric fields to ensure the error type is definitely `String` as per the return signature, preventing compiler complaints about mismatched error types in some Rust versions/configurations.
+
+    Refined Plan:
+    1. Split line.
+    2. Check length.
+    3. Extract fields.
+    4. Parse numbers with explicit error conversion to `String`.
+    5. Return `Ok(GpuStats)`.
+
+    Final check on comment location:
+    `// trace:implements FR-006`
+    `pub fn parse_gpu_csv...`
+    Directly before.
+
+    Final check on struct:
+    `#[derive(Debug, PartialEq)]`
+    `pub struct GpuStats { ... }`
+
+    Final check on forbidden:
+    No `unwrap`, `expect`, `panic!`.
+
+    Ready to write.
+
+    Wait, one detail in spec: "Given a CSV line like 'NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25'".
+    My code handles this format.
+    The spec says "Output BOTH 'pub struct GpuStats' and 'pub fn parse_gpu_csv' inside the ```rust code block."
+    So I will put them together.
+
+    One more check: `parts[0]` access.
+    `let name = parts[0].trim().to_string();`
+    This is safe because `parts.len() >= 5` checked earlier.
+    `parts[1]` to `parts[4]` are safe.
+
+    Let's write it.

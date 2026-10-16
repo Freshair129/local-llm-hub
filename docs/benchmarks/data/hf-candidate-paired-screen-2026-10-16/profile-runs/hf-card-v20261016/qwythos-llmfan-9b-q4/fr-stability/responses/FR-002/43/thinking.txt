@@ -1,0 +1,97 @@
+The user wants me to implement a specific Rust function `normalize_model_name` that adheres to a set of requirements (strip prefixes, strip quantization suffixes, convert to lowercase, guard rails: no unwrap/expect/panic, include traceability comment). They also want the output to be ONLY valid Rust code inside a ```rust block.
+
+I have to think through how to implement this in Rust while respecting the guard rails (no panic, unwrap, expect) and ensuring the function is safe. I'll need to parse the input string `raw`, remove any leading prefixes that match the given list, then strip suffixes that match the given quantization suffixes (case-insensitive). Finally, convert the result to lowercase.
+
+I also need to make sure there are no panics. That means using `Option` or `Result` types where appropriate and handling errors gracefully. Since the function returns a `String`, I can just return the final string after processing, but I must ensure that any intermediate steps don't cause panics. For example, splitting by '/' could be done with `split('/')` and then iterating over the parts, checking each for prefix equality. Similarly, removing suffixes could be done by checking if the string ends with a given suffix (case-insensitive) and then using `trim_end_matches` or `strip_suffix`. Since we need to handle multiple suffixes, we can loop through them and remove them one by one.
+
+The guard rails also require that I don't use `unwrap()` or `expect()`. So if I use methods like `split`, which returns an iterator, I can just iterate over it and collect into a vector, but I must not call `.next().unwrap()`. Instead, I should handle the case where there are no parts (empty string) gracefully. Since the function signature expects a `String` return, we could assume that `raw` is non-empty. But to be safe, we can check if it's empty and return an empty string or something appropriate. The spec doesn't define behavior for empty input; but we must not panic, so returning an empty string is fine.
+
+Now let's think about the implementation step by step.
+
+First, we need to strip prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/'. This can be done by checking if the string starts with one of these prefixes and removing them. Since we want to strip any of them (i.e., if the string has a prefix that matches, we remove it), we could iterate over a list of prefixes, and for each prefix, check if `raw` starts with it (case-sensitive). If so, we replace `raw` with the substring after the prefix. However, we must be careful not to use `.unwrap()` when splitting or anything else. Since we can just do string slicing: `raw.trim_start_matches(prefix)` could be used, but that method only removes a single prefix if it matches at the start, and it returns a new string. That's fine. But we need to handle multiple prefixes; we could loop over them and apply each one sequentially. However, using `trim_start_matches` repeatedly might not be enough because after removing one prefix, the string may start with another prefix (like if we had 'library/', but also maybe 'registry.ollama.ai/library/'?). Actually, they are distinct prefixes, so after removing the first matching prefix, the string will no longer start with any of the others. So a loop over prefixes is fine.
+
+Alternatively, we could split by '/' and take the last part after the registry or library. The spec says "strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/'". That suggests that we should remove any of those prefixes if present at the start. So we can just check each prefix.
+
+Now, suffixes: '-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s' (case-insensitive). For case-insensitive removal, we need to compare ignoring case. In Rust, we can convert the string to a case-insensitive version using `raw.to_lowercase()` or `raw.to_ascii_lowercase()`. However, we need to be careful: after converting to lowercase, the suffixes will also be lowercase, so we can just match against lowercase versions. The spec says "case-insensitive", meaning that if the input has '-Q4_0' (uppercase) it should be stripped as well. So we need to handle that.
+
+One approach: we can first convert the entire string to lowercase after stripping prefixes, but the suffix removal must be case-insensitive, so we could just treat the suffix matching case-insensitively. That is, we can check if the string ends with a suffix (case-insensitive). In Rust, `ends_with` is case-sensitive; we could use `raw.to_lowercase().ends_with(suffix)` after converting to lowercase. But since we also have to strip the suffix, we need to remove it. We can do something like: while we have a suffix that matches case-insensitively at the end, we remove it. However, there may be multiple suffixes; we could loop over them and remove them one by one. But note that after removing a suffix, the string may no longer end with any of the suffixes. That's fine.
+
+But the spec says "strip quantization suffixes: '-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s' (case-insensitive)". So we need to remove all of them if they appear at the end. However, there could be overlapping suffixes? For instance, a model name might have both '-q4_0' and ':q4_0'? That seems unlikely; but we can just apply them in any order.
+
+Now, after stripping prefixes and suffixes, we convert the result to lowercase (the spec says "Convert result to lowercase"). Actually, the spec also says "strip registry prefixes ... strip quantization suffixes ... Convert result to lowercase". So the final output should be lowercase. That means we can either do case-insensitive removal of suffixes while preserving case for other characters, and then convert everything to lowercase. But if we convert to lowercase after removal, that's fine.
+
+Now, guard rails: NO unwrap(), NO expect(), NO panic! So we must not use `.unwrap()`, `.expect()`, or `panic!`. We can use `.ok()` on Option types, or we can just handle errors by returning something else (like empty string). Since the function returns a `String`, we can just return the final processed string.
+
+Now, traceability: Include comment '// trace:implements FR-002' directly before function declaration. So we need to write that comment before the function definition.
+
+Now, output only valid Rust code inside a ```rust block. That means no extra text outside of the code block. The user wants just the code.
+
+Now, I need to implement this in Rust. Let's think about the details:
+
+```rust
+pub fn normalize_model_name(raw: &str) -> String {
+    // trace:implements FR-002
+    let mut name = raw.to_string();
+
+    // Strip registry prefixes (case-sensitive)
+    for prefix in &["registry.ollama.ai/library/", "library/", "hf.co/"] {
+        if name.starts_with(prefix) {
+            name = name.trim_start_matches(prefix);
+        }
+    }
+
+    // Convert to lowercase
+    name = name.to_lowercase();
+
+    // Strip quantization suffixes (case-insensitive)
+    let suffixes_lower = [
+        "-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"
+    ];
+    for suffix in &suffixes_lower {
+        if name.ends_with(suffix) {
+            name = name.trim_end_matches(suffix);
+        }
+    }
+
+    name
+}
+```
+
+But we need to ensure that after stripping prefixes, we convert to lowercase. However, the spec says "Convert result to lowercase". That could be done after suffix removal or before; but the final output must be lowercase. So it's fine to convert after prefix removal and before suffix removal. But if we convert to lowercase after prefix removal, then suffix removal will be case-insensitive anyway because suffixes are lowercased. That's okay.
+
+Now, there is a subtlety: `trim_start_matches` removes all occurrences of the prefix from the start, but the prefix may appear only once at the start. That's fine. However, if we have something like "library/huggingface" and we try to strip "library/", it will remove that prefix. But what about "registry.ollama.ai/library/huggingface"? It starts with "registry.ollama.ai/library/", so that will be stripped, leaving "huggingface". That's correct.
+
+Now, for suffix removal: after converting to lowercase, we can just check ends_with(suffix) and trim_end_matches(suffix). However, `trim_end_matches` will remove all occurrences of the suffix from the end; but the suffix is a known string that appears at the end exactly once. That's fine. If there are multiple suffixes (like if the model name ends with both "-q4_0" and ":q4_0"? That seems unlikely, but `trim_end_matches` will remove all of them, potentially leaving nothing? Actually, `trim_end_matches` removes all occurrences of the suffix from the end; if the string ends with multiple copies of the suffix (like "model-q4_0:q4_0"), it will remove both. That's okay because the spec says to strip any suffixes. However, we must be careful: after removing one suffix, the string may no longer end with another suffix; but we can just loop over all suffixes and apply them sequentially. That's fine.
+
+Now, guard rails: no unwrap, no expect, no panic. I'm not using any of those. I'm using `to_string`, `to_lowercase`, `trim_start_matches`, `trim_end_matches`. All are safe.
+
+Now, the traceability comment: The spec says "Include comment '// trace:implements FR-002' directly before function declaration." That means the comment should be placed right before the `pub fn normalize_model_name` line, not inside the function. So I need to write:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    // ...
+}
+```
+
+Now, the output must be ONLY valid Rust code inside a ```rust block. So I should not include any text outside of that block. That means I will produce just the code block.
+
+Now, think about the possibility that the input string might be empty or contain only whitespace. The spec doesn't define behavior for empty input; but we must not panic. Returning an empty string is fine. However, after stripping prefixes and suffixes, there could be a case where the name becomes empty because we stripped everything (e.g., "library/huggingface-q4_0" -> after stripping prefix "library/", we get "huggingface-q4_0", after stripping suffix "-q4_0", we get "huggingface". That's not empty. But if input is "registry.ollama.ai/library/huggingface-q4_0", after stripping prefix, we get "huggingface-q4_0", after stripping suffix, we get "huggingface". So it's fine. If input is just "library/", after stripping prefix, we get empty string; after converting to lowercase (still empty), after stripping suffix (none), we return empty string. That's okay.
+
+Now, the spec also says "strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/'". So we must strip any of these prefixes if they appear at the start. That is what I'm doing.
+
+Now, I think the implementation is correct.
+
+But I also need to consider that `trim_start_matches` and `trim_end_matches` remove all occurrences of the given suffix from the start or end. However, `trim_start_matches` will remove any prefix that matches the given string at the start; but there may be multiple prefixes that match (like if we have "library/huggingface", the start is "library/", which matches exactly one prefix, so it's removed). That's fine.
+
+Now, I might want to use `str::starts_with` and `str::ends_with` for clarity. But using `trim_start_matches` and `trim_end_matches` is okay.
+
+Now, I also need to think about the case of suffixes that include a colon (like ":q4_0"). If we have "model:q4_0", after converting to lowercase, it's still "model:q4_0". The suffix ":q4_0" matches exactly at the end. So `trim_end_matches(":q4_0")` will remove it, leaving "model". That's correct.
+
+Now, what about suffixes that are not at the very end but appear earlier? The spec says to strip quantization suffixes; presumably they appear at the end of the model name. So we only need to consider suffix removal if they appear at the end. That's fine.
+
+Now, I think the implementation is good.
+
+Now, the final output: just the Rust code block with the function and comment.
+
+Let's write the final answer.

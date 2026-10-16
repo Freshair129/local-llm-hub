@@ -1,0 +1,27 @@
+```rust
+/// Strip registry prefixes and quantization suffixes from the input string, and convert the result to lowercase.
+/// 
+/// # Parameters
+/// 
+/// * `raw`: The input string to be normalized.
+/// 
+/// # Returns
+/// 
+/// The normalized string.
+/// 
+/// # Examples
+/// 
+/// ```
+/// normalize_model_name("registry.ollama.ai/library/model-name-q4_0")
+/// ```
+pub fn normalize_model_name(raw: &str) -> String {
+    // Strip registry prefixes
+    let model_name = raw.replace("registry.ollama.ai/library/", "").replace("library/", "").replace("hf.co/", "");
+
+    // Strip quantization suffixes
+    let model_name = model_name.replace("-q4_0", "").replace("-q4_k_m", "").replace("-q4_k_s", "").replace(":q4_0", "").replace(":q4_k_m", "").replace(":q4_k_s", "");
+
+    // Convert result to lowercase
+    model_name.to_lowercase()
+}
+```

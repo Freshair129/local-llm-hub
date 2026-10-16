@@ -1,0 +1,28 @@
+```rust
+use std::str::FromStr;
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let parts: Vec<&str> = line.split(',').collect();
+    if parts.len() != 5 {
+        return Err(format!("Invalid column count: expected 5, got {}", parts.len()));
+    }
+
+    let name = parts[0].trim().to_string();
+    let vram_used_mb = u64::from_str(parts[1].trim())?;
+    let vram_total_mb = u64::from_str(parts[2].trim())?;
+    let temp_c = u32::from_str(parts[3].trim())?;
+    let util_pct = u32::from_str(parts[4].trim())?;
+
+    Ok(GpuStats { name, vram_used_mb, vram_total_mb, temp_c, util_pct })
+}
+```

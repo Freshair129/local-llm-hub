@@ -1,0 +1,75 @@
+error[E0308]: mismatched types
+ --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-002\46\test.rs:8:68
+  |
+8 |             normalized = normalized.strip_prefix(prefix).unwrap_or(normalized);
+  |                                                          --------- ^^^^^^^^^^ expected `&str`, found `String`
+  |                                                          |
+  |                                                          arguments to this method are incorrect
+  |
+help: the return type of this call is `String` due to the type of the argument passed
+ --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-002\46\test.rs:8:26
+  |
+8 |             normalized = normalized.strip_prefix(prefix).unwrap_or(normalized);
+  |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^----------^
+  |                                                                    |
+  |                                                                    this argument influences the return type of `unwrap_or`
+note: method defined here
+ --> /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library\core\src\option.rs:1038:17
+help: consider borrowing here
+  |
+8 |             normalized = normalized.strip_prefix(prefix).unwrap_or(&normalized);
+  |                                                                    +
+
+error[E0308]: mismatched types
+ --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-002\46\test.rs:8:26
+  |
+3 |     let mut normalized = raw.to_lowercase();
+  |                          ------------------ expected due to this value
+...
+8 |             normalized = normalized.strip_prefix(prefix).unwrap_or(normalized);
+  |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `String`, found `&str`
+  |
+help: try using a conversion method
+  |
+8 |             normalized = normalized.strip_prefix(prefix).unwrap_or(normalized).to_string();
+  |                                                                               ++++++++++++
+
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-002\46\test.rs:16:68
+   |
+16 |             normalized = normalized.strip_suffix(suffix).unwrap_or(normalized);
+   |                                                          --------- ^^^^^^^^^^ expected `&str`, found `String`
+   |                                                          |
+   |                                                          arguments to this method are incorrect
+   |
+help: the return type of this call is `String` due to the type of the argument passed
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-002\46\test.rs:16:26
+   |
+16 |             normalized = normalized.strip_suffix(suffix).unwrap_or(normalized);
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^----------^
+   |                                                                    |
+   |                                                                    this argument influences the return type of `unwrap_or`
+note: method defined here
+  --> /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library\core\src\option.rs:1038:17
+help: consider borrowing here
+   |
+16 |             normalized = normalized.strip_suffix(suffix).unwrap_or(&normalized);
+   |                                                                    +
+
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-002\46\test.rs:16:26
+   |
+ 3 |     let mut normalized = raw.to_lowercase();
+   |                          ------------------ expected due to this value
+...
+16 |             normalized = normalized.strip_suffix(suffix).unwrap_or(normalized);
+   |                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `String`, found `&str`
+   |
+help: try using a conversion method
+   |
+16 |             normalized = normalized.strip_suffix(suffix).unwrap_or(normalized).to_string();
+   |                                                                               ++++++++++++
+
+error: aborting due to 4 previous errors
+
+For more information about this error, try `rustc --explain E0308`.

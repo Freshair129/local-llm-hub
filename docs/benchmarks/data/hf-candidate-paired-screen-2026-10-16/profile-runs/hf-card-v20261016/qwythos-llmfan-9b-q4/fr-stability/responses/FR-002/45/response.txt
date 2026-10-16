@@ -1,0 +1,15 @@
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut s = raw.to_lowercase();
+    for prefix in ["registry.ollama.ai/library/", "library/", "hf.co/"] {
+        if s.starts_with(prefix) {
+            s = s[prefix.len()..].to_string();
+        }
+    }
+    for suffix in ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"] {
+        if s.ends_with(suffix) {
+            s = s[..s.len() - suffix.len()].to_string();
+        }
+    }
+    s
+}

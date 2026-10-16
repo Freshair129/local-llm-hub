@@ -1,0 +1,54 @@
+error[E0425]: cannot find type `GpuStats` in this scope
+ --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-006\44\test.rs:2:44
+  |
+2 | pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+  |                                            ^^^^^^^^ not found in this scope
+  |
+help: you might be missing a type parameter
+  |
+2 | pub fn parse_gpu_csv<GpuStats>(line: &str) -> Result<GpuStats, String> {
+  |                     ++++++++++
+
+error[E0599]: no method named `len` found for struct `std::str::Split<'a, P>` in the current scope
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-006\44\test.rs:16:15
+   |
+16 |     if fields.len() < 5 {
+   |               ^^^
+   |
+help: there is a method `le` with a similar name, but with different arguments
+  --> /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library\core\src\iter\traits\iterator.rs:3979:4
+
+error[E0608]: cannot index into a value of type `std::str::Split<'_, char>`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-006\44\test.rs:19:22
+   |
+19 |     let name = fields[0].to_string();
+   |                      ^^^
+
+error[E0608]: cannot index into a value of type `std::str::Split<'_, char>`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-006\44\test.rs:20:36
+   |
+20 |     let vram_used_mb = match fields[1].parse::<u64>() {
+   |                                    ^^^
+
+error[E0608]: cannot index into a value of type `std::str::Split<'_, char>`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-006\44\test.rs:24:37
+   |
+24 |     let vram_total_mb = match fields[2].parse::<u64>() {
+   |                                     ^^^
+
+error[E0608]: cannot index into a value of type `std::str::Split<'_, char>`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-006\44\test.rs:28:30
+   |
+28 |     let temp_c = match fields[3].parse::<u32>() {
+   |                              ^^^
+
+error[E0608]: cannot index into a value of type `std::str::Split<'_, char>`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-006\44\test.rs:32:32
+   |
+32 |     let util_pct = match fields[4].parse::<u32>() {
+   |                                ^^^
+
+error: aborting due to 7 previous errors
+
+Some errors have detailed explanations: E0425, E0599, E0608.
+For more information about an error, try `rustc --explain E0425`.

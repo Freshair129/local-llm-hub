@@ -1,0 +1,259 @@
+Okay, I need to implement the normalize_model_name function according to the given specification. Let me break down each requirement step by step.
+
+First, the function signature is pub fn normalize_model_name(raw: &str) -> String. That's straightforward.
+
+Next, I have to strip registry prefixes. The prefixes are 'registry.ollama.ai/library/', 'library/', and 'hf.co/'. So I should check if the raw string starts with any of these and remove them. But wait, since the prefixes can be different lengths, I need to handle each case. For example, 'registry.ollama.ai/library/' is longer than 'library/', so I should check for the longest first to avoid partial matches. Maybe I can create a list of the prefixes in order of length, then check each one. If a prefix is found, remove it from the start of the string.
+
+Then, I need to strip quantization suffixes. The suffixes are various combinations of '-q4_0', '-q4_k_m', '-q4_k_s', and their colon versions. The suffixes are case-insensitive, so I should check the string in lowercase. For example, if the string ends with '-q4_0', I should remove it. But I also need to check for the colon versions like ':q4_0', etc. So I can create a list of all possible suffixes in lowercase, then check if the string ends with any of them. If it does, remove the suffix. However, there's a possibility that multiple suffixes could be present, so I need to process them in order, maybe from longest to shortest to avoid partial matches. For example, if the string ends with '-q4_0', but also has a longer suffix like '-q4_k_s', I need to check for the longer ones first. Wait, but the suffixes are all different lengths. Let me list them:
+
+- '-q4_0' (length 5)
+- '-q4_k_m' (length 6)
+- '-q4_k_s' (length 6)
+- ':q4_0' (length 5)
+- ':q4_k_m' (length 6)
+- ':q4_k_s' (length 6)
+
+So I can create a list of these suffixes, sorted by length descending. Then, for each suffix, check if the string ends with it, and if so, remove it. But since the suffixes are in lowercase, I should convert the raw string to lowercase first? Wait, no. The problem says that the suffixes are case-insensitive, so I should check the original string in lowercase. So I'll convert the raw string to lowercase, then check for the suffixes. Wait, but the registry prefixes are case-sensitive. For example, 'registry.ollama.ai/library/' is a specific prefix. So the registry prefixes should be checked exactly as given, but the suffixes need to be case-insensitive. Therefore, after stripping the registry prefixes, I should convert the string to lowercase, then process the suffixes.
+
+Wait, the specification says: "Strip quantization suffixes: ... (case-insensitive)". So the suffixes can be in any case, but the stripping is case-insensitive. Therefore, the approach is: after stripping the registry prefixes, convert the string to lowercase, then check for the suffixes. Wait, no. Because the registry prefixes are already stripped, but the suffixes may be in any case. So perhaps the steps are:
+
+1. Strip registry prefixes (case-sensitive).
+2. Convert the resulting string to lowercase.
+3. Strip quantization suffixes (case-insensitive, but since the string is now lowercase, we can check for the lowercase versions).
+
+Wait, but the suffixes themselves are case-insensitive, so maybe the code should first convert the entire string to lowercase, then check for the suffixes. But then the registry prefixes are case-sensitive. So maybe the order is:
+
+- First, strip the registry prefixes (exact matches, case-sensitive).
+- Then, convert the resulting string to lowercase.
+- Then, strip the quantization suffixes (case-insensitive, but since the string is lowercase, we can check for the lowercase suffixes).
+
+But the problem says the suffixes are case-insensitive. So perhaps the correct approach is:
+
+- After stripping the registry prefixes, convert the string to lowercase, then check for the quantization suffixes (which are in lowercase, so the check is case-insensitive). But since the string is already lowercase, the suffixes are in lowercase, so the check is straightforward.
+
+Alternatively, maybe the quantization suffixes can be checked in a case-insensitive way regardless of the string's case. But the problem says that the suffixes are case-insensitive, so perhaps the code should check the original string (after registry prefixes) in lowercase. For example, the code should take the string after registry prefixes, convert it to lowercase, then check for the suffixes (which are in lowercase). So the code would:
+
+- Strip registry prefixes (case-sensitive).
+- Convert the resulting string to lowercase.
+- Then, check if the string ends with any of the quantization suffixes (in lowercase). So the suffixes are '-q4_0', '-q4_k_m', '-q4_k_s', etc., but in lowercase.
+
+So the steps are:
+
+1. Remove registry prefixes (case-sensitive).
+2. Convert the string to lowercase.
+3. Remove quantization suffixes (case-insensitive, but since the string is lowercase, we can check for the lowercase suffixes).
+
+So the code would first process the registry prefixes, then the suffixes.
+
+Now, how to implement the registry prefix stripping. The prefixes are 'registry.ollama.ai/library/', 'library/', 'hf.co/'. So check if the string starts with any of these. But since 'registry.ollama.ai/library/' is longer than 'library/', we should check for the longest first. For example:
+
+if raw.starts_with("registry.ollama.ai/library/") {
+    raw = raw.trim_start_matches("registry.ollama.ai/library/");
+} else if raw.starts_with("library/") {
+    raw = raw.trim_start_matches("library/");
+} else if raw.starts_with("hf.co/") {
+    raw = raw.trim_start_matches("hf.co/");
+}
+
+But wait, the 'library/' is a prefix, but the 'registry.ollama.ai/library/' is longer. So checking the longest first makes sense.
+
+Once the registry prefixes are stripped, then convert the string to lowercase, then process the suffixes.
+
+Now, the suffixes. The suffixes are:
+
+- '-q4_0'
+- '-q4_k_m'
+- '-q4_k_s'
+- ':q4_0'
+- ':q4_k_m'
+- ':q4_k_s'
+
+But the problem says that the suffixes are case-insensitive, so the code should check for any of these in lowercase. So the code should look for the suffixes in lowercase, but the original string is already lowercase, so checking for the lowercase suffixes is sufficient.
+
+So the code can create a list of these suffixes, then for each suffix, check if the string ends with it. But since there are multiple suffixes, and the order matters, we need to check for the longest ones first to avoid partial matches. For example, if the string ends with '-q4_k_s', but also ends with '-q4_0', which is shorter, we need to check longer ones first. So the order of suffixes in the list should be sorted by length descending.
+
+The suffixes:
+
+- '-q4_0' length 5
+- '-q4_k_m' length 6
+- '-q4_k_s' length 6
+- ':q4_0' length 5
+- ':q4_k_m' length 6
+- ':q4_k_s' length 6
+
+So the longest are the 6-length ones. So the code can create a list like:
+
+let suffixes = &["-q4_k_m", "-q4_k_s", ":q4_k_m", ":q4_k_s", "-q4_0", ":q4_0"];
+
+Then, for each suffix in this order, check if the string ends with the suffix. If it does, remove it. Then, repeat the check until no more suffixes are found. Because there might be multiple suffixes. For example, a string could end with '-q4_k_m' and then after removing it, the string might also end with '-q4_0'. So we need to loop until no more suffixes are found.
+
+So the code could be:
+
+let mut normalized = raw.to_lowercase(); // after registry prefixes are stripped, then convert to lowercase
+
+loop {
+    let mut removed = false;
+    for suffix in suffixes {
+        if normalized.ends_with(*suffix) {
+            normalized = normalized.trim_end_matches(*suffix);
+            removed = true;
+            // after removing, we need to check again, because the string might end with another suffix
+        }
+    }
+    if !removed {
+        break;
+    }
+}
+
+Wait, but the suffixes list is in order of length descending, but the code is checking all suffixes each time. However, if we check the longer ones first, it's more efficient, but in this case, since we're looping through all suffixes each time, it's the same. So the code would process all suffixes each iteration, but once a suffix is removed, the next iteration checks again.
+
+So the code would look like this:
+
+let suffixes = &["-q4_k_m", "-q4_k_s", ":q4_k_m", ":q4_k_s", "-q4_0", ":q4_0"];
+
+loop {
+    let mut removed = false;
+    for suffix in suffixes {
+        if normalized.ends_with(*suffix) {
+            normalized = normalized.trim_end_matches(*suffix);
+            removed = true;
+        }
+    }
+    if !removed {
+        break;
+    }
+}
+
+But wait, the order of suffixes in the list is important. For example, if the string ends with '-q4_k_m', which is longer than '-q4_0', but if we check '-q4_0' first, then after removing it, the longer suffix might still be present. However, the code checks all suffixes each time, so even if we check the shorter ones first, the longer ones will be checked in the same loop. But the order in the list might affect which suffix is removed first. However, since the code checks all suffixes each time, the order of the suffixes in the list isn't crucial as long as all possible suffixes are checked. However, to avoid missing a suffix, the order should be such that longer suffixes are checked first. For example, if the string ends with '-q4_k_m', which is longer than '-q4_0', but if the code checks '-q4_0' first, then after removing it, the longer suffix may still be present. But since the code checks all suffixes in the same loop, even if a longer suffix is not checked first, the code will eventually find it. But to be safe, the code should check the longest suffixes first. So the suffixes list should be ordered by length descending.
+
+So the suffixes list should be:
+
+["-q4_k_m", "-q4_k_s", ":q4_k_m", ":q4_k_s", "-q4_0", ":q4_0"]
+
+Because each of these is 6 or 5 characters long. The first two are 6, then the next two are 6, then the last two are 5. So the code will check the longer ones first, which is better.
+
+Now, putting it all together.
+
+The function steps:
+
+1. Strip registry prefixes (case-sensitive).
+   - Check for 'registry.ollama.ai/library/' first, then 'library/', then 'hf.co/'.
+   - If any of these prefixes are found, remove them from the start of the string.
+
+2. Convert the resulting string to lowercase.
+
+3. Strip quantization suffixes (case-insensitive, but since the string is lowercase, check for the lowercase suffixes).
+
+4. Return the normalized string.
+
+Now, handling the registry prefixes. Let me code that:
+
+let mut raw = raw;
+
+if raw.starts_with("registry.ollama.ai/library/") {
+    raw = &raw[registry_len..];
+} else if raw.starts_with("library/") {
+    raw = &raw[library_len..];
+} else if raw.starts_with("hf.co/") {
+    raw = &raw[hf_len..];
+}
+
+Wait, but the length of each prefix is different. For example, "registry.ollama.ai/library/" is 24 characters (assuming the exact string). Wait, let's count:
+
+"registry.ollama.ai/library/" has:
+
+"registry.ollama.ai/library/" → let's count the characters.
+
+"registry.ollama.ai/library/" → 'registry' is 8, then '.' is 1, 'ollama' is 6, then '.' is 1, 'ai' is 2, then '/' is 1, then 'library/' is 8 (including the slash). Wait, but the exact string is "registry.ollama.ai/library/". Let me count:
+
+r e g i s t r y . o l l a m a . a i / l i b r a r y / → that's 8 + 1 + 6 + 1 + 2 + 1 + 8 + 1? Wait, maybe I should just use the exact string. Alternatively, using the string slice method. So checking if the raw starts with the exact string, and then taking the substring from the length of that prefix. But for the 'registry.ollama.ai/library/' prefix, the length is len("registry.ollama.ai/library/"), which is 24 (assuming that the exact string is correct). Alternatively, perhaps I can use the to_string() method and then check the prefix, but that's not necessary. So the code would be:
+
+if raw.starts_with("registry.ollama.ai/library/") {
+    raw = &raw[24..]; // because "registry.ollama.ai/library/" is 24 characters long.
+} else if raw.starts_with("library/") {
+    raw = &raw[8..]; // "library/" is 8 characters.
+} else if raw.starts_with("hf.co/") {
+    raw = &raw[6..]; // "hf.co/" is 6 characters.
+}
+
+But I need to make sure that the lengths are correct. Alternatively, the code can use the string slice method. For example, the code can check if the raw starts with the prefix, and then take the substring from the start of the prefix.
+
+But in Rust, the starts_with method returns true if the string starts with the given string. So the code can be written as:
+
+let mut raw = raw;
+
+if raw.starts_with("registry.ollama.ai/library/") {
+    raw = &raw[("registry.ollama.ai/library/").len()..];
+} else if raw.starts_with("library/") {
+    raw = &raw[("library/").len()..];
+} else if raw.starts_with("hf.co/") {
+    raw = &raw[("hf.co/").len()..];
+}
+
+But this is more reliable than hardcoding the length, because the length can be calculated at runtime. So that's better.
+
+Once the registry prefixes are stripped, the code converts the raw to lowercase.
+
+Then, process the suffixes as discussed.
+
+Putting it all together.
+
+Now, the code:
+
+pub fn normalize_model_name(raw: &str) -> String {
+    // trace:implements FR-002
+    let mut raw = raw;
+
+    // Step 2: Strip registry prefixes
+    if raw.starts_with("registry.ollama.ai/library/") {
+        raw = &raw[("registry.ollama.ai/library/").len()..];
+    } else if raw.starts_with("library/") {
+        raw = &raw[("library/").len()..];
+    } else if raw.starts_with("hf.co/") {
+        raw = &raw[("hf.co/").len()..];
+    }
+
+    // Step 3: Convert to lowercase
+    let mut normalized = raw.to_lowercase();
+
+    // Step 4: Strip quantization suffixes
+    let suffixes = &["-q4_k_m", "-q4_k_s", ":q4_k_m", ":q4_k_s", "-q4_0", ":q4_0"];
+    loop {
+        let mut removed = false;
+        for suffix in suffixes {
+            if normalized.ends_with(*suffix) {
+                normalized = normalized.trim_end_matches(*suffix);
+                removed = true;
+            }
+        }
+        if !removed {
+            break;
+        }
+    }
+
+    normalized
+}
+
+Wait, but the suffixes are in the order of length descending. The first two are 6 characters, then the next two are 6, then the last two are 5. So the order is correct.
+
+But in the code above, the suffixes list is ["-q4_k_m", "-q4_k_s", ":q4_k_m", ":q4_k_s", "-q4_0", ":q4_0"], which is correct.
+
+Testing this code: for example, if the input is "library/llama2", then the registry prefix "library/" is stripped, resulting in "llama2", converted to lowercase, and no suffixes are stripped. So the result is "llama2".
+
+Another example: input is "hf.co/models/llama2:q4_0", after stripping "hf.co/", we get "models/llama2:q4_0", then converted to lowercase: "models/llama2:q4_0". Then, the suffixes are checked. The suffix ":q4_0" is present, so it's removed, resulting in "models/llama2".
+
+Another example: input is "registry.ollama.ai/library/models/llama2-q4_0", after stripping the registry prefix, we get "models/llama2-q4_0", converted to lowercase: "models/llama2-q4_0". Then, the suffix "-q4_0" is stripped, resulting in "models/llama2".
+
+Another case: input is "hf.co/models/llama2:q4_k_m", after stripping "hf.co/", we get "models/llama2:q4_k_m", converted to lowercase: "models/llama2:q4_k_m". Then, the suffix ":q4_k_m" is stripped, resulting in "models/llama2".
+
+So the code seems to handle these cases.
+
+Now, the code must also handle the case where multiple suffixes are present. For example, "llama2:q4_0-q4_k_m". After converting to lowercase, it's "llama2:q4_0-q4_k_m". The code checks for the suffixes in the list. The first suffix is "-q4_k_m", but the string ends with "-q4_k_m", so it's removed, resulting in "llama2:q4_0". Then, in the next loop iteration, the code checks again. Now the string ends with "-q4_0", which is removed, resulting in "llama2".
+
+So the code correctly processes multiple suffixes.
+
+Now, the code must not unwrap, expect, or panic. The code uses safe operations, like checking starts_with and ends_with, and trimming. So it's safe.
+
+The trace comment is included directly before the function declaration.
+
+So the final code should look like this.

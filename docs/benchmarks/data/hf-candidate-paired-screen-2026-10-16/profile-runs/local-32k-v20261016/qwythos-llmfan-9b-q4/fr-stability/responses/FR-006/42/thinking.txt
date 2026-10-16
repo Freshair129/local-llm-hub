@@ -1,0 +1,80 @@
+Alright, I need to implement the specification for FR-006 under the guard rails STD-003 and ADR-100. Let me read the requirements carefully.
+
+First, define a struct GpuStats with the given fields: name, vram_used_mb, vram_total_mb, temp_c, util_pct. It must derive Debug and PartialEq. So I need to write:
+
+```rust
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+```
+
+That's straightforward.
+
+Next, a function signature: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`. The function takes a CSV line and returns a Result, so I need to handle parsing errors gracefully, never using unwrap, expect, or panic.
+
+The CSV line format is something like "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25". That is, name (string), then four numbers separated by commas. I need to split the line by commas, but note that the name might contain commas, so a simple split might be problematic. However, the specification says "Given a CSV line like ...", and the guard rails require robust error handling, so I should split and then validate that there are exactly 5 parts. If fewer than 5, return Err.
+
+Also, numbers need to be parsed. The name is a string, so that's fine. The numbers are u64, u64, u32, u32. I must parse them safely. If any parse fails, return Err with a descriptive message.
+
+I also need to include a comment before the function declaration: `// trace:implements FR-006`. This ensures traceability.
+
+Let me think about the parsing steps:
+
+1. Split the line by commas. I'll use `line.split(',')`.
+2. Collect the parts into a vector.
+3. Check if the length is exactly 5. If not, return Err with an appropriate message (maybe "Invalid CSV format: expected 5 columns").
+4. For each part, parse accordingly:
+   - Index 0: name (String). Trim whitespace maybe? The example has spaces after commas, but the spec says "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25". The name might have trailing spaces, but I can just take it as is. However, to be safe, I might trim it. But the spec doesn't require trimming; it just says parse it. I'll keep it as is, but maybe I should trim to avoid trailing spaces in the name. Let's see: the struct expects a String, so any whitespace is okay, but it's better to trim to match typical CSV parsing. I'll use `.trim()` on the name part.
+   - Index 1: vram_used_mb: parse u64.
+   - Index 2: vram_total_mb: parse u64.
+   - Index 3: temp_c: parse u32.
+   - Index 4: util_pct: parse u32.
+5. For each parse, use `parse::<T>()` and match on the result. If Err, return Err with a message indicating which column failed.
+6. After parsing all, construct the GpuStats struct and return Ok.
+
+Now, guard rails: no unwrap, expect, panic. So I must handle all errors via Result.
+
+Let me write the function:
+
+```rust
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let parts: Vec<&str> = line.split(',').collect();
+    if parts.len() != 5 {
+        return Err(format!("Invalid CSV format: expected 5 columns, got {}", parts.len()));
+    }
+
+    let name = parts[0].trim().to_string();
+    let vram_used_mb = parts[1].parse::<u64>().map_err(|_| "Failed to parse vram_used_mb")?;
+    let vram_total_mb = parts[2].parse::<u64>().map_err(|_| "Failed to parse vram_total_mb")?;
+    let temp_c = parts[3].parse::<u32>().map_err(|_| "Failed to parse temp_c")?;
+    let util_pct = parts[4].parse::<u32>().map_err(|_| "Failed to parse util_pct")?;
+
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}
+```
+
+Check: the split returns Vec<&str>, so indexing parts[0]... is safe after length check. The trim on name ensures we get the exact string. The parse calls return an error if the string is not a valid number. The map_err provides a specific message.
+
+Now, the output should include both the struct and the function inside a single ```rust code block. So I need to place the struct definition before the function.
+
+I also need to ensure that the comment is directly before the function declaration. That's satisfied.
+
+Now, let's verify that I haven't used any forbidden constructs: I didn't use unwrap, expect, or panic. All errors are returned via Result. Good.
+
+One more thing: the spec says "Given a CSV line like ...". It doesn't require handling empty lines or extra whitespace beyond the commas. My implementation handles those via split and trim.
+
+Now, I should output the code exactly as requested: both struct and function in one code block.
+
+Thus, the final answer is the code block with the struct and function.

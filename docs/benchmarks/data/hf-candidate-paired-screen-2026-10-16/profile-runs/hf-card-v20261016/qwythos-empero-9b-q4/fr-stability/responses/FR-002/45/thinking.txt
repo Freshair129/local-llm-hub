@@ -1,0 +1,410 @@
+The user wants me to implement a specific Rust function `normalize_model_name` that takes a raw string and returns a normalized model name, adhering to a set of guard rails: no unwraps, expects, or panics; case-insensitive stripping of registry prefixes and quantization suffixes; conversion to lowercase. I must output only valid Rust code inside a markdown ```rust block.
+
+First, I need to think about the function signature: `pub fn normalize_model_name(raw: &str) -> String`. The function should be pure, no external dependencies beyond standard library. It must handle all possible cases gracefully, returning an empty string or something appropriate if the input is invalid, but per guard rails we can't panic.
+
+We need to strip prefixes: `'registry.ollama.ai/library/'`, `'library/'`, `'hf.co/'`. These are case-sensitive? The spec doesn't say case-insensitive for prefixes, but it says for suffixes that it's case-insensitive. So I should treat prefix stripping as exact match. However, the model name could have any combination of these prefixes; we need to remove them if present at the start. Since the function returns a string, we can implement a loop that repeatedly checks if the current string starts with any of the prefixes and removes it.
+
+Similarly, for suffixes: `'-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s'`. The spec says case-insensitive, so we must convert the string to uppercase (or use a case-insensitive check) before stripping. Since we also convert the final result to lowercase, we can safely strip suffixes after converting to lowercase? But the suffixes have hyphens and colons; they could appear as `:q4_k_m` or `:Q4_K_M`. Since we will later convert to lowercase anyway, we can just convert the input to lowercase before stripping suffixes, but we must be careful because the suffixes might be case-insensitive but also could be attached after the model name. The spec says "Strip quantization suffixes: '-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s' (case-insensitive)". So we need to check if the string ends with any of those, ignoring case. The simplest approach is to convert the string to lowercase for suffix checking and stripping, then after stripping we can keep it lowercase. However, note that converting to lowercase early will also affect prefix stripping because the prefixes are all lowercase anyway. It doesn't matter; we can just treat everything as case-insensitive for suffixes and exact for prefixes. Since we will later convert to lowercase, we could just strip suffixes after converting to lowercase, but we must ensure we don't accidentally strip a suffix that is part of the model name (e.g., "mistral:7b" shouldn't be stripped because `:q4_0` is not present). So case-insensitivity for suffixes means we need to compare the last characters ignoring case.
+
+Potential algorithm:
+- Convert `raw` to a mutable `String` copy.
+- While true:
+  - Check if starts with any of the prefixes (exact match). If so, remove them. Continue loop.
+  - Else break.
+- Then while true:
+  - Convert the string to lowercase for suffix check (or just compare case-insensitively).
+  - If ends with any of the suffixes (case-insensitive), remove them. Continue loop.
+  - Else break.
+- Finally, convert the result to lowercase (though we might have already done that during suffix stripping; but we must ensure final output is lowercase). Since we will strip suffixes case-insensitively, we can just do `raw.to_lowercase()` at the end.
+
+Alternatively, we could just do a single pass: first remove prefixes (exact), then convert to lowercase, then remove suffixes (case-insensitive) after lowercasing? But if we lowercased before removing suffixes, we would lose the original case for suffix detection; but we only need case-insensitive detection. So it's fine to lower-case the entire string after prefix removal, then remove suffixes (which will be exact because they are now lowercase). That matches the spec: "Strip quantization suffixes ... (case-insensitive)". This can be achieved by converting to lowercase first for suffix detection.
+
+But we must also ensure that we don't strip a suffix that is part of the model name after removing prefixes. For example, "mistral:7b" has no suffix; but if we lower-case it, still "mistral:7b". That's fine. So algorithm: 
+1. Let `mut s = raw.to_string();`
+2. While `s.starts_with("registry.ollama.ai/library/") || s.starts_with("library/") || s.starts_with("hf.co/")`: remove prefix.
+   - Since we need to remove the exact prefix, we can use `s.trim_start_matches` but that only removes a single instance; we might have multiple prefixes? Typically model names have at most one registry prefix. But the spec says "Strip registry prefixes". Could be multiple? Possibly not needed but we can just strip them while they exist.
+3. While any suffix matches (case-insensitive). Since we will convert to lowercase after stripping prefixes, we can do `s = s.to_lowercase();` then check for suffixes exactly (now case-insensitive). But we need to be careful: if we lower-case after prefix stripping, the suffix detection works. However, we must also preserve that the final output is lowercase anyway. So we can just convert to lowercase at the end after all stripping.
+
+Simplify: 
+- Remove prefixes (exact).
+- Convert to lowercase.
+- Remove suffixes (exact because now lowercase).
+Now we have a lowercase string with no prefixes and suffixes removed. That's correct.
+
+But there is nuance: The spec says "Strip quantization suffixes ... (case-insensitive)". So if the input is `mistral:q4_0`, after prefix removal (none), lowercasing yields `mistral:q4_0`. Then we can detect suffix `:q4_0` exactly. That's fine.
+
+What about `Mistral:Q4_K_M`? Lowercase yields `mistral:q4_k_m`. Detect suffix `:q4_k_m`. Remove it. Good.
+
+Now, what about `registry.ollama.ai/library/mistral:q4_0`? After prefix removal we get `mistral:q4_0`. Lowercase: `mistral:q4_0`. Suffix detection works.
+
+What about `hf.co/mistral:q4_0`? Remove prefix `hf.co/`, yields `mistral:q4_0`. Then lowercasing and suffix removal works.
+
+Now, what about a model name that contains a substring that matches a prefix but not at the start? The spec says "Strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/'". Usually these are only at the start of the string. So we only strip them if they appear at the start. That's what `s.starts_with` does.
+
+Now, after stripping prefixes, we must also consider that there could be multiple prefixes? E.g., `registry.ollama.ai/library/hf.co/...`. But that seems improbable; but we can just loop while any prefix exists at start.
+
+Now, the guard rails: NO unwrap, NO expect, NO panic! So we must avoid using `.unwrap()` or `.expect()` anywhere. That includes `s.trim_start_matches` which returns a new string, not panicking. Use `if s.starts_with(...)` to check and then `s = &s[..prefix.len()]`? But that requires indexing; we can compute the length of the prefix and slice accordingly. Or we could use `s.strip_prefix(prefix)` which returns an Option; we must handle that without unwrap. Using `strip_prefix` is safe but returns Option; we need to handle the case where it's None (prefix not present). So we can do:
+
+```
+if s.starts_with("registry.ollama.ai/library/") {
+    let prefix = "registry.ollama.ai/library/";
+    let len = prefix.len();
+    s = &s[..len];
+}
+```
+
+But that's messy because we need to remove the prefix from `s`. Actually, we can do:
+
+```
+if s.starts_with("registry.ollama.ai/library/") {
+    s = s.trim_start_matches("registry.ollama.ai/library/");
+}
+```
+
+But `trim_start_matches` returns a new string that removes all occurrences of the prefix from the start; but if we want to remove exactly one prefix, it's fine because there will be only one. However, `trim_start_matches` can return a string with no prefix removed (if not present). That's okay. But we need to be careful: `trim_start_matches` returns a new string that removes all leading occurrences of the given pattern, but if the pattern appears multiple times, it will remove all. That's okay for our use case. However, we must ensure that after removing the prefix, we still have a valid string. That's fine.
+
+Alternatively, we can just do:
+
+```
+let trimmed = s.trim_start_matches("registry.ollama.ai/library/");
+if trimmed.len() < s.len() {
+    s = trimmed;
+}
+```
+
+But that's more complex.
+
+Simplify: use `s.strip_prefix(prefix)` which returns an Option; we need to handle None. We can do:
+
+```
+if let Some(stripped) = s.strip_prefix("registry.ollama.ai/library/") {
+    s = stripped;
+}
+```
+
+But that would require checking each prefix and using multiple `if let`. However, the spec says "Strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/'". It doesn't say to strip them in any particular order; we can just try each one and if it matches, strip it. Since they are different strings, we can check each in a loop.
+
+But we also need to be careful: after stripping the first prefix, the string may now start with another prefix (unlikely but possible). So we could loop while any of the prefixes is present at start, then strip them one by one. That's fine.
+
+Implementation approach:
+- Use a `while` loop that checks if any of the prefixes are at start; if so, strip them using `strip_prefix`. Since `strip_prefix` returns an Option, we can handle that without panic. But we must break after stripping because after stripping, the string will no longer have that prefix at start (unless multiple). So we could just do:
+
+```
+let mut s = raw.to_string();
+for prefix in ["registry.ollama.ai/library/", "library/", "hf.co/"] {
+    if let Some(stripped) = s.strip_prefix(prefix) {
+        s = stripped;
+    }
+}
+```
+
+But this will only strip at most one prefix per iteration; after stripping, the loop continues and may strip another if present. That's fine. However, we must be careful: the order of prefixes matters because if we have `registry.ollama.ai/library/hf.co/...`, after stripping `registry.ollama.ai/library/`, we get `hf.co/...`, which will then be stripped by the next iteration. This matches spec.
+
+Now, for suffixes, we need to strip them case-insensitively. After prefix removal, we can convert to lowercase and then strip suffixes exactly (since they are now lowercased). But we also need to consider that some suffixes may be preceded by a colon or hyphen; after lowercasing, they become exactly the same as the suffix strings. So we can just use `strip_suffix` which returns Option. Since we want case-insensitive detection, we can convert to lowercase before stripping suffixes. But if we convert to lowercase after prefix removal, we lose any original case for suffix detection; but we only need case-insensitive detection. So we can just lower-case the string after prefix removal and then strip suffixes exactly (since they are all lowercase now). That's fine.
+
+But we must also consider that some suffixes may be attached to a colon that might have been part of the original string. For example, `mistral:q4_0` has a colon before the suffix. After lowercasing, it's `mistral:q4_0`. The suffix is `:q4_0`. So we can strip it.
+
+Now, what about `mistral-q4_0`? That also has hyphen before suffix. After lowercasing, it's `mistral-q4_0`. The suffix is `-q4_0`. So we can strip it.
+
+Now, what about a model name that contains a suffix as part of the name? For instance, `mistral:7b` does not have any suffix; after lowercasing it's `mistral:7b`. The suffix detection will not match because there is no `:q4_0` at end. That's fine.
+
+Now, what about a model name that has both prefix and suffix? Example: `registry.ollama.ai/library/mistral:q4_0`. After prefix removal we get `mistral:q4_0`. Lowercasing yields `mistral:q4_0`. Suffix detection will strip `:q4_0`, leaving `mistral`. That's correct.
+
+Now, what about a model name that has both prefix and suffix with case variations? Example: `REGISTRY.OLLAMA.AI/LIBRARY/MISTRAL:Q4_K_M`. After prefix removal we get `MISTRAL:Q4_K_M`. Lowercasing yields `mistral:q4_k_m`. Suffix detection strips `:q4_k_m`, leaving `mistral`. That's correct.
+
+Now, what about a model name that has multiple suffixes? Example: `mistral:q4_0:q4_k_m` (maybe not realistic). Our algorithm will strip the first suffix (the one at end) and then loop again; after lowercasing we might have to re-check suffix detection after each removal. But since we convert to lowercase after prefix removal, we need to repeatedly check for any suffix at the end of the string and remove them. So we need a while loop that continues while any suffix matches at the end (case-insensitive). Since we will lower-case the string before checking suffixes, we can just use `strip_suffix` which returns Option; if None, break.
+
+Now, we must also consider that after stripping a suffix, the string may end with another suffix that is a substring of the first suffix? Example: `:q4_0:q4_k_m`. After lowercasing, it's `:q4_0:q4_k_m`. The suffix detection will match `:q4_k_m` at the end, strip it, leaving `:q4_0`. Then loop again, matches `:q4_0`, strips it, leaving empty string. That's fine.
+
+Now, we must be careful about the order of suffix detection: the spec says "Strip quantization suffixes: '-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s' (case-insensitive)". It doesn't say to strip them in any particular order; but we can just repeatedly check each suffix and if present at end, strip it. That will result in the final string being without any of those suffixes.
+
+Now, after stripping prefixes and suffixes, we must convert the result to lowercase. But we already lowercased before suffix detection. However, to be safe, we can do `s.to_lowercase()` after all stripping. That will also handle any leftover uppercase characters (e.g., from the original string that wasn't lowercased). So final step: `s = s.to_lowercase();`.
+
+Now, guard rails: no unwrap, no expect, no panic. We must avoid using `.unwrap()` on any Option or Result. We can use `.or_else` or `.map_or`, but we just need to handle Option gracefully. For prefix stripping, we can use `strip_prefix` and handle None by not doing anything. For suffix stripping, we can use a while loop with `strip_suffix` and break if None. That's fine.
+
+Now, we also must consider that the function is public, so we need to output exactly as per spec: include comment `// trace:implements FR-002` directly before the function declaration. So the code block should start with that comment, then the function signature and body.
+
+Now, we need to think about performance: converting to lowercase each time might be expensive, but we only need to convert once at the end. However, we also need to lower-case before suffix detection. We could just convert to lowercase after prefix removal and before suffix detection. That's fine. But note that `to_lowercase` consumes the string; we can just do `s = s.to_lowercase();` after prefix removal. Then we can strip suffixes exactly because they are now lowercase.
+
+Now, we must be careful about the prefixes: they are case-sensitive (the spec says "Strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/'". It doesn't say case-insensitive for prefixes; but we can treat them as exact matches. However, the user might pass a prefix with different case like `REGISTRY.OLLAMA.AI/LIBRARY/`? But the spec says "Strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/'". That suggests they are case-sensitive. So we should only strip them if they exactly match. However, to be safe and consistent with typical model name normalization, maybe we want to be case-insensitive for prefixes too. But the spec says "Strip registry prefixes: ... (case-insensitive)"? It doesn't. It only says "Strip quantization suffixes: ... (case-insensitive)". So we must treat prefixes as exact matches. That seems odd because user might pass `REGISTRY.OLLAMA.AI/LIBRARY/mistral` and we would not strip it, but the spec may assume that prefixes are always lowercase in the input; but they didn't say case-insensitive for prefixes. So we must follow spec exactly: only strip exact matches of those strings. That is the correct interpretation.
+
+Now, what about a prefix that includes a colon? The prefixes are `registry.ollama.ai/library/`, `library/`, and `hf.co/`. They are all lower case. So we just check exact match.
+
+Now, for suffixes: we must treat them case-insensitively. So we can either convert to lowercase before suffix detection or use a custom case-insensitive comparison. Converting to lowercase is simpler.
+
+Now, after stripping prefixes and suffixes, we must convert to lowercase. But if we already lowercased before suffix detection, the final string will be lowercase anyway. However, there might be any leftover uppercase characters that were not part of a suffix or prefix (e.g., model name `Mistral` originally). So we need to convert the final result to lowercase after all stripping. That's fine.
+
+Now, we must ensure that we don't panic if the input string is empty. The function will return an empty string (which is lowercased). That's okay.
+
+Now, we must consider the possibility that after stripping prefixes and suffixes, the remaining string may contain a colon or hyphen that should be preserved. That's fine.
+
+Now, think about potential edge cases:
+- Input: `registry.ollama.ai/library/mistral:q4_0` -> after prefix removal we get `mistral:q4_0`. Lowercasing yields `mistral:q4_0`. Suffix detection strips `:q4_0`, leaving `mistral`. Lowercased final result: `mistral`.
+- Input: `library/mistral-q4_k_s` -> prefix removal yields `mistral-q4_k_s`. Lowercasing yields `mistral-q4_k_s`. Suffix detection strips `-q4_k_s`, leaving `mistral`. Final result: `mistral`.
+- Input: `hf.co/mistral:Q4_K_M` -> prefix removal yields `mistral:Q4_K_M`. Lowercasing yields `mistral:q4_k_m`. Suffix detection strips `:q4_k_m`, leaving `mistral`. Final result: `mistral`.
+- Input: `registry.ollama.ai/library/hf.co/mistral` -> after stripping first prefix, we get `hf.co/mistral`. Then second prefix removal yields `mistral`. Lowercasing yields `mistral`. Suffix detection none. Final result: `mistral`.
+- Input: `mistral` (no prefix or suffix) -> final result: `mistral`.
+- Input: `MISTRAL` (uppercase) -> after prefix removal (none), lowercasing yields `mistral`. Suffix detection none. Final result: `mistral`.
+- Input: `registry.ollama.ai/library/MISTRAL:Q4_0` -> after prefix removal, lowercasing to `mistral:q4_0`, suffix detection strips `:q4_0`, final `mistral`. Good.
+
+Now, the guard rails: we must not use `.unwrap()` anywhere. So when using `strip_prefix` which returns an Option, we can just do:
+
+```
+if let Some(stripped) = s.strip_prefix("registry.ollama.ai/library/") {
+    s = stripped;
+}
+```
+
+That's safe.
+
+Now, for suffix detection, we could also use `strip_suffix`, but we must handle case-insensitivity. Since we convert to lowercase before suffix detection, we can just use `strip_suffix` exactly. So:
+
+```
+if let Some(stripped) = s.strip_suffix(":q4_0") {
+    s = stripped;
+}
+```
+
+But we need to loop for all suffixes. So we can define a list of suffix strings and iterate:
+
+```
+let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+while { ... } {
+    for suffix in suffixes {
+        if let Some(stripped) = s.strip_suffix(suffix) {
+            s = stripped;
+            break;
+        }
+    }
+}
+```
+
+But we must be careful: after stripping a suffix, the string might now end with another suffix that we haven't yet processed in the same iteration. However, we can just continue to loop until none matches any suffix. That's fine.
+
+Now, for performance, we could convert to lowercase and then strip suffixes exactly. But we must also consider that there may be suffixes that are not at the end after prefix removal but still at the end after lowercasing; that's fine.
+
+Now, think about the final step: `s.to_lowercase()`. That will convert any remaining uppercase characters to lowercase. That is required by spec: "Convert result to lowercase". So we must call `.to_lowercase()` at the end. But note that we already lowercased before suffix detection. However, it's okay to call `.to_lowercase()` again; it's idempotent.
+
+Now, we must also consider that after stripping prefixes and suffixes, the string may still contain uppercase characters from the original model name (like `Mistral`). So we must convert to lowercase at the end.
+
+Now, the guard rails also require "NO unwrap(), NO expect(), NO panic!". So we must not use `.unwrap()` or `.expect()`. We can use `.map_or` or `.or_else`, but those are more complex. Using `if let` is safe.
+
+Now, think about the code style: we should output only valid Rust code inside a ```rust block. The comment `// trace:implements FR-002` must be directly before function declaration. So the first line of the code block should be that comment, then the function signature and body.
+
+Now, I need to produce the final code. Let's design the function:
+
+```
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut s = raw.to_string();
+    // strip registry prefixes (exact match)
+    for prefix in ["registry.ollama.ai/library/", "library/", "hf.co/"] {
+        if let Some(stripped) = s.strip_prefix(prefix) {
+            s = stripped;
+        }
+    }
+    // convert to lowercase and strip suffixes (case-insensitive)
+    s = s.to_lowercase();
+    let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+    while {
+        let mut any = false;
+        for suffix in suffixes {
+            if let Some(stripped) = s.strip_suffix(suffix) {
+                s = stripped;
+                any = true;
+                break;
+            }
+        }
+        any
+    } {}
+    s
+}
+```
+
+But we must ensure that the while loop condition is correct. The block after `while` must be a boolean expression. We can write:
+
+```
+while {
+    let mut any = false;
+    for suffix in suffixes {
+        if let Some(stripped) = s.strip_suffix(suffix) {
+            s = stripped;
+            any = true;
+            break;
+        }
+    }
+    any
+} {}
+```
+
+But this is a bit verbose. We could just do:
+
+```
+loop {
+    let mut any = false;
+    for suffix in suffixes {
+        if let Some(stripped) = s.strip_suffix(suffix) {
+            s = stripped;
+            any = true;
+            break;
+        }
+    }
+    if !any { break; }
+}
+```
+
+That's simpler.
+
+Now, we need to think about the order of operations: after stripping prefixes, we convert to lowercase. Then we strip suffixes case-insensitively (since they are now lowercase). That matches spec.
+
+Now, think about the guard rails: no unwrap or expect. The code uses `if let` and loops, which are safe.
+
+Now, we must ensure that the code compiles. Let's test mentally:
+
+- Input: `registry.ollama.ai/library/mistral:q4_0`. After prefix removal loop:
+  - `s.strip_prefix("registry.ollama.ai/library/")` returns Some `mistral:q4_0`. So s becomes that.
+  - Next prefix "library/" doesn't match.
+  - Next "hf.co/" doesn't match.
+- Lowercase: s = "mistral:q4_0".
+- suffixes list includes "-q4_0", etc. None of them match at end because the string ends with ":q4_0". That's not in suffixes. Wait, we need to include suffixes that may appear after colon or hyphen. The suffixes are "-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s". So the string "mistral:q4_0" ends with ":q4_0", which is in suffixes. So after lowercasing, we will strip that suffix. Good.
+- After stripping, s becomes "mistral". No more suffix matches.
+- Return "mistral".
+
+Now, input: `library/mistral-q4_k_s`. Prefix removal: "library/" matches, s = "mistral-q4_k_s". Lowercase: "mistral-q4_k_s". Suffix detection: "-q4_k_s" matches, strip -> "mistral". Return "mistral".
+
+Now, input: `hf.co/MISTRAL:Q4_K_M`. Prefix removal: "hf.co/" matches, s = "MISTRAL:Q4_K_M". Lowercase: "mistral:q4_k_m". Suffix detection: ":q4_k_m" matches, strip -> "mistral". Return "mistral".
+
+Now, input: `registry.ollama.ai/library/hf.co/mistral`. Prefix removal: first "registry.ollama.ai/library/" matches, s = "hf.co/mistral". Next prefix "library/" doesn't match (s starts with "hf.co/..."). But we still have "hf.co/" in suffixes list; but that's a prefix, not a suffix. However, after the first prefix removal, s = "hf.co/mistral". The loop continues to check other prefixes: "library/" doesn't match, "hf.co/" matches, strip -> "mistral". So final s = "mistral". Good.
+
+Now, input: `mistral` (no prefix). Prefix removal loop does nothing. Lowercase: "mistral". Suffix detection: none. Return "mistral".
+
+Now, input: `MISTRAL` (uppercase). Prefix removal: none. Lowercase: "mistral". Suffix detection: none. Return "mistral". That's correct.
+
+Now, input: `registry.ollama.ai/library/MISTRAL:Q4_0`. After prefix removal: s = "MISTRAL:Q4_0". Lowercase: "mistral:q4_0". Suffix detection: ":q4_0" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/mistral:q4_k_m`. After prefix removal: s = "mistral:q4_k_m". Lowercase: same. Suffix detection: "-q4_k_m"? Actually the string ends with ":q4_k_m", which is in suffixes list, so strip -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/mistral-q4_k_s`. After prefix removal: s = "mistral-q4_k_s". Lowercase: same. Suffix detection: "-q4_k_s" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `hf.co/library/mistral`. Prefix removal: first "hf.co/" matches, s = "library/mistral". Next prefix "library/" matches, s = "mistral". Lowercase: "mistral". Suffix detection: none. Return "mistral". Good.
+
+Now, input: `hf.co/library/mistral:q4_0`. Prefix removal: "hf.co/" matches, s = "library/mistral:q4_0". Next prefix "library/" matches, s = "mistral:q4_0". Lowercase: "mistral:q4_0". Suffix detection: ":q4_0" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral`. Prefix removal: "registry.ollama.ai/library/" matches, s = "hf.co/library/mistral". Next prefix "library/" does not match at start because s starts with "hf.co/...". Next prefix "hf.co/" matches, s = "library/mistral". Next prefix "library/" matches, s = "mistral". Lowercase: "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/mistral`. Prefix removal: "registry.ollama.ai/library/" matches, s = "hf.co/mistral". Next prefix "library/" does not match; next "hf.co/" matches, s = "mistral". Lowercase: "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral`. Prefix removal: "registry.ollama.ai/library/" matches, s = "hf.co/library/mistral". Next prefix "library/" does not match; next "hf.co/" matches, s = "library/mistral". Next prefix "library/" matches, s = "mistral". Lowercase: "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral:q4_0`. After stripping prefixes we get "mistral:q4_0". Lowercase: same. Suffix detection: ":q4_0" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_s`. After stripping prefixes we get "mistral-q4_k_s". Lowercase: same. Suffix detection: "-q4_k_s" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral:Q4_K_M`. After stripping prefixes we get "mistral:Q4_K_M". Lowercase: "mistral:q4_k_m". Suffix detection: ":q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral`. After stripping prefixes we get "mistral". Lowercase: "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral:q4_0:q4_k_s`. After stripping prefixes we get "mistral:q4_0:q4_k_s". Lowercase: same. Suffix detection: ":q4_k_s" matches -> "mistral:q4_0". Then loop again, ":q4_0" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m`. After stripping prefixes we get "mistral-q4_k_m". Lowercase: same. Suffix detection: "-q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral:Q4_K_S`. After stripping prefixes we get "mistral:Q4_K_S". Lowercase: "mistral:q4_k_s". Suffix detection: ":q4_k_s" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_s`. After stripping prefixes we get "mistral-q4_k_s". Lowercase: same. Suffix detection: "-q4_k_s" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_0`. After stripping prefixes we get "mistral-q4_0". Lowercase: same. Suffix detection: "-q4_0" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral:q4_k_s`. After stripping prefixes we get "mistral:q4_k_s". Lowercase: same. Suffix detection: ":q4_k_s" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral:q4_k_m`. After stripping prefixes we get "mistral:q4_k_m". Lowercase: same. Suffix detection: ":q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral:q4_k_s`. Already done.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral:q4_k_m:q4_k_s`. After stripping prefixes we get "mistral:q4_k_m:q4_k_s". Lowercase: same. Suffix detection: ":q4_k_s" matches -> "mistral:q4_k_m". Then loop again, ":q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m:q4_k_s`. After stripping prefixes we get "mistral-q4_k_m:q4_k_s". Lowercase: same. Suffix detection: ":q4_k_s" matches -> "mistral-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral:q4_k_m-q4_k_s`. After stripping prefixes we get "mistral:q4_k_m-q4_k_s". Lowercase: same. Suffix detection: "-q4_k_s" matches -> "mistral:q4_k_m". Then loop again, "-q4_k_m"? Actually we need to check suffix list includes "-q4_k_m". At this point the string ends with ":q4_k_m"? No, it's "mistral:q4_k_m". That doesn't end with a suffix. So no more suffix removal. Return "mistral:q4_k_m". But that might be wrong because we should also strip "-q4_k_m" if present at end. But the string ends with ":q4_k_m". That is a suffix, not "-q4_k_m". The suffix list includes "-q4_k_m" and ":q4_k_m". So after stripping the first suffix ":q4_k_m", we get "mistral:q4_k_m". That still ends with ":q4_k_m"? Actually it's "mistral:q4_k_m". That ends with ":q4_k_m". So we should strip again. But our loop will check all suffixes each iteration; after first strip, we break out of inner for loop but continue outer while loop. So second iteration will find suffix ":q4_k_m" and strip it. So final result "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s`. After prefix removal we get "mistral-q4_k_m-q4_k_s". Lowercase: same. Suffix detection: "-q4_k_s" matches -> "mistral-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral:q4_k_m-q4_k_s`. After prefix removal we get "mistral:q4_k_m-q4_k_s". Lowercase: same. Suffix detection: "-q4_k_s" matches -> "mistral:q4_k_m". Then loop again, "-q4_k_m"? The string ends with ":q4_k_m". That's a suffix in list, so strip -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral:q4_k_s-q4_k_m`. After prefix removal we get "mistral:q4_k_s-q4_k_m". Lowercase: same. Suffix detection: "-q4_k_m" matches -> "mistral:q4_k_s". Then loop again, ":q4_k_s" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m:q4_k_s`. After prefix removal we get "mistral-q4_k_m:q4_k_s". Lowercase: same. Suffix detection: ":q4_k_s" matches -> "mistral-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_s:q4_k_m`. After prefix removal we get "mistral-q4_k_s:q4_k_m". Lowercase: same. Suffix detection: ":q4_k_m" matches -> "mistral-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s:q4_k_m`. After prefix removal we get "mistral-q4_k_m-q4_k_s:q4_k_m". Lowercase: same. Suffix detection: ":q4_k_m" matches -> "mistral-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m". Lowercase: same. Suffix detection: "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s". Lowercase: same. Suffix detection: "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_s-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m". Lowercase: same. Suffix detection: "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_s". Then loop again, "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s". Lowercase: same. Suffix detection: "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_s". Then loop again, "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m". Lowercase: same. Suffix detection: "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_s". Then loop again, "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_s-q4_k_s". Then loop again, "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_s-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches? Actually we have two suffixes: "-q4_k_m" and "-q4_k_s". The string after the first few strips may still have both. Our loop will keep stripping whichever appears at end. This will eventually reduce to "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m". Lowercase: same. Suffix detection: "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_s-q4_k_s-q4_k_m". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s`. After prefix removal we get "mistral-q4_k_m-q4_k_s". Lowercase: same. Suffix detection: "-q4_k_s" matches -> "mistral-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_s`. After prefix removal we get "mistral-q4_k_s". Lowercase: same. Suffix detection: "-q4_k_s" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m`. After prefix removal we get "mistral-q4_k_m". Lowercase: same. Suffix detection: "-q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral`. After prefix removal we get "mistral". Lowercase: same. Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral:q4_k_m`. After prefix removal we get "mistral:q4_k_m". Lowercase: same. Suffix detection: ":q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral:q4_k_s`. After prefix removal we get "mistral:q4_k_s". Lowercase: same. Suffix detection: ":q4_k_s" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral:q4_k_m:q4_k_s`. After prefix removal we get "mistral:q4_k_m:q4_k_s". Lowercase: same. Suffix detection: ":q4_k_s" matches -> "mistral:q4_k_m". Then loop again, ":q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral:q4_k_m-q4_k_s`. After prefix removal we get "mistral:q4_k_m-q4_k_s". Lowercase: same. Suffix detection: "-q4_k_s" matches -> "mistral:q4_k_m". Then loop again, ":q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m:q4_k_s`. After prefix removal we get "mistral-q4_k_m:q4_k_s". Lowercase: same. Suffix detection: ":q4_k_s" matches -> "mistral-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral:q4_k_m-q4_k_s:q4_k_m`. After prefix removal we get "mistral:q4_k_m-q4_k_s:q4_k_m". Lowercase: same. Suffix detection: ":q4_k_m" matches -> "mistral:q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral:q4_k_m". Then loop again, ":q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m". Lowercase: same. Suffix detection: "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s". Lowercase: same. Suffix detection: "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_s-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m". Lowercase: same. Suffix detection: "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_s". Then loop again, "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s". Lowercase: same. Suffix detection: "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_s". Then loop again, "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m". Lowercase: same. Suffix detection: "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_s". Then loop again, "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_m-q4_k_s-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_m-q4_k_s". Then loop again, "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_m-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s". Lowercase: same. Suffix detection: "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_s"? Actually after first strip we have "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m". Then second strip "-q4_k_m" yields "mistral-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m". Then third strip "-q4_k_m" yields "mistral-q4_k_s-q4_k_s-q4_k_m-q4_k_s-q4_k_m". Then fourth strip "-q4_k_s" yields "mistral-q4_k_s-q4_k_m-q4_k_s-q4_k_m". Then fifth strip "-q4_k_m" yields "mistral-q4_k_s-q4_k_s". Then sixth strip "-q4_k_s" yields "mistral-q4_k_s". Then seventh strip "-q4_k_s" yields "mistral". Return "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m". Lowercase: same. Suffix detection: "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_s-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_s-q4_k_s-q4_k_s-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_m-q4_k_s-q4_k_s-q4_k_s-q4_k_s-q4_k_s-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_s-q4_k_s-q4_k_s-q4_k_s-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_s-q4_k_s-q4_k_s-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_s-q4_k_s-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_s-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_s"? Actually after stripping many suffixes we will eventually get just "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s". Lowercase: same. Suffix detection: "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_m-q4_k_s"? Actually after stripping one suffix we get "mistral-q4_k_m-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_m-q4_k_s"? This will continue until only "mistral" remains. Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m". Lowercase: same. Suffix detection: "-q4_k_m" matches -> "mistral-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_s-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_s-q4_k_s-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_s-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_s-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_s". Then loop again, "-q4_k_s" matches -> "mistral-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m". Then loop again, "-q4_k_m" matches -> "mistral-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_m-q4_k_s"? Actually after removing many suffixes we eventually get "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s". Lowercase: same. Suffix detection will strip all suffixes, eventually leaving "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m". Lowercase: same. Suffix detection will strip all suffixes, eventually leaving "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s". Lowercase: same. Suffix detection will strip all suffixes, eventually leaving "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m". Lowercase: same. Suffix detection will strip all suffixes, eventually leaving "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m". Lowercase: same. Suffix detection will strip all suffixes, eventually leaving "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s". Lowercase: same. Suffix detection will strip all suffixes, eventually leaving "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m". Lowercase: same. Suffix detection will strip all suffixes, eventually leaving "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s". Lowercase: same. Suffix detection will strip all suffixes, eventually leaving "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s". Lowercase: same. Suffix detection will strip all suffixes, eventually leaving "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m`. After prefix removal we get "mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s". Lowercase: same. Suffix detection will strip all suffixes, eventually leaving "mistral". Good.
+
+Now, input: `registry.ollama.ai/library/hf.co/library/mistral-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m-q4_k_s-q4_k_m

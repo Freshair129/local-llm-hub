@@ -1,0 +1,87 @@
+Okay, let's see. I need to implement the GpuStats struct and the parse_gpu_csv function according to the specification. The user provided a detailed list of requirements, so I need to make sure I cover each point.
+
+First, the struct definition. The struct should have name, vram_used_mb, vram_total_mb, temp_c, and util_pct, all with appropriate types. The derive attributes are Debug and PartialEq, which are straightforward. I'll start by writing that struct.
+
+Next, the function signature. It's called parse_gpu_csv, takes a &str as input and returns a Result<GpuStats, String>. The function needs to parse a CSV line into the struct. The example line is "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25". So the CSV has five fields separated by commas.
+
+The error handling part: if there are fewer than 5 columns, return Err with a message. Also, each value must be parseable as a number. For the first field, it's a string, but the rest are numbers. Wait, the first field is the GPU name, which can contain spaces, but in the CSV, it's likely that the first field is the name, and the rest are numeric. However, the example shows that the first field is "NVIDIA GeForce RTX 3060" which includes spaces. So splitting on commas might not be straightforward. Wait, the CSV line is "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25". So the first field is the name, then the rest are numbers. But when splitting on commas, the first field is "NVIDIA GeForce RTX 3060", and the rest are "5800", "12288", "35", "25".
+
+So the first step is to split the input line into parts. But I need to make sure that the line is split correctly. However, the CSV might have fields with commas inside them, but according to the example, the first field is the name, and the rest are numbers, so perhaps the line is correctly formatted with the first field as the name, and the rest as numbers. So splitting on commas once would split into 5 parts. Wait, but the line is "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25". Splitting on commas gives ["NVIDIA GeForce RTX 3060", " 5800", " 12288", " 35", " 25"], but the first element has a space after the comma, but in the example, the first field is "NVIDIA GeForce RTX 3060", then the next is "5800", etc. Wait, in the example given, the line is "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25". So splitting on commas would give ["NVIDIA GeForce RTX 3060", " 5800", " 12288", " 35", " 25"]. But the first element is the name, and the rest are the numbers. So I need to split the line into parts, and then process each part.
+
+Wait, but splitting on commas may not be the correct approach if the line has commas inside the fields. However, the example doesn't have that, so perhaps the CSV is correctly formatted with the first field being the name, and the rest are numbers. So the function can split on commas, and then check that there are exactly 5 parts. But if there are fewer than 5, return an error.
+
+So first, split the line into parts. Then check the length is 5. If not, return Err.
+
+Then, for each part, parse the first part as a String (name), then the next four as u64. But the numbers may have leading or trailing spaces, so need to trim them. For example, " 5800" becomes 5800. So for each of the numeric fields, we need to parse them as u64 after trimming.
+
+So the steps:
+
+1. Split the line into parts using split(',') and collect into a Vec<String>.
+2. Check if the length is 5. If not, return Err("Invalid number of fields").
+3. The first part is the name. The next four are the numeric fields.
+4. Parse each of the numeric fields as u64, trimming whitespace.
+5. If any parsing fails, return Err with the error message.
+6. Return Ok(GpuStats with the parsed values).
+
+But wait, the first field is the name. However, in the example, the first field is "NVIDIA GeForce RTX 3060", which is a string. So the first part is the name, which can contain spaces, but the CSV is split on commas. So that's correct.
+
+Now, for the error handling: if the line has fewer than 5 columns, return Err("Invalid number of fields"). Also, if any of the numeric fields can't be parsed as u64, return Err with the error message.
+
+But the guard rails say that we can't use unwrap(), expect(), or panic!. So all parsing must be done with Result and handle errors.
+
+So the code would be:
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let parts: Vec<&str> = line.split(',').collect();
+    if parts.len() < 5 {
+        return Err("Invalid number of fields".to_string());
+    }
+    
+    let name = parts[0].to_string();
+    let vram_used_mb = parts[1].trim().parse::<u64>().map_err(|e| e.to_string())?;
+    let vram_total_mb = parts[2].trim().parse::<u64>().map_err(|e| e.to_string())?;
+    let temp_c = parts[3].trim().parse::<u32>().map_err(|e| e.to_string())?;
+    let util_pct = parts[4].trim().parse::<u32>().map_err(|e| e.to_string())?;
+    
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}
+
+Wait, but parts[0] is the name. However, the line might have leading or trailing spaces in the name field. But the problem statement says that the CSV line is like the example, so the name is the first field, and the rest are numbers. So trimming the name is not necessary, but the example shows that the name is "NVIDIA GeForce RTX 3060" which is a single field. However, the code as written would take parts[0] as the name, and then trim the numeric fields. So the name is not trimmed, but the numeric fields are. That's correct.
+
+But what if the name has commas? Well, according to the problem statement, the example line is correctly formatted, so we can assume that the first field is the name, and the rest are numbers.
+
+Now, the error messages: the user wants to return Err(String) if columns are fewer than 5 or numbers fail to parse. So for each number, if parsing fails, we return the error message.
+
+But the code above uses the map_err(|e| e.to_string())? which converts the error into a String. So that's correct.
+
+Now, the struct definition:
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+Yes, that's correct.
+
+Now, the traceability comment: include "// trace:implements FR-006" directly before the function declaration.
+
+So the code should be:
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> { ... }
+
+Putting it all together, the code should have the struct and the function. The user wants both inside a code block.
+
+Testing possible errors: what if the line has more than 5 fields? The code checks parts.len() < 5, so returns error. Also, if the numeric fields are not valid, like "abc", then parse will fail and return Err.
+
+Now, the code should be written as per the user's instructions.

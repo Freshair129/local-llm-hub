@@ -1,0 +1,563 @@
+{
+  "metadata": {
+    "startedAt": "2026-10-16T16:58:49.252Z",
+    "ollamaVersion": "0.40.5",
+    "hardware": "NVIDIA GeForce RTX 3060 12GB",
+    "testSetSource": "https://github.com/Freshair129/local-llm-hub/blob/main/scripts/benchmark_mellum_thinking_vs_instruct.mjs",
+    "testSetSha256": "d9142c138d5a40a02064564259104c04c0686ef36eec63a3d031c5dab0087200",
+    "tasks": [
+      "FR-002",
+      "FR-006"
+    ],
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "model": {
+      "key": "llama31-thai-instruct-8b-q4",
+      "label": "Llama-3.1-8B ThaiInstruct i1 Q4_K_M",
+      "tag": "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M"
+    },
+    "profile": {
+      "id": "hf-card-v20261016",
+      "label": "ThaiInstruct card; matched sampler and 16K context",
+      "num_ctx": 16384,
+      "num_predict": 81920,
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "repeat_penalty": 1
+      },
+      "systemPrompt": null,
+      "settingsSource": "The GGUF card provides quantization details but no sampler recommendation; uses the shared Mellum sampler as a documented fallback and a matched 16K task context."
+    },
+    "expectedSamples": 10,
+    "execution": "Exactly one F-store model per run; unload before/after; check /api/ps around every inference; contaminated attempts are discarded and retried up to three times.",
+    "qualityMetric": "Strict pass requires fenced code, Rust compile, all harness tests, adjacent trace comment, and no unwrap/expect/panic!.",
+    "finalResidentModels": [],
+    "interrupted": false,
+    "completedAt": "2026-10-16T17:00:34.098Z",
+    "summaries": [
+      {
+        "task": "FR-002",
+        "n": 5,
+        "compiled": 4,
+        "testsPassed": 1,
+        "strictPass": 1
+      },
+      {
+        "task": "FR-006",
+        "n": 5,
+        "compiled": 5,
+        "testsPassed": 1,
+        "strictPass": 0
+      },
+      {
+        "task": "ALL",
+        "n": 10,
+        "strictPass": 1
+      }
+    ]
+  },
+  "results": [
+    {
+      "task": "FR-002",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "llama31-thai-instruct-8b-q4",
+      "model": "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 9809,
+      "promptTokens": 181,
+      "generatedTokens": 247,
+      "generationTokensPerSecond": 60.8485590223632,
+      "thinkingChars": 0,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+          "size": 7041733099,
+          "sizeVram": 7041733099,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... FAILED\n\nfailures:\n\n---- test_normalize_cases stdout ----\n\nthread 'test_normalize_cases' (39708) panicked at <LOCAL_BENCHMARK_ROOT>\\hf-card-v20261016\\llama31-thai-instruct-8b-q4\\fr-stability\\responses\\FR-002\\42\\test.rs:28:5:\nassertion `left == right` failed\n  left: \"regitryollaaailibraryllaa321b-intruct-0\"\n right: \"llama3.2:1b-instruct\"\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_normalize_cases\n\ntest result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "llama31-thai-instruct-8b-q4",
+      "model": "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 8021,
+      "promptTokens": 181,
+      "generatedTokens": 158,
+      "generationTokensPerSecond": 61.14617341054779,
+      "thinkingChars": 0,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+          "size": 7041733099,
+          "sizeVram": 7041733099,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "llama31-thai-instruct-8b-q4",
+      "model": "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 9593,
+      "promptTokens": 181,
+      "generatedTokens": 257,
+      "generationTokensPerSecond": 60.927328158856746,
+      "thinkingChars": 0,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+          "size": 7041733099,
+          "sizeVram": 7041733099,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... FAILED\n\nfailures:\n\n---- test_normalize_cases stdout ----\n\nthread 'test_normalize_cases' (34752) panicked at <LOCAL_BENCHMARK_ROOT>\\hf-card-v20261016\\llama31-thai-instruct-8b-q4\\fr-stability\\responses\\FR-002\\44\\test.rs:44:5:\nassertion `left == right` failed\n  left: \"llama3.21b-instruct-q40\"\n right: \"llama3.2:1b-instruct\"\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_normalize_cases\n\ntest result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "llama31-thai-instruct-8b-q4",
+      "model": "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 7914,
+      "promptTokens": 181,
+      "generatedTokens": 212,
+      "generationTokensPerSecond": 61.01764186961508,
+      "thinkingChars": 0,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+          "size": 7041733099,
+          "sizeVram": 7041733099,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "llama31-thai-instruct-8b-q4",
+      "model": "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 8224,
+      "promptTokens": 181,
+      "generatedTokens": 175,
+      "generationTokensPerSecond": 60.973442755693,
+      "thinkingChars": 0,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+          "size": 7041733099,
+          "sizeVram": 7041733099,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... FAILED\n\nfailures:\n\n---- test_normalize_cases stdout ----\n\nthread 'test_normalize_cases' (39944) panicked at <LOCAL_BENCHMARK_ROOT>\\hf-card-v20261016\\llama31-thai-instruct-8b-q4\\fr-stability\\responses\\FR-002\\46\\test.rs:21:5:\nassertion `left == right` failed\n  left: \"mradermacher/qwen3.5-9b-coder-gguf:q4_k_m\"\n right: \"mradermacher/qwen3.5-9b-coder-gguf\"\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_normalize_cases\n\ntest result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "llama31-thai-instruct-8b-q4",
+      "model": "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 13043,
+      "promptTokens": 254,
+      "generatedTokens": 458,
+      "generationTokensPerSecond": 60.424634780578096,
+      "thinkingChars": 0,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+          "size": 7041733099,
+          "sizeVram": 7041733099,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... FAILED\n\nfailures:\n\n---- test_parse_valid_csv stdout ----\n\nthread 'test_parse_valid_csv' (38960) panicked at <LOCAL_BENCHMARK_ROOT>\\hf-card-v20261016\\llama31-thai-instruct-8b-q4\\fr-stability\\responses\\FR-006\\42\\test.rs:47:5:\nassertion failed: res.is_ok()\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_parse_valid_csv\n\ntest result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "llama31-thai-instruct-8b-q4",
+      "model": "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 10851,
+      "promptTokens": 254,
+      "generatedTokens": 328,
+      "generationTokensPerSecond": 60.47080578270516,
+      "thinkingChars": 0,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+          "size": 7041733099,
+          "sizeVram": 7041733099,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_valid_csv ... ok\ntest test_parse_invalid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "llama31-thai-instruct-8b-q4",
+      "model": "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 12261,
+      "promptTokens": 254,
+      "generatedTokens": 376,
+      "generationTokensPerSecond": 60.3689538525909,
+      "thinkingChars": 0,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+          "size": 7041733099,
+          "sizeVram": 7041733099,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... FAILED\n\nfailures:\n\n---- test_parse_valid_csv stdout ----\n\nthread 'test_parse_valid_csv' (19064) panicked at <LOCAL_BENCHMARK_ROOT>\\hf-card-v20261016\\llama31-thai-instruct-8b-q4\\fr-stability\\responses\\FR-006\\44\\test.rs:40:5:\nassertion failed: res.is_ok()\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_parse_valid_csv\n\ntest result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "llama31-thai-instruct-8b-q4",
+      "model": "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 11274,
+      "promptTokens": 254,
+      "generatedTokens": 343,
+      "generationTokensPerSecond": 60.55057597190736,
+      "thinkingChars": 0,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+          "size": 7041733099,
+          "sizeVram": 7041733099,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... FAILED\n\nfailures:\n\n---- test_parse_valid_csv stdout ----\n\nthread 'test_parse_valid_csv' (4352) panicked at <LOCAL_BENCHMARK_ROOT>\\hf-card-v20261016\\llama31-thai-instruct-8b-q4\\fr-stability\\responses\\FR-006\\45\\test.rs:30:5:\nassertion failed: res.is_ok()\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_parse_valid_csv\n\ntest result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "llama31-thai-instruct-8b-q4",
+      "model": "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 11752,
+      "promptTokens": 254,
+      "generatedTokens": 374,
+      "generationTokensPerSecond": 60.59419902893745,
+      "thinkingChars": 0,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+          "size": 7041733099,
+          "sizeVram": 7041733099,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... FAILED\n\nfailures:\n\n---- test_parse_valid_csv stdout ----\n\nthread 'test_parse_valid_csv' (23056) panicked at <LOCAL_BENCHMARK_ROOT>\\hf-card-v20261016\\llama31-thai-instruct-8b-q4\\fr-stability\\responses\\FR-006\\46\\test.rs:35:5:\nassertion failed: res.is_ok()\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_parse_valid_csv\n\ntest result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    }
+  ],
+  "contaminationLog": [
+    {
+      "at": "2026-10-16T16:58:59.305Z",
+      "task": "FR-002",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:58:59.489Z",
+      "reason": "foreign model before FR-002|43",
+      "unloaded": [
+        "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:59:07.521Z",
+      "task": "FR-002",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:59:07.711Z",
+      "reason": "foreign model before FR-002|44",
+      "unloaded": [
+        "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:59:17.308Z",
+      "task": "FR-002",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:59:17.484Z",
+      "reason": "foreign model before FR-002|45",
+      "unloaded": [
+        "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:59:25.403Z",
+      "task": "FR-002",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:59:25.598Z",
+      "reason": "foreign model before FR-002|46",
+      "unloaded": [
+        "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:59:33.839Z",
+      "task": "FR-006",
+      "seed": 42,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:59:34.023Z",
+      "reason": "foreign model before FR-006|42",
+      "unloaded": [
+        "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:59:47.073Z",
+      "task": "FR-006",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:59:47.242Z",
+      "reason": "foreign model before FR-006|43",
+      "unloaded": [
+        "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:59:58.104Z",
+      "task": "FR-006",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:59:58.282Z",
+      "reason": "foreign model before FR-006|44",
+      "unloaded": [
+        "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:00:10.559Z",
+      "task": "FR-006",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:00:10.721Z",
+      "reason": "foreign model before FR-006|45",
+      "unloaded": [
+        "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:00:21.998Z",
+      "task": "FR-006",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:00:22.167Z",
+      "reason": "foreign model before FR-006|46",
+      "unloaded": [
+        "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:00:34.095Z",
+      "reason": "final cleanup for hf-card-v20261016 hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M",
+      "unloaded": [
+        "hf.co/mradermacher/Llama-3.1-8B-ThaiInstruct-i1-GGUF:Q4_K_M"
+      ]
+    }
+  ],
+  "infrastructureFailures": []
+}

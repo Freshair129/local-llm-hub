@@ -1,0 +1,63 @@
+Here is the implementation of FR-006:
+```rust
+// trace:implements FR-006
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+impl GpuStats {
+    // trace:implements FR-006
+    pub fn new(name: &str, vram_used_mb: u64, vram_total_mb: u64, temp_c: u32, util_pct: u32) -> Self {
+        GpuStats {
+            name: name.to_string(),
+            vram_used_mb,
+            vram_total_mb,
+            temp_c,
+            util_pct,
+        }
+    }
+}
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // trace:implements FR-006
+    // Split the CSV line into columns
+    let columns: Vec<&str> = line.split(',').collect();
+
+    // Check if columns are fewer than 5
+    if columns.len() < 5 {
+        return Err("Columns are fewer than 5".to_string());
+    }
+
+    // Try to parse each column
+    let name = match columns[0].parse::<String>() {
+        Ok(value) => value,
+        Err(_) => return Err("Failed to parse name".to_string()),
+    };
+    let vram_used_mb = match columns[1].parse::<u64>() {
+        Ok(value) => value,
+        Err(_) => return Err("Failed to parse vram used".to_string()),
+    };
+    let vram_total_mb = match columns[2].parse::<u64>() {
+        Ok(value) => value,
+        Err(_) => return Err("Failed to parse vram total".to_string()),
+    };
+    let temp_c = match columns[3].parse::<u32>() {
+        Ok(value) => value,
+        Err(_) => return Err("Failed to parse temp".to_string()),
+    };
+    let util_pct = match columns[4].parse::<u32>() {
+        Ok(value) => value,
+        Err(_) => return Err("Failed to parse util pct".to_string()),
+    };
+
+    // Return the parsed GpuStats
+    Ok(GpuStats::new(&name, vram_used_mb, vram_total_mb, temp_c, util_pct))
+}
+```
+This implementation follows the exact specification, including guard rails, robust error handling, and traceability. The `parse_gpu_csv` function takes a CSV line as input, splits it into columns, and attempts to parse each column into its respective type. If any parsing fails, it returns an error message. If all parsing succeeds, it creates a new `GpuStats` instance and returns it.

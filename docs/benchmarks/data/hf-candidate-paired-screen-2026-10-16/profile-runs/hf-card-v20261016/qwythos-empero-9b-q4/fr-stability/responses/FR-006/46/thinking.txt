@@ -1,0 +1,23 @@
+The user has asked for a Rust implementation that follows a specific set of requirements labeled FR‑006. The prompt is straightforward: define a `GpuStats` struct with five fields, then implement a function `parse_gpu_csv` that reads a CSV line and returns either a `Result<GpuStats, String>`. The constraints are explicit—no `unwrap()`, no `expect()`, no `panic!`—and I must include a traceability comment right before the function declaration.
+
+First, I need to consider the struct definition. It should be public and derive both `Debug` and `PartialEq` as specified. The fields are `name: String`, `vram_used_mb: u64`, `vram_total_mb: u64`, `temp_c: u32`, and `util_pct: u32`. I’ll write the struct exactly as requested, ensuring each field is public.
+
+Next, the parsing function. The CSV line will be split by commas, so I should use `line.split(',')` and then collect the results into a vector of strings. Because the spec says a line with fewer than five columns must cause an error, I’ll check `parts.len() < 5` and return an error in that case.
+
+Each field needs to be parsed from its string representation. The numeric fields are unsigned integers, so I’ll use `u64::from_str` for the memory values and `u32::from_str` for temperature and utilization. These functions return a `Result`, which I can match on. If any of them fail (e.g., non‑numeric characters), I should propagate an error rather than unwrap. I’ll construct a descriptive error message that includes the original line, the field name, and the invalid input string.
+
+For the `name` field, it’s already a string, so I can just take the first element of the split vector. However, I still need to guard against empty strings or other edge cases; but the spec doesn’t mention validation for the name, so I’ll assume it’s safe after the length check.
+
+Now, I must respect the guard rails: never use `unwrap()`, `expect()`, or `panic!`. Every operation that could fail—splitting, parsing numbers—must be handled with `Result` and matched. I’ll write the match arms to either construct a `GpuStats` instance (using `Ok`) or return an error string (`Err`). This satisfies the requirement to return `Err(String)` on failure.
+
+Finally, I need to include the traceability comment exactly as specified: `// trace:implements FR-006`. This should appear directly before the function declaration, not inside the struct definition or anywhere else.
+
+Putting it all together, the code block will contain:
+1. The struct definition with derives and public fields.
+2. A comment line `// trace:implements FR-006`.
+3. The function signature `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`.
+4. The implementation following the logic above.
+
+I’ll double‑check that each `from_str` call is inside a `match` and that the error messages are clear. I’ll also ensure that the final return statement uses `Ok(GpuStats { … })` with the parsed values. No use of `unwrap()` anywhere—only `match` arms.
+
+Now I can produce the final answer, which will be a Rust code block containing exactly what the user requested.

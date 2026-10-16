@@ -1,0 +1,20 @@
+
+running 1 test
+test test_normalize_cases ... FAILED
+
+failures:
+
+---- test_normalize_cases stdout ----
+
+thread 'test_normalize_cases' (32432) panicked at <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-002\45\test.rs:18:5:
+assertion `left == right` failed
+  left: "hf.co/mradermacher/qwen3.5-9b-coder-gguf"
+ right: "mradermacher/qwen3.5-9b-coder-gguf"
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    test_normalize_cases
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

@@ -1,0 +1,16 @@
+error: unexpected closing delimiter: `]`
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwen36-12b-hightop-q4\fr-stability\responses\FR-006\43\test.rs:17:44
+   |
+12 | pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+   |                                                              - the nearest open delimiter
+13 |     if len(line) < 5) {
+   |                     - missing open `(` for this delimiter
+...
+17 |     let tokens = line.split([",", " ", "-")]
+   |                             -             -^ unexpected closing delimiter
+   |                             |             |
+   |                             |             missing open `(` for this delimiter
+   |                             the nearest open delimiter
+
+error: aborting due to 1 previous error
+

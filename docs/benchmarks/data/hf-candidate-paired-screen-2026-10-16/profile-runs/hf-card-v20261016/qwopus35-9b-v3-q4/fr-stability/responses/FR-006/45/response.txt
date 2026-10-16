@@ -1,0 +1,40 @@
+```rust
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // Split by comma and trim whitespace from each field
+    let fields: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+    
+    // Check if we have at least 5 fields
+    if fields.len() < 5 {
+        return Err(format!("Expected at least 5 fields, got {}", fields.len()));
+    }
+    
+    // Parse each field with proper error handling
+    let name = fields[0].to_string();
+    let vram_used_mb: u64 = fields[1].parse()
+        .map_err(|_| format!("Failed to parse vram_used_mb: '{}' (got: {})", fields[1], fields[1]))?;
+    let vram_total_mb: u64 = fields[2].parse()
+        .map_err(|_| format!("Failed to parse vram_total_mb: '{}' (got: {})", fields[2], fields[2]))?;
+    let temp_c: u32 = fields[3].parse()
+        .map_err(|_| format!("Failed to parse temp_c: '{}' (got: {})", fields[3], fields[3]))?;
+    let util_pct: u32 = fields[4].parse()
+        .map_err(|_| format!("Failed to parse util_pct: '{}' (got: {})", fields[4], fields[4]))?;
+    
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}
+```

@@ -1,0 +1,89 @@
+Okay, I need to implement the FR-006 specification for the Rust code. Let me start by understanding the requirements.
+
+First, the user wants a struct GpuStats with specific fields: name, vram_used_mb, vram_total_mb, temp_c, util_pct. They also want a function parse_gpu_csv that takes a CSV line and returns a Result<GpuStats, String>. The function needs to parse the line into the struct, handling errors if there are fewer than 5 columns or if the numbers can't be parsed.
+
+I remember that in Rust, when parsing strings to numbers, we should use the parse() method, but we need to handle possible errors. Since the guard rails say not to use unwrap() or expect(), I'll have to use match or ? operator with a Result. But the function is supposed to return a Result, so I need to make sure that any parsing error returns an Err with a descriptive message.
+
+The CSV line is split by commas. So first, I'll split the input line into parts. Then check if there are at least 5 parts. If not, return Err. Then, the first part is the name, which is a String, so I can just assign it. The next parts are the numbers. For each of the next four parts, I need to parse them into u64, u64, u32, u32. Wait, the vram_used_mb and vram_total_mb are u64, and temp_c and util_pct are u32. So I need to parse the third, fourth, fifth, and sixth parts accordingly.
+
+But wait, the CSV line example is "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25". So split by commas, we get 5 parts. The first is the name, then the two VRAM values, then temperature, then utilization. So the indices are 0, 1, 2, 3, 4. So the first part is name, then the next four parts are the numbers. So for the line, after splitting, parts[0] is name, parts[1] is vram_used_mb, parts[2] is vram_total_mb, parts[3] is temp_c, parts[4] is util_pct.
+
+So in code:
+
+let parts: Vec<&str> = line.split(',').collect();
+if parts.len() < 5 {
+    return Err("Not enough columns".to_string());
+}
+
+Then, the name is parts[0].clone() or parts[0].to_string()? Wait, the struct's name is a String, so I can just assign it as parts[0].to_string()? Or maybe parts[0].clone()? Well, the split() returns a Vec<&str>, so parts[0] is a &str, and converting it to a String would be safe.
+
+Then, for each of the next four parts, parse them. For the first two parts, which are vram_used and vram_total, they are u64. For the next two, temp_c and util_pct, they are u32.
+
+So:
+
+let vram_used = parts[1].parse::<u64>().map_err(|e| format!("Invalid VRAM used: {}", e))?;
+let vram_total = parts[2].parse::<u64>().map_err(|e| format!("Invalid VRAM total: {}", e))?;
+let temp_c = parts[3].parse::<u32>().map_err(|e| format!("Invalid temperature: {}", e))?;
+let util_pct = parts[4].parse::<u32>().map_err(|e| format!("Invalid utilization: {}", e))?;
+
+Wait, but the problem says that the function should return a Result, so any parsing error in any of these steps will return an Err. So the code should use the ? operator to propagate any errors.
+
+But I need to make sure that all the parsing is done correctly. Also, the function is supposed to return a Result, so the code should handle all possible errors.
+
+Putting this all together, the function would look like:
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // Split the line into parts
+    let parts: Vec<&str> = line.split(',').collect();
+    // Check if there are at least 5 parts
+    if parts.len() < 5 {
+        return Err("Not enough columns".to_string());
+    }
+    // Parse the name
+    let name = parts[0].to_string();
+    // Parse VRAM used
+    let vram_used = parts[1].parse::<u64>().map_err(|e| format!("Invalid VRAM used: {}", e))?;
+    // Parse VRAM total
+    let vram_total = parts[2].parse::<u64>().map_err(|e| format!("Invalid VRAM total: {}", e))?;
+    // Parse temperature
+    let temp_c = parts[3].parse::<u32>().map_err(|e| format!("Invalid temperature: {}", e))?;
+    // Parse utilization
+    let util_pct = parts[4].parse::<u32>().map_err(|e| format!("Invalid utilization: {}", e))?;
+    Ok(GpuStats {
+        name,
+        vram_used_mb: vram_used,
+        vram_total_mb: vram_total,
+        temp_c,
+        util_pct,
+    })
+}
+
+Wait, but the struct fields are named vram_used_mb, vram_total_mb, temp_c, util_pct. So the code above correctly assigns them.
+
+Now, the user also wants the trace comment: // trace:implements FR-006 directly before the function declaration.
+
+So the code should have that comment.
+
+Also, the struct definition is given, so I need to include that as well.
+
+So the complete code would be:
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // code as above
+}
+
+I need to make sure that the struct is defined first, then the function. Also, the function returns a Result, and all possible errors are handled.
+
+Testing some edge cases: if the line has less than 5 parts, return Err. If any of the numbers can't be parsed, return Err with the appropriate message.
+
+I think that's all. Now, I'll write the code accordingly.

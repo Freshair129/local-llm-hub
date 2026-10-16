@@ -1,0 +1,31 @@
+I need to generate Rust code that defines a `GpuStats` struct and a `parse_gpu_csv` function, adhering to several constraints:
+
+1. **Struct definition**: The struct must be exactly as specified: `#[derive(Debug, PartialEq)] pub struct GpuStats { pub name: String, pub vram_used_mb: u64, pub vram_total_mb: u64, pub temp_c: u32, pub util_pct: u32 }`.
+
+2. **Function signature**: Must be `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`.
+
+3. **Parsing logic**: The CSV line format is `"name, vram_used_mb, vram_total_mb, temp_c, util_pct"`. I need to split by commas, trim whitespace, and parse each field into the appropriate type (`String`, `u64`, `u64`, `u32`, `u32`). If any field is missing (fewer than 5 columns) or parsing fails, return an error with a descriptive message.
+
+4. **Error handling**: No use of `.unwrap()`, `.expect()`, or `panic!`. Must use `.ok()` and match on the result of `trim().parse::<u64>().ok()` for numeric fields to ensure robust error handling.
+
+5. **Guard rails**: The prompt mentions "STRICTLY FORBIDDEN to use unwrap(), expect(), or panic!". So I will avoid any `.unwrap()` calls. Using `.ok()` and pattern matching on `None` is fine.
+
+6. **Traceability**: Include a comment `// trace:implements FR-006` directly before the function declaration. This must be placed exactly as requested, not inside the struct or elsewhere.
+
+7. **Output format**: The final answer should contain both the struct and the function inside a single ```rust code block. No additional explanations or markdown outside the code block.
+
+Now I will construct the code:
+
+- Write the struct definition first, matching the exact field order and types.
+- Add the `parse_gpu_csv` function with the trace comment.
+- Inside the function:
+  - Split the line by commas using `line.split(',')`.
+  - Ensure there are at least 5 parts; otherwise return an error.
+  - For each part, trim whitespace and attempt to parse the numeric fields.
+  - Use `.ok()` on `parse::<u64>()` for `vram_used_mb`, `vram_total_mb`, `temp_c`, and `util_pct`. If any returns `None`, return an appropriate error string.
+  - The name field is already a `String` after trimming, so just take the first part after splitting.
+- Return `Ok(GpuStats { ... })`.
+
+I will double-check that I didn't use `.unwrap()` anywhere. The parsing of numeric fields uses `.ok()`, and I'm matching on the result of `.trim().parse::<u64>().ok()`. That satisfies the guard rails.
+
+Now I will produce the final code block with exactly the required content, no extra commentary.

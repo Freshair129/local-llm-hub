@@ -1,0 +1,107 @@
+*   Role: AI Coder under STD-003 and ADR-100 guard rails.
+    *   Task: Implement FR-006 based on specific requirements.
+    *   Requirements:
+        1.  Define `GpuStats` struct with specific fields (`name`, `vram_used_mb`, `vram_total_mb`, `temp_c`, `util_pct`).
+        2.  Function signature: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`.
+        3.  Input format: CSV line (e.g., "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25").
+        4.  Error handling: Return `Err(String)` for missing columns or parsing failures.
+        5.  Safety: No `unwrap()`, `expect()`, or `panic!`.
+        6.  Traceability: Comment `// trace:implements FR-006` before the function.
+        7.  Output: Both struct and function in a single code block.
+
+    *   *Struct Definition:*
+        ```rust
+        #[derive(Debug, PartialEq)]
+        pub struct GpuStats {
+            pub name: String,
+            pub vram_used_mb: u64,
+            pub vram_total_mb: u64,
+            pub temp_c: u32,
+            pub util_pct: u32,
+        }
+        ```
+
+    *   *Function Logic:*
+        *   Split the string by comma.
+        *   Trim whitespace from each part.
+        *   Check if there are at least 5 parts.
+        *   Parse the first part as `String`.
+        *   Parse the next 4 parts as `u64`, `u64`, `u32`, `u32`.
+        *   Use `map_err` or `match` to convert `ParseIntError` to `String`.
+
+    *   *Refining Parse Logic (Avoiding `unwrap`):*
+        ```rust
+        let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+        if parts.len() < 5 {
+            return Err("Insufficient columns".to_string());
+        }
+        let name = parts[0].to_string();
+        let vram_used = parts[1].parse::<u64>().map_err(|e| e.to_string())?;
+        let vram_total = parts[2].parse::<u64>().map_err(|e| e.to_string())?;
+        let temp = parts[3].parse::<u32>().map_err(|e| e.to_string())?;
+        let util = parts[4].parse::<u32>().map_err(|e| e.to_string())?;
+        ```
+
+    *   *Wait, the prompt says "Return Err(String) if columns are fewer than 5".*
+        *   The logic above handles that.
+
+    *   *Wait, the prompt says "Return Err(String) if numbers fail to parse".*
+        *   `map_err(|e| e.to_string())?` handles that perfectly.
+
+    *   *Traceability:*
+        *   `// trace:implements FR-006`
+
+    *   *Guard Rails Check:*
+        *   No `unwrap()`? Checked.
+        *   No `expect()`? Checked.
+        *   No `panic!`? Checked.
+
+    *   *Formatting:*
+        *   Ensure `pub` visibility for both.
+        *   Ensure `derive` macros.
+
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats {
+        pub name: String,
+        pub vram_used_mb: u64,
+        pub vram_total_mb: u64,
+        pub temp_c: u32,
+        pub util_pct: u32,
+    }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+        let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+
+        if parts.len() < 5 {
+            return Err("Error: Line does not contain at least 5 columns".to_string());
+        }
+
+        let name = parts[0].to_string();
+        let vram_used_mb = parts[1].parse::<u64>()
+            .map_err(|e| format!("Failed to parse vram_used_mb: {}", e))?;
+        let vram_total_mb = parts[2].parse::<u64>()
+            .map_err(|e| format!("Failed to parse vram_total_mb: {}", e))?;
+        let temp_c = parts[3].parse::<u32>()
+            .map_err(|e| format!("Failed to parse temp_c: {}", e))?;
+        let util_pct = parts[4].parse::<u32>()
+            .map_err(|e| format!("Failed to parse util_pct: {}", e))?;
+
+        Ok(GpuStats {
+            name,
+            vram_used_mb,
+            vram_total_mb,
+            temp_c,
+            util_pct,
+        })
+    }
+    ```
+
+    *   Struct defined? Yes.
+    *   Function signature correct? Yes.
+    *   CSV line example handled? Yes.
+    *   Robust error handling? Yes (length check + parse errors).
+    *   No unwrap/expect/panic? Yes.
+    *   Traceability comment included? Yes.
+    *   Both items in code block? Yes.

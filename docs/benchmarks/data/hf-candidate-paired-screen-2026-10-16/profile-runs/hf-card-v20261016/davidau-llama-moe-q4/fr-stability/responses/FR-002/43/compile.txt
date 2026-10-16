@@ -1,0 +1,41 @@
+error[E0716]: temporary value dropped while borrowed
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-002\43\test.rs:7:16
+   |
+ 7 |         raw = &raw[15..].to_string();
+   |                ^^^^^^^^^^^^^^^^^^^^^- temporary value is freed at the end of this statement
+   |                |
+   |                creates a temporary value which is freed while still in use
+...
+13 |     let mut raw = raw.clone();
+   |                   --- borrow later used here
+   |
+   = note: consider using a `let` binding to create a longer lived value
+
+error[E0716]: temporary value dropped while borrowed
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-002\43\test.rs:9:16
+   |
+ 9 |         raw = &raw[8..].to_string();
+   |                ^^^^^^^^^^^^^^^^^^^^- temporary value is freed at the end of this statement
+   |                |
+   |                creates a temporary value which is freed while still in use
+...
+13 |     let mut raw = raw.clone();
+   |                   --- borrow later used here
+   |
+   = note: consider using a `let` binding to create a longer lived value
+
+error[E0716]: temporary value dropped while borrowed
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-002\43\test.rs:16:20
+   |
+15 |         while raw.ends_with(suffix) {
+   |               --- borrow later used here
+16 |             raw = &raw[..raw.len() - suffix.len()].to_string();
+   |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^- temporary value is freed at the end of this statement
+   |                    |
+   |                    creates a temporary value which is freed while still in use
+   |
+   = note: consider using a `let` binding to create a longer lived value
+
+error: aborting due to 3 previous errors
+
+For more information about this error, try `rustc --explain E0716`.

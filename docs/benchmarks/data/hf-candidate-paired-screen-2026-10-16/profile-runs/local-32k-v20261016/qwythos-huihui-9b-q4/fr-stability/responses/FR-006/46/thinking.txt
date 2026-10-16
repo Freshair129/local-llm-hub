@@ -1,0 +1,146 @@
+The task is to produce a Rust implementation that satisfies a fairly specific set of guard rails and traceability requirements. The specification is given, and I need to output both the struct definition and the function definition inside a single ```rust code block.
+
+Let me parse the specification step by step:
+
+1. **Define struct**: 
+   ```rust
+   #[derive(Debug, PartialEq)]
+   pub struct GpuStats {
+       pub name: String,
+       pub vram_used_mb: u64,
+       pub vram_total_mb: u64,
+       pub temp_c: u32,
+       pub util_pct: u32,
+   }
+   ```
+   This is straightforward. The struct has five fields, each with explicit types. The derive macros are already there.
+
+2. **Function signature**:
+   ```rust
+   pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>
+   ```
+   The function takes a reference to a string slice and returns a Result with the GpuStats struct on success and a String error on failure. This matches the spec.
+
+3. **Parsing logic**:
+   The CSV line format is `"NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"`. That means the first field is a name (a String), the next three are numeric (VRAM used, VRAM total, temperature), and the last is utilization percentage. The spec says "Given a CSV line like ... parse it into GpuStats." So we need to split on commas, trim whitespace, and convert the numeric fields.
+
+   The robust error handling requirement: Return `Err(String)` if columns are fewer than 5 or if numbers fail to parse. So we need to handle cases where the split yields fewer than five items, and also handle parsing failures. The guard rails say we must avoid `unwrap()`, `expect()`, and `panic!`. That means we must use `unwrap_or_else`, `unwrap_or`, `unwrap_or_default`, or pattern matching, or `map_err`, `map`, `and_then`, etc.
+
+   Let's think about the parsing flow:
+   - Split `line` by `,`. That yields a `Vec<&str>`.
+   - Trim each element (or at least the numeric ones) to remove spaces.
+   - Check that we have at least 5 elements. If not, return an error.
+   - For the first element (name), we can just keep it as a `String` (or we could trim it, but the spec example includes a space after the comma, so trimming may be safer).
+   - For the next three numeric fields, we need to parse them into their respective types. Since the spec says `vram_used_mb: u64`, `vram_total_mb: u64`, `temp_c: u32`, and `util_pct: u32`, we need to handle possible overflow or non-numeric strings.
+
+   However, the spec says "if numbers fail to parse". This could mean we should attempt to parse each numeric field, and if any fails, return an error with a descriptive message. Since we are forbidden to use `unwrap()`, we could use `parse::<u64>()` which returns `Result<u64, ParseIntError>`. We could chain `map_err` to convert that into a String.
+
+   Let's design the function step by step:
+
+   ```rust
+   pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+       let parts: Vec<&str> = line.split(',').collect();
+       if parts.len() < 5 {
+           return Err(format!("Expected 5 columns, got {}", parts.len()));
+       }
+
+       let name = parts[0].to_string();
+       let vram_used = parts[1].parse::<u64>()?;
+       let vram_total = parts[2].parse::<u64>()?;
+       let temp = parts[3].parse::<u32>()?;
+       let util = parts[4].parse::<u32>()?;
+
+       Ok(GpuStats { name, vram_used, vram_total, temp, util })
+   }
+   ```
+
+   This uses `?` to propagate the parse errors. The `?` operator is allowed, and it returns the underlying `ParseIntError` which we need to convert to a `String`. Since the function signature expects `Result<GpuStats, String>`, we can either use `map_err` on each parse to convert the error, or we can use `parse::<u64>()` and then `map_err(|e| e.to_string())`. However, the `?` operator will automatically convert the error to the outer error type if we have a closure or something. Actually, `?` works with any error type that implements `Into<Error>`. Since `String` implements `From<ParseIntError>`? Not directly, but we can use `parse::<u64>().map_err(|e| e.to_string())` and then use `?` to propagate that.
+
+   The spec says "if columns are fewer than 5 or numbers fail to parse". So the `?` approach will handle the numeric parsing. For the name field, we could just use `to_string()` which never fails, but we might want to trim it. The spec example includes a trailing space after the name, but that's just formatting. It's safe to just keep it as is, or we could `trim()` it. The spec doesn't explicitly say to trim, but it's a nice touch.
+
+   Let's incorporate trimming for the name and also for the numeric fields to handle optional spaces. For numeric fields, we can use `parse::<u64>()` after trimming. That yields a `Result<u64, ParseIntError>`. To map that error into a `String`, we can use `map_err(|e| e.to_string())`. Or we could just use `parse::<u64>()` and let `?` propagate the error, but we need the outer error type to be `String`. Since `?` will convert the `ParseIntError` to `String` if we have a closure that returns `String`, but the simplest is to use `parse::<u64>()` and then `map_err(|e| e.to_string())`. That yields a `Result<u64, String>`. Then we can combine all four fields.
+
+   To avoid using `unwrap()` or `expect()`, we could use `map_or` or pattern matching. However, the spec only forbids `unwrap()`, `expect()`, and `panic!`. So we can use `map_err` freely.
+
+   Let's refine the function:
+
+   ```rust
+   pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+       let parts: Vec<&str> = line.split(',').collect();
+       if parts.len() < 5 {
+           return Err(format!("Expected 5 columns, got {}", parts.len()));
+       }
+
+       let name = parts[0].trim().to_string();
+       let vram_used = parts[1].trim().parse::<u64>()
+           .map_err(|e| e.to_string())?;
+       let vram_total = parts[2].trim().parse::<u64>()
+           .map_err(|e| e.to_string())?;
+       let temp = parts[3].trim().parse::<u32>()
+           .map_err(|e| e.to_string())?;
+       let util = parts[4].trim().parse::<u32>()
+           .map_err(|e| e.to_string())?;
+
+       Ok(GpuStats { name, vram_used, vram_total, temp, util })
+   }
+   ```
+
+   This uses `trim()` to handle spaces, and `map_err` to convert parse errors to a descriptive `String`. The `?` operator then propagates that error. The guard rails are satisfied because we never call `unwrap()`, `expect()`, or `panic!`.
+
+   Now, the traceability requirement: Include comment `// trace:implements FR-006` directly before the function declaration. So the line should be:
+
+   ```rust
+   // trace:implements FR-006
+   pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+   ```
+
+   That matches the spec.
+
+   Finally, the output should be a single code block containing both the struct and the function. The struct is defined before the function, as typical.
+
+   Let's assemble the final code:
+
+   ```rust
+   #[derive(Debug, PartialEq)]
+   pub struct GpuStats {
+       pub name: String,
+       pub vram_used_mb: u64,
+       pub vram_total_mb: u64,
+       pub temp_c: u32,
+       pub util_pct: u32,
+   }
+
+   // trace:implements FR-006
+   pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+       let parts: Vec<&str> = line.split(',').collect();
+       if parts.len() < 5 {
+           return Err(format!("Expected 5 columns, got {}", parts.len()));
+       }
+
+       let name = parts[0].trim().to_string();
+       let vram_used = parts[1].trim().parse::<u64>()
+           .map_err(|e| e.to_string())?;
+       let vram_total = parts[2].trim().parse::<u64>()
+           .map_err(|e| e.to_string())?;
+       let temp = parts[3].trim().parse::<u32>()
+           .map_err(|e| e.to_string())?;
+       let util = parts[4].trim().parse::<u32>()
+           .map_err(|e| e.to_string())?;
+
+       Ok(GpuStats { name, vram_used, vram_total, temp, util })
+   }
+   ```
+
+   This seems to satisfy all the requirements. Let's double-check each point:
+
+   1. Struct defined with `#[derive(Debug, PartialEq)]` and the exact fields: yes.
+   2. Function signature `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`: yes.
+   3. Parsing logic: splits on commas, trims, parses numeric fields, returns `GpuStats`: yes.
+   4. Robust error handling: returns `Err` if fewer than 5 columns or if any numeric parse fails: yes.
+   5. Guard rails: no `unwrap()`, `expect()`, or `panic!` used: we used `map_err`, `trim()`, and `?`. Good.
+   6. Traceability: comment `// trace:implements FR-006` directly before the function: yes.
+   7. Output both struct and function inside a single ````rust` code block: yes.
+
+   I think that's the final answer.
+
+   Let's present it.

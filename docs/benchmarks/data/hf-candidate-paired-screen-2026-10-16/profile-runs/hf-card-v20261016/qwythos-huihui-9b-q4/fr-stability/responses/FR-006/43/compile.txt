@@ -1,0 +1,95 @@
+error[E0277]: `?` couldn't convert the error to `String`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-006\43\test.rs:19:48
+   |
+11 | pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+   |                                     ------------------------ expected `String` because of this
+...
+19 |     let vram_used_mb = tokens[1].parse::<u64>()?;
+   |                                  --------------^ the trait `From<ParseIntError>` is not implemented for `String`
+   |                                  |
+   |                                  this can't be annotated with `?` because it has type `Result<_, ParseIntError>`
+   |
+   = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+   = help: `String` implements trait `From<T>`:
+             From<&String>
+             From<&mut str>
+             From<&str>
+             From<Box<str>>
+             From<Cow<'_, str>>
+             From<char>
+
+error[E0277]: `?` couldn't convert the error to `String`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-006\43\test.rs:20:49
+   |
+11 | pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+   |                                     ------------------------ expected `String` because of this
+...
+20 |     let vram_total_mb = tokens[2].parse::<u64>()?;
+   |                                   --------------^ the trait `From<ParseIntError>` is not implemented for `String`
+   |                                   |
+   |                                   this can't be annotated with `?` because it has type `Result<_, ParseIntError>`
+   |
+   = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+   = help: `String` implements trait `From<T>`:
+             From<&String>
+             From<&mut str>
+             From<&str>
+             From<Box<str>>
+             From<Cow<'_, str>>
+             From<char>
+
+error[E0277]: `?` couldn't convert the error to `String`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-006\43\test.rs:21:42
+   |
+11 | pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+   |                                     ------------------------ expected `String` because of this
+...
+21 |     let temp_c = tokens[3].parse::<u32>()?;
+   |                            --------------^ the trait `From<ParseIntError>` is not implemented for `String`
+   |                            |
+   |                            this can't be annotated with `?` because it has type `Result<_, ParseIntError>`
+   |
+   = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+   = help: `String` implements trait `From<T>`:
+             From<&String>
+             From<&mut str>
+             From<&str>
+             From<Box<str>>
+             From<Cow<'_, str>>
+             From<char>
+
+error[E0277]: `?` couldn't convert the error to `String`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-006\43\test.rs:22:44
+   |
+11 | pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+   |                                     ------------------------ expected `String` because of this
+...
+22 |     let util_pct = tokens[4].parse::<u32>()?;
+   |                              --------------^ the trait `From<ParseIntError>` is not implemented for `String`
+   |                              |
+   |                              this can't be annotated with `?` because it has type `Result<_, ParseIntError>`
+   |
+   = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+   = help: `String` implements trait `From<T>`:
+             From<&String>
+             From<&mut str>
+             From<&str>
+             From<Box<str>>
+             From<Cow<'_, str>>
+             From<char>
+
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-006\43\test.rs:25:9
+   |
+25 |         name,
+   |         ^^^^ expected `String`, found `&str`
+   |
+help: try using a conversion method
+   |
+25 |         name: name.to_string(),
+   |         +++++     ++++++++++++
+
+error: aborting due to 5 previous errors
+
+Some errors have detailed explanations: E0277, E0308.
+For more information about an error, try `rustc --explain E0277`.

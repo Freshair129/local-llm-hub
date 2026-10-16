@@ -1,0 +1,27 @@
+// trace:implements FR-006
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let parts: Vec<&str> = line.split(',').collect();
+    if parts.len() < 5 {
+        return Err(format!("expected 5 columns, found {}", parts.len()));
+    }
+    let name = parts[0].trim();
+    let vram_used = parts[1].trim();
+    let vram_total = parts[2].trim();
+    let temp = parts[3].trim();
+    let util = parts[4].trim();
+    Ok(GpuStats {
+        name: name.to_string(),
+        vram_used_mb: vram_used.parse::<u64>()?,
+        vram_total_mb: vram_total.parse::<u64>()?,
+        temp_c: temp.parse::<u32>()?,
+        util_pct: util.parse::<u32>()?,
+    })
+}

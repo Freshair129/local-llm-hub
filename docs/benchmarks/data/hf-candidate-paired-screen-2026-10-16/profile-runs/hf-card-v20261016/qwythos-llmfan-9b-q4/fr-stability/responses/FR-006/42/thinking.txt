@@ -1,0 +1,108 @@
+Alright, I need to implement the specification for FR-006 within the Rust code block. Let me walk through each requirement step-by-step.
+
+First, define the struct `GpuStats`. The spec says:
+```rust
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+```
+I'll copy that exactly.
+
+Next, the function signature: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`. That matches the spec.
+
+Now, the parsing logic. The input is a CSV line like `"NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"`. I need to split it by commas. However, the name field may contain spaces (e.g., "NVIDIA GeForce RTX 3060"), so a simple `split(", ")` would work, but I must also handle cases where there are fewer than 5 columns. The spec says: "Robust error handling: Return Err(String) if columns are fewer than 5 or numbers fail to parse."
+
+I should split the line by commas and then iterate over each part. For each part that is supposed to be a number, I need to trim whitespace and parse it into the appropriate integer type (`u64` for VRAM fields, `u32` for temperature and utilization). If any of these parses fail (e.g., empty string or non-numeric), I should return an error.
+
+I also need to ensure that there are exactly 5 parts after splitting. So I'll check the length of the split result; if it's less than 5, return an error with a descriptive message.
+
+Now, about guard rails: The spec says "STRICTLY FORBIDDEN to use unwrap(), expect(), or panic! Return Err instead." That means I must not call `.unwrap()` on any `Result` or `Option`. I also need to avoid using `.expect()` which can panic. So for parsing numbers, I'll use `trim().parse::<u64>()` and then match on the result: if it's `Ok(val)`, use the value; if it's `Err(_)`, return a formatted error string like `"Failed to parse vram_used_mb: <value>"`. Similarly for `vram_total_mb`, `temp_c`, and `util_pct`, but note that `temp_c` and `util_pct` are `u32`, so I'll use `parse::<u32>()`.
+
+I also need to handle the case where a field is empty. Since `split(", ")` will produce an empty string for trailing commas, I should treat that as a parse error (the `parse()` will fail on an empty string, returning `Err(ParseIntError)`). That's fine; I'll just return an error with a message indicating which field failed.
+
+Now, the function body:
+```rust
+let parts = line.split(', ');
+if parts.len() < 5 {
+    return Err(format!("Invalid CSV: expected 5 columns, got {}", parts.len()));
+}
+let name = parts[0].trim().to_string(); // name can be any string, so we just trim whitespace.
+// parse numeric fields
+let vram_used_mb = match parts[1].trim().parse::<u64>() {
+    Ok(v) => v,
+    Err(_) => return Err(format!("Failed to parse vram_used_mb: {}", parts[1])),
+};
+let vram_total_mb = match parts[2].trim().parse::<u64>() {
+    Ok(v) => v,
+    Err(_) => return Err(format!("Failed to parse vram_total_mb: {}", parts[2])),
+};
+let temp_c = match parts[3].trim().parse::<u32>() {
+    Ok(v) => v,
+    Err(_) => return Err(format!("Failed to parse temp_c: {}", parts[3])),
+};
+let util_pct = match parts[4].trim().parse::<u32>() {
+    Ok(v) => v,
+    Err(_) => return Err(format!("Failed to parse util_pct: {}", parts[4])),
+};
+Ok(GpuStats { name, vram_used_mb, vram_total_mb, temp_c, util_pct })
+```
+
+Wait, the spec says "Return Err(String) if columns are fewer than 5 or numbers fail to parse." I've already handled that with matches and error messages. The name field is just trimmed and converted to a string; there is no numeric parsing for it, so that's fine.
+
+Now, the traceability requirement: "Include comment '// trace:implements FR-006' directly before function declaration." So I need to place that comment right before `pub fn parse_gpu_csv`.
+
+Also, the spec says "Output BOTH 'pub struct GpuStats' and 'pub fn parse_gpu_csv' inside the ```rust code block." That means I should not output any extra markdown outside the code block. Just the code block with both definitions.
+
+Now, I need to ensure that I don't use any other guard rails (like STD-003 or ADR-100). The spec only mentions that I must follow FR-006, and the guard rails are just a reminder not to use unwrap/expect/panic. So I'll just implement as above.
+
+One more detail: The `split(", ")` will treat any spaces after commas as part of the delimiter. In the example line "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25", there is a space after each comma. That's fine, but if there are extra spaces inside the name (e.g., "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25" vs "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"), the `split(", ")` will correctly separate them. However, if there are multiple spaces after a comma, it might be better to split by `,` and then trim each part. But the spec says "Given a CSV line like ...", and the example uses a single space after commas. I think splitting by `, ` is acceptable as per the spec's exact wording. To be safe, I could split by `,` and then trim each part, but that might be overcomplicating. Since the spec expects exactly that pattern, I'll stick with `split(", ")`.
+
+Now, final check: Are there any additional requirements? The spec says "Traceability: Include comment '// trace:implements FR-006' directly before function declaration." So I must ensure that the comment appears exactly as written, not just a generic comment. Also, the function signature should be exactly `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`. That matches.
+
+Now, let's write the code block.
+
+```rust
+// trace:implements FR-006
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let parts = line.split(", ");
+    if parts.len() < 5 {
+        return Err(format!("Invalid CSV: expected 5 columns, got {}", parts.len()));
+    }
+    let name = parts[0].trim().to_string();
+    let vram_used_mb = match parts[1].trim().parse::<u64>() {
+        Ok(v) => v,
+        Err(_) => return Err(format!("Failed to parse vram_used_mb: {}", parts[1])),
+    };
+    let vram_total_mb = match parts[2].trim().parse::<u64>() {
+        Ok(v) => v,
+        Err(_) => return Err(format!("Failed to parse vram_total_mb: {}", parts[2])),
+    };
+    let temp_c = match parts[3].trim().parse::<u32>() {
+        Ok(v) => v,
+        Err(_) => return Err(format!("Failed to parse temp_c: {}", parts[3])),
+    };
+    let util_pct = match parts[4].trim().parse::<u32>() {
+        Ok(v) => v,
+        Err(_) => return Err(format!("Failed to parse util_pct: {}", parts[4])),
+    };
+    Ok(GpuStats { name, vram_used_mb, vram_total_mb, temp_c, util_pct })
+}
+```
+
+I think that satisfies all the requirements. Let me double check the guard rails: no `.unwrap()`, no `.expect()`, no `panic!`. All good. The comment is placed exactly before the function declaration. The struct definition matches the spec. The function returns a `Result<GpuStats, String>` and handles errors appropriately.
+
+Thus, the final answer should be this code block.

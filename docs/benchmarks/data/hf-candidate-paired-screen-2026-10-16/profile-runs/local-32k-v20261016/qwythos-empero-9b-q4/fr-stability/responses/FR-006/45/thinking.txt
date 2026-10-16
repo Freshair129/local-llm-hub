@@ -1,0 +1,5 @@
+The user wants a Rust implementation of a specific feature request (FR‑006). I need to output both the struct definition and the parsing function, each enclosed in a markdown code block with the language tag `rust`. The struct should be exactly as specified, with the derive macros and fields. The function must have the signature `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`, include a traceability comment `// trace:implements FR-006` right before the function declaration, and must not use `unwrap()`, `expect()`, or `panic!`. It should return an `Err(String)` if there are fewer than five columns or if any numeric conversion fails.
+
+I will write the struct first, then the function. Inside the function, I’ll split the line by commas, check the length, then convert each field using `parse::<u64>()` or `parse::<u32>()`, returning a `Result` with an appropriate error message on failure. This satisfies the guard rails.
+
+Now I’ll produce the final answer with the two code blocks.

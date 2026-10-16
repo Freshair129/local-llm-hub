@@ -1,0 +1,27 @@
+error[E0425]: cannot find function `normalize_model_name` in this scope
+ --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwen36-12b-hightop-q4\fr-stability\responses\FR-002\43\test.rs:5:16
+  |
+5 |     assert_eq!(normalize_model_name("registry.ollama.ai/library/llama3.2:1b-instruct-q4_0"), "llama3.2:1b-instruct");
+  |                ^^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `normalize_model_name` in this scope
+ --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwen36-12b-hightop-q4\fr-stability\responses\FR-002\43\test.rs:6:16
+  |
+6 |     assert_eq!(normalize_model_name("hf.co/mradermacher/Qwen3.5-9B-Coder-GGUF:Q4_K_M"), "mradermacher/qwen3.5-9b-coder-gguf");
+  |                ^^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `normalize_model_name` in this scope
+ --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwen36-12b-hightop-q4\fr-stability\responses\FR-002\43\test.rs:7:16
+  |
+7 |     assert_eq!(normalize_model_name("library/gemma4:12b"), "gemma4:12b");
+  |                ^^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error[E0425]: cannot find function `normalize_model_name` in this scope
+ --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwen36-12b-hightop-q4\fr-stability\responses\FR-002\43\test.rs:8:16
+  |
+8 |     assert_eq!(normalize_model_name("custom-model:latest"), "custom-model:latest");
+  |                ^^^^^^^^^^^^^^^^^^^^ not found in this scope
+
+error: aborting due to 4 previous errors
+
+For more information about this error, try `rustc --explain E0425`.

@@ -1,0 +1,70 @@
+The user wants me to implement a Rust struct and function according to specific guidelines. Let me create the complete implementation with the required attributes:
+
+1. The GpuStats struct with proper fields
+2. The parse_gpu_csv function that strictly follows the error handling rules
+3. The traceability comment
+4. Both items inside a code block
+5. No unwrap(), expect(), or panic!() - only proper error returning
+
+Let me implement this carefully:
+
+```rust
+// trace:implements FR-006
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let parts: Vec<&str> = line.split(',').collect();
+    
+    if parts.len() < 5 {
+        return Err(format!("CSV line has only {} columns, but 5 are required", parts.len()));
+    }
+    
+    let name = parts[0].trim();
+    let vram_used_str = parts[1].trim();
+    let vram_total_str = parts[2].trim();
+    let temp_str = parts[3].trim();
+    let util_str = parts[4].trim();
+    
+    let vram_used = match vram_used_str.parse::<u64>() {
+        Ok(val) => val,
+        Err(_) => return Err("Failed to parse VRAM used as u64".to_string()),
+    };
+    
+    let vram_total = match vram_total_str.parse::<u64>() {
+        Ok(val) => val,
+        Err(_) => return Err("Failed to parse VRAM total as u64".to_string()),
+    };
+    
+    let temp = match temp_str.parse::<u32>() {
+        Ok(val) => val,
+        Err(_) => return Err("Failed to parse temperature as u32".to_string()),
+    };
+    
+    let util = match util_str.parse::<u32>() {
+        Ok(val) => val,
+        Err(_) => return Err("Failed to parse utilization as u32".to_string()),
+    };
+    
+    Ok(GpuStats {
+        name: name.to_string(),
+        vram_used_mb: vram_used,
+        vram_total_mb: vram_total,
+        temp_c: temp,
+        util_pct: util,
+    })
+}
+```
+
+I'll verify the implementation:
+
+1. Struct has all required fields with correct types
+2. Function returns Result as specified
+3. Proper error handling without using unwrap(), expect(), or panic!()
+4. Traceability comment is in the correct format
+5. Both items are included in the code block

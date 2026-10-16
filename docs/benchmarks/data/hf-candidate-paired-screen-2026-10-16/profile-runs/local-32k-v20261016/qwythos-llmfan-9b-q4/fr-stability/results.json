@@ -1,0 +1,563 @@
+{
+  "metadata": {
+    "startedAt": "2026-10-16T14:58:15.065Z",
+    "ollamaVersion": "0.40.5",
+    "hardware": "NVIDIA GeForce RTX 3060 12GB",
+    "testSetSource": "https://github.com/Freshair129/local-llm-hub/blob/main/scripts/benchmark_mellum_thinking_vs_instruct.mjs",
+    "testSetSha256": "d9142c138d5a40a02064564259104c04c0686ef36eec63a3d031c5dab0087200",
+    "tasks": [
+      "FR-002",
+      "FR-006"
+    ],
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "model": {
+      "key": "qwythos-llmfan-9b-q4",
+      "label": "llmfan46 Qwythos 9B Uncensored Heretic Q4_K_M",
+      "tag": "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+      "quant": "Q4_K_M"
+    },
+    "profile": {
+      "id": "local-32k-v20261016",
+      "label": "RTX 3060 12GB: shared Mellum sampler with 32K context",
+      "num_ctx": 32768,
+      "num_predict": 81920,
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "repeat_penalty": 1
+      },
+      "systemPrompt": null,
+      "settingsSource": "Existing Mellum-matched sampling profile; context raised from 16K for this hardware profile."
+    },
+    "expectedSamples": 10,
+    "execution": "Exactly one F-store model per run; unload before/after; check /api/ps around every inference; contaminated attempts are discarded and retried up to three times.",
+    "qualityMetric": "Strict pass requires fenced code, Rust compile, all harness tests, adjacent trace comment, and no unwrap/expect/panic!.",
+    "finalResidentModels": [],
+    "interrupted": false,
+    "completedAt": "2026-10-16T15:54:46.997Z",
+    "summaries": [
+      {
+        "task": "FR-002",
+        "n": 5,
+        "compiled": 0,
+        "testsPassed": 0,
+        "strictPass": 0
+      },
+      {
+        "task": "FR-006",
+        "n": 5,
+        "compiled": 4,
+        "testsPassed": 2,
+        "strictPass": 1
+      },
+      {
+        "task": "ALL",
+        "n": 10,
+        "strictPass": 1
+      }
+    ]
+  },
+  "results": [
+    {
+      "task": "FR-002",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "qwythos-llmfan-9b-q4",
+      "model": "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 762014,
+      "promptTokens": 277,
+      "generatedTokens": 32491,
+      "generationTokensPerSecond": 44.557837259701266,
+      "thinkingChars": 114949,
+      "residency": [
+        {
+          "name": "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+          "size": 7163084798,
+          "sizeVram": 7163084798,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": false,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "qwythos-llmfan-9b-q4",
+      "model": "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 118553,
+      "promptTokens": 277,
+      "generatedTokens": 4226,
+      "generationTokensPerSecond": 48.04521079347371,
+      "thinkingChars": 14217,
+      "residency": [
+        {
+          "name": "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+          "size": 7163084798,
+          "sizeVram": 7163084798,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "qwythos-llmfan-9b-q4",
+      "model": "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 759936,
+      "promptTokens": 277,
+      "generatedTokens": 32491,
+      "generationTokensPerSecond": 44.50165018586428,
+      "thinkingChars": 95195,
+      "residency": [
+        {
+          "name": "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+          "size": 7163084798,
+          "sizeVram": 7163084798,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": false,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "qwythos-llmfan-9b-q4",
+      "model": "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 763202,
+      "promptTokens": 277,
+      "generatedTokens": 32491,
+      "generationTokensPerSecond": 44.628551753525244,
+      "thinkingChars": 138684,
+      "residency": [
+        {
+          "name": "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+          "size": 7163084798,
+          "sizeVram": 7163084798,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": false,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "qwythos-llmfan-9b-q4",
+      "model": "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 755394,
+      "promptTokens": 277,
+      "generatedTokens": 32491,
+      "generationTokensPerSecond": 44.822347389691465,
+      "thinkingChars": 147673,
+      "residency": [
+        {
+          "name": "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+          "size": 7163084798,
+          "sizeVram": 7163084798,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": false,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "qwythos-llmfan-9b-q4",
+      "model": "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 41727,
+      "promptTokens": 372,
+      "generatedTokens": 1623,
+      "generationTokensPerSecond": 48.07897536031015,
+      "thinkingChars": 4688,
+      "residency": [
+        {
+          "name": "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+          "size": 7163084798,
+          "sizeVram": 7163084798,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... FAILED\n\nfailures:\n\n---- test_parse_valid_csv stdout ----\n\nthread 'test_parse_valid_csv' (5508) panicked at <LOCAL_BENCHMARK_ROOT>\\local-32k-v20261016\\qwythos-llmfan-9b-q4\\fr-stability\\responses\\FR-006\\42\\test.rs:35:5:\nassertion failed: res.is_ok()\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_parse_valid_csv\n\ntest result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "qwythos-llmfan-9b-q4",
+      "model": "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 29155,
+      "promptTokens": 372,
+      "generatedTokens": 940,
+      "generationTokensPerSecond": 47.64607602630915,
+      "thinkingChars": 2142,
+      "residency": [
+        {
+          "name": "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+          "size": 7163084798,
+          "sizeVram": 7163084798,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... FAILED\n\nfailures:\n\n---- test_parse_valid_csv stdout ----\n\nthread 'test_parse_valid_csv' (4800) panicked at <LOCAL_BENCHMARK_ROOT>\\local-32k-v20261016\\qwythos-llmfan-9b-q4\\fr-stability\\responses\\FR-006\\43\\test.rs:32:5:\nassertion failed: res.is_ok()\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_parse_valid_csv\n\ntest result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "qwythos-llmfan-9b-q4",
+      "model": "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 38632,
+      "promptTokens": 372,
+      "generatedTokens": 1342,
+      "generationTokensPerSecond": 47.87982463710964,
+      "thinkingChars": 3311,
+      "residency": [
+        {
+          "name": "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+          "size": 7163084798,
+          "sizeVram": 7163084798,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "qwythos-llmfan-9b-q4",
+      "model": "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 39311,
+      "promptTokens": 372,
+      "generatedTokens": 1512,
+      "generationTokensPerSecond": 47.66966285630945,
+      "thinkingChars": 4446,
+      "residency": [
+        {
+          "name": "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+          "size": 7163084798,
+          "sizeVram": 7163084798,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "qwythos-llmfan-9b-q4",
+      "model": "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 78834,
+      "promptTokens": 372,
+      "generatedTokens": 2055,
+      "generationTokensPerSecond": 47.96874874534295,
+      "thinkingChars": 6067,
+      "residency": [
+        {
+          "name": "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+          "size": 7163084798,
+          "sizeVram": 7163084798,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    }
+  ],
+  "contaminationLog": [
+    {
+      "at": "2026-10-16T15:10:58.064Z",
+      "task": "FR-002",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T15:10:58.786Z",
+      "reason": "foreign model before FR-002|43",
+      "unloaded": [
+        "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T15:12:57.353Z",
+      "task": "FR-002",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T15:12:57.627Z",
+      "reason": "foreign model before FR-002|44",
+      "unloaded": [
+        "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T15:25:37.577Z",
+      "task": "FR-002",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T15:25:37.922Z",
+      "reason": "foreign model before FR-002|45",
+      "unloaded": [
+        "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T15:38:21.130Z",
+      "task": "FR-002",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T15:38:21.979Z",
+      "reason": "foreign model before FR-002|46",
+      "unloaded": [
+        "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T15:50:57.389Z",
+      "task": "FR-006",
+      "seed": 42,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T15:50:57.655Z",
+      "reason": "foreign model before FR-006|42",
+      "unloaded": [
+        "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T15:51:39.401Z",
+      "task": "FR-006",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T15:51:39.675Z",
+      "reason": "foreign model before FR-006|43",
+      "unloaded": [
+        "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T15:52:08.834Z",
+      "task": "FR-006",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T15:52:09.095Z",
+      "reason": "foreign model before FR-006|44",
+      "unloaded": [
+        "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T15:52:47.783Z",
+      "task": "FR-006",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T15:52:48.087Z",
+      "reason": "foreign model before FR-006|45",
+      "unloaded": [
+        "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T15:53:27.419Z",
+      "task": "FR-006",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T15:53:27.799Z",
+      "reason": "foreign model before FR-006|46",
+      "unloaded": [
+        "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T15:54:46.980Z",
+      "reason": "final cleanup for local-32k-v20261016 hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M",
+      "unloaded": [
+        "hf.co/llmfan46/Qwythos-9B-Claude-Mythos-5-1M-uncensored-heretic-GGUF:Q4_K_M"
+      ]
+    }
+  ],
+  "infrastructureFailures": []
+}

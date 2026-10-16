@@ -1,0 +1,81 @@
+The user wants me to implement a specific Rust function `normalize_model_name` with several requirements: strip registry prefixes, strip quantization suffixes (case-insensitive), convert to lowercase, and include a traceability comment before the function declaration. I need to follow the guard rails: no unwrap/expect/panic.
+
+I'll need to handle the stripping of prefixes safely using `rsplit` or `strip_prefix`, checking that the prefix is at the start of the string. For suffixes, I'll need to check for each variant (including with colon). Since the suffix list includes both `-q4_0` and `:q4_0`, I need to handle case-insensitivity, so I can convert the raw string to lowercase first or use a case-insensitive comparison.
+
+I'll construct the function step by step:
+
+1. Define the function signature as required.
+2. Add the traceability comment right before the function declaration.
+3. Inside the function, I'll start with `raw.to_lowercase()` to handle case-insensitivity for both prefixes and suffixes.
+4. For stripping registry prefixes, I need to check if the string starts with any of the three prefixes. Since they are at the beginning, I can use `strip_prefix` after converting to lowercase. However, note that the prefixes themselves are already lowercase, so I don't need to worry about case for them.
+5. For stripping quantization suffixes, I need to check the end of the string. The suffix list includes both `-q4_0` and `:q4_0`. Since we already lowercased the string, I can directly compare with these exact strings.
+6. To avoid unwrap/expect, I'll use optional chaining or pattern matching that returns an empty string if no match is found. For stripping prefixes, I can iterate over the list of prefixes and use `strip_prefix` which returns `None` if not found. Similarly for suffixes, I can iterate over the suffix list and use `strip_suffix` (which is not a standard method in Rust; we need to implement manually). Actually, `strip_prefix` works on the start, but for the end we need to check the last characters. Since the suffix length is fixed (e.g., `-q4_0` is 5 chars), I can slice the string from `len - suffix_len` and compare.
+7. After stripping prefixes and suffixes, I'll collect all the stripped strings into a vector and then join them with an empty string to reconstruct the normalized name.
+8. Return the resulting string.
+
+I need to make sure that after stripping prefixes, I don't accidentally strip a prefix that was part of the suffix. But since the prefixes are at the start and suffixes are at the end, they won't overlap. The order of operations: strip prefixes first, then suffixes. This matches the spec.
+
+Now, let's write the Rust code. I'll use `rsplit` for suffix stripping? Actually, `strip_prefix` is available in the standard library for `&str`. For suffix stripping, we can implement a custom function or use `strip_suffix` which isn't built-in. However, I can iterate over the suffix list and check if the string ends with any of them using `ends_with` method which is available on `&str`.
+
+Thus:
+
+```rust
+let stripped = raw.to_lowercase()
+    .strip_prefix("registry.ollama.ai/library/")
+    .or_else(|| raw.to_lowercase().strip_prefix("library/"))
+    .or_else(|| raw.to_lowercase().strip_prefix("hf.co/"))
+    .unwrap_or(raw.to_lowercase());
+```
+
+But using `or_else` with multiple prefixes is messy. Instead, I can use a loop over the prefixes and collect all matches, then take the longest match? Actually, the spec says to strip registry prefixes, not necessarily the longest. But we can just try each prefix in order and keep the first that matches, or we can strip all that match. However, the typical approach is to try each prefix and if any matches, use that stripped version; else keep original. Since the prefixes are mutually exclusive (a string cannot start with both "registry.ollama.ai/library/" and "library/"), we can just check each and pick the first that matches.
+
+Simplify: Use `strip_prefix` for each and combine with `or_else`. However, using multiple `or_else` is verbose. I can write a helper function that tries to strip any of the prefixes, returning the stripped string or None. Then use `unwrap_or(raw.to_lowercase())`. That's okay, but we need to avoid unwrap on the final result? Actually, we will have a fallback: if none match, we keep original (lowercased). So we can just do:
+
+```rust
+let stripped = raw.to_lowercase()
+    .strip_prefix("registry.ollama.ai/library/")
+    .or_else(|| raw.to_lowercase().strip_prefix("library/"))
+    .or_else(|| raw.to_lowercase().strip_prefix("hf.co/"))
+    .unwrap_or(raw.to_lowercase());
+```
+
+But this uses `unwrap_or` which is allowed because we are not unwrapping without a fallback. The spec says "NO unwrap(), NO expect(), NO panic!" but `unwrap_or` is a method that returns a default if `None`, not an `unwrap`. So it's okay. However, the function signature requires returning a `String`, so we must produce a value. Using `unwrap_or` is fine.
+
+But I want to avoid any `unwrap` at all. So I'll use `or_else` and then `unwrap_or` which is safe. That's acceptable.
+
+Now for suffix stripping: I need to check each suffix (case-insensitive). Since we already lowercased the string, we can directly compare with the suffix strings. The suffixes are: `-q4_0`, `-q4_k_m`, `-q4_k_s`, `:q4_0`, `:q4_k_m`, `:q4_k_s`. So I'll create a vector of these suffixes and iterate, using `strip_suffix` (which doesn't exist), but I can implement manually: check if the string ends with the suffix.
+
+Thus:
+
+```rust
+let stripped_suffix = stripped.strip_suffix("-q4_0")
+    .or_else(|| stripped.strip_suffix("-q4_k_m"))
+    .or_else(|| stripped.strip_suffix("-q4_k_s"))
+    .or_else(|| stripped.strip_suffix(":q4_0"))
+    .or_else(|| stripped.strip_suffix(":q4_k_m"))
+    .or_else(|| stripped.strip_suffix(":q4_k_s"))
+    .unwrap_or(stripped);
+```
+
+But `strip_suffix` doesn't exist on `&str`. However, we can use `ends_with` and then slice. Actually, there is a method `strip_suffix` in the standard library for `String`, but not for `&str`. Wait, I recall that `&str` has `strip_prefix` and `strip_suffix`? Let me check: In Rust, `&str` has methods `strip_prefix`, `strip_suffix`, `starts_with`, `ends_with`. Yes, `strip_suffix` is available on `&str`. Actually, I think `strip_suffix` was added in recent versions. So we can use it.
+
+Thus I can do:
+
+```rust
+let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+let stripped_suffix = suffixes.iter().find_map(|s| stripped.strip_suffix(s)).unwrap_or(stripped);
+```
+
+But `find_map` will return `Some(stripped_without_suffix)` if any suffix matches, else `None`. Then we unwrap or use a default. That's safe.
+
+Now combine everything: after stripping prefixes, we have `stripped`. Then strip suffixes from that to get `normalized`. Then return `normalized`.
+
+Finally, I'll add the traceability comment as required.
+
+Now produce the final code block.
+
+Make sure to include the function signature exactly as specified: `pub fn normalize_model_name(raw: &str) -> String`.
+
+I'll also ensure that there are no panics or unwraps that could cause runtime errors without a fallback. The use of `find_map` and `unwrap_or` is fine.
+
+Now write the final answer.

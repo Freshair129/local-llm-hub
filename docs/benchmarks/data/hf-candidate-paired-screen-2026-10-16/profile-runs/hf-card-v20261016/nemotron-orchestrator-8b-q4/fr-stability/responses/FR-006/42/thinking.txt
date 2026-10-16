@@ -1,0 +1,28 @@
+The user wants me to implement a Rust struct and function according to their specific requirements. Let me break down what they're asking for:
+
+1. Create a GpuStats struct with specific fields:
+   - name: String
+   - vram_used_mb: u64
+   - vram_total_mb: u64
+   - temp_c: u32
+   - util_pct: u32
+
+2. Implement a parse_gpu_csv function that takes a CSV line and returns Result<GpuStats, String>
+
+3. The function must:
+   - Check for exactly 5 columns
+   - Parse each field to the correct type
+   - Use strict error handling (no unwrap(), expect(), panic!)
+   - Return Err with meaningful messages
+
+4. Add the traceability comment
+5. Provide both items in a code block
+
+Let me implement this carefully following all the guard rails:
+- Using from_str_radix for parsing numbers
+- Using match arms to handle parsing errors
+- Returning Err with clear messages
+- Not using any unsafe code
+- Keeping it simple and clean
+
+I'll make sure to include the comment before the function declaration as requested.

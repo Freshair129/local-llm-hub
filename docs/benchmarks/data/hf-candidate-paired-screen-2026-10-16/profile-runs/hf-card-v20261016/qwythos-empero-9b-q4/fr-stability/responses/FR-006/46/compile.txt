@@ -1,0 +1,71 @@
+error[E0599]: no associated function or constant named `from_str` found for type `u64` in the current scope
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-006\46\test.rs:17:35
+   |
+17 |     let vram_used_mb = match u64::from_str(parts[1]) {
+   |                                   ^^^^^^^^ associated function or constant not found in `u64`
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: trait `FromStr` which provides `from_str` is implemented but not in scope; perhaps you want to import it
+   |
+ 2 + use std::str::FromStr;
+   |
+help: there is an associated function `from` with a similar name
+   |
+17 -     let vram_used_mb = match u64::from_str(parts[1]) {
+17 +     let vram_used_mb = match u64::from(parts[1]) {
+   |
+
+error[E0599]: no associated function or constant named `from_str` found for type `u64` in the current scope
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-006\46\test.rs:21:36
+   |
+21 |     let vram_total_mb = match u64::from_str(parts[2]) {
+   |                                    ^^^^^^^^ associated function or constant not found in `u64`
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: trait `FromStr` which provides `from_str` is implemented but not in scope; perhaps you want to import it
+   |
+ 2 + use std::str::FromStr;
+   |
+help: there is an associated function `from` with a similar name
+   |
+21 -     let vram_total_mb = match u64::from_str(parts[2]) {
+21 +     let vram_total_mb = match u64::from(parts[2]) {
+   |
+
+error[E0599]: no associated function or constant named `from_str` found for type `u32` in the current scope
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-006\46\test.rs:25:29
+   |
+25 |     let temp_c = match u32::from_str(parts[3]) {
+   |                             ^^^^^^^^ associated function or constant not found in `u32`
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: trait `FromStr` which provides `from_str` is implemented but not in scope; perhaps you want to import it
+   |
+ 2 + use std::str::FromStr;
+   |
+help: there is an associated function `from` with a similar name
+   |
+25 -     let temp_c = match u32::from_str(parts[3]) {
+25 +     let temp_c = match u32::from(parts[3]) {
+   |
+
+error[E0599]: no associated function or constant named `from_str` found for type `u32` in the current scope
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-006\46\test.rs:29:31
+   |
+29 |     let util_pct = match u32::from_str(parts[4]) {
+   |                               ^^^^^^^^ associated function or constant not found in `u32`
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: trait `FromStr` which provides `from_str` is implemented but not in scope; perhaps you want to import it
+   |
+ 2 + use std::str::FromStr;
+   |
+help: there is an associated function `from` with a similar name
+   |
+29 -     let util_pct = match u32::from_str(parts[4]) {
+29 +     let util_pct = match u32::from(parts[4]) {
+   |
+
+error: aborting due to 4 previous errors
+
+For more information about this error, try `rustc --explain E0599`.

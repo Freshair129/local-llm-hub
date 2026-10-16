@@ -1,0 +1,59 @@
+error[E0308]: mismatched types
+ --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-002\42\test.rs:8:20
+  |
+3 |     let mut name = raw.trim().to_lowercase();
+  |                    ------------------------- expected due to this value
+...
+8 |             name = stripped.trim();
+  |                    ^^^^^^^^^^^^^^^ expected `String`, found `&str`
+  |
+help: try using a conversion method
+  |
+8 |             name = stripped.trim().to_string();
+  |                                   ++++++++++++
+
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-002\42\test.rs:13:20
+   |
+ 3 |     let mut name = raw.trim().to_lowercase();
+   |                    ------------------------- expected due to this value
+...
+13 |             name = stripped.trim();
+   |                    ^^^^^^^^^^^^^^^ expected `String`, found `&str`
+   |
+help: try using a conversion method
+   |
+13 |             name = stripped.trim().to_string();
+   |                                   ++++++++++++
+
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-002\42\test.rs:18:20
+   |
+ 3 |     let mut name = raw.trim().to_lowercase();
+   |                    ------------------------- expected due to this value
+...
+18 |             name = stripped.trim();
+   |                    ^^^^^^^^^^^^^^^ expected `String`, found `&str`
+   |
+help: try using a conversion method
+   |
+18 |             name = stripped.trim().to_string();
+   |                                   ++++++++++++
+
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-002\42\test.rs:31:24
+   |
+ 3 |     let mut name = raw.trim().to_lowercase();
+   |                    ------------------------- expected due to this value
+...
+31 |                 name = stripped.trim();
+   |                        ^^^^^^^^^^^^^^^ expected `String`, found `&str`
+   |
+help: try using a conversion method
+   |
+31 |                 name = stripped.trim().to_string();
+   |                                       ++++++++++++
+
+error: aborting due to 4 previous errors
+
+For more information about this error, try `rustc --explain E0308`.

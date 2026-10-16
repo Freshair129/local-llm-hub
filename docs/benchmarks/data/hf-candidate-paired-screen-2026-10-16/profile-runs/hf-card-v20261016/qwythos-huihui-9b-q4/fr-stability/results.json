@@ -1,0 +1,563 @@
+{
+  "metadata": {
+    "startedAt": "2026-10-16T21:01:17.682Z",
+    "ollamaVersion": "0.40.5",
+    "hardware": "NVIDIA GeForce RTX 3060 12GB",
+    "testSetSource": "https://github.com/Freshair129/local-llm-hub/blob/main/scripts/benchmark_mellum_thinking_vs_instruct.mjs",
+    "testSetSha256": "d9142c138d5a40a02064564259104c04c0686ef36eec63a3d031c5dab0087200",
+    "tasks": [
+      "FR-002",
+      "FR-006"
+    ],
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "model": {
+      "key": "qwythos-huihui-9b-q4",
+      "label": "Huihui Qwythos 9B Abliterated Q4_K_M",
+      "tag": "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M"
+    },
+    "profile": {
+      "id": "hf-card-v20261016",
+      "label": "Huihui card plus upstream Qwythos quick-start settings; 16K context",
+      "num_ctx": 16384,
+      "num_predict": 16384,
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "repeat_penalty": 1.05
+      },
+      "systemPrompt": null,
+      "settingsSource": "Huihui GGUF card gives no sampler values; inherits upstream Qwythos quick-start temperature=0.6, top_p=0.95, top_k=20, repetition penalty=1.05, and 16K context. Output cap follows that upstream card's 16384 recommendation."
+    },
+    "expectedSamples": 10,
+    "execution": "Exactly one F-store model per run; unload before/after; check /api/ps around every inference; contaminated attempts are discarded and retried up to three times.",
+    "qualityMetric": "Strict pass requires fenced code, Rust compile, all harness tests, adjacent trace comment, and no unwrap/expect/panic!.",
+    "finalResidentModels": [],
+    "interrupted": false,
+    "completedAt": "2026-10-16T21:22:02.481Z",
+    "summaries": [
+      {
+        "task": "FR-002",
+        "n": 5,
+        "compiled": 1,
+        "testsPassed": 0,
+        "strictPass": 0
+      },
+      {
+        "task": "FR-006",
+        "n": 5,
+        "compiled": 3,
+        "testsPassed": 3,
+        "strictPass": 3
+      },
+      {
+        "task": "ALL",
+        "n": 10,
+        "strictPass": 3
+      }
+    ]
+  },
+  "results": [
+    {
+      "task": "FR-002",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "qwythos-huihui-9b-q4",
+      "model": "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 44004,
+      "promptTokens": 196,
+      "generatedTokens": 1818,
+      "generationTokensPerSecond": 49.15755363675856,
+      "thinkingChars": 6021,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+          "size": 5887271895,
+          "sizeVram": 5887271895,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... FAILED\n\nfailures:\n\n---- test_normalize_cases stdout ----\n\nthread 'test_normalize_cases' (24188) panicked at <LOCAL_BENCHMARK_ROOT>\\hf-card-v20261016\\qwythos-huihui-9b-q4\\fr-stability\\responses\\FR-002\\42\\test.rs:27:5:\nassertion `left == right` failed\n  left: \"registry.ollama.ai/librar\"\n right: \"llama3.2:1b-instruct\"\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_normalize_cases\n\ntest result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "qwythos-huihui-9b-q4",
+      "model": "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 196314,
+      "promptTokens": 196,
+      "generatedTokens": 9012,
+      "generationTokensPerSecond": 47.2395318518362,
+      "thinkingChars": 31077,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+          "size": 5887271895,
+          "sizeVram": 5887271895,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "qwythos-huihui-9b-q4",
+      "model": "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 52842,
+      "promptTokens": 196,
+      "generatedTokens": 2344,
+      "generationTokensPerSecond": 49.17660034693001,
+      "thinkingChars": 7428,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+          "size": 5887271895,
+          "sizeVram": 5887271895,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "qwythos-huihui-9b-q4",
+      "model": "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 354807,
+      "promptTokens": 196,
+      "generatedTokens": 16188,
+      "generationTokensPerSecond": 46.31389291275245,
+      "thinkingChars": 48417,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+          "size": 5887271895,
+          "sizeVram": 5887271895,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": false,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "qwythos-huihui-9b-q4",
+      "model": "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 349508,
+      "promptTokens": 196,
+      "generatedTokens": 16188,
+      "generationTokensPerSecond": 47.110023830955356,
+      "thinkingChars": 60547,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+          "size": 5887271895,
+          "sizeVram": 5887271895,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": false,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "qwythos-huihui-9b-q4",
+      "model": "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 29772,
+      "promptTokens": 291,
+      "generatedTokens": 1030,
+      "generationTokensPerSecond": 46.98118946154448,
+      "thinkingChars": 2478,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+          "size": 5887271895,
+          "sizeVram": 5887271895,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "qwythos-huihui-9b-q4",
+      "model": "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 51763,
+      "promptTokens": 291,
+      "generatedTokens": 2127,
+      "generationTokensPerSecond": 47.098377882708036,
+      "thinkingChars": 6535,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+          "size": 5887271895,
+          "sizeVram": 5887271895,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "qwythos-huihui-9b-q4",
+      "model": "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 48426,
+      "promptTokens": 291,
+      "generatedTokens": 1946,
+      "generationTokensPerSecond": 48.145688358154835,
+      "thinkingChars": 5532,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+          "size": 5887271895,
+          "sizeVram": 5887271895,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "qwythos-huihui-9b-q4",
+      "model": "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 63426,
+      "promptTokens": 291,
+      "generatedTokens": 2735,
+      "generationTokensPerSecond": 48.0828531377024,
+      "thinkingChars": 8339,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+          "size": 5887271895,
+          "sizeVram": 5887271895,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "qwythos-huihui-9b-q4",
+      "model": "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 51507,
+      "promptTokens": 291,
+      "generatedTokens": 2277,
+      "generationTokensPerSecond": 49.02686200501521,
+      "thinkingChars": 6778,
+      "residency": [
+        {
+          "name": "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+          "size": 5887271895,
+          "sizeVram": 5887271895,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    }
+  ],
+  "contaminationLog": [
+    {
+      "at": "2026-10-16T21:02:01.920Z",
+      "task": "FR-002",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T21:02:02.118Z",
+      "reason": "foreign model before FR-002|43",
+      "unloaded": [
+        "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T21:05:18.439Z",
+      "task": "FR-002",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T21:05:18.629Z",
+      "reason": "foreign model before FR-002|44",
+      "unloaded": [
+        "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T21:06:11.481Z",
+      "task": "FR-002",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T21:06:11.672Z",
+      "reason": "foreign model before FR-002|45",
+      "unloaded": [
+        "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T21:12:06.546Z",
+      "task": "FR-002",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T21:12:06.740Z",
+      "reason": "foreign model before FR-002|46",
+      "unloaded": [
+        "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T21:17:56.268Z",
+      "task": "FR-006",
+      "seed": 42,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T21:17:56.496Z",
+      "reason": "foreign model before FR-006|42",
+      "unloaded": [
+        "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T21:18:26.271Z",
+      "task": "FR-006",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T21:18:26.505Z",
+      "reason": "foreign model before FR-006|43",
+      "unloaded": [
+        "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T21:19:18.280Z",
+      "task": "FR-006",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T21:19:18.548Z",
+      "reason": "foreign model before FR-006|44",
+      "unloaded": [
+        "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T21:20:06.988Z",
+      "task": "FR-006",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T21:20:07.159Z",
+      "reason": "foreign model before FR-006|45",
+      "unloaded": [
+        "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T21:21:10.588Z",
+      "task": "FR-006",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T21:21:10.762Z",
+      "reason": "foreign model before FR-006|46",
+      "unloaded": [
+        "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T21:22:02.471Z",
+      "reason": "final cleanup for hf-card-v20261016 hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M",
+      "unloaded": [
+        "hf.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF:Q4_K_M"
+      ]
+    }
+  ],
+  "infrastructureFailures": []
+}

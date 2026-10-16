@@ -1,0 +1,72 @@
+Alright, I've been given a fairly straightforward task: implement a Rust solution that parses a CSV line into a `GpuStats` struct, while adhering to strict guard rails (no unwrap, expect, panic) and ensuring traceability via a comment. Let's break down the requirements systematically and see how each part fits together.
+
+First, I need to define the `GpuStats` struct exactly as specified:
+
+```rust
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+```
+
+That's straightforward copy-paste. The struct fields have specific types, so I must keep those exact type annotations.
+
+Next, the function signature is `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`. This means the function must return a `Result` that either contains a `GpuStats` instance or an error message string. The error handling requirement says "Return Err(String) if columns are fewer than 5 or numbers fail to parse." So I need to split the input line on commas and check that there are exactly five parts. If not, I'll return an error like "Invalid column count: expected 5, got X". Then for each part, I need to attempt parsing into the appropriate type: `name` is a String (so just trim whitespace), `vram_used_mb` and `vram_total_mb` are u64, `temp_c` and `util_pct` are u32.
+
+Now, the guard rails: I must not use `unwrap()`, `expect()`, or `panic!`. All parsing must be done using `parse()` which returns a `Result`, and any failure should propagate as an error. For the name field, since it's a String, I can just trim it. However, note that the example input has extra spaces around numbers, so I need to handle trimming for all fields (including name) to avoid parsing errors.
+
+I also need to ensure that after splitting on commas, each part is trimmed before parsing; otherwise, leading/trailing whitespace could cause `parse()` to fail. For instance, "5800" with spaces around it would be parsed correctly if I trim first. The spec doesn't explicitly mention trimming, but it's safe practice and necessary for robustness.
+
+Now, constructing the error messages: I should provide clear messages that indicate why parsing failed. For column count, I'll return an error like `format!("Invalid column count: expected 5, got {}", parts.len())`. For each numeric parse failure, I'll return something like `format!("Failed to parse vram_used_mb: {} is not a valid number", part)`. However, the spec says "Return Err(String) if columns are fewer than 5 or numbers fail to parse." It doesn't require detailed error messages, but it's good practice to give some context. I'll keep them concise but informative.
+
+Now, the traceability requirement: include a comment `// trace:implements FR-006` directly before the function declaration. That means I should place that comment right above `pub fn parse_gpu_csv`. This will help with code review and linking to the feature request.
+
+Finally, output both the struct and the function inside a single ```rust code block. The order doesn't matter for Rust, but I'll keep the struct first, then the function.
+
+Let's draft the code:
+
+```rust
+use std::str::FromStr;
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let parts: Vec<&str> = line.split(',').collect();
+    if parts.len() != 5 {
+        return Err(format!("Invalid column count: expected 5, got {}", parts.len()));
+    }
+
+    let name = parts[0].trim().to_string();
+    let vram_used_mb = u64::from_str(parts[1].trim())?;
+    let vram_total_mb = u64::from_str(parts[2].trim())?;
+    let temp_c = u32::from_str(parts[3].trim())?;
+    let util_pct = u32::from_str(parts[4].trim())?;
+
+    Ok(GpuStats { name, vram_used_mb, vram_total_mb, temp_c, util_pct })
+}
+```
+
+Now, double-check each requirement:
+
+- Struct definition matches exactly.
+- Function signature matches.
+- Parsing logic uses `split(',')` and checks length.
+- Each numeric field uses `u64::from_str(...)?` which returns a Result; the `?` operator will propagate any parse error as an Err with a default message. That's okay because the spec just says "numbers fail to parse" -> return Err(String). The `?` is fine and doesn't use unwrap/expect/panic.
+- Name field uses `.trim().to_string()`. This is safe; it never fails.
+- Error messages are clear.
+- Traceability comment placed directly before function.
+- Both outputs inside a single code block.
+
+Everything seems to satisfy the spec. I'll present this as the final answer.

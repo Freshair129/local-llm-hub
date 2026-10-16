@@ -1,0 +1,81 @@
+We need to implement a Rust crate with two structs and a function. The spec is clear. We need to produce a single Rust file.
+
+We need to include the struct definitions, function signature, and processing. Also we must include the comment '// trace:implements FR-006' directly before the function definition.
+
+We need to output both 'pub struct GpuStats' and 'pub fn parse_gpu_csv' inside the code block.
+
+We need to be careful: The code block must be enclosed in a single code block. The code block is written with #.
+
+We must ensure that we handle the error handling: return Err(String) if columns are fewer than 5 or numbers fail to parse.
+
+We must be strict: STRICTLY FORBIDDEN to use unwrap(), expect(), or panic! Return Err instead.
+
+We need to use STD-003 and ADR-100.
+
+Let's design:
+
+1. Define struct:
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+2. Function:
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // Ensure line has at least 5 characters? Actually CSV lines can be up to 1000 chars, but we can parse.
+    // We'll use len(line) >= 5 to ensure at least 5 columns.
+    if len(line) < 5 {
+        return Err("CSV line has fewer than 5 columns".to_str());
+    }
+    let matches = std::matches(line, &[std::str::parse(line]);)
+    if matches.len() < 4 {
+        return Err("CSV line has fewer than 4 columns".to_str());
+    }
+    if matches.len() < 5 {
+        return Err("CSV line has fewer than 5 columns".to_str());
+    }
+
+    let matches = std::matches(line, &[std::str::parse(line]);)
+    if matches.len() < 4 {
+        return Err("CSV line has fewer than 4 columns".to_str());
+    }
+
+    let parsed = std::csv::parse(line);
+    let rows = parsed.rows.iter();
+    if rows.count() < 4 {
+        return Err("CSV rows count not as expected".to_str());
+    }
+
+    // Process each row
+    let (name, vram_used_mb, vram_total_mb, temp_c, util_pct) = std::str::parse(line);
+    let vram_used = vram_used_mb - vram_total_mb;
+    let util_pct = (vram_used / (vram_total_mb - vram_used) * 100) * std::ceil(1e-9);
+    let vram_used_mb = vram_used * 100;
+
+    Ok({
+        name: name.into(),
+        vram_used_mb: vram_used_mb,
+        vram_total_mb: vram_total_mb,
+        temp_c: temp_c,
+        util_pct: util_pct,
+    })
+}
+
+3. Ensure we include the comment '// trace:implements FR-006' directly before the function definition.
+
+Let's produce final code.
+
+We must be careful: The code block must be enclosed in a #. So we write:
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // code block
+    ...
+}
+
+That's it.
+
+Now produce the output.

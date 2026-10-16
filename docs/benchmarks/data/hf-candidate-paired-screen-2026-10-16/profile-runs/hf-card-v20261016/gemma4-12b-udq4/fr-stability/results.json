@@ -1,0 +1,563 @@
+{
+  "metadata": {
+    "startedAt": "2026-10-16T13:41:15.062Z",
+    "ollamaVersion": "0.40.5",
+    "hardware": "NVIDIA GeForce RTX 3060 12GB",
+    "testSetSource": "https://github.com/Freshair129/local-llm-hub/blob/main/scripts/benchmark_mellum_thinking_vs_instruct.mjs",
+    "testSetSha256": "d9142c138d5a40a02064564259104c04c0686ef36eec63a3d031c5dab0087200",
+    "tasks": [
+      "FR-002",
+      "FR-006"
+    ],
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "model": {
+      "key": "gemma4-12b-udq4",
+      "label": "Gemma 4 12B IT UD-Q4_K_XL",
+      "tag": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+      "quant": "UD-Q4_K_XL"
+    },
+    "profile": {
+      "id": "hf-card-v20261016",
+      "label": "Gemma 4 card sampler; matched 16K task context",
+      "num_ctx": 16384,
+      "num_predict": 81920,
+      "options": {
+        "temperature": 1,
+        "top_p": 0.95,
+        "top_k": 64,
+        "repeat_penalty": 1
+      },
+      "systemPrompt": "<|think|>",
+      "settingsSource": "HF card: temperature=1.0, top_p=0.95, top_k=64; enable thinking with <|think|> at the start of the system prompt. repeat_penalty=1.0 is retained from the shared local comparison because the card does not specify it. The card has no context requirement for this coding screen, so context remains at the matched 16K task profile."
+    },
+    "expectedSamples": 10,
+    "execution": "Exactly one F-store model per run; unload before/after; check /api/ps around every inference; contaminated attempts are discarded and retried up to three times.",
+    "qualityMetric": "Strict pass requires fenced code, Rust compile, all harness tests, adjacent trace comment, and no unwrap/expect/panic!.",
+    "finalResidentModels": [],
+    "interrupted": false,
+    "completedAt": "2026-10-16T14:07:42.599Z",
+    "summaries": [
+      {
+        "task": "FR-002",
+        "n": 5,
+        "compiled": 5,
+        "testsPassed": 5,
+        "strictPass": 5
+      },
+      {
+        "task": "FR-006",
+        "n": 5,
+        "compiled": 5,
+        "testsPassed": 5,
+        "strictPass": 5
+      },
+      {
+        "task": "ALL",
+        "n": 10,
+        "strictPass": 10
+      }
+    ]
+  },
+  "results": [
+    {
+      "task": "FR-002",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "gemma4-12b-udq4",
+      "model": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+      "quant": "UD-Q4_K_XL",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 252877,
+      "promptTokens": 216,
+      "generatedTokens": 7862,
+      "generationTokensPerSecond": 34.358863240462185,
+      "thinkingChars": 24239,
+      "residency": [
+        {
+          "name": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+          "size": 8372648671,
+          "sizeVram": 8372648671,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "gemma4-12b-udq4",
+      "model": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+      "quant": "UD-Q4_K_XL",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 276154,
+      "promptTokens": 216,
+      "generatedTokens": 6377,
+      "generationTokensPerSecond": 34.263396034148116,
+      "thinkingChars": 19909,
+      "residency": [
+        {
+          "name": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+          "size": 8372648671,
+          "sizeVram": 8372648671,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "gemma4-12b-udq4",
+      "model": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+      "quant": "UD-Q4_K_XL",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 246455,
+      "promptTokens": 216,
+      "generatedTokens": 8018,
+      "generationTokensPerSecond": 34.103074198187834,
+      "thinkingChars": 24994,
+      "residency": [
+        {
+          "name": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+          "size": 8372648671,
+          "sizeVram": 8372648671,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "gemma4-12b-udq4",
+      "model": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+      "quant": "UD-Q4_K_XL",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 177629,
+      "promptTokens": 216,
+      "generatedTokens": 5740,
+      "generationTokensPerSecond": 34.31030492016288,
+      "thinkingChars": 17398,
+      "residency": [
+        {
+          "name": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+          "size": 8372648671,
+          "sizeVram": 8372648671,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "gemma4-12b-udq4",
+      "model": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+      "quant": "UD-Q4_K_XL",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 227433,
+      "promptTokens": 216,
+      "generatedTokens": 7359,
+      "generationTokensPerSecond": 33.98653084086705,
+      "thinkingChars": 21820,
+      "residency": [
+        {
+          "name": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+          "size": 8372648671,
+          "sizeVram": 8372648671,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "gemma4-12b-udq4",
+      "model": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+      "quant": "UD-Q4_K_XL",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 123070,
+      "promptTokens": 312,
+      "generatedTokens": 1795,
+      "generationTokensPerSecond": 35.08587370207433,
+      "thinkingChars": 4196,
+      "residency": [
+        {
+          "name": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+          "size": 8372648671,
+          "sizeVram": 8372648671,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "gemma4-12b-udq4",
+      "model": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+      "quant": "UD-Q4_K_XL",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 61139,
+      "promptTokens": 312,
+      "generatedTokens": 1829,
+      "generationTokensPerSecond": 34.95688539311541,
+      "thinkingChars": 4336,
+      "residency": [
+        {
+          "name": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+          "size": 8372648671,
+          "sizeVram": 8372648671,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "gemma4-12b-udq4",
+      "model": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+      "quant": "UD-Q4_K_XL",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 75203,
+      "promptTokens": 312,
+      "generatedTokens": 2106,
+      "generationTokensPerSecond": 32.60602896932652,
+      "thinkingChars": 5089,
+      "residency": [
+        {
+          "name": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+          "size": 8372648671,
+          "sizeVram": 8372648671,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "gemma4-12b-udq4",
+      "model": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+      "quant": "UD-Q4_K_XL",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 70944,
+      "promptTokens": 312,
+      "generatedTokens": 2002,
+      "generationTokensPerSecond": 32.42073498713089,
+      "thinkingChars": 4966,
+      "residency": [
+        {
+          "name": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+          "size": 8372648671,
+          "sizeVram": 8372648671,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "gemma4-12b-udq4",
+      "model": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+      "quant": "UD-Q4_K_XL",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 68639,
+      "promptTokens": 312,
+      "generatedTokens": 1778,
+      "generationTokensPerSecond": 31.668322871268874,
+      "thinkingChars": 3839,
+      "residency": [
+        {
+          "name": "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+          "size": 8372648671,
+          "sizeVram": 8372648671,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s\n\n"
+      }
+    }
+  ],
+  "contaminationLog": [
+    {
+      "at": "2026-10-16T13:45:32.284Z",
+      "task": "FR-002",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL"
+      ]
+    },
+    {
+      "at": "2026-10-16T13:45:33.351Z",
+      "reason": "foreign model before FR-002|43",
+      "unloaded": [
+        "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL"
+      ]
+    },
+    {
+      "at": "2026-10-16T13:50:09.519Z",
+      "task": "FR-002",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL"
+      ]
+    },
+    {
+      "at": "2026-10-16T13:50:09.941Z",
+      "reason": "foreign model before FR-002|44",
+      "unloaded": [
+        "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL"
+      ]
+    },
+    {
+      "at": "2026-10-16T13:54:16.407Z",
+      "task": "FR-002",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL"
+      ]
+    },
+    {
+      "at": "2026-10-16T13:54:16.617Z",
+      "reason": "foreign model before FR-002|45",
+      "unloaded": [
+        "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL"
+      ]
+    },
+    {
+      "at": "2026-10-16T13:57:14.255Z",
+      "task": "FR-002",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL"
+      ]
+    },
+    {
+      "at": "2026-10-16T13:57:14.485Z",
+      "reason": "foreign model before FR-002|46",
+      "unloaded": [
+        "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:01:01.936Z",
+      "task": "FR-006",
+      "seed": 42,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:01:02.237Z",
+      "reason": "foreign model before FR-006|42",
+      "unloaded": [
+        "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:03:05.311Z",
+      "task": "FR-006",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:03:05.574Z",
+      "reason": "foreign model before FR-006|43",
+      "unloaded": [
+        "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:04:06.721Z",
+      "task": "FR-006",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:04:06.920Z",
+      "reason": "foreign model before FR-006|44",
+      "unloaded": [
+        "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:05:22.137Z",
+      "task": "FR-006",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:05:22.404Z",
+      "reason": "foreign model before FR-006|45",
+      "unloaded": [
+        "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:06:33.361Z",
+      "task": "FR-006",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:06:33.636Z",
+      "reason": "foreign model before FR-006|46",
+      "unloaded": [
+        "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:07:42.587Z",
+      "reason": "final cleanup for hf-card-v20261016 hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL",
+      "unloaded": [
+        "hf.co/unsloth/gemma-4-12b-it-GGUF:UD-Q4_K_XL"
+      ]
+    }
+  ],
+  "infrastructureFailures": []
+}

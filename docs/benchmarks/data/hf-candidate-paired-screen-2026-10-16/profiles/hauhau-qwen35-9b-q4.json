@@ -1,0 +1,25 @@
+{
+  "modelKey": "hauhau-qwen35-9b-q4",
+  "seeds": [42, 43, 44, 45, 46],
+  "modelCardUrl": "https://huggingface.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive",
+  "profiles": {
+    "local-32k": {
+      "id": "local-32k-v20261016",
+      "label": "RTX 3060 12GB: shared Mellum sampler with 32K context",
+      "num_ctx": 32768,
+      "num_predict": 81920,
+      "options": { "temperature": 0.6, "top_p": 0.95, "top_k": 20, "repeat_penalty": 1.0 },
+      "systemPrompt": null,
+      "settingsSource": "Existing Mellum-matched sampling profile; context raised from 16K for this hardware profile."
+    },
+    "hf-card": {
+      "id": "hf-card-v20261016",
+      "label": "Hauhau card thinking sampler with its recommended 128K context",
+      "num_ctx": 131072,
+      "num_predict": 81920,
+      "options": { "temperature": 0.6, "top_p": 0.95, "top_k": 20, "min_p": 0.0, "presence_penalty": 0.0, "repeat_penalty": 1.0 },
+      "systemPrompt": null,
+      "settingsSource": "HF model card: thinking sampler temperature=0.6, top_p=0.95, top_k=20, min_p=0; recommends at least 128K context for thinking. Output cap 81920 follows the Qwen3.5 coding recommendation. The same Q4_K_M artifact and single-model protocol are used."
+    }
+  }
+}

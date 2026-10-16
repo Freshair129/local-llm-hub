@@ -1,0 +1,114 @@
+The user wants me to implement a Rust specification for FR-006. Let me break down the requirements:
+
+1. Define struct `GpuStats` with:
+   - `#[derive(Debug, PartialEq)]`
+   - Fields: `name: String`, `vram_used_mb: u64`, `vram_total_mb: u64`, `temp_c: u32`, `util_pct: u32`
+
+2. Function signature: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`
+
+3. Parse CSV line like "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"
+
+4. Error handling: Return `Err(String)` if fewer than 5 columns or numbers fail to parse
+
+5. Guard rails: NO unwrap(), expect(), panic! - use Result/Option pattern instead
+
+6. Traceability: Comment '// trace:implements FR-006' before function declaration
+
+7. Output BOTH struct and function inside ```rust code block
+
+Let me write the code:
+
+```rust
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // Split by comma and trim whitespace
+    let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+    
+    // Check if we have at least 5 parts
+    if parts.len() < 5 {
+        return Err(format!("Expected 5 columns, got {}", parts.len()));
+    }
+    
+    // Parse each field with proper error handling
+    let name = parts[0].to_string();
+    let vram_used_mb = parts[1].parse::<u64>()
+        .map_err(|e| format!("Failed to parse vram_used_mb '{}': {}", parts[1], e))?;
+    let vram_total_mb = parts[2].parse::<u64>()
+        .map_err(|e| format!("Failed to parse vram_total_mb '{}': {}", parts[2], e))?;
+    let temp_c = parts[3].parse::<u32>()
+        .map_err(|e| format!("Failed to parse temp_c '{}': {}", parts[3], e))?;
+    let util_pct = parts[4].parse::<u32>()
+        .map_err(|e| format!("Failed to parse util_pct '{}': {}", parts[4], e))?;
+    
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}
+```
+
+Wait, I need to check the guard rails again. The user said:
+- STRICTLY FORBIDDEN to use unwrap(), expect(), or panic!
+- Return Err instead
+
+I didn't use any of those. I used map_err which is fine.
+
+Also, I need to make sure I handle the case where there might be extra columns - the spec says "fewer than 5" triggers error, but doesn't mention what to do with extra columns. I'll just ignore extra columns.
+
+Also, I should use the exact traceability comment: '// trace:implements FR-006'
+
+Let me double-check the struct definition - it needs to be pub, and the fields should be pub according to the spec.
+
+The example line is: "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"
+- Name: NVIDIA GeForce RTX 3060
+- VRAM used: 5800
+- VRAM total: 12288
+- Temp: 35
+- Util: 25
+
+My implementation splits by comma, trims whitespace, then parses.
+
+One thing to consider: what if the line has trailing spaces or is empty? The current implementation handles empty lines (len < 5).
+
+Also, should I handle the case where there are more than 5 columns? The spec doesn't forbid it, so I'll just ignore extra columns.
+
+Actually, looking at the split logic: `line.split(',').map(|s| s.trim()).collect()` - this will handle trailing commas correctly (they will create empty strings which will be trimmed to empty strings).
+
+Wait, if the line is just "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25, 99", parts[5] would be "99" which is ignored. That's fine.
+
+Let me verify the error messages are reasonable. The parse functions will return a parser error, and I'm wrapping it in a format string.
+
+Actually, looking at the parse errors: u64::parse returns a Result<u64, ParseIntError>. I need to import ParseIntError or handle it generically. Since I'm returning a String, I can just format the error message.
+
+But actually, `e` in `format!("Failed to parse...: {}", e)` will work because ParseIntError implements Display.
+
+One more check: the spec says "Return Err(String) if columns are fewer than 5 or numbers fail to parse."
+
+My implementation does exactly that.
+
+Also, the traceability comment needs to be directly before the function declaration.
+
+Final check:
+- Struct defined with correct derives and fields? Yes.
+- Function signature correct? Yes.
+- Error handling robust? Yes, no unwrap/expect/panic.
+- Traceability comment included? Yes.
+- Both items in the same code block? Yes.
+
+I should also consider if the line can be empty or just whitespace. If line is "", split gives [""] which is len 1 < 5, so returns Err. That's correct.
+
+If line is "a,b,c,d,e,f" (6 columns), it will parse first 5 and ignore 6th. That seems reasonable.
+
+I think this is complete.

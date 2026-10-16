@@ -1,0 +1,41 @@
+The user wants me to implement a Rust function that parses a CSV line into a `GpuStats` struct. I need to follow the guard rails: no unwrap, expect, panic, and always return a Result. Also include a traceability comment before the function.
+
+First, I'll define the struct exactly as specified, using the same fields and derives. Then I'll implement the parsing function. I'll split the line by commas, check that there are at least 5 parts, and then parse each numeric field with `parse::<u64>()` or `parse::<u32>()`, returning an error if any fail. For the first field (name), I'll just take it as a string. For the rest, I'll use `Ok` on successful parse and `Err` on failure.
+
+I need to make sure I don't use any unsafe methods. I'll use `parse()` which returns a Result, and I'll propagate any errors. I'll also handle the case where the line is empty or has fewer than 5 columns.
+
+Now, I'll write the code block with the struct and function, include the traceability comment, and ensure the function signature matches exactly. I'll also make the function public.
+
+Let me construct the code:
+
+```rust
+// trace:implements FR-006
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let parts: Vec<&str> = line.split(',').collect();
+    if parts.len() < 5 {
+        return Err("not enough columns".to_string());
+    }
+    let vram_used = parts[1].parse::<u64>().map_err(|_| "failed to parse vram_used".to_string())?;
+    let vram_total = parts[2].parse::<u64>().map_err(|_| "failed to parse vram_total".to_string())?;
+    let temp = parts[3].parse::<u32>().map_err(|_| "failed to parse temp".to_string())?;
+    let util = parts[4].parse::<u32>().map_err(|_| "failed to parse util".to_string())?;
+    Ok(GpuStats {
+        name: parts[0].to_string(),
+        vram_used_mb: vram_used,
+        vram_total_mb: vram_total,
+        temp_c: temp,
+        util_pct: util,
+    })
+}
+```
+
+I think this satisfies all the requirements. I'll output this code block.

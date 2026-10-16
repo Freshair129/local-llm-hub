@@ -1,0 +1,203 @@
+I need to implement the `normalize_model_name` function according to the provided specification, while adhering to the guard rails (no unwrap(), expect(), panic!). I should also include the traceability comment exactly as specified: `// trace:implements FR-002` directly before the function declaration.
+
+First, let's break down the requirements:
+
+1. **Function signature**: `pub fn normalize_model_name(raw: &str) -> String`
+   - This is straightforward; I need to define a public function that takes a string slice and returns a String.
+
+2. **Strip registry prefixes**: `'registry.ollama.ai/library/', 'library/', 'hf.co/'`
+   - These prefixes should be removed from the beginning of the input string if present.
+   - Note: The prefix `'registry.ollama.ai/library/'` includes the trailing slash, but the other two (`'library/'` and `'hf.co/'`) also have trailing slashes. However, sometimes the model name might just be `'library/model-name'` without the registry part, so I need to handle both cases: if it starts with `'registry.ollama.ai/library/'` or `'library/'`, strip that part, and similarly for `'hf.co/'`.
+
+3. **Strip quantization suffixes**: `'-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s'`
+   - These suffixes can appear at the end of the model name, possibly preceded by a colon (e.g., `'model-name:q4_k_m'`). The spec says "case-insensitive", so I need to handle both lowercase and uppercase versions.
+   - Since these are optional suffixes, I should check if the string ends with any of them (after removing the registry prefixes) and then strip them.
+
+4. **Convert result to lowercase**
+   - After stripping prefixes and suffixes, convert the entire resulting string to lowercase.
+
+5. **Guard rails**: NO unwrap(), NO expect(), NO panic!
+   - This means I must use safe Rust operations only. No `.unwrap()` or `.expect()`, no `panic!` macro. I should use methods like `.is_empty()`, `.trim()`, `.to_lowercase()`, etc., which are always safe.
+
+6. **Traceability**: Include comment `// trace:implements FR-002` directly before function declaration.
+   - The comment must be exactly as specified, placed right before the `pub fn normalize_model_name` line.
+
+Now, let's think about the implementation steps:
+
+**Step 1: Strip registry prefixes**
+- I need to check if the input starts with `'registry.ollama.ai/library/'`. If so, remove that prefix.
+- Then check if it starts with `'library/'`. If so, remove that prefix.
+- Then check if it starts with `'hf.co/'`. If so, remove that prefix.
+- Note: After removing a prefix, the string might become empty or start with something else. I should handle that gracefully.
+
+**Step 2: Strip quantization suffixes**
+- After stripping prefixes, I need to look at the end of the string and see if it matches any of the suffix patterns.
+- The suffixes can be: `'-q4_0'`, `'-q4_k_m'`, `'-q4_k_s'`, `':q4_0'`, `':q4_k_m'`, `':q4_k_s'`.
+- Since they are case-insensitive, I should convert them to lowercase before comparing.
+- Also, note that the suffix might be preceded by a colon (e.g., `'model-name:q4_k_m'`). So I need to handle both cases: suffix starting with `-` or `:`.
+- To strip these, I can check if the string ends with any of these patterns (after converting to lowercase). If it does, remove that suffix.
+- Since multiple suffixes could be present (though unlikely), I should repeat the process until no more suffixes are found.
+
+**Step 3: Convert to lowercase**
+- After stripping prefixes and suffixes, convert the remaining string to lowercase.
+
+**Step 4: Ensure safety**
+- Use `.trim()` to remove leading/trailing whitespace after stripping.
+- Use `.is_empty()` checks instead of `.unwrap()`.
+- Avoid any method that could panic (like `.expect()`).
+
+Let's draft the code:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut name = raw.trim();
+
+    // Strip registry prefixes
+    if name.starts_with("registry.ollama.ai/library/") {
+        name = name.strip_prefix("registry.ollama.ai/library/").unwrap().trim();
+    }
+    if name.starts_with("library/") {
+        name = name.strip_prefix("library/").unwrap().trim();
+    }
+    if name.starts_with("hf.co/") {
+        name = name.strip_prefix("hf.co/").unwrap().trim();
+    }
+
+    // Strip quantization suffixes (case-insensitive)
+    let lower_name = name.to_lowercase();
+    let mut suffixes = [
+        "-q4_0", "-q4_k_m", "-q4_k_s",
+        ":q4_0", ":q4_k_m", ":q4_k_s",
+    ];
+
+    for suffix in &suffixes {
+        if lower_name.ends_with(suffix) {
+            name = lower_name.strip_suffix(suffix).unwrap().trim();
+            break; // Only strip the longest matching suffix (or first found, but order doesn't matter much here)
+        }
+    }
+
+    // Convert to lowercase (already done via lower_name, but we need to preserve any non-lowercase parts from original? Actually, spec says "convert result to lowercase", so we should convert everything.)
+    name = name.to_lowercase();
+
+    name
+}
+```
+
+Wait, there's a problem: after stripping the registry prefixes, I call `.strip_prefix(...).unwrap()`. This is allowed because `strip_prefix` returns an `Option`, but I'm using `.unwrap()` which is not allowed per guard rails. I must avoid `.unwrap()`. So I need to handle the case where the prefix doesn't exist (though after trimming and checking, it should exist if we matched). But to be safe, I can use pattern matching or `.map` with `if let`.
+
+Similarly, for suffix stripping, I use `.strip_suffix(...).unwrap()`. Again, I must avoid `.unwrap()`. So I need to handle the case where the suffix doesn't exist (though after checking, it should exist if we matched). But again, to be safe, I can use pattern matching.
+
+Also, note that after stripping prefixes, the string might become empty. The spec doesn't say what to do in that case, but since we're returning a `String`, an empty string is acceptable? Probably not; maybe we should return an empty string if no name remains. But the guard rails don't forbid returning an empty string. So I can just return whatever results from stripping.
+
+But I need to avoid `.unwrap()`. So I'll use `if let` or pattern matching to handle the optional result of `strip_prefix` and `strip_suffix`.
+
+Let's rewrite the code with safe operations:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut name = raw.trim().to_lowercase();
+
+    // Strip registry prefixes
+    if name.starts_with("registry.ollama.ai/library/") {
+        if let Some(stripped) = name.strip_prefix("registry.ollama.ai/library/") {
+            name = stripped.trim();
+        }
+    }
+    if name.starts_with("library/") {
+        if let Some(stripped) = name.strip_prefix("library/") {
+            name = stripped.trim();
+        }
+    }
+    if name.starts_with("hf.co/") {
+        if let Some(stripped) = name.strip_prefix("hf.co/") {
+            name = stripped.trim();
+        }
+    }
+
+    // Strip quantization suffixes (case-insensitive, but we already lowercased)
+    let mut suffixes = [
+        "-q4_0", "-q4_k_m", "-q4_k_s",
+        ":q4_0", ":q4_k_m", ":q4_k_s",
+    ];
+
+    for suffix in &suffixes {
+        if name.ends_with(suffix) {
+            if let Some(stripped) = name.strip_suffix(suffix) {
+                name = stripped.trim();
+                break; // Only strip the longest matching suffix (or first found, but order doesn't matter much here)
+            }
+        }
+    }
+
+    name
+}
+```
+
+Now, I need to ensure that I'm not using any `.unwrap()` or `.expect()`. In the above code, I use `if let` which is safe. Also, after stripping prefixes, I call `.trim()` to remove any extra whitespace that might have been left. Similarly, after stripping suffixes, I call `.trim()`.
+
+One more thing: the spec says "convert result to lowercase". I already lowercased at the beginning (`raw.trim().to_lowercase()`). So that's covered.
+
+Now, let's think about edge cases:
+- Input is just `"registry.ollama.ai/library/model"` -> after stripping prefix, we get `"model"`.
+- Input is `"library/model-q4_0"` -> after stripping prefix, we get `"model-q4_0"`, then suffix stripping removes `-q4_0`, leaving `"model"`.
+- Input is `"hf.co/model:q4_k_m"` -> after stripping prefix, we get `"model:q4_k_m"`, then suffix stripping removes `:q4_k_m`, leaving `"model"`.
+- Input is empty string -> after trimming, it's empty. Then no prefixes or suffixes match, so returns empty string. That's fine.
+- Input has extra spaces -> `.trim()` handles that.
+
+All good.
+
+Now, I need to output ONLY valid Rust code inside a ```rust code block. So I'll produce just the function definition with the traceability comment.
+
+Let me double-check the guard rails: NO unwrap(), NO expect(), NO panic!. In my code, I don't use any of those. I use `if let` which is safe. Also, no `.unwrap()` on optional results. I also don't call `.expect()`. So that's fine.
+
+One more thing: the spec says "Strip quantization suffixes: '-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s' (case-insensitive)". I've already lowercased at the beginning, so case-insensitivity is handled. However, note that the suffixes themselves might have uppercase letters in the input (e.g., `"MODEL-Q4_K_M"`). Since I lowercased at the start, they become lowercase, and then I compare against lowercase suffixes. That's correct.
+
+Also, after stripping prefixes, I call `.trim()` to remove any trailing whitespace that might be left. Similarly, after stripping suffixes, I call `.trim()`. That's fine.
+
+Now, let's finalize the code:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut name = raw.trim().to_lowercase();
+
+    // Strip registry prefixes
+    if name.starts_with("registry.ollama.ai/library/") {
+        if let Some(stripped) = name.strip_prefix("registry.ollama.ai/library/") {
+            name = stripped.trim();
+        }
+    }
+    if name.starts_with("library/") {
+        if let Some(stripped) = name.strip_prefix("library/") {
+            name = stripped.trim();
+        }
+    }
+    if name.starts_with("hf.co/") {
+        if let Some(stripped) = name.strip_prefix("hf.co/") {
+            name = stripped.trim();
+        }
+    }
+
+    // Strip quantization suffixes (case-insensitive, already lowercased)
+    let mut suffixes = [
+        "-q4_0", "-q4_k_m", "-q4_k_s",
+        ":q4_0", ":q4_k_m", ":q4_k_s",
+    ];
+
+    for suffix in &suffixes {
+        if name.ends_with(suffix) {
+            if let Some(stripped) = name.strip_suffix(suffix) {
+                name = stripped.trim();
+                break; // Only strip the longest matching suffix (or first found, but order doesn't matter much here)
+            }
+        }
+    }
+
+    name
+}
+```
+
+I think that's correct. I'll output this inside a ```rust code block, without any additional text.

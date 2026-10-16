@@ -1,0 +1,101 @@
+*   Role: AI Coder under STD-003 and ADR-100.
+    *   Task: Implement FR-006 specification.
+    *   Specific requirements:
+        *   Struct definition: `GpuStats` with fields `name` (String), `vram_used_mb` (u64), `vram_total_mb` (u64), `temp_c` (u32), `util_pct` (u32).
+        *   Function signature: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`.
+        *   Input: CSV string (e.g., "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25").
+        *   Error handling: `Err(String)` for fewer than 5 columns or parsing failures.
+        *   Guard rails: NO `unwrap()`, `expect()`, or `panic!`.
+        *   Traceability: Comment `// trace:implements FR-006` before the function.
+        *   Output: Both struct and function in a code block.
+
+    *   *Step 1: Define the struct.*
+        ```rust
+        #[derive(Debug, PartialEq)]
+        pub struct GpuStats {
+            pub name: String,
+            pub vram_used_mb: u64,
+            pub vram_total_mb: u64,
+            pub temp_c: u32,
+            pub util_pct: u32,
+        }
+        ```
+
+    *   *Step 2: Implement the function.*
+        *   Input: `line: &str`.
+        *   Logic:
+            1. Split the line by comma.
+            2. Trim whitespace from parts.
+            3. Check if there are at least 5 parts.
+            4. Parse `name` (index 0).
+            5. Parse `vram_used_mb` (index 1).
+            6. Parse `vram_total_mb` (index 2).
+            7. Parse `temp_c` (index 3).
+            8. Parse `util_pct` (index 4).
+            9. Handle all errors by returning `Err(String)`.
+
+    *   *Step 3: Refining the parsing logic to avoid `unwrap()`.*
+        *   Use `.split(',')`.
+        *   Use `.map(|s| s.trim())`.
+        *   Check length: `if parts.len() < 5 { return Err(...); }`.
+        *   Use `.parse::<u64>().map_err(|e| e.to_string())?`.
+
+    *   *Step 4: Applying guard rails.*
+        *   Double-check for `unwrap()`, `expect()`, `panic!`. None allowed.
+
+    *   *Step 5: Adding traceability.*
+        *   `// trace:implements FR-006` before the function.
+
+    *   Input: `"NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"`
+    *   Parts: `["NVIDIA GeForce RTX 3060", " 5800", " 12288", " 35", " 25"]`
+    *   Trimmed: `["NVIDIA GeForce RTX 3060", "5800", "12288", "35", "25"]`
+    *   Parse name: `String::from("NVIDIA GeForce RTX 3060")`
+    *   Parse used: `5800`
+    *   Parse total: `12288`
+    *   Parse temp: `35`
+    *   Parse util: `25`
+
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats {
+        pub name: String,
+        pub vram_used_mb: u64,
+        pub vram_total_mb: u64,
+        pub temp_c: u32,
+        pub util_pct: u32,
+    }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+        let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+
+        if parts.len() < 5 {
+            return Err(format!("Expected at least 5 columns, found {}", parts.len()));
+        }
+
+        let name = parts[0].to_string();
+        let vram_used_mb = parts[1].parse::<u64>()
+            .map_err(|e| format!("Failed to parse vram_used_mb: {}", e))?;
+        let vram_total_mb = parts[2].parse::<u64>()
+            .map_err(|e| format!("Failed to parse vram_total_mb: {}", e))?;
+        let temp_c = parts[3].parse::<u32>()
+            .map_err(|e| format!("Failed to parse temp_c: {}", e))?;
+        let util_pct = parts[4].parse::<u32>()
+            .map_err(|e| format!("Failed to parse util_pct: {}", e))?;
+
+        Ok(GpuStats {
+            name,
+            vram_used_mb,
+            vram_total_mb,
+            temp_c,
+            util_pct,
+        })
+    }
+    ```
+
+    *   `unwrap()`? No.
+    *   `expect()`? No.
+    *   `panic!`? No.
+    *   `trace:implements FR-006` included? Yes.
+    *   Struct fields correct? Yes.
+    *   Return type correct? Yes.

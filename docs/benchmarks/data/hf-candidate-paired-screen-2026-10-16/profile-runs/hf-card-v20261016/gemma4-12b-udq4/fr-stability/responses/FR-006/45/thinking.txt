@@ -1,0 +1,126 @@
+AI Coder under STD-003 and ADR-100 guard rails. (These are fictional/simulated guard rails for the sake of the prompt, usually implying high-quality, safe, and strictly-compliant code).
+Implement FR-006.
+
+        *   Struct `GpuStats`: `name` (String), `vram_used_mb` (u64), `vram_total_mb` (u64), `temp_c` (u32), `util_pct` (u32).
+        *   Function `parse_gpu_csv`: Takes `&str`, returns `Result<GpuStats, String>`.
+        *   Input format: CSV (comma-separated).
+        *   Error handling: Check column count (< 5) and parse errors.
+        *   *Strict Constraint*: No `unwrap()`, `expect()`, or `panic!`. Use `Result` for everything.
+        *   *Traceability*: Include `// trace:implements FR-006` before the function.
+        *   *Output Format*: Include both the struct and the function in the code block.
+
+    *   *Step 1: Define the struct.*
+        ```rust
+        #[derive(Debug, PartialEq)]
+        pub struct GpuStats {
+            pub name: String,
+            pub vram_used_mb: u64,
+            pub vram_total_mb: u64,
+            pub temp_c: u32,
+            pub util_pct: u32,
+        }
+        ```
+
+    *   *Step 2: Implement the parsing logic.*
+        *   Split the string by comma: `line.split(',')`.
+        *   Collect into a vector or iterate.
+        *   Check length.
+        *   Parse values.
+
+    *   *Step 3: Handling Errors without `unwrap()`.*
+        *   Use `.parse::<T>().map_err(|e| e.to_string())?` pattern.
+        *   Use `Result` for each step.
+
+    *   *Step 4: Refine logic.*
+        ```rust
+        pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+            let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+            if parts.len() < 5 {
+                return Err("Insufficient columns".to_string());
+            }
+
+            let name = parts[0].to_string();
+            let vram_used = parts[1].parse::<u64>().map_err(|e| e.to_string())?;
+            let vram_total = parts[2].parse::<u64>().map_err(|e| e.to_string())?;
+            let temp = parts[3].parse::<u32>().map_err(|e| e.to_string())?;
+            let util = parts[4].parse::<u32>().map_err(|e| e.to_string())?;
+
+            Ok(GpuStats {
+                name,
+                vram_used_mb: vram_used,
+                vram_total_mb: vram_total,
+                temp_c: temp,
+                util_pct: util,
+            })
+        }
+        ```
+
+    *   *Step 5: Final checks against requirements.*
+        *   `#[derive(Debug, PartialEq)]`? Yes.
+        *   Correct types? Yes (u64, u64, u32, u32).
+        *   `parse_gpu_csv` signature correct? Yes.
+        *   CSV example "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25" handles well? Yes.
+        *   Robust error handling? Yes, checks length and parse failures.
+        *   No `unwrap`/`expect`/`panic`? Checked.
+        *   Traceability comment included? Yes.
+        *   Both in code block? Yes.
+
+    *   Ensure trim() is used to handle spaces after commas in "..., 5800, ...".
+    *   Check the error message for "fewer than 5".
+
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats {
+        pub name: String,
+        pub vram_used_mb: u64,
+        pub vram_total_mb: u64,
+        pub temp_c: u32,
+        pub util_pct: u32,
+    }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+        let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+
+        if parts.len() < 5 {
+            return Err(format!("Expected at least 5 columns, found {}", parts.len()));
+        }
+
+        let name = parts[0].to_string();
+        let vram_used_mb = parts[1].parse::<u64>().map_err(|e| format!("Failed to parse vram_used_mb: {}", e))?;
+        let vram_total_mb = parts[2].parse::<u64>().map_err(|e| format!("Failed to parse vram_total_mb: {}", e))?;
+        let temp_c = parts[3].parse::<u32>().map_err(|e| format!("Failed to parse temp_c: {}", e))?;
+        let util_pct = parts[4].parse::<u32>().map_err(|e| format!("Failed to parse util_pct: {}", e))?;
+
+        Ok(GpuStats {
+            name,
+            vram_used_mb,
+            vram_total_mb,
+            temp_c,
+            util_pct,
+        })
+    }
+    ```
+
+    *Wait*, I should double check if the prompt requires any specific error message string. It says "Return Err(String)". My formatted strings are fine.
+
+    One more check: "Return Err(String) if columns are fewer than 5 or numbers fail to parse."
+    My logic:
+    - `parts.len() < 5` -> Err.
+    - `.parse().map_err(...)` -> Err.
+    Perfect.
+
+    *Guard rails check*: No `unwrap`, `expect`, or `panic!`. I used `?` which is the standard safe way to propagate results.
+
+    *Traceability check*: `// trace:implements FR-006` before the function.
+
+    *Final code structure*:
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats { ... }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(...) -> ... { ... }
+    ```
+
+    (Proceed to generate response).

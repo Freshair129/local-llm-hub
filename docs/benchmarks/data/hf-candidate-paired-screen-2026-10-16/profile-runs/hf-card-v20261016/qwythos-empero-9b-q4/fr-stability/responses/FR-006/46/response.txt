@@ -1,0 +1,43 @@
+```rust
+// trace:implements FR-006
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let parts: Vec<&str> = line.split(',').collect();
+    if parts.len() < 5 {
+        return Err("Insufficient columns".to_string());
+    }
+
+    let vram_used_mb = match u64::from_str(parts[1]) {
+        Ok(val) => val,
+        Err(_) => return Err(format!("Invalid VRAM used: {}", parts[1])),
+    };
+    let vram_total_mb = match u64::from_str(parts[2]) {
+        Ok(val) => val,
+        Err(_) => return Err(format!("Invalid VRAM total: {}", parts[2])),
+    };
+    let temp_c = match u32::from_str(parts[3]) {
+        Ok(val) => val,
+        Err(_) => return Err(format!("Invalid temperature: {}", parts[3])),
+    };
+    let util_pct = match u32::from_str(parts[4]) {
+        Ok(val) => val,
+        Err(_) => return Err(format!("Invalid utilization: {}", parts[4])),
+    };
+
+    Ok(GpuStats {
+        name: parts[0].to_string(),
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}
+```

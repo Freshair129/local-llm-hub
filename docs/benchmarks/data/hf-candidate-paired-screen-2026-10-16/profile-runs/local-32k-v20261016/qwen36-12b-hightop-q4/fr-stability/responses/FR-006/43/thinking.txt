@@ -1,0 +1,371 @@
+We need to implement FR-006 specification. We need to produce Rust code that defines struct GpuStats and implements parse_gpu_csv. The constraints:
+
+- Under STD-003 and ADR-100 guard rails.
+- Implement this exact specification for FR-006.
+
+We must include both parts inside the "```rust code block" and also ensure we are following everything: STRICTLY FORBIDDEN to use unwrap(), expect(), panic! Return Err.
+
+We must output both struct and fn.
+
+Let's parse the specification:
+
+1. Define struct:
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+2. Function signature:
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>
+
+3. Given a CSV line like:
+" NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"
+
+parse it into GpuStats.
+
+4. Robust error handling:
+Return Err(String) if columns are fewer than 5 or numbers fail to parse.
+
+5. Guard rails:
+STRICTLY FORBIDDEN to use unwrap(), expect(), panic! Return Err instead.
+
+6. Traceability:
+Include '// trace:implements FR-006' directly before function declaration.
+
+Now, we need to produce a Rust solution. The code block should be:
+
+```rust
+#![include "std::string"]
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    if len(line) < 5) {
+        return Err("columns are fewer than 5 or numbers cannot parse".to_string())
+    }
+
+    let tokens = line.split([",", " ", "-"]);
+    let tokens_count = tokens.len();
+
+    if tokens_count < 5) {
+        return Err("tokens count is less than 5".to_string())
+    }
+
+    // Initialize stats
+    let vram_used = 0;
+    let vram_total = 0;
+    let temp_c = 0f;
+    let util = 0f;
+
+    for word in std::collections::iter(&tokens) {
+        if word.trim().is_empty()) {
+            return Err("empty token".to_string())
+        }
+
+        let token = word.trim();
+
+        if token.is_numeric_str()) {
+            // attempt to parse number
+            let num = std::str::parse(token);
+            if num.is_err()) {
+                return Err("numeric token not parseable".to_string())
+            }
+
+            // Convert to u64
+            let vram_used = vram_used + (num as u64);
+            util = util + (num as u32);
+            if util > 100f) {
+                // warning
+                token = token;
+            }
+        }
+
+        // handle name
+            if token.is_str(&&("NVIDIA")) {
+                token = token;
+            }
+
+        // handle GPU
+            if token.is_str(&&("GPT")) {
+                token = token;
+            }
+
+        // parse the first four tokens as numbers
+            let words = tokens;
+            let words_count = words_count;
+
+            if words_count > 4) {
+                // parse the third to fourth token as number
+                let third = words[words_count - 3];
+                let fourth = words[words_count - 4];
+                let word = third.trim();
+
+                if word.is_numeric_str()) {
+                    let num = std::str::parse(token);
+                    if num.is_err()) {
+                        return Err("numeric token not parseable".to_string())
+                    }
+
+                    // Convert to u64
+                    let vram_used = vram_used + (num as u64);
+                    util = vram_used + (num as u32);
+                }
+            }
+
+        // parse the last four tokens as numbers (vram, temp, util, util)
+            let words = tokens;
+            let words_count = words_count;
+
+            if words_count > 4) {
+                let third = words[words_count - 3];
+                let fourth = words[words_count - 4];
+                let word = third.trim();
+
+                if word.is_numeric_str()) {
+                    let vram = std::str::parse(token);
+                    if vram.is_err()) {
+                        return Err("numeric token not parseable".to_string())
+                    }
+
+                    let temp = std::str::parse(token);
+                    if temp.is_err()) {
+                        return Err("temp not parseable".to_string())
+                    }
+
+                    let util = vram + (temp as u64);
+                    util = vram + (temp as u32);
+                }
+            }
+
+        return " ".to_string()
+    }
+```
+
+Check: Ensure we use proper numeric parsing for numbers. Also, we need to handle that token as numeric. Also, we need to ensure that the string parsing works (splitting by commas and spaces). Also, we should include "std::string" import.
+
+Also, need to include the "// trace" comment.
+
+But we must be careful: The specification says "Include comment '// trace:implements FR-006' directly before function declaration." So we should include that inside the function definition.
+
+Also, we must be careful about "return Err(String)" but we can use std::error::to_string()? We'll use std::error::to_string() for error messages.
+
+But we want to be strict: return Err(String) and not panic! for internal errors.
+
+Now, let's write the code.
+
+We need to produce a final answer containing exactly the code block.
+
+We'll produce a Rust solution.
+
+But also note: The specification says "Under STD-003 and ADR-100 guard rails." So we might need to include that as part of the explanation? But the instruction: "You are an AI Coder working under STD-003 and ADR-100 guard rails. Implement this exact specification for FR-006." So we should include that as a note? But the instruction says: "include comment '// trace:implements FR-006' directly before function declaration." So we should include that inside the function definition.
+
+Thus, final answer includes only the code block and maybe a brief explanation? But the instruction says: "You are an AI Coder working under STD-003 and ADR-100 guard rails. Provide a Rust solution." So we should output the code block and maybe a brief explanation? But we need to follow instructions precisely.
+
+We'll produce:
+
+```rust
+#![include "std::string"]
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    if len(line) < 5) {
+        return Err("columns are fewer than 5 or numbers cannot parse".to_string())
+    }
+
+    let tokens = line.split([",", " ", "-")]
+    let tokens_count = tokens.len()
+
+    if tokens_count < 5) {
+        return Err("tokens count is less than 5".to_string())
+    }
+
+    // Initialize stats
+    let vram_used = 0;
+    let vram_total = 0;
+    let temp_c = 0f;
+    let util = 0f;
+
+    for word in std::collections::iter(&tokens) {
+        if word.trim().is_empty()) {
+            return Err("empty token".to_string())
+        }
+
+        let token = word.trim();
+
+        if token.is_numeric_str()) {
+            let num = std::str::parse(token);
+            if num.is_err()) {
+                return Err("numeric token not parseable".to_string())
+            }
+
+            let vram_used = vram_used + (num as u64);
+            util = vram_used + (num as u32);
+            if util > 100f) {
+                token = token;
+            }
+        }
+
+        // parse the first four tokens as numbers
+            let words = tokens;
+            let words_count = words_count;
+
+            if words_count > 4) {
+                let third = words[words_count - 3];
+                let fourth = words[words_count - 4];
+                let word = third.trim();
+
+                if word.is_numeric_str()) {
+                    let vram = std::str::parse(token);
+                    if vram.is_err()) {
+                        return Err("numeric token not parseable".to_string())
+                    }
+
+                    let temp = std::str::parse(token);
+                    if temp.is_err()) {
+                        return Err("temp not parseable".to_string())
+                    }
+
+                    let util = vram + (temp as u64);
+                    util = vram + (temp as u32);
+                }
+            }
+
+        return " ".to_string()
+    }
+```
+
+That's the code block.
+
+But we need to ensure we include everything. The instruction: "You are an AI Coder working under STD-003 and ADR-100 guard rails. Provide a Rust solution." So output the code.
+
+But also we might need to include a brief explanation? The instruction says: "Include comment '// trace:implements FR-006' directly before function declaration." So we can include that as a comment inside the function definition. Also we might include a brief note about guard rails, but not required.
+
+So final answer: just the code.
+
+But careful: The specification says "Under STD-003 and ADR-100 guard rails." That might be part of the requirement, but not necessarily inside the code block. We can include it as a note? But we are not required to produce that. We just need to implement the function. The instruction: "Implement this exact specification for FR-006." So we should produce the code.
+
+Thus, final output:
+
+```rust
+#![include "std::string"]
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    if len(line) < 5) {
+        return Err("columns are fewer than 5 or numbers cannot parse".to_string())
+    }
+
+    let tokens = line.split([",", " ", "-")]
+    let tokens_count = tokens.len()
+
+    if tokens_count < 5) {
+        return Err("tokens count is less than 5".to_string())
+    }
+
+    // Initialize stats
+    let vram_used = 0;
+    let vram_total = 0;
+    let temp_c = 0f;
+    let util = 0f;
+
+    for word in std::collections::iter(&tokens) {
+        if word.trim().is_empty()) {
+            return Err("empty token".to_string())
+        }
+
+        let token = word.trim();
+
+        if token.is_numeric_str()) {
+            let num = std::str::parse(token);
+            if num.is_err()) {
+                return Err("numeric token not parseable".to_string())
+            }
+
+            let vram_used = vram_used + (num as u64);
+            util = vram_used + (num as u32);
+            if util > 100f) {
+                token = token;
+            }
+        }
+
+        // parse the first four tokens as numbers
+            let words = tokens;
+            let words_count = words_count;
+
+            if words_count > 4) {
+                let third = words[words_count - 3];
+                let fourth = words[words_count - 4];
+                let word = third.trim();
+
+                if word.is_numeric_str()) {
+                    let vram = std::str::parse(token);
+                    if vram.is_err()) {
+                        return Err("numeric token not parseable".to_string())
+                    }
+
+                    let temp = std::str::parse(token);
+                    if temp.is_err()) {
+                        return Err("temp not parseable".to_string())
+                    }
+
+                    let util = vram + (temp as u64);
+                    util = vram + (temp as u32);
+                }
+            }
+
+        return " ".to_string()
+    }
+```
+
+Now, we need to ensure we include the "// trace" comment inside the function definition. So we can include:
+
+```rust
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // ...
+    // ...
+    // ...
+    // ...
+    // ...
+}
+```
+
+That's it.
+
+But also we might need to include "std::string" import.
+
+Thus, final answer.
+
+Now, we need to produce this as a single response. The instruction says: "Provide a Rust solution." So we should output exactly that code.
+
+I'll format it nicely.
+
+I'll also note that we must be strict for guard rails.
+
+I'll produce the final answer.

@@ -1,0 +1,563 @@
+{
+  "metadata": {
+    "startedAt": "2026-10-16T17:07:49.325Z",
+    "ollamaVersion": "0.40.5",
+    "hardware": "NVIDIA GeForce RTX 3060 12GB",
+    "testSetSource": "https://github.com/Freshair129/local-llm-hub/blob/main/scripts/benchmark_mellum_thinking_vs_instruct.mjs",
+    "testSetSha256": "d9142c138d5a40a02064564259104c04c0686ef36eec63a3d031c5dab0087200",
+    "tasks": [
+      "FR-002",
+      "FR-006"
+    ],
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "model": {
+      "key": "davidau-llama-moe-q4",
+      "label": "DavidAU Llama-3.2 4X3B MoE Q4_K_M",
+      "tag": "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+      "quant": "Q4_K_M"
+    },
+    "profile": {
+      "id": "local-32k-v20261016",
+      "label": "RTX 3060 12GB: shared Mellum sampler with 32K context",
+      "num_ctx": 32768,
+      "num_predict": 81920,
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "repeat_penalty": 1
+      },
+      "systemPrompt": null,
+      "settingsSource": "Existing Mellum-matched sampling profile; context raised from 16K for this hardware profile."
+    },
+    "expectedSamples": 10,
+    "execution": "Exactly one F-store model per run; unload before/after; check /api/ps around every inference; contaminated attempts are discarded and retried up to three times.",
+    "qualityMetric": "Strict pass requires fenced code, Rust compile, all harness tests, adjacent trace comment, and no unwrap/expect/panic!.",
+    "finalResidentModels": [],
+    "interrupted": false,
+    "completedAt": "2026-10-16T17:09:48.364Z",
+    "summaries": [
+      {
+        "task": "FR-002",
+        "n": 5,
+        "compiled": 4,
+        "testsPassed": 1,
+        "strictPass": 0
+      },
+      {
+        "task": "FR-006",
+        "n": 5,
+        "compiled": 4,
+        "testsPassed": 0,
+        "strictPass": 0
+      },
+      {
+        "task": "ALL",
+        "n": 10,
+        "strictPass": 0
+      }
+    ]
+  },
+  "results": [
+    {
+      "task": "FR-002",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "davidau-llama-moe-q4",
+      "model": "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 28211,
+      "promptTokens": 181,
+      "generatedTokens": 137,
+      "generationTokensPerSecond": 78.041244512903,
+      "thinkingChars": 0,
+      "residency": [
+        {
+          "name": "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+          "size": 9770159308,
+          "sizeVram": 9770159308,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... FAILED\n\nfailures:\n\n---- test_normalize_cases stdout ----\n\nthread 'test_normalize_cases' (32000) panicked at <LOCAL_BENCHMARK_ROOT>\\local-32k-v20261016\\davidau-llama-moe-q4\\fr-stability\\responses\\FR-002\\42\\test.rs:23:5:\nassertion `left == right` failed\n  left: \"hf.co/mradermacher/qwen3.5-9b-coder-gguf\"\n right: \"mradermacher/qwen3.5-9b-coder-gguf\"\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_normalize_cases\n\ntest result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "davidau-llama-moe-q4",
+      "model": "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 7717,
+      "promptTokens": 181,
+      "generatedTokens": 157,
+      "generationTokensPerSecond": 79.0540503116089,
+      "thinkingChars": 0,
+      "residency": [
+        {
+          "name": "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+          "size": 9770159308,
+          "sizeVram": 9770159308,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "davidau-llama-moe-q4",
+      "model": "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 7615,
+      "promptTokens": 181,
+      "generatedTokens": 136,
+      "generationTokensPerSecond": 79.36781203367762,
+      "thinkingChars": 0,
+      "residency": [
+        {
+          "name": "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+          "size": 9770159308,
+          "sizeVram": 9770159308,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... FAILED\n\nfailures:\n\n---- test_normalize_cases stdout ----\n\nthread 'test_normalize_cases' (11292) panicked at <LOCAL_BENCHMARK_ROOT>\\local-32k-v20261016\\davidau-llama-moe-q4\\fr-stability\\responses\\FR-002\\44\\test.rs:20:5:\nassertion `left == right` failed\n  left: \"hf.co/mradermacher/qwen3.5-9b-coder-gguf:q4_k_m\"\n right: \"mradermacher/qwen3.5-9b-coder-gguf\"\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_normalize_cases\n\ntest result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "davidau-llama-moe-q4",
+      "model": "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 6681,
+      "promptTokens": 181,
+      "generatedTokens": 144,
+      "generationTokensPerSecond": 79.1042759157144,
+      "thinkingChars": 0,
+      "residency": [
+        {
+          "name": "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+          "size": 9770159308,
+          "sizeVram": 9770159308,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "davidau-llama-moe-q4",
+      "model": "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 7646,
+      "promptTokens": 181,
+      "generatedTokens": 143,
+      "generationTokensPerSecond": 79.17296913029324,
+      "thinkingChars": 0,
+      "residency": [
+        {
+          "name": "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+          "size": 9770159308,
+          "sizeVram": 9770159308,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": true,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... FAILED\n\nfailures:\n\n---- test_normalize_cases stdout ----\n\nthread 'test_normalize_cases' (29444) panicked at <LOCAL_BENCHMARK_ROOT>\\local-32k-v20261016\\davidau-llama-moe-q4\\fr-stability\\responses\\FR-002\\46\\test.rs:8:10:\ncalled `Option::unwrap()` on a `None` value\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_normalize_cases\n\ntest result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "davidau-llama-moe-q4",
+      "model": "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 10914,
+      "promptTokens": 254,
+      "generatedTokens": 487,
+      "generationTokensPerSecond": 78.25164927000209,
+      "thinkingChars": 0,
+      "residency": [
+        {
+          "name": "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+          "size": 9770159308,
+          "sizeVram": 9770159308,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "davidau-llama-moe-q4",
+      "model": "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 11481,
+      "promptTokens": 254,
+      "generatedTokens": 435,
+      "generationTokensPerSecond": 78.43183921581142,
+      "thinkingChars": 0,
+      "residency": [
+        {
+          "name": "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+          "size": 9770159308,
+          "sizeVram": 9770159308,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... FAILED\n\nfailures:\n\n---- test_parse_valid_csv stdout ----\n\nthread 'test_parse_valid_csv' (16424) panicked at <LOCAL_BENCHMARK_ROOT>\\local-32k-v20261016\\davidau-llama-moe-q4\\fr-stability\\responses\\FR-006\\43\\test.rs:62:5:\nassertion failed: res.is_ok()\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_parse_valid_csv\n\ntest result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "davidau-llama-moe-q4",
+      "model": "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 10545,
+      "promptTokens": 254,
+      "generatedTokens": 369,
+      "generationTokensPerSecond": 78.25039745476268,
+      "thinkingChars": 0,
+      "residency": [
+        {
+          "name": "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+          "size": 9770159308,
+          "sizeVram": 9770159308,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... FAILED\n\nfailures:\n\n---- test_parse_valid_csv stdout ----\n\nthread 'test_parse_valid_csv' (37704) panicked at <LOCAL_BENCHMARK_ROOT>\\local-32k-v20261016\\davidau-llama-moe-q4\\fr-stability\\responses\\FR-006\\44\\test.rs:44:5:\nassertion failed: res.is_ok()\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_parse_valid_csv\n\ntest result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "davidau-llama-moe-q4",
+      "model": "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 11708,
+      "promptTokens": 254,
+      "generatedTokens": 419,
+      "generationTokensPerSecond": 78.36376459525115,
+      "thinkingChars": 0,
+      "residency": [
+        {
+          "name": "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+          "size": 9770159308,
+          "sizeVram": 9770159308,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... FAILED\n\nfailures:\n\n---- test_parse_valid_csv stdout ----\n\nthread 'test_parse_valid_csv' (28536) panicked at <LOCAL_BENCHMARK_ROOT>\\local-32k-v20261016\\davidau-llama-moe-q4\\fr-stability\\responses\\FR-006\\45\\test.rs:59:5:\nassertion failed: res.is_ok()\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_parse_valid_csv\n\ntest result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "davidau-llama-moe-q4",
+      "model": "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 14412,
+      "promptTokens": 254,
+      "generatedTokens": 661,
+      "generationTokensPerSecond": 77.98423609426631,
+      "thinkingChars": 0,
+      "residency": [
+        {
+          "name": "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+          "size": 9770159308,
+          "sizeVram": 9770159308,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... FAILED\n\nfailures:\n\n---- test_parse_valid_csv stdout ----\n\nthread 'test_parse_valid_csv' (17348) panicked at <LOCAL_BENCHMARK_ROOT>\\local-32k-v20261016\\davidau-llama-moe-q4\\fr-stability\\responses\\FR-006\\46\\test.rs:82:5:\nassertion failed: res.is_ok()\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_parse_valid_csv\n\ntest result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    }
+  ],
+  "contaminationLog": [
+    {
+      "at": "2026-10-16T17:08:17.724Z",
+      "task": "FR-002",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:08:17.922Z",
+      "reason": "foreign model before FR-002|43",
+      "unloaded": [
+        "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:08:25.642Z",
+      "task": "FR-002",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:08:25.801Z",
+      "reason": "foreign model before FR-002|44",
+      "unloaded": [
+        "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:08:33.419Z",
+      "task": "FR-002",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:08:33.581Z",
+      "reason": "foreign model before FR-002|45",
+      "unloaded": [
+        "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:08:40.276Z",
+      "task": "FR-002",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:08:40.469Z",
+      "reason": "foreign model before FR-002|46",
+      "unloaded": [
+        "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:08:48.124Z",
+      "task": "FR-006",
+      "seed": 42,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:08:48.336Z",
+      "reason": "foreign model before FR-006|42",
+      "unloaded": [
+        "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:08:59.256Z",
+      "task": "FR-006",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:08:59.453Z",
+      "reason": "foreign model before FR-006|43",
+      "unloaded": [
+        "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:09:10.942Z",
+      "task": "FR-006",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:09:11.121Z",
+      "reason": "foreign model before FR-006|44",
+      "unloaded": [
+        "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:09:21.682Z",
+      "task": "FR-006",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:09:21.868Z",
+      "reason": "foreign model before FR-006|45",
+      "unloaded": [
+        "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:09:33.584Z",
+      "task": "FR-006",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:09:33.764Z",
+      "reason": "foreign model before FR-006|46",
+      "unloaded": [
+        "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T17:09:48.360Z",
+      "reason": "final cleanup for local-32k-v20261016 hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M",
+      "unloaded": [
+        "hf.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF:Q4_K_M"
+      ]
+    }
+  ],
+  "infrastructureFailures": []
+}

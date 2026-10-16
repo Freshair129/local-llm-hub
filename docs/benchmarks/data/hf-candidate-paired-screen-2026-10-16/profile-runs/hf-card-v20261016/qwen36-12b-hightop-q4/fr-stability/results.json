@@ -1,0 +1,563 @@
+{
+  "metadata": {
+    "startedAt": "2026-10-16T18:24:59.512Z",
+    "ollamaVersion": "0.40.5",
+    "hardware": "NVIDIA GeForce RTX 3060 12GB",
+    "testSetSource": "https://github.com/Freshair129/local-llm-hub/blob/main/scripts/benchmark_mellum_thinking_vs_instruct.mjs",
+    "testSetSha256": "d9142c138d5a40a02064564259104c04c0686ef36eec63a3d031c5dab0087200",
+    "tasks": [
+      "FR-002",
+      "FR-006"
+    ],
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "model": {
+      "key": "qwen36-12b-hightop-q4",
+      "label": "KevinJK51 Qwen3.6-12B Hightop Q4_K_M",
+      "tag": "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+      "quant": "Q4_K_M"
+    },
+    "profile": {
+      "id": "hf-card-v20261016",
+      "label": "Qwen3.6 card; matched sampler and 16K context",
+      "num_ctx": 16384,
+      "num_predict": 81920,
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "repeat_penalty": 1
+      },
+      "systemPrompt": null,
+      "settingsSource": "The GGUF card lists Ollama usage but no explicit sampler values; uses the shared Mellum sampler as a documented fallback and a matched 16K task context. Model-card template and thinking defaults are retained."
+    },
+    "expectedSamples": 10,
+    "execution": "Exactly one F-store model per run; unload before/after; check /api/ps around every inference; contaminated attempts are discarded and retried up to three times.",
+    "qualityMetric": "Strict pass requires fenced code, Rust compile, all harness tests, adjacent trace comment, and no unwrap/expect/panic!.",
+    "finalResidentModels": [],
+    "interrupted": false,
+    "completedAt": "2026-10-16T19:03:33.084Z",
+    "summaries": [
+      {
+        "task": "FR-002",
+        "n": 5,
+        "compiled": 0,
+        "testsPassed": 0,
+        "strictPass": 0
+      },
+      {
+        "task": "FR-006",
+        "n": 5,
+        "compiled": 0,
+        "testsPassed": 0,
+        "strictPass": 0
+      },
+      {
+        "task": "ALL",
+        "n": 10,
+        "strictPass": 0
+      }
+    ]
+  },
+  "results": [
+    {
+      "task": "FR-002",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "qwen36-12b-hightop-q4",
+      "model": "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 81499,
+      "promptTokens": 196,
+      "generatedTokens": 2129,
+      "generationTokensPerSecond": 42.402654290641735,
+      "thinkingChars": 6351,
+      "residency": [
+        {
+          "name": "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+          "size": 7224174836,
+          "sizeVram": 7224174836,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "qwen36-12b-hightop-q4",
+      "model": "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 396236,
+      "promptTokens": 196,
+      "generatedTokens": 16188,
+      "generationTokensPerSecond": 41.46593632246142,
+      "thinkingChars": 55538,
+      "residency": [
+        {
+          "name": "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+          "size": 7224174836,
+          "sizeVram": 7224174836,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": false,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "qwen36-12b-hightop-q4",
+      "model": "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 47882,
+      "promptTokens": 196,
+      "generatedTokens": 1749,
+      "generationTokensPerSecond": 42.287975309044946,
+      "thinkingChars": 4116,
+      "residency": [
+        {
+          "name": "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+          "size": 7224174836,
+          "sizeVram": 7224174836,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "qwen36-12b-hightop-q4",
+      "model": "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 396667,
+      "promptTokens": 196,
+      "generatedTokens": 16188,
+      "generationTokensPerSecond": 41.52435006690338,
+      "thinkingChars": 32884,
+      "residency": [
+        {
+          "name": "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+          "size": 7224174836,
+          "sizeVram": 7224174836,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": false,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "qwen36-12b-hightop-q4",
+      "model": "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 78613,
+      "promptTokens": 196,
+      "generatedTokens": 3123,
+      "generationTokensPerSecond": 42.61169493317475,
+      "thinkingChars": 9084,
+      "residency": [
+        {
+          "name": "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+          "size": 7224174836,
+          "sizeVram": 7224174836,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "qwen36-12b-hightop-q4",
+      "model": "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 392202,
+      "promptTokens": 291,
+      "generatedTokens": 16093,
+      "generationTokensPerSecond": 41.64284638752771,
+      "thinkingChars": 48616,
+      "residency": [
+        {
+          "name": "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+          "size": 7224174836,
+          "sizeVram": 7224174836,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": false,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "qwen36-12b-hightop-q4",
+      "model": "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 93155,
+      "promptTokens": 291,
+      "generatedTokens": 3702,
+      "generationTokensPerSecond": 42.47285010251594,
+      "thinkingChars": 11952,
+      "residency": [
+        {
+          "name": "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+          "size": 7224174836,
+          "sizeVram": 7224174836,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "qwen36-12b-hightop-q4",
+      "model": "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 38475,
+      "promptTokens": 291,
+      "generatedTokens": 1413,
+      "generationTokensPerSecond": 42.68549460495224,
+      "thinkingChars": 2715,
+      "residency": [
+        {
+          "name": "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+          "size": 7224174836,
+          "sizeVram": 7224174836,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "qwen36-12b-hightop-q4",
+      "model": "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 391805,
+      "promptTokens": 291,
+      "generatedTokens": 16093,
+      "generationTokensPerSecond": 41.65843231178046,
+      "thinkingChars": 48438,
+      "residency": [
+        {
+          "name": "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+          "size": 7224174836,
+          "sizeVram": 7224174836,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": false,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "qwen36-12b-hightop-q4",
+      "model": "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 393657,
+      "promptTokens": 291,
+      "generatedTokens": 16093,
+      "generationTokensPerSecond": 41.5880573219619,
+      "thinkingChars": 24596,
+      "residency": [
+        {
+          "name": "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+          "size": 7224174836,
+          "sizeVram": 7224174836,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": false,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    }
+  ],
+  "contaminationLog": [
+    {
+      "at": "2026-10-16T18:26:22.136Z",
+      "task": "FR-002",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T18:26:22.359Z",
+      "reason": "foreign model before FR-002|43",
+      "unloaded": [
+        "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T18:32:58.614Z",
+      "task": "FR-002",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T18:32:58.845Z",
+      "reason": "foreign model before FR-002|44",
+      "unloaded": [
+        "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T18:33:46.734Z",
+      "task": "FR-002",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T18:33:46.945Z",
+      "reason": "foreign model before FR-002|45",
+      "unloaded": [
+        "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T18:40:23.630Z",
+      "task": "FR-002",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T18:40:23.827Z",
+      "reason": "foreign model before FR-002|46",
+      "unloaded": [
+        "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T18:41:42.444Z",
+      "task": "FR-006",
+      "seed": 42,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T18:41:42.649Z",
+      "reason": "foreign model before FR-006|42",
+      "unloaded": [
+        "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T18:48:14.868Z",
+      "task": "FR-006",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T18:48:15.057Z",
+      "reason": "foreign model before FR-006|43",
+      "unloaded": [
+        "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T18:49:48.215Z",
+      "task": "FR-006",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T18:49:48.407Z",
+      "reason": "foreign model before FR-006|44",
+      "unloaded": [
+        "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T18:50:26.900Z",
+      "task": "FR-006",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T18:50:27.155Z",
+      "reason": "foreign model before FR-006|45",
+      "unloaded": [
+        "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T18:56:59.002Z",
+      "task": "FR-006",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T18:56:59.218Z",
+      "reason": "foreign model before FR-006|46",
+      "unloaded": [
+        "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T19:03:33.073Z",
+      "reason": "final cleanup for hf-card-v20261016 hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M",
+      "unloaded": [
+        "hf.co/KevinJK51/Qwen3.6-12B-IQ-Ultra-Heretic-Uncensored-Thinking-V2-Hightop-GGUF:Q4_K_M"
+      ]
+    }
+  ],
+  "infrastructureFailures": []
+}

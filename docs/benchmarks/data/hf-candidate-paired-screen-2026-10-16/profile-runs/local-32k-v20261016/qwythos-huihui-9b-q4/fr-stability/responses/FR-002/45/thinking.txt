@@ -1,0 +1,123 @@
+The task is to implement a Rust function `normalize_model_name` that follows a fairly specific set of rules and guard rails. Let’s break down the requirements and then design the function step by step, ensuring we satisfy each one without violating any constraints.
+
+**1. Function signature:** `pub fn normalize_model_name(raw: &str) -> String`. This is straightforward; the function takes a string slice and returns an owned `String`.
+
+**2. Strip registry prefixes:** The prefixes to strip are `'registry.ollama.ai/library/', 'library/', 'hf.co/'`. These are just substrings at the start of the string. We need to check if `raw` begins with any of these and remove them. Since we have to avoid `unwrap()` and `expect()`, we can use `if raw.starts_with(...)` checks and then slice accordingly. However, note that after stripping one prefix, the string may change, potentially making another prefix apply. But the spec says “strip registry prefixes” (plural) but doesn’t specify order. The simplest approach is to check each prefix in order and slice as needed. Since the longest prefix `'registry.ollama.ai/library/'` includes `'library/'`, we can just apply them sequentially: first check for `'registry.ollama.ai/library/'`, then `'library/'`, then `'hf.co/'`. That way we cover all cases.
+
+**3. Strip quantization suffixes:** The suffixes are `'-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s'`. These are case‑insensitive, so after converting the whole result to lowercase (step 4), we can just look for these exact suffixes. However, the spec says to strip them *before* lowercasing? Let's read carefully: “Strip quantization suffixes: '-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s' (case-insensitive)”. The parentheses indicate case‑insensitivity, meaning we can apply the suffix stripping after lowercasing (or before, but case‑insensitive means the suffixes themselves are case‑insensitive, i.e., we can treat them as lowercase). The simplest pipeline is: first strip the registry prefixes, then strip the suffixes, then lower‑case the whole thing. That satisfies the order of operations described.
+
+**4. Convert result to lowercase:** After the two previous steps we have a string that may still contain uppercase letters. We can use `to_lowercase().to_string()` to get a `String`. This returns a `String` directly, so we can chain it.
+
+**5. Guard rails:** No `unwrap()`, no `expect()`, no `panic!`. This means we must avoid any method that could panic if the string is empty, or any slicing that might go out of bounds. For example, if we use `trim_end()` we could get an empty slice and call `.split_at` on it without checking length. Instead, we can use methods like `trim_end_matches`, `trim_end`, or more robustly `trim_end_matches` and then `split_at` only after ensuring the length. But we can also use `split_at` with a fallback to the original string if the split point is beyond the length, but that would require `unwrap_or_else`. However, we can avoid `unwrap_or_else` by using `if` statements to conditionally apply the suffix stripping: check whether the string ends with a suffix and then slice accordingly. That way we only slice when we know the length is sufficient.
+
+**6. Traceability:** Include a comment `// trace:implements FR-002` directly before the function declaration. This is just a textual comment, so we can place it on the line before `pub fn`.
+
+Now, let’s construct the function.
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    // start with the raw string
+    let mut name = raw;
+
+    // strip registry prefixes
+    if name.starts_with("registry.ollama.ai/library/") {
+        name = &name[24..];
+    } else if name.startswith("library/") {
+        name = &name[8..];
+    } else if name.startswith("hf.co/") {
+        name = &name[6..];
+    }
+
+    // strip quantization suffixes (case-insensitive)
+    // we need to check from the end of the string, but we must be careful not to panic on an empty string
+    if name.ends_with("-q4_0") { name = &name[..name.len()-5]; }
+    else if name.ends_with("-q4_k_m") { name = &name[..name.len()-7]; }
+    else if name.ends_with("-q4_k_s") { name = &name[..name.len()-7]; }
+    else if name.ends_with(":q4_0") { name = &name[..name.len()-5]; }
+    else if name.ends_with(":q4_k_m") { name = &name[..name.len()-7]; }
+    else if name.ends_with(":q4_k_s") { name = &name[..name.len()-7]; }
+
+    // finally, convert to lowercase
+    name.to_lowercase().to_string()
+}
+```
+
+Now we must verify that each conditional uses only safe operations. The `starts_with` and `ends_with` methods are safe and return a bool, so no risk of panic. However, the slicing `&name[..name.len()-5]` assumes that `name.len()` is at least 5. Since we only slice after confirming that the string ends with the suffix, the length will be at least the suffix length. For example, `ends_with("-q4_0")` guarantees a length of at least 5. That's fine.
+
+But there is a nuance: after stripping a suffix, the string may become shorter, potentially matching another suffix that includes a colon or dash. Since we used `else if`, we only apply the first matching suffix. The spec does not specify whether multiple suffixes should be applied in sequence; it just says “strip quantization suffixes”. The simplest interpretation is to apply each suffix that matches, possibly multiple times, but the spec likely expects a single pass. However, the suffix list includes both dash‑prefixed and colon‑prefixed versions; they are distinct, so a single pass should be sufficient.
+
+Now, we need to double‑check the exact suffix strings: `'q4_0'` has 4 characters, but the dash prefix adds one more, making `"-q4_0"` length 5. The colon version `":q4_0"` also length 5. For `"-q4_k_m"` the suffix is 7 characters (`-q4_k_m`). Same for `":q4_k_m"` and `":q4_k_s"`. The lengths we used (`-5` and `-7`) match those.
+
+Now, we must ensure that the comment is placed directly before the function declaration. In the code above, we have `// trace:implements FR-002` on its own line, then `pub fn normalize_model_name(raw: &str) -> String {`. That satisfies the traceability requirement.
+
+Now, let's consider edge cases: an empty string `""`. The `starts_with` checks will all be false, leaving `name` as `""`. Then the suffix checks will all be false, and `to_lowercase().to_string()` will return `""`. That's fine. A string that contains a suffix but no dash, e.g., `"q4_0"` would not be stripped because the suffix list includes the dash prefix. That's probably intended.
+
+Now, we need to verify that we avoided any `unwrap()` or `expect()`. We used only `if`, `else if`, and slicing with `..`. No `unwrap_or_else` etc. Good.
+
+Now, let's think about the order of operations: we stripped prefixes first, then suffixes, then lowercased. That matches the spec: “Strip registry prefixes… Strip quantization suffixes… Convert result to lowercase.” Good.
+
+Now, we must ensure that the function returns a `String`. The `to_lowercase().to_string()` yields a `String`. Good.
+
+Now, we should test mentally with a few examples:
+
+- Input `"registry.ollama.ai/library/ggml/gemma2:2b"` → after stripping `'registry.ollama.ai/library/'` (length 24) we get `"ggml/gemma2:2b"`. Then suffix stripping: ends with `":2b"`? Not in our list, but the suffix list includes `:q4_0`, `:q4_k_m`, `:q4_k_s`. So maybe the input would be something like `"ggml/gemma2:q4_0"`. After suffix strip we get `"ggml/gemma2"`. Then lowercase yields `"ggml/gemma2"`. Good.
+
+- Input `"library/mistral-7b-q4_k_m"` → after stripping `'library/'` (length 8) we get `"mistral-7b-q4_k_m"`. Then suffix strip: ends with `"-q4_k_m"` (7 chars) → `"mistral-7b"`. Lowercase → `"mistral-7b"`. Good.
+
+- Input `"hf.co/mistral:q4_k_s"` → after stripping `'hf.co/'` (length 6) we get `"mistral:q4_k_s"`. Then suffix strip: ends with `":q4_k_s"` (7 chars) → `"mistral"`. Lowercase → `"mistral"`. Good.
+
+Now, we should also verify that we didn't miss any case where the suffix includes both a dash and a colon, e.g., `"-q4_k_s"` and `":q4_k_s"` are distinct. That's fine.
+
+Now, we need to ensure that the comment includes the exact text `// trace:implements FR-002`. In the code, we have `// trace:implements FR-002`. Good.
+
+Now, the final step is to output ONLY valid Rust code inside a ```rust code block. That means we should wrap the entire function in triple backticks with `rust` as the language identifier. The code we prepared is a single function; we can include any necessary imports, but the spec doesn't mention any, so we can just have the function. However, we might want to ensure that the `to_lowercase()` method is available on `&str`. In Rust, `to_lowercase()` is a method on `&str` that returns a `String`. So we can chain it directly. That's fine.
+
+Now, double-check for any stray punctuation or missing braces. The code appears correct.
+
+Now, we might consider adding a `let mut name = raw;` to make copying easier, but we could also just assign directly. The `let mut name = raw;` pattern is common and safe.
+
+Now, we must ensure that we didn't accidentally use `trim_end` which could be safe, but we used `ends_with` which is also safe. Good.
+
+Now, final review of the guard rails: no `unwrap()`, no `expect()`, no `panic!`. Indeed, we only used `if`, `else if`, and slicing. That satisfies the constraints.
+
+Now, let's produce the final output: a ```rust code block containing the function with the comment line directly before it.
+
+Thus, the final answer will be:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut name = raw;
+
+    // strip registry prefixes
+    if name.starts_with("registry.ollama.ai/library/") {
+        name = &name[24..];
+    } else if name.startswith("library/") {
+        name = &name[8..];
+    } else if name.startswith("hf.co/") {
+        name = &name[6..];
+    }
+
+    // strip quantization suffixes (case-insensitive)
+    if name.ends_with("-q4_0") { name = &name[..name.len()-5]; }
+    else if name.ends_with("-q4_k_m") { name = &name[..name.len()-7]; }
+    else if name.ends_with("-q4_k_s") { name = &name[..name.len()-7]; }
+    else if name.ends_with(":q4_0") { name = &name[..name.len()-5]; }
+    else if name.ends_with(":q4_k_m") { name = &name[..name.len()-7]; }
+    else if name.ends_with(":q4_k_s") { name = &name[..name.len()-7]; }
+
+    // finally, convert to lowercase
+    name.to_lowercase().to_string()
+}
+```
+
+We should double‑check the exact string literals: `"registry.ollama.ai/library/"` length 24, `"library/"` length 8, `"hf.co/"` length 6. Good.
+
+Now, ensure that the suffix stripping logic uses the correct slice lengths: `"-q4_0"` length 5, `"-q4_k_m"` length 7, `"-q4_k_s"` length 7, `":q4_0"` length 5, `":q4_k_m"` length 7, `":q4_k_s"` length 7. That matches.
+
+Now, we should verify that we didn't accidentally miss a suffix like `"-q4_0"` being the same as `"-q4_0"`; it's fine.
+
+Now, final output.
+
+Let's produce the final answer.

@@ -1,0 +1,168 @@
+Alright, the user wants me to implement a Rust function that parses a single CSV line into a `GpuStats` struct. The struct is defined with five fields: `name` (String), `vram_used_mb` (u64), `vram_total_mb` (u64), `temp_c` (u32), and `util_pct` (u32). The CSV line format is:
+
+`NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25`
+
+So there are five comma-separated values. The first value is a string (GPU name), the rest are numbers.
+
+I must:
+
+1. Define the struct exactly as given, with the `Debug` and `PartialEq` derives.
+2. Implement `parse_gpu_csv(line: &str) -> Result<GpuStats, String>` that parses the line.
+3. Handle errors robustly: if there are fewer than 5 columns (i.e., the split by commas yields fewer than 5 parts) or any of the numeric fields cannot be parsed into the appropriate unsigned integer types, return `Err(String)` describing the problem.
+4. Do **not** use `unwrap()`, `expect()`, or `panic!`. All error handling must be explicit via `Result`.
+5. Include the comment `// trace:implements FR-006` directly before the function declaration, as required for traceability.
+6. Output both the struct definition and the function inside a single ```rust code block.
+
+Let me think about how to split the line. The CSV line has commas as delimiters. However, the GPU name might contain spaces, but not commas (in this simple case). So I can safely split by `,` and then trim each part. The first part is the name, the rest are numbers.
+
+I need to parse each numeric part into the appropriate unsigned type:
+
+- `vram_used_mb` is u64.
+- `vram_total_mb` is u64.
+- `temp_c` is u32.
+- `util_pct` is u32.
+
+Rust's `parse::<T>()` method returns a `Result<T, ParseIntError>`. I can use `.map_err(|_| err_msg)` to convert the parse error into a generic error string.
+
+I also need to check the number of fields. The split will produce a `Vec<&str>`. If its length is less than 5, that's an error.
+
+Now, the error message: The spec says "Return Err(String) if columns are fewer than 5 or numbers fail to parse." It doesn't require a specific format, but it's good to give a clear message. I could say something like "Invalid CSV line: expected 5 fields, got {{len}}" or "Failed to parse field {{i}}". However, the spec doesn't require a specific format; just that we return an error. I'll produce a simple message that includes the line content to make debugging easier.
+
+Implementation steps:
+
+- Split the line by commas.
+- If the split length < 5, return `Err("Invalid CSV line: expected 5 fields, got {{split.len()}}")`.
+- Otherwise, map each part to a field:
+  - name = split[0].trim().to_string()
+  - vram_used = split[1].trim().parse::<u64>()?
+  - vram_total = split[2].trim().parse::<u64>()?
+  - temp = split[3].trim().parse::<u32>()?
+  - util = split[4].trim().parse::<u32>()?
+- If any parse fails, the `?` will propagate the error. I'll convert the `ParseIntError` to a generic string error using `map_err(|_| "Failed to parse numeric field")`.
+- Return `Ok(GpuStats { name, vram_used, vram_total, temp, util })`.
+
+Now, I must ensure that I don't use `unwrap()`, `expect()`, or `panic!`. Using `?` is fine. If I need to provide a custom error message for a parse failure, I'll use `map_err`. That satisfies the guard rails.
+
+The struct definition must exactly match the spec:
+
+```rust
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+```
+
+Now, I'll write the function with the comment:
+
+```rust
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    ...
+}
+```
+
+Now, I'll implement the body.
+
+Potential edge cases:
+
+- Extra whitespace around commas: `trim()` will handle that.
+- Empty fields: `trim()` would produce an empty string, and `parse::<u64>()` would fail, which is fine.
+
+- The GPU name may have leading/trailing spaces; `trim()` will clean them.
+
+- The line may be empty: splitting an empty string yields a vector with one empty element. That will be caught by length check.
+
+- The line may have trailing commas: splitting "a,b,c,d,e," yields 6 elements, the last being empty. That would be caught by the length check (6 >= 5). However, the parse of the empty string would fail, which is also fine.
+
+- The line may have fewer than 5 commas, but maybe 5 fields with missing values: we already handle that.
+
+Now, I'll write the code.
+
+Let me draft the function:
+
+```rust
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let fields = line.split(',').collect::<Vec<_>>();
+    if fields.len() < 5 {
+        return Err(format!("Invalid CSV line: expected 5 fields, got {}", fields.len()));
+    }
+
+    let name = fields[0].trim().to_string();
+    let vram_used = fields[1].trim().parse::<u64>()
+        .map_err(|_| "Failed to parse vram_used_mb")?;
+    let vram_total = fields[2].trim().parse::<u64>()
+        .map_err(|_| "Failed to parse vram_total_mb")?;
+    let temp = fields[3].trim().parse::<u32>()
+        .map_err(|_| "Failed to parse temp_c")?;
+    let util = fields[4].trim().parse::<u32>()
+        .map_err(|_| "Failed to parse util_pct")?;
+
+    Ok(GpuStats {
+        name,
+        vram_used_mb: vram_used,
+        vram_total_mb: vram_total,
+        temp_c: temp,
+        util_pct: util,
+    })
+}
+```
+
+Now, I need to ensure that I didn't use any forbidden constructs. I used `map_err` for parse failures, which is fine. I used `format!` for the length error, which is fine. I didn't use `unwrap`, `expect`, or `panic!`. Good.
+
+Now, I'll output the struct and function inside a single ` ```rust ` block.
+
+I'll also include a short comment or docstring for the function? Not required, but maybe helpful. The spec didn't ask for doc comments, just the comment `// trace:implements FR-006`. I'll keep that.
+
+Now, I'll produce the final output.
+
+One more check: The struct field names must be exactly as given: `name`, `vram_used_mb`, `vram_total_mb`, `temp_c`, `util_pct`. In the function, I used `vram_used` and `vram_total` as local variables, but I must map them to the struct fields correctly. I used `vram_used_mb: vram_used` etc. That matches.
+
+Now, I'm ready to output the code block.
+
+But the spec says "Output BOTH 'pub struct GpuStats' and 'pub fn parse_gpu_csv' inside the ```rust code block." So I need to include both. I'll put the struct first, then the function.
+
+Thus, final answer:
+
+```rust
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let fields = line.split(',').collect::<Vec<_>>();
+    if fields.len() < 5 {
+        return Err(format!("Invalid CSV line: expected 5 fields, got {}", fields.len()));
+    }
+
+    let name = fields[0].trim().to_string();
+    let vram_used = fields[1].trim().parse::<u64>()
+        .map_err(|_| "Failed to parse vram_used_mb")?;
+    let vram_total = fields[2].trim().parse::<u64>()
+        .map_err(|_| "Failed to parse vram_total_mb")?;
+    let temp = fields[3].trim().parse::<u32>()
+        .map_err(|_| "Failed to parse temp_c")?;
+    let util = fields[4].trim().parse::<u32>()
+        .map_err(|_| "Failed to parse util_pct")?;
+
+    Ok(GpuStats {
+        name,
+        vram_used_mb: vram_used,
+        vram_total_mb: vram_total,
+        temp_c: temp,
+        util_pct: util,
+    })
+}
+```
+
+That should satisfy all requirements. I'll output that.

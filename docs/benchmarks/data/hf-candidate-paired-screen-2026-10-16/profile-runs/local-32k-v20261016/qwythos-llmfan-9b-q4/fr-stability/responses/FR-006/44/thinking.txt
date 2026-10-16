@@ -1,0 +1,64 @@
+The user wants me to implement a Rust solution for FR-006. I need to define a struct `GpuStats` and a function `parse_gpu_csv`. The specification includes a CSV line with five fields: name, vram_used_mb, vram_total_mb, temp_c, util_pct. The function should return `Result<GpuStats, String>` and must handle errors robustly without using `unwrap`, `expect`, or `panic`. Also, I must include the traceability comment `// trace:implements FR-006` right before the function declaration.
+
+I need to ensure I follow the guard rails: no use of `unwrap`, `expect`, `panic`. So I'll use `split(',')` and iterate over the parts, checking length. For each part, I'll trim whitespace, then attempt to parse the numeric fields using `parse::<u64>()` or `parse::<u32>()`. If parsing fails, I'll return an `Err` with a clear message.
+
+I also need to output both the struct and the function inside a single code block. I'll format it as a Rust snippet, with the struct first, then the function. I'll include the `derive(Debug, PartialEq)` as required.
+
+Now, I need to think about the exact parsing logic:
+
+- The CSV line is `NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25`.
+- Split by comma, but note there may be spaces after commas. So I'll `trim()` each part.
+- The first part is the name, which should be a `String`. I'll just assign it directly.
+- The second part is `vram_used_mb` (u64), third is `vram_total_mb` (u64), fourth is `temp_c` (u32), fifth is `util_pct` (u32).
+- I'll use `match` to handle each part, or just iterate.
+
+Given the guard rails, I must not use `unwrap`. So I'll use `if let` or `match` to handle errors.
+
+I'll write the function:
+
+```rust
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // trace:implements FR-006
+    ...
+}
+```
+
+But the spec says include the comment directly before the function declaration. I need to make sure the comment is placed before the function, not after. So I'll write:
+
+```rust
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // trace:implements FR-006
+    ...
+}
+```
+
+Now, inside the function:
+
+- First, split by commas: `line.split(',')`.
+- Check that we have exactly 5 parts: `if parts.len() != 5 { return Err("Expected 5 columns".to_string()); }`
+- Then for each part, trim whitespace: `let field = part.trim()`.
+- For the numeric fields, parse with `u64::from_str` and `u32::from_str`. If parsing fails, return an error.
+
+I'll implement the parsing as:
+
+```rust
+let name = parts[0].trim().to_string();
+let vram_used = parts[1].trim().parse::<u64>()
+    .map_err(|_| "Failed to parse vram_used".to_string())?;
+let vram_total = parts[2].trim().parse::<u64>()
+    .map_err(|_| "Failed to parse vram_total".to_string())?;
+let temp = parts[3].trim().parse::<u32>()
+    .map_err(|_| "Failed to parse temp".to_string())?;
+let util = parts[4].trim().parse::<u32>()
+    .map_err(|_| "Failed to parse util".to_string())?;
+```
+
+Then construct the struct and return `Ok(GpuStats { ... })`.
+
+I also need to output both the struct and the function in the same code block. So I'll start with the struct definition, then the function.
+
+Now, I'll write the final answer accordingly.
+
+I must not mention any other AI or model. I'm Qwythos, created by Empero AI. So I'll keep the answer focused on the code.
+
+Now, let's produce the final output.

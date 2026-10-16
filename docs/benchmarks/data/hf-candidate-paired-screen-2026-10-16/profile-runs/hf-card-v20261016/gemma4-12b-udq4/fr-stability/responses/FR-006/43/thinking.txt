@@ -1,0 +1,110 @@
+*   Role: AI Coder under STD-003 and ADR-100 (Standardized coding practices, specific error handling, no panics).
+    *   Task: Implement FR-006 based on a specific specification.
+    *   Requirements:
+        1.  `GpuStats` struct (name: String, vram_used_mb: u64, vram_total_mb: u64, temp_c: u32, util_pct: u32).
+        2.  Function `parse_gpu_csv(line: &str) -> Result<GpuStats, String>`.
+        3.  Parsing logic for "Name, used, total, temp, util".
+        4.  Error handling: `Err(String)` for missing columns or parse failures.
+        5.  Constraint: No `unwrap()`, `expect()`, or `panic!`.
+        6.  Traceability: `// trace:implements FR-006` before the function.
+        7.  Output format: Both struct and function in one code block.
+
+    *   `GpuStats` struct definition.
+    *   `parse_gpu_csv` implementation.
+    *   Use `split(',')` to get the columns.
+    *   Trim whitespace for each part.
+    *   Validate number of parts (must be at least 5).
+    *   Parse each numerical field using `parse().map_err(...)`.
+    *   Ensure no panics are used.
+
+    *   *Step 1: Struct*
+        ```rust
+        #[derive(Debug, PartialEq)]
+        pub struct GpuStats {
+            pub name: String,
+            pub vram_used_mb: u64,
+            pub vram_total_mb: u64,
+            pub temp_c: u32,
+            pub util_pct: u32,
+        }
+        ```
+
+    *   *Step 2: Parsing Function*
+        ```rust
+        // trace:implements FR-006
+        pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+            let parts: Vec<&str> = line.split(',').collect();
+            if parts.len() < 5 {
+                return Err("Insufficient columns: expected at least 5".to_string());
+            }
+
+            let name = parts[0].trim().to_string();
+            let vram_used = parts[1].trim().parse::<u64>()
+                .map_err(|e| format!("Failed to parse vram_used_mb: {}", e))?;
+            let vram_total = parts[2].trim().parse::<u64>()
+                .map_err(|e| format!("Failed to parse vram_total_mb: {}", e))?;
+            let temp_c = parts[3].trim().parse::<u32>()
+                .map_err(|e| format!("Failed to parse temp_c: {}", e))?;
+            let util_pct = parts[4].trim().parse::<u32>()
+                .map_err(|e| format!("Failed to parse util_pct: {}", e))?;
+
+            Ok(GpuStats {
+                name,
+                vram_used_mb: vram_used,
+                vram_total_mb: vram_total,
+                temp_c,
+                util_pct,
+            })
+        }
+        ```
+
+    *   No `unwrap()`? Checked.
+    *   No `expect()`? Checked.
+    *   No `panic!`? Checked.
+    *   Return `Err(String)`? Checked.
+    *   Traceability comment? Checked.
+    *   Correct types? Checked.
+
+    *   Make sure the `vram_used_mb` and `vram_total_mb` are `u64` and `temp_c`/`util_pct` are `u32`.
+    *   The input CSV: "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25".
+
+    *Drafting the code block:*
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats {
+        pub name: String,
+        pub vram_used_mb: u64,
+        pub vram_total_mb: u64,
+        pub temp_c: u32,
+        pub util_pct: u32,
+    }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+        let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+
+        if parts.len() < 5 {
+            return Err(format!("Expected at least 5 columns, found {}", parts.len()));
+        }
+
+        let name = parts[0].to_string();
+        let vram_used_mb = parts[1].parse::<u64>()
+            .map_err(|e| format!("Invalid vram_used_mb: {}", e))?;
+        let vram_total_mb = parts[2].parse::<u64>()
+            .map_err(|e| format!("Invalid vram_total_mb: {}", e))?;
+        let temp_c = parts[3].parse::<u32>()
+            .map_err(|e| format!("Invalid temp_c: {}", e))?;
+        let util_pct = parts[4].parse::<u32>()
+            .map_err(|e| format!("Invalid util_pct: {}", e))?;
+
+        Ok(GpuStats {
+            name,
+            vram_used_mb,
+            vram_total_mb,
+            temp_c,
+            util_pct,
+        })
+    }
+    ```
+
+    One small adjustment: The prompt says "parse it into GpuStats". If there are more than 5 columns, is that an error? Usually, "fewer than 5" is the constraint provided. I will stick to "fewer than 5" as the error condition.

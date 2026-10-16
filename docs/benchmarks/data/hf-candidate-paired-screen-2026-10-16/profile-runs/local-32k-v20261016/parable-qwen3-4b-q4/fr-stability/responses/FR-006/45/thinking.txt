@@ -1,0 +1,168 @@
+Okay, I need to implement the FR-006 specification. Let me start by understanding the requirements. The user wants a struct GpuStats and a function to parse a CSV line into it. The struct has fields for name, vram_used_mb, vram_total_mb, temp_c, and util_pct. The function must return a Result with GpuStats or an error message.
+
+First, I'll define the struct. The derive attributes are Debug and PartialEq, which are needed for testing and debugging. The fields are all pub, so they can be accessed outside the struct.
+
+Next, the function parse_gpu_csv. The input is a string slice, which represents a CSV line. The function needs to split this line into parts. The CSV line has five columns: name, vram_used, vram_total, temp, util. So I'll split the line by commas. But wait, the first element is the GPU name, which might contain spaces, like "NVIDIA GeForce RTX 3060". So splitting on commas directly might not work if the name has commas, but the example given doesn't have that. The example line is "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25", so the first field is the name, then the rest are numbers. So splitting on commas and then trimming each part should work.
+
+So the steps are:
+
+1. Split the line into parts. Use split(',') to get an iterator. Then collect into a Vec. But the first part is the name, which may have spaces. So the split on commas will split the line into five parts, with the first part being the name, then the next four being the numbers.
+
+But wait, the example line has a comma after the name, but the name itself has spaces. So splitting on commas would split the line into ["NVIDIA GeForce RTX 3060", "5800", "12288", "35", "25"], which is correct. So splitting on commas gives us five parts. So the code would be:
+
+let parts: Vec<&str> = line.split(',').collect();
+
+Then check if parts.len() < 5. If so, return Err with a message.
+
+Then, for each part, we need to parse them into the respective types. The name is a String, so we can take parts[0], trim any whitespace, and assign to name. The other parts are numbers: vram_used_mb, vram_total_mb, temp_c, util_pct. Each of these should be parsed as u64, u64, u32, u32 respectively.
+
+So for each of the next four parts:
+
+- vram_used_mb: parse from parts[1] as u64. If it fails, return Err.
+- vram_total_mb: same as above.
+- temp_c: parse from parts[3] as u32.
+- util_pct: parse from parts[4] as u32.
+
+But wait, parts[2] is the vram_total_mb, parts[3] is temp_c, parts[4] is util_pct. So the order is:
+
+parts[0] = name
+parts[1] = vram_used_mb
+parts[2] = vram_total_mb
+parts[3] = temp_c
+parts[4] = util_pct
+
+So the code would be:
+
+let name = parts[0].trim().to_string();
+let vram_used = parts[1].trim().parse()?;
+let vram_total = parts[2].trim().parse()?;
+let temp = parts[3].trim().parse()?;
+let util = parts[4].trim().parse()?;
+
+Wait, but parts[3] is the temp_c, which is a u32. So parts[3] is parsed as u32, and parts[4] is parsed as u32.
+
+But what about parts[1] and parts[2]? They are u64, so they can be parsed as u64.
+
+So the code would be:
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let parts: Vec<&str> = line.split(',').collect();
+    if parts.len() < 5 {
+        return Err("Not enough columns".to_string());
+    }
+    let name = parts[0].trim().to_string();
+    let vram_used = parts[1].trim().parse::<u64>().map_err(|e| e.to_string())?;
+    let vram_total = parts[2].trim().parse::<u64>().map_err(|e| e.to_string())?;
+    let temp = parts[3].trim().parse::<u32>().map_err(|e| e.to_string())?;
+    let util = parts[4].trim().parse::<u32>().map_err(|e| e.to_string())?;
+    Ok(GpuStats {
+        name,
+        vram_used_mb: vram_used,
+        vram_total_mb: vram_total,
+        temp_c: temp,
+        util_pct: util,
+    })
+}
+
+Wait, but the function is supposed to return a Result<GpuStats, String>. The parse methods may return an error, so using the ? operator here would allow the function to return the error message as a String. The map_err is used to convert the error into a String, which is the format required by the function.
+
+Also, the user mentioned that the function should not use unwrap(), expect(), or panic!. The code above uses the ? operator, which is allowed as it returns the error.
+
+Now, the traceability comment: "// trace:implements FR-006" should be directly before the function declaration. So in the code block, the struct is defined first, then the comment, then the function.
+
+Putting it all together:
+
+The struct:
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+Then the function with the comment.
+
+Wait, the user says to output both struct and function inside the code block. So the code block should contain the struct and the function.
+
+So the final code would be:
+
+```rust
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // function code
+}
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+```
+
+Wait, no, the order matters. The user says to include the comment before the function declaration. So the struct is defined first, then the comment, then the function. Or is the comment before the function?
+
+The specification says: "Include comment '// trace:implements FR-006' directly before function declaration."
+
+So the code block should have the struct, then the comment, then the function.
+
+Wait, no. The struct is a separate declaration. The function is declared after the struct. So the comment should be before the function. So the code block would be:
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // function code
+}
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+Wait, but that's not correct. The struct is defined before the function. So the correct order is:
+
+First, the struct definition, then the comment, then the function declaration. But the comment is before the function. So the code should be:
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // function code
+}
+
+Yes, that's correct. The struct is defined first, then the comment before the function. So the code block should have the struct, then the comment, then the function.
+
+Now, checking the error handling. If the line has fewer than 5 columns, return Err. Also, if any of the numbers can't be parsed, return Err.
+
+Testing the example line: "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25" should parse into:
+
+name: "NVIDIA GeForce RTX 3060"
+
+vram_used_mb: 5800
+
+vram_total_mb: 12288
+
+temp_c: 35
+
+util_pct: 25
+
+Which should be correct.
+
+Now, the code. The code for the function uses the split(',') and then checks the length. Then parses each part. The parse methods return a Result, and the ? operator propagates the error as a String, which is what the function is supposed to return.
+
+So the code should be correct.

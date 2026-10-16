@@ -1,0 +1,24 @@
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut name = raw;
+
+    // strip registry prefixes
+    if name.starts_with("registry.ollama.ai/library/") {
+        name = &name[24..];
+    } else if name.startswith("library/") {
+        name = &name[8..];
+    } else if name.startswith("hf.co/") {
+        name = &name[6..];
+    }
+
+    // strip quantization suffixes (case-insensitive)
+    if name.ends_with("-q4_0") { name = &name[..name.len()-5]; }
+    else if name.ends_with("-q4_k_m") { name = &name[..name.len()-7]; }
+    else if name.ends_with("-q4_k_s") { name = &name[..name.len()-7]; }
+    else if name.ends_with(":q4_0") { name = &name[..name.len()-5]; }
+    else if name.ends_with(":q4_k_m") { name = &name[..name.len()-7]; }
+    else if name.ends_with(":q4_k_s") { name = &name[..name.len()-7]; }
+
+    // finally, convert to lowercase
+    name.to_lowercase().to_string()
+}

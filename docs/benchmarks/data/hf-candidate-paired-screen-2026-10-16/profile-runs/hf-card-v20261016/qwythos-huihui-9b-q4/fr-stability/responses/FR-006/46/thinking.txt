@@ -1,0 +1,88 @@
+The task is to produce a Rust implementation that satisfies a fairly specific set of guard rails (STD‑003, ADR‑100) and the functional requirements of FR‑006. The key constraints are:
+
+1. **Struct definition** – `GpuStats` must be derived with `Debug` and `PartialEq`, and its fields must have exact types (`String`, `u64`, `u64`, `u32`, `u32`). This is straightforward; I’ll copy the given struct, ensuring the commas are correctly placed.
+
+2. **Function signature** – `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`. The return type must be `Result<GpuStats, String>` so that any parsing error can be propagated as a string.
+
+3. **CSV parsing logic** – The example line `"NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"` has five columns: name (string), vram_used_mb (u64), vram_total_mb (u64), temp_c (u32), util_pct (u32). I need to split on commas, trim whitespace, and then parse each token. If fewer than five tokens appear, the error should be `"Expected 5 columns"` (or something similar, but the spec just says “if columns are fewer than 5”). If a numeric token fails `parse::<u64>()` or `parse::<u32>()`, I must return an `Err(String)` with a helpful message like `"Failed to parse vram_used_mb"` etc.
+
+4. **Robust error handling** – The spec says “Return Err(String) if columns are fewer than 5 or numbers fail to parse.” This means I should avoid the usual `unwrap()` or `expect()` that would panic on failure, because guard rail #5 forbids those exact tokens (`unwrap`, `expect`, `panic!`). Instead, I must use `map_err` (or `and_then`) to transform any intermediate errors into a `String`. The only place where `unwrap` is acceptable is when we’re just extracting the final `GpuStats` from the `Result` at the end of the function; but that’s part of the signature, not the body. Inside the body, I’ll use `map_err` to convert parsing errors into strings.
+
+5. **Guard rails** – STRICTLY FORBIDDEN to use `unwrap()`, `expect()`, or `panic!`. I need to double‑check the implementation: any `.split(',')` returns an iterator of `&str`, and calling `.map(|s| s.trim())` yields `Cow<str>` (which is fine). When I try to convert a `Cow<str>` to a `String` I’ll use `.to_string()` (no `unwrap`). For the numeric fields, I’ll call `.parse::<u64>()` which returns `Result<u64, ParseIntError>`; I’ll map that error to a string. The split may produce fewer than five elements; I’ll handle that by checking `parts.len()`. If it’s less than 5, return an `Err` with a descriptive string.
+
+6. **Traceability** – Include the comment `// trace:implements FR-006` directly before the function declaration. That is a simple textual requirement; I’ll place it right above `pub fn parse_gpu_csv`.
+
+7. **Output format** – The final answer must be a single code block containing both the struct and the function, inside ```rust … ```. I’ll make sure there are no stray characters outside the block.
+
+Now, let me think through the parsing step by step to ensure correctness:
+
+- `line.split(',')` yields an iterator of `&str`. 
+- `.map(|s| s.trim())` trims each piece, yielding `Cow<str>` (borrowed if it contains no whitespace, owned otherwise). 
+- Collect into a `Vec<Cow<str>>`. 
+- Check length: `if parts.len() < 5 { Err("Expected at least 5 columns".to_string()) }`. 
+- Extract the name: `let name = parts[0].to_string();` (no unwrap, just `to_string()` which is safe because `Cow` implements `Into<String>`). 
+- Parse vram_used_mb: `parts[1].parse::<u64>()`. If it fails, map to a string like `"Failed to parse vram_used_mb"`. 
+- Similarly for vram_total_mb (index 2) and temp_c (index 3). 
+- For util_pct (index 4), use `.parse::<u32>()`. 
+- Combine all into a `GpuStats` using `Ok(GpuStats { … })`. 
+
+I need to be careful about the order of fields in the struct: `name`, `vram_used_mb`, `vram_total_mb`, `temp_c`, `util_pct`. That matches the CSV example.
+
+Now, I’ll write the code, adding comments as needed for readability but ensuring they don’t introduce any forbidden keywords. I’ll also add a tiny `use std::string::Cow;` at the top of the block to make the `Cow` type available (or I could just rely on the default import from `&str`. Actually, `Cow` is in `std::string`, but it’s automatically imported via `use std::string::Cow;` or you can just use `Cow<str>` directly because Rust will infer the type. To be safe and explicit, I’ll include `use std::string::Cow;` at the top of the block.)
+
+Now, double‑check for any stray `unwrap()`: In the name extraction we have `let name = parts[0].to_string();`. That’s fine. For the numeric fields, we use `.parse::<u64>()` which returns a `Result`. To map that to a string we’ll do `.map_err(|e| format!("Failed to parse vram_used_mb: {}", e))`. That satisfies the “no unwrap” rule.
+
+Potential edge case: If there are trailing commas, `split(',')` will produce an empty string at the end. That’s okay; the length check will still be correct. If there are leading spaces on the line, `trim()` will handle it. All good.
+
+Now, incorporate the traceability comment right before the function. I’ll place `// trace:implements FR-006` on its own line, then the `pub fn` declaration. That matches the spec.
+
+Finally, ensure the struct definition is exactly as given, preserving the commas and spaces for readability. The struct should be `#[derive(Debug, PartialEq)]`. I’ll keep that.
+
+Now I’ll assemble the final code block:
+
+```rust
+use std::string::Cow;
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let parts: Vec<Cow<str>> = line.split(',').map(|s| s.trim()).collect();
+    if parts.len() < 5 {
+        return Err("Expected at least 5 columns".to_string());
+    }
+
+    let name = parts[0].to_string();
+    let vram_used_mb = parts[1]
+        .parse::<u64>()
+        .map_err(|e| format!("Failed to parse vram_used_mb: {}", e))?;
+    let vram_total_mb = parts[2]
+        .parse::<u64>()
+        .map_err(|e| format!("Failed to parse vram_total_mb: {}", e))?;
+    let temp_c = parts[3]
+        .parse::<u32>()
+        .map_err(|e| format!("Failed to parse temp_c: {}", e))?;
+    let util_pct = parts[4]
+        .parse::<u32>()
+        .map_err(|e| format!("Failed to parse util_pct: {}", e))?;
+
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}
+```
+
+Check for any stray `unwrap()` inside the body – none. The function returns a `Result<GpuStats, String>` as required. The struct matches the spec exactly. The traceability comment is present. This should satisfy all guard rails.
+
+Now I’ll output this block as the final answer.

@@ -1,0 +1,21 @@
+error[E0600]: cannot apply unary operator `-` to type `&'static str`
+ --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-002\45\test.rs:7:42
+  |
+7 |     let raw = raw.to_lowercase().replace(-"q4_0", "").replace(-"q4_k_m", "").replace(-"q4_k_s", "").replace(":q4_0", "").replace(":q4...
+  |                                          ^^^^^^^ cannot apply unary operator `-`
+
+error[E0600]: cannot apply unary operator `-` to type `&'static str`
+ --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-002\45\test.rs:7:63
+  |
+7 |     let raw = raw.to_lowercase().replace(-"q4_0", "").replace(-"q4_k_m", "").replace(-"q4_k_s", "").replace(":q4_0", "").replace(":q4...
+  |                                                               ^^^^^^^^^ cannot apply unary operator `-`
+
+error[E0600]: cannot apply unary operator `-` to type `&'static str`
+ --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-002\45\test.rs:7:86
+  |
+7 |     let raw = raw.to_lowercase().replace(-"q4_0", "").replace(-"q4_k_m", "").replace(-"q4_k_s", "").replace(":q4_0", "").replace(":q4...
+  |                                                                                      ^^^^^^^^^ cannot apply unary operator `-`
+
+error: aborting due to 3 previous errors
+
+For more information about this error, try `rustc --explain E0600`.

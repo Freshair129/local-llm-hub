@@ -1,0 +1,12 @@
+error[E0599]: no method named `len` found for struct `std::str::Split<'a, P>` in the current scope
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-006\46\test.rs:16:14
+   |
+16 |     if parts.len() < 5 {
+   |              ^^^
+   |
+help: there is a method `le` with a similar name, but with different arguments
+  --> /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library\core\src\iter\traits\iterator.rs:3979:4
+
+error: aborting due to 1 previous error
+
+For more information about this error, try `rustc --explain E0599`.

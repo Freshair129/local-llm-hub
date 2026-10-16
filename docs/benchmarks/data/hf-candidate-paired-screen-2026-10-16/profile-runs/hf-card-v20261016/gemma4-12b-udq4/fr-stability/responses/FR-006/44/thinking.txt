@@ -1,0 +1,142 @@
+*   Role: AI Coder.
+    *   Guard Rails: STD-003 (General Standard) and ADR-100 (Adherence to specific constraints).
+    *   Task: Implement FR-006.
+    *   Spec Requirements:
+        1.  `GpuStats` struct with specific fields: `name` (String), `vram_used_mb` (u64), `vram_total_mb` (u64), `temp_c` (u32), `util_pct` (u32).
+        2.  Function signature: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`.
+        3.  Input format: CSV line (e.g., "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25").
+        4.  Error handling: Return `Err(String)` for < 5 columns or parsing failures.
+        5.  Strict Guard Rail: No `unwrap()`, `expect()`, or `panic!`.
+        6.  Traceability: Comment `// trace:implements FR-006` before the function.
+        7.  Output: Both struct and function in a single code block.
+
+    *   Split the string by comma.
+    *   Check length (must be at least 5).
+    *   Trim spaces from each part.
+    *   Parse components:
+        *   Part 0 -> String (Name).
+        *   Part 1 -> u64 (vram_used_mb).
+        *   Part 2 -> u64 (vram_total_mb).
+        *   Part 3 -> u32 (temp_c).
+        *   Part 4 -> u32 (util_pct).
+    *   Use `Result` combinators or `match` to handle errors without panicking.
+
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats {
+        pub name: String,
+        pub vram_used_mb: u64,
+        pub vram_total_mb: u64,
+        pub temp_c: u32,
+        pub util_pct: u32,
+    }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+        let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+
+        if parts.len() < 5 {
+            return Err("Insufficient columns: expected at least 5".to_string());
+        }
+
+        let name = parts[0].to_string();
+        let vram_used_mb = parts[1].parse::<u64>()
+            .map_err(|e| format!("Failed to parse vram_used_mb: {}", e))?;
+        let vram_total_mb = parts[2].parse::<u64>()
+            .map_err(|e| format!("Failed to parse vram_total_mb: {}", e))?;
+        let temp_c = parts[3].parse::<u32>()
+            .map_err(|e| format!("Failed to parse temp_c: {}", e))?;
+        let util_pct = parts[4].parse::<u32>()
+            .map_err(|e| format!("Failed to parse util_pct: {}", e))?;
+
+        Ok(GpuStats {
+            name,
+            vram_used_mb,
+            vram_total_mb,
+            temp_c,
+            util_pct,
+        })
+    }
+    ```
+
+    *   `unwrap()`/`expect()`/`panic!`? None.
+    *   `Result<GpuStats, String>`? Yes.
+    *   `// trace:implements FR-006`? Yes.
+    *   Correct types? Yes (`u64`, `u32`, `String`).
+    *   Input handling? `trim()` is good practice for CSV parsing.
+
+    (Final check of the prompt's requirement: "Output BOTH... inside the ```rust code block").
+
+    One minor detail: The spec says "Return Err(String) if columns are fewer than 5". My draft handles this.
+
+    Refining the parsing to be very clean:
+    ```rust
+    let mut parts = line.split(',').map(|s| s.trim()).peekable();
+    // Actually, the split method is cleaner for checking length first.
+    ```
+
+    Let's stick to the standard `split` approach.
+
+    Final code structure:
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats { ... }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(...) -> Result<GpuStats, String> { ... }
+    ```
+
+    Wait, the prompt says "Include comment '// trace:implements FR-006' directly before function declaration". Done.
+
+    One edge case: What if there are *more* than 5 columns? The spec says "fewer than 5". I will accept 5 or more, taking the first 5.
+
+    Let's re-verify `vram_used_mb` and `vram_total_mb` are `u64`. Yes.
+    `temp_c` and `util_pct` are `u32`. Yes.
+
+    Final Code Block:
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats {
+        pub name: String,
+        pub vram_used_mb: u64,
+        pub vram_total_mb: u64,
+        pub temp_c: u32,
+        pub util_pct: u32,
+    }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+        let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+
+        if parts.len() < 5 {
+            return Err(format!("Expected at least 5 columns, found {}", parts.len()));
+        }
+
+        let name = parts[0].to_string();
+
+        let vram_used_mb = parts[1]
+            .parse::<u64>()
+            .map_err(|e| format!("Invalid vram_used_mb: {}", e))?;
+
+        let vram_total_mb = parts[2]
+            .parse::<u64>()
+            .map_err(|e| format!("Invalid vram_total_mb: {}", e))?;
+
+        let temp_c = parts[3]
+            .parse::<u32>()
+            .map_err(|e| format!("Invalid temp_c: {}", e))?;
+
+        let util_pct = parts[4]
+            .parse::<u32>()
+            .map_err(|e| format!("Invalid util_pct: {}", e))?;
+
+        Ok(GpuStats {
+            name,
+            vram_used_mb,
+            vram_total_mb,
+            temp_c,
+            util_pct,
+        })
+    }
+    ```
+    This looks perfect. No panics. Result type used. Traceability included. Exact field names and types.

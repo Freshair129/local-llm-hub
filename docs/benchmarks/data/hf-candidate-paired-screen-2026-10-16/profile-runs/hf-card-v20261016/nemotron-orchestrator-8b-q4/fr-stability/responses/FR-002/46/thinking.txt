@@ -1,0 +1,111 @@
+The user wants me to implement a Rust function that normalizes model names according to specific rules. Let me break down what needs to be done:
+
+1. Function signature: pub fn normalize_model_name(raw: &str) -> String
+2. Strip registry prefixes (three different ones)
+3. Strip quantization suffixes (multiple variants, case-insensitive)
+4. Convert to lowercase
+5. No unwrap(), expect(), or panic! (so I need to handle errors gracefully, probably via Result or Option)
+6. Include the traceability comment
+
+Let me think about this:
+
+For stripping prefixes:
+- 'registry.ollama.ai/library/'
+- 'library/'
+- 'hf.co/'
+
+I can use replace_prefix or check if the string starts with these and remove them.
+
+For stripping quantization suffixes:
+- '-q4_0', '-q4_k_m', '-q4_k_s'
+- with colons in front (':q4_0', etc.)
+
+I need to remove all occurrences of these suffixes, case-insensitively.
+
+I'll approach this by:
+1. Creating a list of all the patterns to remove
+2. Converting the input to lowercase first (since we need the final result in lowercase)
+3. Removing all occurrences of the patterns
+
+Let me write this:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    // Create a map of all registry prefixes to remove
+    let registry_prefixes: &[&str] = &[
+        "registry.ollama.ai/library/",
+        "library/",
+        "hf.co/",
+    ];
+    
+    // Create a map of all quantization suffixes to remove
+    let quantization_suffixes: &[&str] = &[
+        "-q4_0", "-q4_k_m", "-q4_k_s",
+        ":q4_0", ":q4_k_m", ":q4_k_s",
+    ];
+    
+    let mut result = raw.to_string();
+    
+    // Remove registry prefixes
+    for &prefix in registry_prefixes {
+        if result.starts_with(prefix) {
+            result = result[prefix.len()..].to_string();
+            break; // Only remove the first matching prefix
+        }
+    }
+    
+    // Remove quantization suffixes
+    for &suffix in quantization_suffixes {
+        if result.ends_with(suffix) {
+            result = result[..result.len() - suffix.len()].to_string();
+        }
+    }
+    
+    result.to_lowercase()
+}
+```
+
+Wait, I need to handle case-insensitive matching for the quantization suffixes. The current code checks for exact matches, but I need to check in a case-insensitive manner.
+
+Let me fix that:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let registry_prefixes: &[&str] = &[
+        "registry.ollama.ai/library/",
+        "library/",
+        "hf.co/",
+    ];
+    
+    let quantization_patterns: &[&str] = &[
+        "-q4_0", "-q4_k_m", "-q4_k_s",
+        ":q4_0", ":q4_k_m", ":q4_k_s",
+    ];
+    
+    let mut result = raw.to_string();
+    
+    // Remove registry prefixes
+    for &prefix in registry_prefixes {
+        if result.starts_with(prefix) {
+            result = result[prefix.len()..].to_string();
+            break;
+        }
+    }
+    
+    // Remove quantization patterns (case-insensitive)
+    let mut result_lowercase = result.to_lowercase();
+    for &pattern in quantization_patterns {
+        if result_lowercase.ends_with(pattern) {
+            result_lowercase = result_lowercase[..result_lowercase.len() - pattern.len()].to_string();
+        }
+    }
+    
+    result_lowercase
+}
+```
+
+I'm checking the lowercase version for pattern matching but working with the original string. This approach won't work perfectly because modifications to the lowercase version don't affect the original. I need to track uppercase letters and update them accordingly. This is more complex than I initially thought, so I'll simplify by converting the entire string to lowercase first, making pattern matching easier while still preserving the original character case information.
+
+The final implementation will convert the entire string to lowercase, ensuring case-insensitive pattern matching while maintaining the original text's essence.

@@ -1,0 +1,30 @@
+The user wants me to implement a Rust function that normalizes model names according to specific rules. Let me break down what needs to be done:
+
+1. Function signature: pub fn normalize_model_name(raw: &str) -> String
+2. Strip registry prefixes (three different ones)
+3. Strip quantization suffixes (multiple variants, case-insensitive)
+4. Convert to lowercase
+5. No unwrap(), expect(), or panic! (so I need to handle errors gracefully, probably by returning empty strings or defaults)
+6. Include the traceability comment
+
+Let me think about the implementation:
+
+For stripping prefixes:
+- I can check if the string starts with any of the prefixes
+- If it does, I can take the substring after the prefix
+- I need to check all three prefixes
+
+For stripping quantization suffixes:
+- I need to check if the string ends with any of the suffixes (case-insensitive)
+- If it does, I can take the substring before the suffix
+- I need to check all variants
+
+I'll build this step by step:
+
+1. Create a function with the correct signature and traceability comment
+2. Implement prefix stripping
+3. Implement suffix stripping
+4. Convert to lowercase
+5. Return the result
+
+Let me write this out properly with error handling:

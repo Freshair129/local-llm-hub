@@ -1,0 +1,307 @@
+The user wants a Rust implementation of a function `normalize_model_name` that follows a specific set of rules: strip certain prefixes, strip certain quantization suffixes, convert to lowercase, and avoid unwrapping or panicking. Additionally, the function must include a traceability comment `// trace:implements FR-002` right before its declaration.
+
+First, I need to think about how to handle the stripping of prefixes and suffixes without using `.unwrap()` or `.expect()`. The safest way is to use `Option::map` to conditionally replace substrings, and then filter out any empty results if needed. Since the function returns a `String`, I can start by converting the input slice to a `String` (or keep it as `&str` and later convert). However, the specification says the function signature is `pub fn normalize_model_name(raw: &str) -> String`, so I must return a `String`.
+
+Given the prefixes to strip: `'registry.ollama.ai/library/'`, `'library/'`, `'hf.co/'`. These are literal strings. The suffixes to strip: `'-q4_0'`, `'-q4_k_m'`, `'-q4_k_s'`, `':q4_0'`, `':q4_k_m'`, `':q4_k_s'`. All should be case-insensitive, so I should convert the whole string to lowercase first, or handle both cases. But the requirement says "Convert result to lowercase", which implies that after stripping, we convert the final string to lowercase. However, if we strip a suffix that contains uppercase letters (like `'-Q4_0'`), we need to ensure we match case-insensitively. The simplest approach is to first strip all prefixes and suffixes using case-insensitive matching (by checking both the original and lowercased versions). Then convert the final string to lowercase.
+
+To avoid `.unwrap()`, I'll use `Option::map` to replace substrings if they exist, and then filter out any empty strings. Since the function must always return a non-empty `String`, I need to ensure that after stripping, we still have something left. However, the specification doesn't require us to handle empty input specially; it just says "strip prefixes and suffixes". If the input is just a prefix or suffix, after stripping we may get an empty string. Should we return an empty string? The spec doesn't say to ignore empty results, so returning an empty string is fine as long as we don't use `.unwrap()`. So I will just do the replacements and then convert to lowercase, and if the result is empty after replacements, it's okay.
+
+Now, how to implement the stripping without using `.unwrap()`? I'll start with the raw input, then apply a series of `if` checks for each prefix and suffix. For each prefix, I'll check if the string starts with that prefix (case-insensitive) and replace it. But since we also need to handle case-insensitivity, I'll convert the entire string to lowercase after stripping? The spec says "Convert result to lowercase", which suggests that after stripping, we do `raw.to_lowercase()`. However, if we strip case-insensitively, we might have already lowercased the string. Let's think: The prefixes and suffixes are given as literal strings (e.g., `'registry.ollama.ai/library/'`). If the input is `'Registry.Ollama.ai/library/MyModel'`, we need to strip it even though the case differs. So we should do a case-insensitive comparison before deciding to strip. That means we can convert the whole string to lowercase first, then strip prefixes and suffixes that are now all lowercase. But the spec says "Convert result to lowercase", which could be interpreted as "after stripping, convert to lowercase". However, it's simpler to just convert to lowercase at the end, after stripping. So we can keep the original case for stripping (case-insensitive) and then lower-case at the end.
+
+But to avoid `.unwrap()`, we need to use `Option::map`. For each prefix, we can do: `if raw.starts_with(prefix) { raw = &raw[prefix.len()..]; } else { ... }`. However, `starts_with` is case-sensitive. To make it case-insensitive, we could convert the whole string to lowercase before checking for prefixes and suffixes. But then we would be lower-casing before stripping, which might cause issues if we later try to strip a suffix that includes uppercase letters (like `-Q4_0`). However, after converting to lowercase, the suffix will be `-q4_0`, which matches the given suffix list. So it's safe to convert to lowercase at the start, then strip prefixes and suffixes using exact case-sensitive matches (since they are all lowercase now). Then, after stripping, we would have a string that is already lowercase. The spec says "Convert result to lowercase", but if we already lowercased, that step is redundant. However, maybe there are characters that are not part of the prefixes or suffixes that we need to keep uppercase? No, the spec says to convert the final result to lowercase, so we can just do `raw.to_lowercase()` at the end after stripping. But to avoid double conversion, we could lower-case at the start and then strip prefixes and suffixes. That would be fine because the prefixes and suffixes are all lowercase after conversion. The only difference is that if the input has uppercase letters outside of those prefixes/suffixes, they will be lowercased anyway. So it's simpler to convert to lowercase first, then strip prefixes and suffixes using exact matches.
+
+Wait, the spec says "Strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/'". These are literal strings. If we lower-case first, these become `'registry.ollama.ai/library/'`, `'library/'`, `'hf.co/'` (they're already lowercase). So they remain unchanged. The suffixes also become lowercase after conversion, so we can strip them using exact matches. That seems fine.
+
+Now, to avoid `.unwrap()`, we can use `map` to replace the prefix if it exists: `raw = raw.strip_prefix(prefix).unwrap_or(raw)`. But that's still using `.unwrap_or`. However, we can't use `.unwrap()` on `Option`. The spec says "NO unwrap(), NO expect(), NO panic!". So we must avoid calling `.unwrap()`. That means we need to handle the case where the prefix is not found without using `.unwrap()`. So we can use a simple `if` check: `if raw.starts_with(prefix) { raw = &raw[prefix.len()..]; }`. But `starts_with` is case-sensitive, but after converting to lowercase, it's fine. However, we must also handle the suffixes similarly: `if raw.ends_with(suffix) { raw = &raw[..raw.len() - suffix.len()]; }`. That will work.
+
+Now, we need to apply these strips in some order. The spec says "Strip registry prefixes ... Strip quantization suffixes". It doesn't specify order, but we can strip prefixes first, then suffixes. However, after stripping a prefix, the string may end with a suffix that includes characters from the original prefix? For example, if we have `'registry.ollama.ai/library/model-q4_0'`, after stripping the prefix `'registry.ollama.ai/library/'`, we get `'model-q4_0'`. Then we need to strip suffix `'-q4_0'` (or `':q4_0'`). That's fine.
+
+Now, we also need to handle multiple prefixes. The spec lists `'registry.ollama.ai/library/'`, `'library/'`, `'hf.co/'`. Since `'library/'` is a substring of the longer prefix, after stripping the longer prefix, we might not need to strip `'library/'` again, but it's okay to just check each one in order. However, we must be careful: if we first strip `'registry.ollama.ai/library/'`, we should then also consider `'library/'` as a possible prefix for strings that didn't have the longer one. So we can just loop over all prefixes and apply them sequentially.
+
+Now, about suffixes: the spec lists `'-q4_0'`, `'-q4_k_m'`, `'-q4_k_s'`, `':q4_0'`, `':q4_k_m'`, `':q4_k_s'`. These are case-insensitive, but after converting to lowercase, they become exactly these strings. So we can just check each suffix and strip if present.
+
+Now, the function must return a `String`. We need to ensure that after stripping, we convert the result to lowercase. But if we already lowercased at the start, the final string is already lowercase. However, maybe there are characters that were not part of prefixes or suffixes that remain uppercase (like `'Model'`). The spec says "Convert result to lowercase", so we must ensure the final string is all lowercase. So we can simply call `raw.to_lowercase()` at the end. That will handle any remaining uppercase letters.
+
+Now, we need to avoid `.unwrap()`. So we must not use `strip_prefix` with `.unwrap_or`, but we can just use `if raw.starts_with(prefix) { ... }`. However, there is a nuance: `strip_prefix` returns an `Option<&str>`. If we call `raw.strip_prefix(prefix).map(|s| s.to_string())`, that's fine. But we cannot call `.unwrap()` on it. So we can just use `if raw.starts_with(prefix) { ... }`. That's the same as using `strip_prefix` and ignoring the `Option`. However, `strip_prefix` returns a new string slice after the prefix. To avoid copying the entire string repeatedly, we could just keep a mutable reference and adjust it. But since we need to return a `String`, we will eventually allocate a new one at the end. It's okay to do repeated slicing and concatenation; performance isn't critical for this spec.
+
+Now, about the order of operations: Should we strip prefixes first, then suffixes? The spec says "Strip registry prefixes ... Strip quantization suffixes". That suggests that after stripping prefixes, we then strip suffixes. However, note that some suffixes start with a colon (e.g., `':q4_0'`). If we have `'model:q4_0'`, after stripping prefix `'library/'` maybe we get `'model:q4_0'`. That's fine. The suffix will be stripped later.
+
+Now, what about overlapping prefixes? For example, `'registry.ollama.ai/library/model-q4_0'` has both `'registry.ollama.ai/library/'` and `'library/'`. If we strip the longer one first, we get `'model-q4_0'`. Then we also need to consider `'library/'` for strings that might have just `'library/model-q4_0'`. So we should try each prefix in order. Since `'registry.ollama.ai/library/'` is longer, we can check it first; if it matches, strip it; otherwise check `'library/'`. But the spec doesn't require us to handle overlapping prefixes specially; we just need to strip any of them if present. So we can simply iterate over all prefixes and apply each one if it matches, regardless of order. However, after stripping a prefix, the string might no longer start with another prefix (e.g., `'registry.ollama.ai/library/model-q4_0'` after stripping the long prefix becomes `'model-q4_0'`, which does not start with `'library/'`). That's fine because we only need to strip prefixes that are present; if they're not present after a previous strip, we just ignore them.
+
+Now, about suffixes: After stripping prefixes, the string might end with multiple suffixes? For example, `'model-q4_0'` ends with `-q4_0`. That's fine. If it also ends with `':q4_0'`, that would be a different suffix; we only strip one at a time. However, the spec lists both `-q4_0` and `:q4_0` as separate suffixes. So we need to check each suffix individually and strip if present. Since they are mutually exclusive (they can't both be present at the end of the same string), we can just iterate over all suffixes and apply them sequentially. That's fine.
+
+Now, about case-insensitivity: The spec says "case-insensitive" for suffix stripping. However, after converting to lowercase, we don't need to worry about case. But we must ensure that we strip suffixes regardless of case. Since we lower-case at the start, all characters become lowercase, so we can just use exact matches. That satisfies case-insensitivity.
+
+Now, about the comment: "Include comment '// trace:implements FR-002' directly before function declaration." So we need to place a line `// trace:implements FR-002` right before `pub fn normalize_model_name`. That is straightforward.
+
+Now, about the function signature: `pub fn normalize_model_name(raw: &str) -> String`. We must keep that exactly. So we will not add any extra arguments or return types.
+
+Now, about guard rails: "NO unwrap(), NO expect(), NO panic!". So we must not use `.unwrap()` anywhere. We also must not call `.expect()`. We can still use `.map`, `.filter`, etc., but we need to be careful not to call `.unwrap()` on any `Option` that we get from `strip_prefix` or similar. So we will just use `if raw.starts_with(prefix) { ... }` and similar for suffixes.
+
+Now, about the implementation details: We'll convert `raw` to a mutable string for modifications (since we need to slice it). The input is `&str`, but we can convert it to a `String` at the start. However, we could also keep it as `&str` and use slicing to produce new strings. But we must return a `String`. So we can just use `raw.to_string()` after all modifications.
+
+Now, about the order of operations: Should we first strip prefixes, then suffixes, or vice versa? The spec says "Strip registry prefixes ... Strip quantization suffixes". It doesn't specify order, but it's natural to strip prefixes first, then suffixes. However, there is a nuance: Some suffixes might be part of the prefix (e.g., `'registry.ollama.ai/library/model-q4_0'` has a suffix `-q4_0` that appears after the prefix). If we strip the prefix first, we get `model-q4_0`. Then we strip the suffix `-q4_0`, leaving `model`. That's correct. If we stripped suffixes first, we might get `registry.ollama.ai/library/model`, then strip prefixes, ending with `model`. Same result. So order doesn't matter for correctness, but we need to be careful not to double-strip something that was already removed. Since we only strip each prefix/suffix once (by checking if it's present), the order is fine.
+
+Now, about the suffixes: The spec includes both `-q4_0` and `:q4_0`. These are different strings; a model name can have either a dash or a colon before the quantization tag. So we need to check each suffix individually. That's straightforward.
+
+Now, about the prefixes: `'registry.ollama.ai/library/'`, `'library/'`, `'hf.co/'`. Some of these may contain characters that are also part of suffixes (like `'library/'` appears in `'registry.ollama.ai/library/'`). But after stripping the longer prefix, we won't need to strip `'library/'` again because it's no longer at the start. However, if we have a string like `'library/model-q4_0'`, we should strip `'library/'`. That's fine.
+
+Now, about the case-insensitivity: If the input is `'Registry.Ollama.Ai/Library/MyModel-Q4_0'`, after converting to lowercase it becomes `'registry.ollama.ai/library/my-model-q4_0'`. Then we can strip the prefixes and suffixes exactly. That satisfies the spec.
+
+Now, about the guard rails: We must not use `.unwrap()` anywhere. So we will not call `strip_prefix` with `.map` that returns an `Option` and then `.unwrap()`. Instead, we will just check with `if raw.starts_with(prefix) { ... }`. However, we might still want to use `raw.strip_prefix(prefix)` to get the suffix part without copying the whole string. Since `strip_prefix` returns an `Option<&str>`, we can call it and then use `.map(|s| s.to_string())` to convert to a new `String`. But that would allocate a new string each time, which is fine for this spec. However, we must not call `.unwrap()` on the result. So we could do:
+
+```
+let trimmed = raw.strip_prefix(prefix).map(|s| s.to_string()).unwrap_or(raw.to_string());
+```
+
+But that uses `.unwrap_or`, which is allowed because it's not `.unwrap()`. The spec says "NO unwrap()", but `.unwrap_or` is a method that returns the original value if `None`. That's fine. However, we must avoid `.unwrap()` specifically. So we can use `.unwrap_or(raw.to_string())`. That satisfies the guard rail.
+
+But maybe it's simpler to just use `if raw.starts_with(prefix) { ... }`. That avoids any `Option` handling altogether. However, using `strip_prefix` might be more concise and still respects the guard rails if we don't call `.unwrap()`. Since we can use `.map` and then `.unwrap_or`, that's okay.
+
+Now, about the suffixes: Similarly, we could do:
+
+```
+let trimmed = raw.strip_suffix(suffix).map(|s| s.to_string()).unwrap_or(raw.to_string());
+```
+
+But note that `strip_suffix` also returns an `Option<&str>`. We must not call `.unwrap()`. So using `.unwrap_or` is fine.
+
+Now, about the comment: we need to include `// trace:implements FR-002` right before the function declaration. That means we should output something like:
+
+```
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String { ... }
+```
+
+Now, about the implementation steps: We'll start by converting `raw` to a mutable string for modifications. But since we need to return a `String`, we can just keep it as `&str` and later convert to `String`. However, we will need to do multiple slices and concatenations; each slice returns a `&str`, which we can later convert to a `String`. So we might want to accumulate the result in a `String` variable.
+
+Simplify: We'll start with `let mut s = raw.to_string();`. Then we iterate over prefixes and suffixes, applying them conditionally.
+
+Now, about the order of prefix stripping: Since `'registry.ollama.ai/library/'` is longer than `'library/'`, we should try the longer one first to avoid double-stripping, but it's not necessary; we can just check each prefix in any order because after stripping a prefix, the string will no longer start with the other prefix (unless they are overlapping but not at the start). Actually, if we have `'library/model-q4_0'`, checking `'registry.ollama.ai/library/'` first will fail (no match), then we check `'library/'` and strip it. That's fine. So order doesn't matter.
+
+Now, about suffix stripping: We must be careful to strip each suffix only once. Since they are mutually exclusive (they can't both be present at the end of the same string), we can just iterate over them and apply each if present. That will handle all cases.
+
+Now, about case-insensitivity for suffixes: After converting to lowercase, the suffixes become exactly as given. So we don't need any extra case handling.
+
+Now, after stripping prefixes and suffixes, we must convert the result to lowercase. But we already lowercased at the start (by converting to a `String` with `raw.to_string()` which preserves case). Actually, `raw.to_string()` just copies the string; it doesn't change case. So we need to call `.to_lowercase()` at the end after all stripping. That will ensure the final string is lowercase.
+
+Now, about potential edge cases: Empty input? The spec doesn't say anything about empty input. If `raw` is empty, after stripping nothing and converting to lowercase, we return an empty string. That's fine. Input that only contains a prefix or suffix: e.g., `'registry.ollama.ai/library/'`. After stripping prefixes, we get empty string; after stripping suffixes (none), we still have empty string; then we convert to lowercase (still empty). So we return `""`. That's okay.
+
+Now, about performance: The spec doesn't require high performance, just correctness and guard rails. So we can use simple string operations.
+
+Now, about the code block: The user wants "Output ONLY valid Rust code inside a ```rust code block." So we must not include any extra text outside the code block. We need to output exactly the function definition with the comment line before it.
+
+Thus, the final code will be something like:
+
+```
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut s = raw.to_string();
+    for prefix in ["registry.ollama.ai/library/", "library/", "hf.co/"] {
+        if s.starts_with(prefix) {
+            s = s[prefix.len()..].to_string();
+        }
+    }
+    for suffix in ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"] {
+        if s.ends_with(suffix) {
+            s = s[..s.len() - suffix.len()].to_string();
+        }
+    }
+    s.to_lowercase()
+}
+```
+
+But we need to ensure that we don't use `.unwrap()` or `.expect()`. In the above, we use `if s.starts_with(prefix) { ... }` and `if s.ends_with(suffix) { ... }`. That's fine. However, we could also use `strip_prefix` with `.map` and `.unwrap_or`, but that would still be okay because we are not calling `.unwrap()`. But the spec says "NO unwrap()", so using `.unwrap_or` is allowed because it's not `.unwrap()`; it's a different method that returns the original value. However, I think it's safer to just use `if s.starts_with(prefix) { ... }` to avoid any potential misuse of `.unwrap()`. The spec may be strict: they might want us to not use `.unwrap()` anywhere. Using `.unwrap_or` is not exactly `.unwrap()`, but it's still a method that can return the original value. However, the spec says "NO unwrap()", which could be interpreted as "do not call any method named `unwrap`". Since we are not calling `unwrap`, only `unwrap_or`, that should be okay. But to be safe, I'll just use `if s.starts_with(prefix) { ... }`.
+
+Now, about the suffix list: The spec includes both `-q4_0` and `:q4_0`. In the above code, I've included both. That's correct.
+
+Now, about the order of prefix and suffix loops: The spec says "Strip registry prefixes ... Strip quantization suffixes". So we should strip prefixes first, then suffixes. That's what I have.
+
+Now, about the `to_lowercase()` call: Should we call it on the final string after all stripping? Yes. But note that after stripping, the string may contain uppercase letters (like `'MyModel'`). We must convert them to lowercase. So `s.to_lowercase()` is correct.
+
+Now, about the return type: The function returns a `String`. That's fine.
+
+Now, about the comment: The spec says "Include comment '// trace:implements FR-002' directly before function declaration." So we need to place that line exactly before the `pub fn` line. That's what I have.
+
+Now, about the code block: The output must be only the Rust code inside a ```rust code block. So no extra markdown outside.
+
+Now, let me double-check if any of the prefixes or suffixes contain characters that could cause issues when using `starts_with` or `ends_with`. All are ASCII strings; no special handling needed.
+
+Now, consider the case where the input string contains both a prefix and a suffix that overlap after stripping. For example, `'registry.ollama.ai/library/model-q4_0'`. After stripping the prefix `'registry.ollama.ai/library/'`, we get `'model-q4_0'`. Then we strip suffix `'-q4_0'`, leaving `'model'`. That's correct.
+
+Now, consider `'library/model:q4_0'`. After stripping `'library/'`, we get `'model:q4_0'`. Then we strip suffix `':q4_0'`, leaving `'model'`. That's correct.
+
+Now, what about `'hf.co/model-q4_k_m'`. After stripping `'hf.co/'`, we get `'model-q4_k_m'`. Then we strip suffix `'-q4_k_m'`, leaving `'model'`. That's correct.
+
+Now, consider `'registry.ollama.ai/library/model-q4_k_s'`. After stripping prefix `'registry.ollama.ai/library/'`, we get `'model-q4_k_s'`. Then we strip suffix `'-q4_k_s'`, leaving `'model'`. That's correct.
+
+Now, what about `'library/model-q4_0'`? After stripping `'library/'`, we get `'model-q4_0'`. Then we strip suffix `'-q4_0'`, leaving `'model'`. That's correct.
+
+Now, consider `'hf.co/library/model-q4_k_m'`. The spec says to strip prefixes `'registry.ollama.ai/library/', 'library/', 'hf.co/'`. So after stripping `'hf.co/'`, we get `'library/model-q4_k_m'`. Then we strip `'library/'` (which is now at the start), leaving `'model-q4_k_m'`. Then we strip suffix `'-q4_k_m'`, leaving `'model'`. That's correct.
+
+Now, about case-insensitivity: If the input is `'Registry.Ollama.Ai/Library/MyModel-Q4_0'`, after converting to lowercase (which we do at the end), we get `'registry.ollama.ai/library/my-model-q4_0'`. Then we strip prefixes and suffixes using exact matches, which will succeed because after lowercasing the string, the prefixes and suffixes are all lowercase. That's fine.
+
+Now, about the comment: The spec says "Include comment '// trace:implements FR-002' directly before function declaration." So we must not add any other comments before it. That's satisfied.
+
+Now, about the guard rails: "NO unwrap(), NO expect(), NO panic!". We are not using any of those. Good.
+
+Now, about the function signature: `pub fn normalize_model_name(raw: &str) -> String`. That matches exactly.
+
+Now, I think the implementation is correct. However, we need to ensure that we don't accidentally use `.unwrap()` on any `Option` from `strip_prefix` or similar. In my code, I used `if s.starts_with(prefix) { s = s[prefix.len()..].to_string(); }`. That's fine. Similarly for suffixes. So no `.unwrap()` is called.
+
+Now, about the final output: The user wants only valid Rust code inside a ```rust code block. So I will output exactly that.
+
+Thus, the final answer will be:
+
+```
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut s = raw.to_string();
+    for prefix in ["registry.ollama.ai/library/", "library/", "hf.co/"] {
+        if s.starts_with(prefix) {
+            s = s[prefix.len()..].to_string();
+        }
+    }
+    for suffix in ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"] {
+        if s.ends_with(suffix) {
+            s = s[..s.len() - suffix.len()].to_string();
+        }
+    }
+    s.to_lowercase()
+}
+```
+
+Now, I need to double-check that the suffix list includes all the required ones: `-q4_0`, `-q4_k_m`, `-q4_k_s`, `:q4_0`, `:q4_k_m`, `:q4_k_s`. Yes.
+
+Now, about the prefix list: `'registry.ollama.ai/library/'`, `'library/'`, `'hf.co/'`. Yes.
+
+Now, about the order of loops: I used a `for` loop over prefixes first, then suffixes. That matches the spec.
+
+Now, about the guard rails: No `.unwrap()`, no `.expect()`, no `.panic!()`. Good.
+
+Now, about the comment: I placed it before the function declaration exactly as required.
+
+Now, about the return type: `String`. Yes.
+
+Now, about the input parameter: `raw: &str`. Yes.
+
+Now, I think this is correct.
+
+But wait, there is a nuance: The spec says "Strip quantization suffixes: '-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s' (case-insensitive)". So we need to strip them case-insensitively. In my implementation, I convert the entire string to lowercase after stripping prefixes and suffixes. However, if the input contains uppercase letters in the suffix (e.g., `-Q4_0`), after converting to lowercase at the end, the suffix becomes `-q4_0`. But we also need to strip it earlier, before lowercasing. The spec says "case-insensitive", so we should be able to strip suffixes regardless of case. In my current implementation, I only strip suffixes after lowercasing (since I convert at the end). However, if the input is `'model-Q4_0'`, after stripping prefixes (none), we then go into the suffix loop. At that point, `s` still has uppercase `-Q4_0`. The suffix list includes `-q4_0` (lowercase). `ends_with("-q4_0")` will be false because the actual suffix is `-Q4_0`. So we won't strip it. Then we call `to_lowercase()` at the end, which lowercases everything to `'model-q4_0'`. That would still have the suffix `-q4_0`, but we never stripped it. However, the spec says "Strip quantization suffixes ... (case-insensitive)". So we need to strip them regardless of case before lowercasing. That means we should either lower-case the string first and then strip suffixes, or check suffixes case-insensitively (by converting both to lowercase before checking). Since we have to return a `String` that is lowercase, we can just lower-case at the start and then strip suffixes with exact matches. That would be more straightforward: convert to lowercase first, then strip prefixes and suffixes using exact matches. Then we don't need any case-insensitive checks.
+
+So the correct order should be: Convert `raw` to a lowercase string (or just keep it as is and later call `.to_lowercase()`), but to strip suffixes case-insensitively, we should lower-case first. However, the spec says "Convert result to lowercase", which implies that after stripping prefixes and suffixes, we convert the final string to lowercase. But if we lower-case first, the final string is already lowercase, so the conversion step would be redundant. However, the spec may want us to strip prefixes and suffixes on the original case (case-insensitively) and then lower-case the result. To satisfy both, we can just lower-case at the end after stripping. But we need to ensure that we strip suffixes regardless of case. Since `ends_with` is case-sensitive, we must either lower-case first or use a case-insensitive check.
+
+Simplest approach: Convert to lowercase at the start (or just before stripping). Then strip prefixes and suffixes using exact matches. After that, we have a string that is already lowercase, so we don't need another `to_lowercase()` call. However, the spec says "Convert result to lowercase". That could be satisfied by lower-casing at the end; but if we lower-case at the start, it's also fine because the final result will be lowercase. The only difference is that we might lose any uppercase letters that were not part of prefixes or suffixes, but those are supposed to be lowercased anyway. So it's okay to lower-case early.
+
+Thus, we can change the implementation to:
+
+```
+let mut s = raw.to_lowercase();
+for prefix in [...] {
+    if s.starts_with(prefix) { ... }
+}
+for suffix in [...] {
+    if s.ends_with(suffix) { ... }
+}
+s
+```
+
+But we must ensure that we don't use `.unwrap()`. That's fine.
+
+Now, the spec says "Convert result to lowercase". If we lower-case at the start, we are converting the input to lowercase before any stripping. That's okay because the final result will still be lowercase; we just need to make sure that we don't accidentally strip something that was originally uppercase but not part of a prefix or suffix. However, since we lower-case everything, any uppercase letters become lowercase, and then we strip prefixes and suffixes that are all lowercase. That's correct because the prefixes and suffixes are defined as lowercase strings; they will match only after lower-casing. That satisfies case-insensitivity for stripping.
+
+Thus, the simplest implementation is to lower-case first, then strip prefixes and suffixes using exact matches. Then return `s`. This also avoids any need for a final `.to_lowercase()`. However, the spec says "Convert result to lowercase", which could be interpreted as "after stripping, convert to lowercase". But we can just lower-case at the start; it's equivalent.
+
+Now, we must ensure that we don't call `.unwrap()` anywhere. Using `if s.starts_with(prefix) { s = &s[prefix.len()..].to_string(); }` is fine.
+
+Now, about the suffix list: we need to include all six suffixes as strings. That's fine.
+
+Now, after stripping prefixes and suffixes, we might have a string that contains characters that were originally uppercase but are now lowercase because of the initial `to_lowercase()`. That's okay.
+
+Now, about the order of prefix and suffix loops: The spec says "Strip registry prefixes ... Strip quantization suffixes". So we should strip prefixes first, then suffixes. That's what I have.
+
+Now, about the comment: we must include `// trace:implements FR-002` before the function declaration.
+
+Now, we need to ensure that the code is valid Rust. The use of `for prefix in [...]` is fine. However, we can't use a raw string array for prefixes because they contain quotes? Actually, the prefixes are strings like `"registry.ollama.ai/library/"`. That's fine. But we must be careful about escaping double quotes inside the string literals; there are no double quotes inside them. So we can just write them as normal string literals.
+
+Now, about the suffix list: includes `"-q4_0"`, etc. That's fine.
+
+Now, about the final return: we should just return `s`. Since we lowercased at the start, `s` is already lowercase. So we don't need another `to_lowercase()` call. However, to be safe and match the spec exactly (which says "Convert result to lowercase"), we could still call `s.to_lowercase()` after stripping, but it would be redundant. But the spec might want us to explicitly call `.to_lowercase()`. Since the spec doesn't forbid extra calls, but it's fine either way. However, to avoid any potential issue with the final string not being lowercase if we didn't lower-case early (like if we had kept original case and then stripped suffixes case-insensitively), we might need a final `to_lowercase()`. But our approach of lower-casing early ensures that the final string is always lowercase. So we can just return `s`.
+
+Now, about the guard rails: we must not use `.unwrap()`. That's fine.
+
+Now, I think the final code will be:
+
+```
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut s = raw.to_lowercase();
+    for prefix in ["registry.ollama.ai/library/", "library/", "hf.co/"] {
+        if s.starts_with(prefix) {
+            s = s[prefix.len()..].to_string();
+        }
+    }
+    for suffix in ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"] {
+        if s.ends_with(suffix) {
+            s = s[..s.len() - suffix.len()].to_string();
+        }
+    }
+    s
+}
+```
+
+Now, I need to double-check that the prefixes and suffixes are exactly as specified. The prefixes: `'registry.ollama.ai/library/'`, `'library/'`, `'hf.co/'`. Yes. The suffixes: `'-q4_0'`, `'-q4_k_m'`, `'-q4_k_s'`, `':q4_0'`, `':q4_k_m'`, `':q4_k_s'`. Yes.
+
+Now, about the order of loops: I used a `for` loop over prefixes first, then suffixes. That matches the spec.
+
+Now, about the guard rails: we are not using `.unwrap()`. Good.
+
+Now, about the comment: placed before function declaration.
+
+Now, about the final output: only the code block with ```rust and closing ```. No extra text.
+
+Thus, I think this is the correct implementation.
+
+But before finalizing, I should test mentally some edge cases.
+
+Case 1: Input `'registry.ollama.ai/library/model-q4_0'`. Lowercase first: `'registry.ollama.ai/library/model-q4_0'`. Strip prefix `'registry.ollama.ai/library/'` -> `'model-q4_0'`. Then suffix loop: `'model-q4_0'` ends with `-q4_0`, strip -> `'model'`. Return `'model'`. That's correct.
+
+Case 2: Input `'library/model:q4_k_m'`. Lowercase first: `'library/model:q4_k_m'`. Strip prefix `'library/'` -> `'model:q4_k_m'`. Then suffix loop: `'model:q4_k_m'` ends with `:q4_k_m`, strip -> `'model'`. Return `'model'`. That's correct.
+
+Case 3: Input `'hf.co/library/model-q4_k_s'`. Lowercase first: `'hf.co/library/model-q4_k_s'`. Strip prefix `'hf.co/'` -> `'library/model-q4_k_s'`. Then suffix loop: `'library/model-q4_k_s'` ends with `-q4_k_s`, strip -> `'library/model'`. Wait, we haven't stripped `'library/'` because it's a prefix that we already stripped earlier. But the spec says to strip prefixes in order. After stripping `'hf.co/'`, we have `'library/model-q4_k_s'`. Then we continue with suffix loop; after suffix stripping we get `'library/model'`. However, we also need to strip `'library/'` as a prefix. That should be done earlier (in the prefix loop). Since we already stripped `'hf.co/'`, we still have `'library/model-q4_k_s'`. In the prefix loop we iterate over all prefixes; after stripping `'hf.co/'`, we then check `'registry.ollama.ai/library/'` which doesn't match, then `'library/'` which does match. So we will strip `'library/'` as well, resulting in `'model-q4_k_s'`. Then suffix loop strips `-q4_k_s`, resulting `'model'`. That's correct.
+
+Thus, the order of prefix checks matters: we need to check all prefixes, regardless of previous strips, because after stripping a longer prefix, the string may still start with a shorter prefix (like `'library/'`). So we must iterate over all prefixes and apply each if it matches. That's what my code does.
+
+Now, about suffixes: they are mutually exclusive; after stripping a suffix, the string will not end with another suffix (except maybe if the suffix is empty, but none are). So iterating over all suffixes works fine.
+
+Now, about case-insensitivity: Since we lower-case at start, any suffix that originally had uppercase letters (like `-Q4_0`) becomes `-q4_0` after lowercasing, and then matches exactly. That's correct.
+
+Now, about the final string being lowercase: Yes, because we lowercased at start and didn't change case later. So it's always lowercase.
+
+Now, about the guard rails: No `.unwrap()` used. Good.
+
+Now, about the comment: placed before function declaration. Good.
+
+Thus, I think this is the correct implementation.
+
+Now, I need to output only the code block. So final answer:
+
+```
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut s = raw.to_lowercase();
+    for prefix in ["registry.ollama.ai/library/", "library/", "hf.co/"] {
+        if s.starts_with(prefix) {
+            s = s[prefix.len()..].to_string();
+        }
+    }
+    for suffix in ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"] {
+        if s.ends_with(suffix) {
+            s = s[..s.len() - suffix.len()].to_string();
+        }
+    }
+    s
+}
+```
+
+Now, I will output that as the final answer.

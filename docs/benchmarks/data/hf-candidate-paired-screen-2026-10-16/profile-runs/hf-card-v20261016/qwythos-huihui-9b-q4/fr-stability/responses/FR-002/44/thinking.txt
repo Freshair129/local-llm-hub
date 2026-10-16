@@ -1,0 +1,111 @@
+The user wants me to implement a Rust function `normalize_model_name` that adheres to a fairly specific set of rules (FR‑002). I need to read the specification carefully and translate each bullet into concrete Rust code, while also respecting the guard rails (no `unwrap`, `expect`, or `panic!`). Additionally, I must include a traceability comment right before the function declaration.
+
+**Step 1: Understand the function signature.**  
+`pub fn normalize_model_name(raw: &str) -> String` – takes a string slice and returns an owned `String`. That’s straightforward; I just need to allocate a mutable copy of `raw` (or use `to_string()`) so I can modify it in place.
+
+**Step 2: Strip registry prefixes.**  
+The spec lists three possible prefixes:
+- `'registry.ollama.ai/library/'`
+- `'library/'`
+- `'hf.co/'`
+
+I need to check the start of the string and remove whichever matches, if present. Since the prefixes have different lengths, I can use `starts_with` checks in order. A `if ... else if ...` chain works well. After each match, I can slice the string (e.g., `&raw[21..]` for the longest prefix) and reassign to the mutable copy.
+
+**Step 3: Strip quantization suffixes.**  
+The suffixes are given as `-q4_0`, `-q4_k_m`, `-q4_k_s`, plus their colon‑prefixed variants `:q4_0`, `:q4_k_m`, `:q4_k_s`. The spec says “case‑insensitive”, so I can convert the whole string to lowercase earlier (step 4) and then look for these suffixes, which will appear as exact matches. However, there’s a nuance: if the model name ends with one of these suffixes after the prefixes have been stripped, I need to remove them. The longest suffix is `-q4_k_m` (length 7) and `:q4_k_m` (also length 7). The shorter ones are `-q4_0` (5 chars) and `:q4_0`. So I can check for the longer patterns first, then fall back to the shorter ones. Using `ends_with` checks in an `if ... else if ...` chain accomplishes this.
+
+**Step 4: Convert result to lowercase.**  
+The simplest way is to call `to_lowercase()` on the mutable copy after stripping prefixes but before suffixes (or after, doesn’t matter much). Since we’ll be using `ends_with` checks that are case‑insensitive, converting early makes those checks exact. So I’ll do `raw = raw.to_lowercase();`.
+
+**Step 5: Guard rails.**  
+The spec forbids any `unwrap()`, `expect()`, or `panic!()`. That means I must avoid calling methods that might panic on missing data. For example, `trim_end()` is fine because it returns the string unchanged if there’s no trailing whitespace (no panic). Using `starts_with` and `ends_with` are also safe. The only potential panic is when slicing with an index that assumes a certain length; I’ll compute the slice lengths precisely to avoid off‑by‑one errors.
+
+**Step 6: Traceability comment.**  
+Insert `// trace:implements FR-002` directly before the function line, as requested.
+
+**Putting it together:**  
+I’ll start with a `let mut name = raw.to_string();` so I have a mutable owned copy. Then apply the prefix stripping logic. Next, call `name.to_lowercase();`. Finally, strip the quantization suffixes. I’ll make sure each conditional updates `name` appropriately.
+
+Let me draft the code:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut name = raw.to_string();
+
+    // Strip registry prefixes
+    if name.starts_with("registry.ollama.ai/library/") {
+        name = &name[21..];
+    } else if name.startswith("library/") {
+        name = &name[8..];
+    } else if name.startswith("hf.co/") {
+        name = &name[6..];
+    }
+
+    // Convert to lowercase (case‑insensitive suffix matching)
+    name.to_lowercase();
+
+    // Strip quantization suffixes (longest first, then shorter)
+    if name.ends_with("-q4_k_m") || name.ends_with(":q4_k_m") {
+        name = &name[..name.len() - 7];
+    } else if name.ends_with("-q4_k_s") {
+        name = &name[..name.len() - 7];
+    } else if name.ends_with("-q4_0") {
+        name = &name[..name.len() - 5];
+    } else if name.ends_with(":q4_k_s") {
+        name = &name[..name.len() - 7];
+    } else if name.ends_with(":q4_0") {
+        name = &name[..name.len() - 5];
+    }
+
+    name
+}
+```
+
+Wait, I notice a typo: `name.startswith` should be `name.startswith`? Actually the method is `starts_with`. In my draft I wrote `name.startswith("library/")` and `name.startswith("hf.co/")` – that’s correct. But I also have `name.to_lowercase()` without assigning it back. The spec says “Convert result to lowercase”, which implies the final output should be lowercase. If I call `to_lowercase()` but don’t capture its return, the original `name` remains unchanged. I need either `name = name.to_lowercase();` or chain it. Let me adjust: after stripping prefixes, do `name = name.to_lowercase();`. That satisfies the spec.
+
+Now, double‑check the suffix stripping logic. The longest suffixes are `-q4_k_m` and `:q4_k_m`, both length 7. So if the name ends with either of those, I slice off the last 7 characters. Then handle the other two longer ones (`-q4_k_s`, `:q4_k_s`). Finally, the shorter suffixes `-q4_0` and `:q4_0` (length 5). The order matters because if a name ends with `-q4_k_m`, it also ends with `-q4_0`? Not really; but to be safe I’ll keep the longer ones first. That matches the spec.
+
+Now verify that no `unwrap()` is used. I’m using `&name[..]` and `&name[... ]` – all safe. I could have used `name.trim_end()` but that would also work. The only potential panic is if I slice with an index that assumes the string is at least that long; I computed the exact lengths from the suffix name, so it’s fine.
+
+One more nuance: after stripping prefixes, the lowercase conversion may introduce lower‑case letters that affect suffix matching (e.g., `HF.co/gguf` becomes `hf.co/gguf`). That’s expected because the suffixes are case‑insensitive; they appear as `:q4_0` etc. So the logic stands.
+
+Now, ensure the traceability comment is directly before the function line, not after any declarations. I’ll place it right before `pub fn`. The final code block should be wrapped in ```rust and contain only the function (no extra whitespace outside). Let me finalize:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut name = raw.to_string();
+
+    // Strip registry prefixes
+    if name.startswith("registry.ollama.ai/library/") {
+        name = &name[21..];
+    } else if name.startswith("library/") {
+        name = &name[8..];
+    } else if name.startswith("hf.co/") {
+        name = &name[6..];
+    }
+
+    // Convert to lowercase (case‑insensitive suffix matching)
+    name = name.to_lowercase();
+
+    // Strip quantization suffixes (longest first, then shorter)
+    if name.ends_with("-q4_k_m") || name.ends_with(":q4_k_m") {
+        name = &name[..name.len() - 7];
+    } else if name.ends_with("-q4_k_s") {
+        name = &name[..name.len() - 7];
+    } else if name.ends_with("-q4_0") {
+        name = &name[..name.len() - 5];
+    } else if name.ends_with(":q4_k_s") {
+        name = &name[..name.len() - 7];
+    } else if name.ends_with(":q4_0") {
+        name = &name[..name.len() - 5];
+    }
+
+    name
+}
+```
+
+Double‑check the `starts_with` method: it returns a boolean, so the condition works. The slice after `registry.ollama.ai/library/` (length 21) is correct. `library/` is length 8, `hf.co/` is length 6. Good.
+
+Now I’ll output exactly this as the final answer, inside a Rust code block, with no extra commentary.

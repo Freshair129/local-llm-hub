@@ -1,0 +1,36 @@
+error[E0599]: no method named `startswith` found for struct `String` in the current scope
+ --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-002\43\test.rs:7:10
+  |
+7 |     if s.startswith("registry.ollama.ai/library/") {
+  |          ^^^^^^^^^^
+  |
+help: there is a method `starts_with` with a similar name
+  |
+7 |     if s.starts_with("registry.ollama.ai/library/") {
+  |                +
+
+error[E0599]: no method named `startswith` found for struct `String` in the current scope
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-002\43\test.rs:10:10
+   |
+10 |     if s.startswith("library/") {
+   |          ^^^^^^^^^^
+   |
+help: there is a method `starts_with` with a similar name
+   |
+10 |     if s.starts_with("library/") {
+   |                +
+
+error[E0599]: no method named `startswith` found for struct `String` in the current scope
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-002\43\test.rs:13:10
+   |
+13 |     if s.startswith("hf.co/") {
+   |          ^^^^^^^^^^
+   |
+help: there is a method `starts_with` with a similar name
+   |
+13 |     if s.starts_with("hf.co/") {
+   |                +
+
+error: aborting due to 3 previous errors
+
+For more information about this error, try `rustc --explain E0599`.

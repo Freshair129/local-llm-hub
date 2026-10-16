@@ -1,0 +1,82 @@
+The user wants me to implement a Rust function `parse_gpu_csv` that reads a CSV line and returns a `GpuStats` struct. The struct is already defined with five fields: `name` (String), `vram_used_mb` (u64), `vram_total_mb` (u64), `temp_c` (u32), and `util_pct` (u32). The CSV line is expected to be in the format `"NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"`.
+
+**Step 1: Define the struct**
+I need to copy the exact struct definition provided in the specification, making sure the derive macros (`Debug`, `PartialEq`) and the `pub` visibility are correct. This is straightforward.
+
+**Step 2: Define the function signature**
+The function must be `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`. The `Result` type is important because the spec demands returning an `Err(String)` on failure, not panicking.
+
+**Step 3: Traceability comment**
+The spec says to include `// trace:implements FR-006` directly before the function declaration. I'll place that comment right above the `pub fn` line.
+
+**Step 4: Parsing the CSV line**
+The line is a comma-separated string, but there may be spaces after the commas (e.g., `"5800, "`). I can split on commas, then trim whitespace from each token. The split method returns an iterator, so I'll map each token to a trimmed string.
+
+**Step 5: Handling column count**
+If the split yields fewer than 5 tokens, the struct would be under‑populated. The spec requires robust error handling, so I'll collect the tokens into a `Vec<String>` and check `len()`. If `< 5`, I'll return `Err(...)` with a helpful message like `"Expected 5 columns, got {len}"`.
+
+**Step 6: Extracting individual fields**
+Now I need to bind the five fields: `name` is simply the first token, `vram_used_mb` is the second, etc. I'll let the compiler infer the types for the numeric fields; the `parse` method will produce a `u64` or `u32` as appropriate.
+
+**Step 7: Parsing numeric strings**
+For each numeric field, I'll call `.parse::<u64>()` or `.parse::<u32>()`. The `parse` method returns a `Result<T, ParseIntError>`. Since the spec forbids `unwrap()`, I need to handle the `Err` case by converting the `ParseIntError` into a `String`. I can use `map_err(|e| e.to_string())` on the `parse` call.
+
+**Step 8: Constructing the `GpuStats`**
+I'll create a `GpuStats` instance with the parsed values, chaining the `map_err` calls for each field. This way, if any single field fails to parse, the error propagates with the original error message.
+
+**Step 9: Returning the result**
+Finally, the function returns `Ok(stats)` if all parsing succeeded.
+
+**Step 10: Reviewing against guard rails**
+- Did I use any `unwrap()`? No, only `parse` with `map_err`.
+- Did I use `expect()`? No.
+- Did I use `panic!`? No.
+- Are there enough columns? The `len()` check ensures at least five.
+- Are the types correct? `vram_used_mb` and `vram_total_mb` are `u64`, `temp_c` and `util_pct` are `u32`. The CSV example matches those ranges.
+- Is the traceability comment present? Yes.
+
+**Step 11: Formatting the output**
+The spec wants BOTH the struct and the function inside a single code block. I'll put the struct first, then a blank line for readability, then the comment and function.
+
+Now I'll write the final Rust code block accordingly.
+
+```rust
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let tokens: Vec<String> = line
+        .split(',')
+        .map(|s| s.trim().to_string())
+        .collect();
+
+    if tokens.len() < 5 {
+        return Err(format!("Expected 5 columns, got {}", tokens.len()));
+    }
+
+    let name = tokens[0].clone();
+    let vram_used_mb = tokens[1].parse::<u64>().map_err(|e| e.to_string())?;
+    let vram_total_mb = tokens[2].parse::<u64>().map_err(|e| e.to_string())?;
+    let temp_c = tokens[3].parse::<u32>().map_err(|e| e.to_string())?;
+    let util_pct = tokens[4].parse::<u32>().map_err(|e| e.to_string())?;
+
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}
+```
+
+I've double‑checked the example line: `"NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"` splits into five tokens, each trimming spaces correctly, and the numeric parses line up with the expected types. The error handling covers both missing columns and malformed numbers, satisfying the robustness requirement.
+
+Thus, this implementation adheres to all seven specifications and the guard rails.

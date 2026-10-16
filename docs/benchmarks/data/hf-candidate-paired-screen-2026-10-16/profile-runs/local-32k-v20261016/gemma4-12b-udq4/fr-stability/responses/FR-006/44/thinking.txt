@@ -1,0 +1,119 @@
+*   Role: AI Coder.
+    *   Constraints: STD-003 and ADR-100 guard rails (implies high safety, no panics, strict adherence to specs).
+    *   Task: Implement FR-006.
+
+    *   Struct: `GpuStats` with fields `name` (String), `vram_used_mb` (u64), `vram_total_mb` (u64), `temp_c` (u32), `util_pct` (u32).
+    *   Function: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`.
+    *   Input format: CSV line (e.g., "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25").
+    *   Error Handling: Return `Err(String)` for < 5 columns or parsing failures.
+    *   Forbidden: `unwrap()`, `expect()`, `panic!`.
+    *   Traceability: Comment `// trace:implements FR-006` before the function.
+    *   Output: Both struct and function in one code block.
+
+    *   *Step 1: Define the struct.*
+        ```rust
+        #[derive(Debug, PartialEq)]
+        pub struct GpuStats {
+            pub name: String,
+            pub vram_used_mb: u64,
+            pub vram_total_mb: u64,
+            pub temp_c: u32,
+            pub util_pct: u32,
+        }
+        ```
+
+    *   *Step 2: Implement the function.*
+        *   Split the string by comma.
+        *   Check if length < 5.
+        *   Trim whitespace from each part.
+        *   Parse the parts into respective types.
+        *   Handle errors by returning `Err`.
+
+    *   *Refining the parsing logic:*
+        ```rust
+        pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+            let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+            if parts.len() < 5 {
+                return Err("Insufficient columns in CSV line".to_string());
+            }
+
+            let name = parts[0].to_string();
+            let vram_used_mb = parts[1].parse::<u64>().map_err(|e| e.to_string())?;
+            let vram_total_mb = parts[2].parse::<u64>().map_err(|e| e.to_string())?;
+            let temp_c = parts[3].parse::<u32>().map_err(|e| e.to_string())?;
+            let util_pct = parts[4].parse::<u32>().map_err(|e| e.to_string())?;
+
+            Ok(GpuStats {
+                name,
+                vram_used_mb,
+                vram_total_mb,
+                temp_c,
+                util_pct,
+            })
+        }
+        ```
+
+    *   *Wait, check the "Strictly Forbidden" rule:* No `unwrap`, `expect`, `panic`. The `?` operator is safe because it returns the `Err` variant of the Result.
+
+    *   *Check the "Traceability" rule:* `// trace:implements FR-006` before the function.
+
+    *   *Check the "Output" rule:* Both in the code block.
+
+    *   Input: "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"
+    *   Splits into: ["NVIDIA GeForce RTX 3060", "5800", "12288", "35", "25"]
+    *   Parses correctly.
+    *   Returns `Ok(GpuStats { ... })`.
+
+    *   *Edge cases:*
+        - "A, 1, 2, 3" (4 parts) -> `Err` (correct).
+        - "A, 1, 2, 3, X" (X is not a number) -> `Err` (correct).
+
+    *   `#[derive(Debug, PartialEq)]` included? Yes.
+    *   Struct field names/types correct? Yes.
+    *   Function signature exact? Yes.
+    *   No `unwrap`/`expect`/`panic`? Yes.
+    *   Traceability comment present? Yes.
+
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats {
+        pub name: String,
+        pub vram_used_mb: u64,
+        pub vram_total_mb: u64,
+        pub temp_c: u32,
+        pub util_pct: u32,
+    }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+        let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+
+        if parts.len() < 5 {
+            return Err(format!("Expected at least 5 columns, found {}", parts.len()));
+        }
+
+        let name = parts[0].to_string();
+        let vram_used_mb = parts[1].parse::<u64>().map_err(|e| e.to_string())?;
+        let vram_total_mb = parts[2].parse::<u64>().map_err(|e| e.to_string())?;
+        let temp_c = parts[3].parse::<u32>().map_err(|e| e.to_string())?;
+        let util_pct = parts[4].parse::<u32>().map_err(|e| e.to_string())?;
+
+        Ok(GpuStats {
+            name,
+            vram_used_mb,
+            vram_total_mb,
+            temp_c,
+            util_pct,
+        })
+    }
+    ```
+
+    Wait, the prompt says "Return Err(String) if columns are fewer than 5 or numbers fail to parse."
+    The `?` operator with `map_err` handles the parsing failure perfectly.
+
+    Final check on constraints:
+    - STD-003 (Standard coding practices)
+    - ADR-100 (Architecture/Safety rules - no panics)
+    - FR-006 implementation.
+
+    Everything looks good.

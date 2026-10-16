@@ -1,0 +1,47 @@
+error: character literal may only contain one codepoint
+ --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-002\44\test.rs:5:49
+  |
+5 |     for prefix in &['registry.ollama.ai/library/', 'library/', 'hf.co/'] {
+  |                                                 ^^^^
+  |
+note: there are non-printing characters, the full sequence is `, `
+ --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-002\44\test.rs:5:50
+  |
+5 |     for prefix in &['registry.ollama.ai/library/', 'library/', 'hf.co/'] {
+  |                                                  ^^
+help: consider removing the non-printing characters
+  |
+5 |     for prefix in &['registry.ollama.ai/library/','library/', 'hf.co/'] {
+  |                                                  ~
+
+error: character literal may only contain one codepoint
+ --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-002\44\test.rs:5:61
+  |
+5 |     for prefix in &['registry.ollama.ai/library/', 'library/', 'hf.co/'] {
+  |                                                             ^^^^
+  |
+note: there are non-printing characters, the full sequence is `, `
+ --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-002\44\test.rs:5:62
+  |
+5 |     for prefix in &['registry.ollama.ai/library/', 'library/', 'hf.co/'] {
+  |                                                              ^^
+help: consider removing the non-printing characters
+  |
+5 |     for prefix in &['registry.ollama.ai/library/', 'library/','hf.co/'] {
+  |                                                              ~
+
+error[E0762]: unterminated character literal
+ --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-002\44\test.rs:5:71
+  |
+5 |     for prefix in &['registry.ollama.ai/library/', 'library/', 'hf.co/'] {
+  |                                                                       ^^^^
+  |
+help: if you meant to write a string literal, use double quotes
+  |
+5 -     for prefix in &['registry.ollama.ai/library/', 'library/', 'hf.co/'] {
+5 +     for prefix in &["registry.ollama.ai/library/', 'library/', 'hf.co/"] {
+  |
+
+error: aborting due to 3 previous errors
+
+For more information about this error, try `rustc --explain E0762`.

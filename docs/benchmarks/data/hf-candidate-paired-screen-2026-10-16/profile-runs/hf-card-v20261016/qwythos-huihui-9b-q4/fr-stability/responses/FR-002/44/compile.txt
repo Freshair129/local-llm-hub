@@ -1,0 +1,149 @@
+error[E0599]: no method named `startswith` found for struct `String` in the current scope
+ --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-002\44\test.rs:6:13
+  |
+6 |     if name.startswith("registry.ollama.ai/library/") {
+  |             ^^^^^^^^^^
+  |
+help: there is a method `starts_with` with a similar name
+  |
+6 |     if name.starts_with("registry.ollama.ai/library/") {
+  |                   +
+
+error[E0308]: mismatched types
+ --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-002\44\test.rs:7:16
+  |
+3 |     let mut name = raw.to_string();
+  |                    --------------- expected due to this value
+...
+7 |         name = &name[21..];
+  |                ^^^^^^^^^^^ expected `String`, found `&str`
+  |
+help: try using a conversion method
+  |
+7 |         name = (&name[21..]).to_string();
+  |                +           +++++++++++++
+
+error[E0599]: no method named `startswith` found for struct `String` in the current scope
+ --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-002\44\test.rs:8:20
+  |
+8 |     } else if name.startswith("library/") {
+  |                    ^^^^^^^^^^
+  |
+help: there is a method `starts_with` with a similar name
+  |
+8 |     } else if name.starts_with("library/") {
+  |                          +
+
+error[E0308]: mismatched types
+ --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-002\44\test.rs:9:16
+  |
+3 |     let mut name = raw.to_string();
+  |                    --------------- expected due to this value
+...
+9 |         name = &name[8..];
+  |                ^^^^^^^^^^ expected `String`, found `&str`
+  |
+help: try using a conversion method
+  |
+9 |         name = (&name[8..]).to_string();
+  |                +          +++++++++++++
+
+error[E0599]: no method named `startswith` found for struct `String` in the current scope
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-002\44\test.rs:10:20
+   |
+10 |     } else if name.startswith("hf.co/") {
+   |                    ^^^^^^^^^^
+   |
+help: there is a method `starts_with` with a similar name
+   |
+10 |     } else if name.starts_with("hf.co/") {
+   |                          +
+
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-002\44\test.rs:11:16
+   |
+ 3 |     let mut name = raw.to_string();
+   |                    --------------- expected due to this value
+...
+11 |         name = &name[6..];
+   |                ^^^^^^^^^^ expected `String`, found `&str`
+   |
+help: try using a conversion method
+   |
+11 |         name = (&name[6..]).to_string();
+   |                +          +++++++++++++
+
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-002\44\test.rs:19:16
+   |
+ 3 |     let mut name = raw.to_string();
+   |                    --------------- expected due to this value
+...
+19 |         name = &name[..name.len() - 7];
+   |                ^^^^^^^^^^^^^^^^^^^^^^^ expected `String`, found `&str`
+   |
+help: try using a conversion method
+   |
+19 |         name = (&name[..name.len() - 7]).to_string();
+   |                +                       +++++++++++++
+
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-002\44\test.rs:21:16
+   |
+ 3 |     let mut name = raw.to_string();
+   |                    --------------- expected due to this value
+...
+21 |         name = &name[..name.len() - 7];
+   |                ^^^^^^^^^^^^^^^^^^^^^^^ expected `String`, found `&str`
+   |
+help: try using a conversion method
+   |
+21 |         name = (&name[..name.len() - 7]).to_string();
+   |                +                       +++++++++++++
+
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-002\44\test.rs:23:16
+   |
+ 3 |     let mut name = raw.to_string();
+   |                    --------------- expected due to this value
+...
+23 |         name = &name[..name.len() - 5];
+   |                ^^^^^^^^^^^^^^^^^^^^^^^ expected `String`, found `&str`
+   |
+help: try using a conversion method
+   |
+23 |         name = (&name[..name.len() - 5]).to_string();
+   |                +                       +++++++++++++
+
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-002\44\test.rs:25:16
+   |
+ 3 |     let mut name = raw.to_string();
+   |                    --------------- expected due to this value
+...
+25 |         name = &name[..name.len() - 7];
+   |                ^^^^^^^^^^^^^^^^^^^^^^^ expected `String`, found `&str`
+   |
+help: try using a conversion method
+   |
+25 |         name = (&name[..name.len() - 7]).to_string();
+   |                +                       +++++++++++++
+
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-002\44\test.rs:27:16
+   |
+ 3 |     let mut name = raw.to_string();
+   |                    --------------- expected due to this value
+...
+27 |         name = &name[..name.len() - 5];
+   |                ^^^^^^^^^^^^^^^^^^^^^^^ expected `String`, found `&str`
+   |
+help: try using a conversion method
+   |
+27 |         name = (&name[..name.len() - 5]).to_string();
+   |                +                       +++++++++++++
+
+error: aborting due to 11 previous errors
+
+Some errors have detailed explanations: E0308, E0599.
+For more information about an error, try `rustc --explain E0308`.

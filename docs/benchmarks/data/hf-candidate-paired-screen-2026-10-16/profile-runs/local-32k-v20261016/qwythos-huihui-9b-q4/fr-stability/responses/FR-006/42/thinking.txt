@@ -1,0 +1,88 @@
+1. **Understand the Goal**: Implement the exact specification for FR‑006, which involves defining a `GpuStats` struct and a `parse_gpu_csv` function that robustly parses a CSV line into that struct, adhering to several guard rails.
+
+2. **Break Down the Specification**:
+   - **Struct Definition**: `#[derive(Debug, PartialEq)] pub struct GpuStats { pub name: String, pub vram_used_mb: u64, pub vram_total_mb: u64, pub temp_c: u32, pub util_pct: u32; }`
+   - **Function Signature**: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`
+   - **Parsing Logic**: Split the line by commas, trim whitespace, then parse each field:
+     - `name` (String) – just trim.
+     - `vram_used_mb` (u64) – parse as unsigned 64‑bit.
+     - `vram_total_mb` (u64) – parse as unsigned 64‑bit.
+     - `temp_c` (u32) – parse as unsigned 32‑bit.
+     - `util_pct` (u32) – parse as unsigned 32‑bit.
+   - **Robust Error Handling**: Return `Err(String)` if fewer than 5 columns or if any numeric parse fails (e.g., `Ok` from `parse` is `Ok(u64)`, but `Err` from `parse` is `Err(ParseIntError)` – we need to map that to a descriptive string).
+   - **Guard Rails**: Strictly forbid `unwrap()`, `expect()`, or `panic!`. So we must use `match` or `?` with `Ok`/`Err` handling, or `map_err` to convert `ParseIntError` into a readable string.
+   - **Traceability**: Add a comment `// trace:implements FR-006` right before the function declaration.
+   - **Output**: Both the struct and the function inside a single ```rust code block.
+
+3. **Draft the Struct**:
+   ```rust
+   #[derive(Debug, PartialEq)]
+   pub struct GpuStats {
+       pub name: String,
+       pub vram_used_mb: u64,
+       pub vram_total_mb: u64,
+       pub temp_c: u32,
+       pub util_pct: u32,
+   }
+   ```
+   This matches the spec exactly.
+
+4. **Draft the Function**:
+   ```rust
+   // trace:implements FR-006
+   pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+       // split by comma, trim each field
+       let fields: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+
+       // ensure at least 5 columns
+       if fields.len() < 5 {
+           return Err(format!("Expected 5 columns, got {}", fields.len()));
+       }
+
+       // parse each field, mapping ParseIntError to a descriptive Err
+       let name = fields[0];
+       let vram_used = fields[1].parse::<u64>()
+           .map_err(|_| format!("Failed to parse VRAM used: {}", fields[1]));
+       let vram_total = fields[2].parse::<u64>()
+           .map_err(|_| format!("Failed to parse VRAM total: {}", fields[2]));
+       let temp = fields[3].parse::<u32>()
+           .map_err(|_| format!("Failed to parse temperature: {}", fields[3]));
+       let util = fields[4].parse::<u32>()
+           .map_err(|_| format!("Failed to parse utilization: {}", fields[4]));
+
+       // combine into a Result, chaining the parsed values
+       Ok(GpuStats {
+           name: name.to_string(),
+           vram_used_mb: vram_used?,
+           vram_total_mb: vram_total?,
+           temp_c: temp?,
+           util_pct: util?,
+       })
+   }
+   ```
+   *Check guard rails*:
+   - No `unwrap()` or `expect()` – we used `?` after mapping each `parse` result, which propagates the `Err` from `map_err`.
+   - `name` is a plain `&str`, so we `.to_string()` to get a `String`.
+   - For the numeric fields, we map `ParseIntError` to a clear message, then `?` to propagate if any fail.
+
+5. **Refine the Return Type**: The function signature expects `Result<GpuStats, String>`. The `Ok` block returns `GpuStats` constructed with the parsed values. Since each parsed field is a `Result<u64, String>` (or `Result<u32, String>`), the `?` operator will propagate the inner `String` `Err`. This aligns perfectly.
+
+6. **Test the Logic mentally with the example line**:
+   - Input: `"NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"`
+   - Split → `["NVIDIA GeForce RTX 3060", "5800", "12288", "35", "25"]`
+   - `fields.len()` = 5 → passes.
+   - Parse each:
+     - `name` = `"NVIDIA GeForce RTX 3060"`
+     - `vram_used` = 5800 (u64)
+     - `vram_total` = 12288 (u64)
+     - `temp` = 35 (u32)
+     - `util` = 25 (u32)
+   - Construct `GpuStats` → matches the spec.
+
+7. **Add a Small Edge Case**: If the line has extra commas, `fields.len()` will be >5, which is fine. If a numeric field is empty, `parse::<u64>()` returns `Err(ParseIntError)` → our `map_err` catches it. Good.
+
+8. **Final Polish**: Ensure the comment is exactly `// trace:implements FR-006` (the spec says “directly before function declaration”). The struct can be placed before the function, matching the spec’s “Output BOTH” requirement.
+
+9. **Produce the Output**: Wrap everything in a code block with language identifier `rust`.
+
+That yields the final implementation.

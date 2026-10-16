@@ -1,0 +1,31 @@
+// trace:implements FR-006
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+    
+    match parts.as_slice() {
+        [name, vram_used, vram_total, temp, util] => {
+            let vram_used_mb = vram_used.parse::<u64>().unwrap_or(u64::MAX);
+            let vram_total_mb = vram_total.parse::<u64>().unwrap_or(u64::MAX);
+            let temp_c = temp.parse::<u32>().unwrap_or(0);
+            let util_pct = util.parse::<u32>().unwrap_or(0);
+            
+            Ok(GpuStats {
+                name: name.to_string(),
+                vram_used_mb,
+                vram_total_mb,
+                temp_c,
+                util_pct,
+            })
+        }
+        _ => Err(format!("Invalid CSV line: expected 5 columns, got {}", parts.len())),
+    }
+}

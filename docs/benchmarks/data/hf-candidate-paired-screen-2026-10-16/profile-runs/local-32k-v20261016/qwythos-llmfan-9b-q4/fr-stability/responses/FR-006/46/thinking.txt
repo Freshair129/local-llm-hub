@@ -1,0 +1,139 @@
+I need to implement FR-006 according to the given specification, making sure I follow the guard rails and traceability requirements.
+
+First, I'll recall the exact struct definition:
+
+```rust
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+```
+
+Next, the function signature is:
+
+```rust
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>
+```
+
+The CSV line example is "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25". I need to parse this into the struct. The first field is a string (name), the rest are numbers. I'll split the line by commas, but I have to be careful about whitespace after each comma. I can use `.split(',')` on the line, then for each part, trim whitespace and parse accordingly.
+
+For parsing numbers, I'll use `u64::from_str` for the VRAM fields and `u32::from_str` for the temperature and utilization. If any of these fail, I'll return an error with a message indicating which field failed. This satisfies the requirement to avoid unwrap() or expect() and instead return a Result.
+
+I also need to handle the case where there are fewer than 5 columns. I'll check the length of the split vector and if it's less than 5, return an error.
+
+Now, regarding traceability: I must include a comment `// trace:implements FR-006` directly before the function declaration. That means the comment should appear before the `pub fn parse_gpu_csv` line.
+
+Finally, I need to output both the struct and the function inside a single code block. I'll make sure to include the struct definition first, then the function, and include the trace comment.
+
+I'll also consider the guard rails: no unwrap, expect, or panic. All error handling must be via Result. I'll use match on the split result to handle the case where the line is empty or has fewer than 5 parts.
+
+Let me draft the implementation:
+
+```rust
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let parts = line.split(',');
+    let mut iter = parts.into_iter().map(|s| s.trim());
+
+    let name = iter.next()
+        .ok_or("not enough columns")?
+        .parse::<String>()
+        .unwrap(); // Wait, I can't use unwrap here. I need to handle parse errors.
+}
+```
+
+I need to refine the parsing to avoid unwrap. I'll parse each numeric field with `u64::from_str` and `u32::from_str`, returning an error if any fails. For the name field, I can just take it as is, but I'll still use `parse::<String>()`? Actually, the name is already a string, so I don't need to parse it. I'll just take the first trimmed part as the name.
+
+Let me adjust:
+
+```rust
+let name = iter.next().ok_or("not enough columns")?.to_string();
+let vram_used = iter.next().ok_or("not enough columns")?.parse::<u64>()
+    .map_err(|e| format!("failed to parse vram_used: {}", e))?;
+let vram_total = iter.next().ok_or("not enough columns")?.parse::<u64>()
+    .map_err(|e| format!("failed to parse vram_total: {}", e))?;
+let temp = iter.next().ok_or("not enough columns")?.parse::<u32>()
+    .map_err(|e| format!("failed to parse temp: {}", e))?;
+let util = iter.next().ok_or("not enough columns")?.parse::<u32>()
+    .map_err(|e| format!("failed to parse util: {}", e))?;
+```
+
+Now, I need to ensure that I don't use unwrap() anywhere. The above uses `map_err` to convert parse errors into a custom error string. That's fine.
+
+Also, I need to check that there are exactly 5 columns. The `iter.next()` calls will return an error if there aren't enough. But I also need to handle the case where there are more than 5 columns. The spec says "if columns are fewer than 5", so extra columns can be ignored? I think it's okay to ignore extra fields, as long as the first five are parsed correctly. So I won't check for more than five.
+
+Now, about the trace comment: It must be directly before the function declaration. So I'll place the comment right before `pub fn parse_gpu_csv`.
+
+Now, let's construct the final code block:
+
+```rust
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let parts = line.split(',');
+    let mut iter = parts.into_iter().map(|s| s.trim());
+
+    let name = iter.next()
+        .ok_or("not enough columns")?
+        .to_string();
+
+    let vram_used = iter.next()
+        .ok_or("not enough columns")?
+        .parse::<u64>()
+        .map_err(|e| format!("failed to parse vram_used: {}", e))?;
+
+    let vram_total = iter.next()
+        .ok_or("not enough columns")?
+        .parse::<u64>()
+        .map_err(|e| format!("failed to parse vram_total: {}", e))?;
+
+    let temp = iter.next()
+        .ok_or("not enough columns")?
+        .parse::<u32>()
+        .map_err(|e| format!("failed to parse temp: {}", e))?;
+
+    let util = iter.next()
+        .ok_or("not enough columns")?
+        .parse::<u32>()
+        .map_err(|e| format!("failed to parse util: {}", e))?;
+
+    Ok(GpuStats {
+        name,
+        vram_used_mb: vram_used,
+        vram_total_mb: vram_total,
+        temp_c: temp,
+        util_pct: util,
+    })
+}
+```
+
+I need to ensure that there are no unwrap() calls. In the above, I used `map_err` and `?` operator, which propagate errors. That's fine. No `unwrap()` or `expect()`.
+
+Now, I'll double-check the guard rails: "STRICTLY FORBIDDEN to use unwrap(), expect(), or panic!". I haven't used any of those.
+
+Traceability: The comment `// trace:implements FR-006` is placed directly before the function declaration. That's correct.
+
+Now, output both the struct and the function inside a single code block. I'll use the triple backticks with rust as the language.
+
+I think this satisfies all requirements. I'll now produce the final answer.

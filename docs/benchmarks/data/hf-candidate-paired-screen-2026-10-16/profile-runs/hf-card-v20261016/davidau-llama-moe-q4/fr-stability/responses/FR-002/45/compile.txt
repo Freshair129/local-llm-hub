@@ -1,0 +1,15 @@
+warning: unused return value of `str::<impl str>::replace` that must be used
+ --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-002\45\test.rs:5:5
+  |
+5 |     raw.replace("library/", "");
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: this returns the replaced string as a new allocation, without modifying the original
+  = note: `#[warn(unused_must_use)]` (part of `#[warn(unused)]`) on by default
+help: use `let _ = ...` to ignore the resulting value
+  |
+5 |     let _ = raw.replace("library/", "");
+  |     +++++++
+
+warning: 1 warning emitted
+

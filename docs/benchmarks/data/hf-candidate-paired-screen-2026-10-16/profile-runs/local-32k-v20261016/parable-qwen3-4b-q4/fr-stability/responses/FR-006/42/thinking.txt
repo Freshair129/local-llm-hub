@@ -1,0 +1,74 @@
+Okay, I need to implement the FR-006 specification for the Rust code. Let me start by understanding the requirements.
+
+First, the user wants a struct called GpuStats with specific fields. The struct should be derived with Debug and PartialEq traits. The fields are name (String), vram_used_mb (u64), vram_total_mb (u64), temp_c (u32), and util_pct (u32). I'll make sure to define that correctly.
+
+Next, the function signature is pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>. The function needs to parse a CSV line into the struct. The example given is "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25". So, the line is split into five parts: the GPU name, VRAM used, VRAM total, temperature, and utilization.
+
+Error handling is crucial here. The function must return Err with a String if there are fewer than 5 columns or if any of the numeric values can't be parsed. Also, I can't use unwrap(), expect(), or panic!. Instead, I'll use the Result type's methods like Ok and Err.
+
+Let me outline the steps for the function:
+
+1. Split the input line by commas. I'll use split(',') and collect into a Vec<String>.
+2. Check if the length is at least 5. If not, return Err with a message.
+3. The first element is the name. I'll use trim() to remove any surrounding whitespace.
+4. For the next four elements, I need to parse them as u64, u64, u32, u32. I'll use parse() on each, but handle any errors by returning Err.
+5. If all parses are successful, create a GpuStats instance and return Ok with it.
+6. If any parse fails, return Err with an appropriate message.
+
+Wait, the VRAM used and total are u64, but the example uses numbers like 5800 and 12288, which are integers. The temperature and utilization are u32. So the parsing for those should be correct.
+
+I should also make sure that the fields are correctly assigned. For example, the name is the first part, then the next two are VRAM values, then temp, then utilization.
+
+Now, for the error messages. If the line has fewer than 5 columns, return "Invalid CSV line: fewer than 5 columns". If any of the numeric values can't be parsed, return "Invalid CSV line: failed to parse numeric value".
+
+I need to include a comment // trace:implements FR-006 before the function declaration.
+
+Let me write the code step by step.
+
+First, the struct:
+
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+Then the function:
+
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // trace:implements FR-006
+    let fields: Vec<String> = line.split(',')
+        .map(|s| s.trim().to_string())
+        .collect();
+    
+    if fields.len() < 5 {
+        return Err("Invalid CSV line: fewer than 5 columns".to_string());
+    }
+
+    let name = fields[0].clone();
+    let vram_used = fields[1].parse::<u64>().map_err(|_| "Invalid CSV line: failed to parse numeric value".to_string())?;
+    let vram_total = fields[2].parse::<u64>().map_err(|_| "Invalid CSV line: failed to parse numeric value".to_string())?;
+    let temp_c = fields[3].parse::<u32>().map_err(|_| "Invalid CSV line: failed to parse numeric value".to_string())?;
+    let util_pct = fields[4].parse::<u32>().map_err(|_| "Invalid CSV line: failed to parse numeric value".to_string())?;
+
+    Ok(GpuStats {
+        name,
+        vram_used_mb: vram_used,
+        vram_total_mb: vram_total,
+        temp_c,
+        util_pct,
+    })
+}
+
+Wait, but the fields[1] and fields[2] are u64, and fields[3] and [4] are u32. So the parsing should be correct. Also, the error messages are the same for any numeric failure, which is acceptable.
+
+I need to make sure that the error messages are consistent. Each time a parse fails, it returns the same message, which is correct.
+
+Testing this function: if the line is split into exactly 5 parts, and all the numbers are valid, it should return Ok. If any part is missing or not a number, it returns Err.
+
+I think that's all. Let me check the guard rails: no unwrap, expect, or panic. The code uses the ? operator, which is okay because it's in a Result context. The error messages are properly handled.
+
+Yes, this should meet all the requirements.

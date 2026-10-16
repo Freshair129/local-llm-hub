@@ -1,0 +1,99 @@
+error[E0277]: the trait bound `String: Pattern` is not satisfied
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-002\42\test.rs:10:18
+   |
+10 |         .replace("-q4_0".to_lowercase(), "")
+   |          ------- ^^^^^^^^^^^^^^^^^^^^^^ the trait `Pattern` is not implemented for `String`
+   |          |
+   |          required by a bound introduced by this call
+   |
+   = note: required for `String` to implement `Pattern`
+note: required by a bound in `str::<impl str>::replace`
+  --> /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library\alloc\src\str.rs:268:4
+help: consider borrowing here
+   |
+10 |         .replace(&"-q4_0".to_lowercase(), "")
+   |                  +
+
+error[E0277]: the trait bound `String: Pattern` is not satisfied
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-002\42\test.rs:11:18
+   |
+11 |         .replace("-q4_k_m".to_lowercase(), "")
+   |          ------- ^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Pattern` is not implemented for `String`
+   |          |
+   |          required by a bound introduced by this call
+   |
+   = note: required for `String` to implement `Pattern`
+note: required by a bound in `str::<impl str>::replace`
+  --> /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library\alloc\src\str.rs:268:4
+help: consider borrowing here
+   |
+11 |         .replace(&"-q4_k_m".to_lowercase(), "")
+   |                  +
+
+error[E0277]: the trait bound `String: Pattern` is not satisfied
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-002\42\test.rs:12:18
+   |
+12 |         .replace("-q4_k_s".to_lowercase(), "")
+   |          ------- ^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Pattern` is not implemented for `String`
+   |          |
+   |          required by a bound introduced by this call
+   |
+   = note: required for `String` to implement `Pattern`
+note: required by a bound in `str::<impl str>::replace`
+  --> /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library\alloc\src\str.rs:268:4
+help: consider borrowing here
+   |
+12 |         .replace(&"-q4_k_s".to_lowercase(), "")
+   |                  +
+
+error[E0277]: the trait bound `String: Pattern` is not satisfied
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-002\42\test.rs:13:18
+   |
+13 |         .replace("://q4_0".to_lowercase(), "")
+   |          ------- ^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Pattern` is not implemented for `String`
+   |          |
+   |          required by a bound introduced by this call
+   |
+   = note: required for `String` to implement `Pattern`
+note: required by a bound in `str::<impl str>::replace`
+  --> /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library\alloc\src\str.rs:268:4
+help: consider borrowing here
+   |
+13 |         .replace(&"://q4_0".to_lowercase(), "")
+   |                  +
+
+error[E0277]: the trait bound `String: Pattern` is not satisfied
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-002\42\test.rs:14:18
+   |
+14 |         .replace("://q4_k_m".to_lowercase(), "")
+   |          ------- ^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Pattern` is not implemented for `String`
+   |          |
+   |          required by a bound introduced by this call
+   |
+   = note: required for `String` to implement `Pattern`
+note: required by a bound in `str::<impl str>::replace`
+  --> /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library\alloc\src\str.rs:268:4
+help: consider borrowing here
+   |
+14 |         .replace(&"://q4_k_m".to_lowercase(), "")
+   |                  +
+
+error[E0277]: the trait bound `String: Pattern` is not satisfied
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\davidau-llama-moe-q4\fr-stability\responses\FR-002\42\test.rs:15:18
+   |
+15 |         .replace("://q4_k_s".to_lowercase(), "");
+   |          ------- ^^^^^^^^^^^^^^^^^^^^^^^^^^ the trait `Pattern` is not implemented for `String`
+   |          |
+   |          required by a bound introduced by this call
+   |
+   = note: required for `String` to implement `Pattern`
+note: required by a bound in `str::<impl str>::replace`
+  --> /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library\alloc\src\str.rs:268:4
+help: consider borrowing here
+   |
+15 |         .replace(&"://q4_k_s".to_lowercase(), "");
+   |                  +
+
+error: aborting due to 6 previous errors
+
+For more information about this error, try `rustc --explain E0277`.

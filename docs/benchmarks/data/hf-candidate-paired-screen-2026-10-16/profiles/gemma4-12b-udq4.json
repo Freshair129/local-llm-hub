@@ -1,0 +1,25 @@
+{
+  "modelKey": "gemma4-12b-udq4",
+  "seeds": [42, 43, 44, 45, 46],
+  "modelCardUrl": "https://huggingface.co/unsloth/gemma-4-12b-it-GGUF",
+  "profiles": {
+    "local-32k": {
+      "id": "local-32k-v20261016",
+      "label": "RTX 3060 12GB: shared Mellum sampler with 32K context",
+      "num_ctx": 32768,
+      "num_predict": 81920,
+      "options": { "temperature": 0.6, "top_p": 0.95, "top_k": 20, "repeat_penalty": 1.0 },
+      "systemPrompt": null,
+      "settingsSource": "Existing Mellum-matched sampling profile; context raised from 16K for this hardware profile."
+    },
+    "hf-card": {
+      "id": "hf-card-v20261016",
+      "label": "Gemma 4 card sampler; matched 16K task context",
+      "num_ctx": 16384,
+      "num_predict": 81920,
+      "options": { "temperature": 1.0, "top_p": 0.95, "top_k": 64, "repeat_penalty": 1.0 },
+      "systemPrompt": "<|think|>",
+      "settingsSource": "HF card: temperature=1.0, top_p=0.95, top_k=64; enable thinking with <|think|> at the start of the system prompt. repeat_penalty=1.0 is retained from the shared local comparison because the card does not specify it. The card has no context requirement for this coding screen, so context remains at the matched 16K task profile."
+    }
+  }
+}

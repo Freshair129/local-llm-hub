@@ -1,0 +1,296 @@
+Thinking Process:
+
+1.  **Analyze the Request:**
+    *   **Role:** AI Coder working under STD-003 and ADR-100 guard rails.
+    *   **Task:** Implement FR-006 specification.
+    *   **Specification Details:**
+        1.  Define `GpuStats` struct with specific fields and derives.
+        2.  Define `parse_gpu_csv` function with specific signature.
+        3.  Parse a CSV line (example provided) into the struct.
+        4.  Robust error handling (return `Err(String)` for malformed input/parse failures).
+        5.  Guard Rails: STRICTLY FORBIDDEN to use `unwrap()`, `expect()`, or `panic!`. Use `Result` propagation or `match`/`if let` with `Err` return.
+        6.  Traceability: Include comment `// trace:implements FR-006` directly before the function declaration.
+        7.  Output Format: Both `pub struct` and `pub fn` inside a single ```rust code block.
+
+2.  **Drafting the Code:**
+
+    *   *Struct Definition:*
+        ```rust
+        #[derive(Debug, PartialEq)]
+        pub struct GpuStats {
+            pub name: String,
+            pub vram_used_mb: u64,
+            pub vram_total_mb: u64,
+            pub temp_c: u32,
+            pub util_pct: u32,
+        }
+        ```
+
+    *   *Function Definition:*
+        ```rust
+        // trace:implements FR-006
+        pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>
+        ```
+
+    *   *Parsing Logic:*
+        *   Need to handle potential empty lines or whitespace.
+        *   Split by comma.
+        *   Trim whitespace from parts.
+        *   Parse numbers (`u64`, `u32`).
+        *   Handle `name` (String).
+        *   Handle errors gracefully (return `Err`).
+
+    *   *Guard Rails Check:*
+        *   No `unwrap()`.
+        *   No `expect()`.
+        *   No `panic!()`.
+        *   Use `split`, `trim`, `parse`, and match `match` or `if let` to handle results.
+
+    *   *Implementation Details:*
+        *   Split `line` by `','`.
+        *   Check `parts.len() >= 5`.
+        *   `name` = `parts[0].trim()`.
+        *   `vram_used_mb` = `parts[1].trim().parse::<u64>()`.
+        *   `vram_total_mb` = `parts[2].trim().parse::<u64>()`.
+        *   `temp_c` = `parts[3].trim().parse::<u32>()`.
+        *   `util_pct` = `parts[4].trim().parse::<u32>()`.
+        *   Wrap all in a `match` or `if let` chain to propagate errors.
+
+3.  **Refining the Logic (Mental Walkthrough):**
+
+    *   Example input: `"NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"`
+    *   Split: `["NVIDIA GeForce RTX 3060", " 5800", " 12288", " 35", " 25"]`
+    *   Trim: `["NVIDIA GeForce RTX 3060", "5800", "12288", "35", "25"]`
+    *   Parse: All look good.
+    *   Error Case: `"NVIDIA, 5800, 12288"` (3 parts). `parts.len() < 5`. Return `Err("Expected 5 columns, found 3")`.
+    *   Error Case: `"NVIDIA, abc, 12288, 35, 25"`. `parts[1].parse()` returns `Err`. Return `Err`.
+
+    *   Structure:
+        ```rust
+        // trace:implements FR-006
+        pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+            // ... logic ...
+        }
+        ```
+
+4.  **Final Code Assembly:**
+
+    ```rust
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+        // ...
+    }
+    ```
+    Wait, need to include the struct definition as well.
+
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats {
+        pub name: String,
+        pub vram_used_mb: u64,
+        pub vram_total_mb: u64,
+        pub temp_c: u32,
+        pub util_pct: u32,
+    }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+        // ...
+    }
+    ```
+
+    Let's write the parsing logic cleanly.
+    1. Split by comma.
+    2. Check length.
+    3. Map/Iterate with trim.
+    4. Parse integers.
+    5. Construct struct.
+
+    ```rust
+    let parts: Vec<&str> = line.split(',').collect();
+    if parts.len() < 5 {
+        return Err(format!("Expected 5 columns, found {}", parts.len()));
+    }
+
+    let name = parts[0].trim().to_string();
+
+    let vram_used_mb = parts[1].trim().parse::<u64>()
+        .map_err(|e| format!("Failed to parse vram_used_mb: {}", e))?;
+
+    // ...
+    ```
+    Using `?` operator is allowed with `Result` return type, as long as it's not `unwrap`/`expect`.
+    Or explicit `match`/`if let`.
+    The spec says "Return Err(String) if columns are fewer than 5 or numbers fail to parse."
+    Using `?` is idiomatic Rust for `Result` return types and avoids `unwrap`.
+    However, to be strictly safe regarding "STRICTLY FORBIDDEN to use unwrap(), expect(), or panic!", `?` is fine, but explicit error construction is also fine.
+    Let's use `match` or `if let` to be very explicit about error propagation to ensure guard rails are visible. Or just `?` is standard for `Result` functions. Usually `?` is considered safe compared to `unwrap()`.
+    Let's stick to a clean implementation.
+
+    Implementation plan:
+    1. Define struct.
+    2. Define function with comment.
+    3. Split string.
+    4. Check count.
+    5. Parse fields.
+    6. Return `Ok(GpuStats)`.
+
+    Example Input Check:
+    `"NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"`
+    Parts:
+    0: "NVIDIA GeForce RTX 3060"
+    1: " 5800"
+    2: " 12288"
+    3: " 35"
+    4: " 25"
+
+    Let's write the code.
+
+5.  **Review against Guard Rails (STD-003 & ADR-100 context implied):**
+    *   STD-003/ADR-100 usually implies strict type safety and error propagation.
+    *   No `unwrap()`.
+    *   No `expect()`.
+    *   No `panic!()`.
+    *   Traceability comment present.
+    *   Both struct and function in one block.
+
+6.  **Final Polish:**
+    Ensure imports (like `Result`) are available (usually in `prelude` in snippets, but good to assume standard `std` context).
+    Ensure `String` is used for `name`.
+    Ensure `u64` and `u32` are used for numbers.
+
+    Code Structure:
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats {
+        pub name: String,
+        pub vram_used_mb: u64,
+        pub vram_total_mb: u64,
+        pub temp_c: u32,
+        pub util_pct: u32,
+    }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+        // implementation
+    }
+    ```
+
+    Implementation details:
+    ```rust
+    let parts: Vec<&str> = line.split(',').collect();
+    if parts.len() < 5 {
+        return Err(format!("Invalid CSV format: expected 5 columns, found {}", parts.len()));
+    }
+
+    let name = parts[0].trim().to_string();
+    let vram_used_mb = parts[1].trim().parse::<u64>()
+        .map_err(|e| format!("Failed to parse vram_used_mb: {}", e))?;
+    let vram_total_mb = parts[2].trim().parse::<u64>()
+        .map_err(|e| format!("Failed to parse vram_total_mb: {}", e))?;
+    let temp_c = parts[3].trim().parse::<u32>()
+        .map_err(|e| format!("Failed to parse temp_c: {}", e))?;
+    let util_pct = parts[4].trim().parse::<u32>()
+        .map_err(|e| format!("Failed to parse util_pct: {}", e))?;
+
+        Ok(GpuStats {
+            name,
+            vram_used_mb,
+            vram_total_mb,
+            temp_c,
+            util_pct,
+        })
+    }
+    ```
+    This looks robust and follows the guard rails.
+
+7.  **Final Check:**
+    *   Struct defined? Yes.
+    *   Function signature correct? Yes.
+    *   CSV parsing logic correct? Yes.
+    *   Error handling (fewer columns, number parse)? Yes.
+    *   No `unwrap`/`expect`/`panic`? Yes (using `?` and `map_err`).
+    *   Traceability comment? Yes.
+    *   Output in single code block? Yes.
+
+    Wait, `parts[0].trim().to_string()` creates a `String`.
+    `parts[1]...` creates `u64`.
+    Seems correct.
+
+    One small detail: `split` returns an iterator, collecting into `Vec` is fine.
+    Accessing indices 0-4 is safe after length check.
+
+    Let's construct the final response.
+
+    Wait, check guard rails "STD-003 and ADR-100". Since they aren't explicitly defined in the prompt, I assume they mean "Standard Type Definition 003" and "Architecture Decision Record 100" style strictness, often implying minimal dependencies, clear error types, and no panic. The prompt explicitly lists the forbidden functions, so I will adhere to those.
+
+    One more check on the traceability comment: `// trace:implements FR-006` directly before function declaration.
+
+    Okay, ready to write.
+
+    ```rust
+    // trace:implements FR-006
+    pub fn parse_gpu_csv...
+    ```
+    And the struct before it.
+
+    Wait, the order in the spec:
+    1. Define struct.
+    2. Function signature.
+    3. ...
+    7. Output BOTH inside the block.
+
+    So struct first, then function.
+
+    Let's combine.
+
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats {
+        pub name: String,
+        pub vram_used_mb: u64,
+        pub vram_total_mb: u64,
+        pub temp_c: u32,
+        pub util_pct: u32,
+    }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+        let parts: Vec<&str> = line.split(',').collect();
+
+        if parts.len() < 5 {
+            return Err(format!("Invalid CSV format: expected 5 columns, found {}", parts.len()));
+        }
+
+        let name = parts[0].trim().to_string();
+        let vram_used_mb = parts[1].trim().parse::<u64>()
+            .map_err(|e| format!("Failed to parse vram_used_mb: {}", e))?;
+        let vram_total_mb = parts[2].trim().parse::<u64>()
+            .map_err(|e| format!("Failed to parse vram_total_mb: {}", e))?;
+        let temp_c = parts[3].trim().parse::<u32>()
+            .map_err(|e| format!("Failed to parse temp_c: {}", e))?;
+        let util_pct = parts[4].trim().parse::<u32>()
+            .map_err(|e| format!("Failed to parse util_pct: {}", e))?;
+
+        Ok(GpuStats {
+            name,
+            vram_used_mb,
+            vram_total_mb,
+            temp_c,
+            util_pct,
+        })
+    }
+    ```
+
+    Looks good. I will ensure no extra imports are needed (since `Result`, `String`, `Vec`, `format` are in `std`).
+    I will ensure `unwrap`, `expect`, `panic` are absent. `?` operator is used which is allowed. `map_err` is used which is allowed.
+
+    Final check on comment placement: "directly before function declaration".
+    So:
+    ```rust
+    ...
+    // trace:implements FR-006
+    pub fn parse_gpu_csv...
+    ```
+
+    Okay.

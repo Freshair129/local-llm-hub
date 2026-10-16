@@ -1,0 +1,284 @@
+Thinking Process:
+
+1.  **Analyze the Request:**
+    *   **Role:** AI Coder working under STD-003 and ADR-100 guard rails.
+    *   **Task:** Implement FR-006 specification.
+    *   **Specification Details:**
+        1.  Define `GpuStats` struct with specific fields and derives.
+        2.  Define `parse_gpu_csv` function signature.
+        3.  Parse a specific CSV format ("NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25").
+        4.  Robust error handling (return `Err(String)` on bad input).
+        5.  Guard rails: NO `unwrap()`, `expect()`, or `panic!`. Use `Result` propagation.
+        6.  Traceability: Include comment `// trace:implements FR-006` before function declaration.
+        7.  Output format: Both struct and function inside a single ```rust code block.
+
+2.  **Drafting the Struct:**
+    *   `#[derive(Debug, PartialEq)]`
+    *   `pub struct GpuStats { ... }`
+    *   Fields: `name: String`, `vram_used_mb: u64`, `vram_total_mb: u64`, `temp_c: u32`, `util_pct: u32`.
+    *   *Self-Correction/Check:* The example CSV has 5 comma-separated values.
+        *   Value 1: Name (String)
+        *   Value 2: VRAM Used (u64)
+        *   Value 3: VRAM Total (u64)
+        *   Value 4: Temp (u32)
+        *   Value 5: Util (u32)
+    *   Note: The example string is "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25".
+    *   Splitting by comma:
+        1.  "NVIDIA GeForce RTX 3060"
+        2.  " 5800" (note leading space)
+        3.  " 12288"
+        4.  " 35"
+        5.  " 25"
+    *   Need to handle trimming whitespace when parsing numbers.
+
+3.  **Drafting the Function:**
+    *   `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`
+    *   Traceability comment: `// trace:implements FR-006` immediately before.
+    *   Logic:
+        1.  Check if line is empty (optional, but good for robustness).
+        2.  Split by `','`.
+        3.  Check length (must be 5, but sometimes trailing commas create empty strings, so check parts.len() >= 5).
+        4.  Extract fields.
+        5.  Trim whitespace from all parts (especially numbers).
+        6.  Parse numbers using `parse()`.
+        7.  Return `Err` if parsing fails or count is wrong.
+    *   Guard Rails: Avoid `unwrap()`, `expect()`, `panic!`. Use `map_err`, `ok`, or `match`/`if let` or direct `Result` construction.
+
+4.  **Refining Error Handling (Guard Rails):**
+    *   Split: `line.split(',').collect::<Vec<&str>>()`.
+    *   Check length: `if parts.len() < 5` -> `Err("Expected 5 columns, found {:?}".format(parts.len()))`.
+    *   Parsing:
+        *   `name`: `parts[0].trim().to_string()`.
+        *   `vram_used`: `parts[1].trim().parse::<u64>()`.
+        *   `vram_total`: `parts[2].trim().parse::<u64>()`.
+        *   `temp`: `parts[3].trim().parse::<u32>()`.
+        *   `util`: `parts[4].trim().parse::<u32>()`.
+    *   Wrap each parse in `map_err` or use `map` with error propagation.
+    *   Since `parse` returns `Result`, chaining them is best.
+    *   Example: `parts[1].trim().parse::<u64>().map_err(|e| format!("Failed to parse vram_used: {}", e))`? Or simpler: `parts[1].trim().parse::<u64>()` inside a match or `ok().unwrap_or_else`?
+    *   To strictly avoid `unwrap()`, I can use `match` or `map_err`.
+    *   Let's construct the `GpuStats` using `map_err` style or `?` operator (but `?` is technically `unwrap_or_else` internally for `Result`). Since `parse_gpu_csv` returns `Result`, the `?` operator is allowed as long as it doesn't use `unwrap()` explicitly. However, to be very explicit about guard rails, I'll use `map_err` or `if let` or `match` to avoid ambiguity, though `?` is generally acceptable in Rust `Result` functions. The spec says "Return Err(String) if...".
+    *   Let's use `map_err` for clarity and strictness.
+    *   Wait, `parts[0]` access needs bounds check. `parts[1]` etc.
+    *   Let's create a helper or just chain carefully.
+    *   Better approach:
+        ```rust
+        let parts: Vec<&str> = line.split(',').collect();
+        if parts.len() < 5 {
+            return Err("Expected 5 columns, found {:?}".format(parts.len()));
+        }
+        let name = parts[0].trim().to_string();
+        let vram_used = parts[1].trim().parse::<u64>().map_err(|e| format!("vram_used parse error: {}", e))?;
+        // ...
+        ```
+        Is `?` allowed? "STRICTLY FORBIDDEN to use unwrap(), expect(), or panic!". `?` is not explicitly forbidden, but sometimes interpreted as implicit `unwrap`. To be safe and explicit, I will use `map_err` or `match`.
+        Actually, `parse::<T>()` returns `Result<T, ParseIntError>`.
+        So `parts[1].trim().parse::<u64>()` is a `Result`.
+        I can use `.map_err(...)` to customize the error message.
+        Let's construct the struct fields using `map_err`.
+        Or simpler:
+        ```rust
+        let vram_used = parts[1].trim().parse::<u64>().map_err(|e| format!("vram_used: {}", e))?;
+        ```
+        This is standard Rust idiom. But to be ultra-safe against "unwrap" spirit, I'll ensure I don't call `.unwrap()` on the result.
+        Let's write it cleanly.
+
+5.  **Final Code Structure:**
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats {
+        pub name: String,
+        pub vram_used_mb: u64,
+        pub vram_total_mb: u64,
+        pub temp_c: u32,
+        pub util_pct: u32,
+    }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+        // ... implementation ...
+    }
+    ```
+
+6.  **Reviewing Constraints:**
+    *   STD-003/ADR-100 (Implied context: Standard Library, Design Patterns/Arch).
+    *   Struct definition exact match.
+    *   Function signature exact match.
+    *   CSV parsing logic matches example.
+    *   Error handling: `Err(String)`.
+    *   Guard rails: No `unwrap()`, `expect()`, `panic!`.
+    *   Traceability: Comment before function.
+    *   Output: Single code block.
+
+7.  **Implementation Details:**
+    *   Split by `,`.
+    *   Check `len() >= 5`.
+    *   Trim strings.
+    *   Parse integers.
+    *   Handle potential empty strings or whitespace-only fields (though trimming handles most, `parse` handles whitespace).
+    *   Construct `GpuStats`.
+
+    *   *Self-Correction on `parts` indexing:* Since `parts` is `Vec<&str>`, `parts[0]` to `parts[4]` is safe if `len >= 5`.
+    *   *Error Messages:* Make them descriptive.
+    *   *Whitespace:* The example "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25" has spaces after commas. `split(',')` will include the space. `trim()` is necessary for numbers. For name, `trim()` is good practice too.
+
+    *   *Refining the `Result` construction:*
+        ```rust
+        let name = parts[0].trim().to_string();
+        let vram_used = parts[1].trim().parse::<u64>().map_err(|e| format!("vram_used parse error: {}", e))?;
+        let vram_total = parts[2].trim().parse::<u64>().map_err(|e| format!("vram_total parse error: {}", e))?;
+        let temp = parts[3].trim().parse::<u32>().map_err(|e| format!("temp parse error: {}", e))?;
+        let util = parts[4].trim().parse::<u32>().map_err(|e| format!("util parse error: {}", e))?;
+        ```
+        This uses `?` which is allowed (it's `unwrap_or_else` but often accepted as `Result` propagation). To be strictly "no unwrap", `?` is usually distinct from `unwrap()`. But to be absolutely safe regarding "unwrap, expect, panic", `?` is fine.
+        However, I will chain `map_err` to ensure errors are `String`.
+
+    *   *Final check on struct fields:* `pub name`, `pub vram_used_mb`, `pub vram_total_mb`, `pub temp_c`, `pub util_pct`.
+    *   *Final check on comment:* `// trace:implements FR-006` directly before function.
+
+8.  **Constructing the Final Output:**
+    Combine into the requested block.
+
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats {
+        pub name: String,
+        pub vram_used_mb: u64,
+        pub vram_total_mb: u64,
+        pub temp_c: u32,
+        pub util_pct: u32,
+    }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+        // ...
+    }
+    ```
+
+    Wait, check `parts.len() < 5`. If I use `split`, it returns an iterator. Collecting to Vec is needed for indexing.
+    `let parts: Vec<&str> = line.split(',').collect();`
+    `if parts.len() < 5 { return Err("...".to_string()); }`
+
+    Let's write the code.
+
+    One detail: `#[derive(Debug, PartialEq)]` is required.
+    One detail: `pub fn parse_gpu_csv` is required.
+    One detail: `// trace:implements FR-006` before function.
+
+    Implementation:
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats {
+        pub name: String,
+        pub vram_used_mb: u64,
+        pub vram_total_mb: u64,
+        pub temp_c: u32,
+        pub util_pct: u32,
+    }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+        let parts: Vec<&str> = line.split(',').collect();
+
+        if parts.len() < 5 {
+            return Err(format!("Expected 5 columns, found {}", parts.len()));
+        }
+
+        let name = parts[0].trim().to_string();
+        let vram_used_mb = parts[1].trim().parse::<u64>().map_err(|e| format!("vram_used_mb parse error: {}", e))?;
+        let vram_total_mb = parts[2].trim().parse::<u64>().map_err(|e| format!("vram_total_mb parse error: {}", e))?;
+        let temp_c = parts[3].trim().parse::<u32>().map_err(|e| format!("temp_c parse error: {}", e))?;
+        let util_pct = parts[4].trim().parse::<u32>().map_err(|e| format!("util_pct parse error: {}", e))?;
+
+        Ok(GpuStats {
+            name,
+            vram_used_mb,
+            vram_total_mb,
+            temp_c,
+            util_pct,
+        })
+    }
+    ```
+    Check `unwrap()` usage: None used. `?` is used, which is `Result` propagation, not `unwrap()`.
+    Check `expect()`: None.
+    Check `panic!`: None.
+    Check Traceability Comment: Present.
+    Check Struct: Matches.
+    Check Function: Matches.
+
+    Looks good.
+
+    Wait, one small detail: `line.split(',')` creates `&str` slices. `parts` will be `Vec<&str>`.
+    `parts[0]` is `&str`. `.trim()` returns `&str`. `.to_string()` makes it `String`.
+    `parts[1]` is `&str`. `.trim()` returns `&str`. `.parse::<u64>()` returns `Result<u64, ParseIntError>`.
+    `.map_err(|e| ...)` converts error type to `String`.
+    `?` unwraps the `Result` and returns `String` error if failed.
+    This satisfies "Return Err(String)".
+
+    Ready to generate.
+
+    Wait, check STD-003 and ADR-100 context (implied). Usually means "Standard Types", "Design/Architecture".
+    STD-003 might imply standard library usage.
+    ADR-100 might imply "Always Define Result".
+    The implementation uses standard library `split`, `parse`, `Result`, `Vec`.
+    It fits.
+
+    Final check on comment placement: "directly before function declaration".
+    So:
+    ```rust
+    // trace:implements FR-006
+    pub fn parse_gpu_csv...
+    ```
+    Yes.
+
+    Final check on struct:
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats {
+        pub name: String,
+        pub vram_used_mb: u64,
+        pub vram_total_mb: u64,
+        pub temp_c: u32,
+        pub util_pct: u32,
+    }
+    ```
+    Yes.
+
+    Combine into one block.
+
+    One more check: "Given a CSV line like ...".
+    Example: "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"
+    Split:
+    0: "NVIDIA GeForce RTX 3060"
+    1: " 5800"
+    2: " 12288"
+    3: " 35"
+    4: " 25"
+    Trimmed:
+    0: "NVIDIA GeForce RTX 3060"
+    1: "5800"
+    2: "12288"
+    3: "35"
+    4: "25"
+    Parsing works.
+
+    Error cases:
+    - Empty line: `parts.len() == 0` -> Err.
+    - 4 columns: `parts.len() == 4` -> Err.
+    - Non-number: `parse` fails -> Err.
+    - No `unwrap()`.
+
+    Looks solid.
+
+    Wait, `map_err` is used. Is that allowed? Yes, it transforms the inner error.
+    Is `?` allowed? Yes, `?` is `unwrap_or_else` but often considered distinct from `unwrap` in these guard rail contexts unless specified "no ?". The spec says "STRICTLY FORBIDDEN to use unwrap(), expect(), or panic!". `?` is not `unwrap()`.
+    However, to be very explicit and safe, I will use `map_err` followed by `?` or `map_err` to construct the `Ok` directly?
+    Actually, `Ok(Struct { ... })` is fine.
+    The `?` operator is the most idiomatic way to chain `Result`.
+    I'll stick with `?` as it's standard Rust, but ensure no explicit `.unwrap()` is called.
+    Wait, `parts[1].trim().parse::<u64>()` returns `Result`.
+    `let val = parts[1].trim().parse::<u64>().map_err(...)?;`
+    This is effectively `val = parts[1].trim().parse::<u64>().unwrap_or_else(...)`.
+    I will use `?` as it's cleaner and meets the "no unwrap()" constraint specifically.
+
+    Okay, writing the code.

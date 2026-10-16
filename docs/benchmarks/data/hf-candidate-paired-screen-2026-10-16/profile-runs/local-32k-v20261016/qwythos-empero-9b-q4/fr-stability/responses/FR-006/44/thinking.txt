@@ -1,0 +1,60 @@
+The user wants me to implement a Rust specification for FR-006. I need to produce a Rust code block that includes both a struct definition and a function that parses a CSV line into that struct. The spec also includes guard rails: no unwrap, expect, or panic. The struct must be derived with Debug and PartialEq, and the fields are name (String), vram_used_mb (u64), vram_total_mb (u64), temp_c (u32), util_pct (u32). The function signature is `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`.
+
+I need to parse the CSV line, which is comma-separated. The line can have whitespace around each field, so I should split by comma, then trim each part. There are exactly five fields. If the number of split parts is not five, I should return an error. Then I need to parse each numeric field as the appropriate integer type: vram_used_mb, vram_total_mb as u64, temp_c and util_pct as u32. The name field should remain a String.
+
+Parsing numbers: I'll use `u64::from_str` for the u64 fields and `u32::from_str` for the u32 fields. These return a Result, so I need to handle errors. If any parse fails, I should return an error with a descriptive message. Since I cannot use unwrap, expect, or panic, I must propagate the error using the Result returned by `from_str`. That means I can chain the results with `and` or `map_err`. I'll need to ensure that I don't accidentally call unwrap on the split result.
+
+The split result is `Vec<&str>`. If the length is not five, I will return `Err(format!("Expected 5 columns, got {}", parts.len()))`. That satisfies the requirement to return a string error.
+
+Now, for the struct: I need to define `pub struct GpuStats` with the fields as specified, and derive Debug and PartialEq. That's straightforward.
+
+For the function: I need to include a comment `// trace:implements FR-006` directly before the function declaration. That's a specific requirement.
+
+I also need to ensure that the code block includes both the struct and the function. I will output a single ```rust block that starts with the struct definition, then the function definition, and that's it.
+
+I must verify that the struct fields are public: `pub name: String`, etc. Yes.
+
+Now, I need to think about the parsing logic more carefully. The CSV line may have trailing spaces, or spaces around each field. Splitting by comma and then trimming each part will handle that. However, I must be careful about the order of operations: I should split first, then trim each part. The `parts` vector will be a `Vec<&str>`. If I attempt to access `parts[0]`, `parts[1]`, etc., that's fine because I already checked the length.
+
+Now, what about the numeric fields? The `u64::from_str` expects a string that can be parsed as a u64. If the string contains non-digit characters, it will return an error. That's fine. I will map each part to its appropriate type, handling errors with `map_err`.
+
+I need to combine these maps into a single Result. I can use `Ok` after mapping each field. Since each map returns a Result, I need to combine them. One way is to use `and` to chain them, but that would flatten the result. Alternatively, I can use `map_err` on each and then combine. But the easiest is to use `Ok` after mapping each field, but I need to handle errors. I can use `and_then` to combine them, or I can just use `map_err` on each and then combine. However, the simplest is to use `Ok` with a tuple of the parsed values, but that would require me to handle errors. I think I'll use `and` for each field, but that would flatten the result. Actually, I can use `map_err` on each field and then combine them using `and` to propagate the first error. But I need to produce a single `Result<GpuStats, String>`. I can use `Ok` after mapping each field, but if any field fails to parse, I need to return an error. I can use `and_then` to combine the results, but that would require me to handle the error. Another approach: I can use `map_err` on each field and then combine them into a single error string. But I can just use `and` to chain them, and if any fails, the error will propagate. Then after all fields, I can construct the `GpuStats` struct and return `Ok`. That's fine.
+
+Let's design the code:
+
+```rust
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let parts: Vec<&str> = line.split(',').collect();
+    if parts.len() != 5 {
+        return Err(format!("Expected 5 columns, got {}", parts.len()));
+    }
+    let name = parts[0].trim().to_string();
+    let vram_used = u64::from_str(parts[1].trim())?;
+    let vram_total = u64::from_str(parts[2].trim())?;
+    let temp = u32::from_str(parts[3].trim())?;
+    let util = u32::from_str(parts[4].trim())?;
+    Ok(GpuStats { name, vram_used, vram_total, temp, util })
+}
+```
+
+But I need to be careful: I'm using `?` which is allowed, but I'm also using `unwrap`? No, I'm not. I'm using `?` to propagate errors. That's fine. However, I need to make sure that I'm not using any forbidden constructs. The spec says "STRICTLY FORBIDDEN to use unwrap(), expect(), or panic!". Using `?` is allowed because it's just syntactic sugar for handling errors. So that's okay.
+
+Now, the struct definition:
+
+```rust
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+```
+
+That matches the spec.
+
+Now, I need to output both the struct and the function inside a single code block. The code block should start with the struct, then the function. The comment should be directly before the function declaration. That's exactly what the spec says.
+
+I think that's all. I will now produce the answer.

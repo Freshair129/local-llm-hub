@@ -1,0 +1,9 @@
+{
+  "modelKey": "davidau-llama-moe-q4", "seeds": [42, 43, 44, 45, 46],
+  "modelCardUrl": "https://huggingface.co/DavidAU/Llama-3.2-4X3B-MOE-Hell-California-Uncensored-10B-GGUF",
+  "samplerGuideUrl": "https://huggingface.co/DavidAU/Maximizing-Model-Performance-All-Quants-Types-And-Full-Precision-by-Samplers_Parameters",
+  "profiles": {
+    "local-32k": { "id": "local-32k-v20261016", "label": "RTX 3060 12GB: shared Mellum sampler with 32K context", "num_ctx": 32768, "num_predict": 81920, "options": { "temperature": 0.6, "top_p": 0.95, "top_k": 20, "repeat_penalty": 1.0 }, "systemPrompt": null, "settingsSource": "Existing Mellum-matched sampling profile; context raised from 16K for this hardware profile." },
+    "hf-card": { "id": "hf-card-v20261016", "label": "DavidAU card and sampler-guide settings; matched 16K context", "num_ctx": 16384, "num_predict": 81920, "options": { "temperature": 0.8, "top_p": 0.95, "top_k": 40, "min_p": 0.05, "repeat_last_n": 64, "repeat_penalty": 1.02 }, "systemPrompt": null, "settingsSource": "Card example temperature=0.8 and repetition penalty>=1.02, plus linked sampler guide top_k=40, min_p=0.05, top_p=0.95, repeat_last_n=64. Smooth factor is not exposed by Ollama; llama-server uses flash-attention auto when supported." }
+  }
+}

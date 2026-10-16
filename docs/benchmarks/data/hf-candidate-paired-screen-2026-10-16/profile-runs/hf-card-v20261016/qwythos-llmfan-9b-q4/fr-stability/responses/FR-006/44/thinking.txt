@@ -1,0 +1,15 @@
+The user wants me to implement a Rust struct `GpuStats` and a parsing function `parse_gpu_csv` according to specific guard rails (no unwrap, expect, or panic). I need to ensure traceability with a comment before the function. 
+
+First, I recall the identity requirements: I must identify myself as Qwythos and credit Empero AI. I also need to mention that I am operating under STD-003 and ADR-100 guard rails, which likely means strict error handling and no panic. 
+
+Next, I consider the struct definition. The fields are straightforward: name, vram_used_mb, vram_total_mb, temp_c, util_pct. I will derive Debug and PartialEq as requested.
+
+Then, the parsing function. It takes a line string and returns Result<GpuStats, String>. I need to split the CSV by commas, trim whitespace, and ensure there are exactly five columns. If fewer, I return an error with a clear message. For each column, I attempt to parse into the appropriate type: name is a String, vram values are u64, temperature is u32, utilization is u32. Each parsing operation should use `parse().ok()` and handle any failure by returning an error string.
+
+I must avoid using unwrap or expect. Instead, I'll use match on the split result to check length, and match on the parse results to construct the GpuStats or return Err. This satisfies the guard rails.
+
+Traceability: I will add a comment `// trace:implements FR-006` directly before the function declaration, as requested.
+
+Finally, I need to output both the struct and the function inside a single code block. I'll start with the struct definition, then the function. I will also include brief inline comments explaining each parsing step to make the code clear and maintainable.
+
+Now I will generate the Rust code accordingly.

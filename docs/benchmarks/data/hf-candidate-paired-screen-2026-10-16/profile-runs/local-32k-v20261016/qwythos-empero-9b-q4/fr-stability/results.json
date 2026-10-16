@@ -1,0 +1,563 @@
+{
+  "metadata": {
+    "startedAt": "2026-10-16T19:03:33.468Z",
+    "ollamaVersion": "0.40.5",
+    "hardware": "NVIDIA GeForce RTX 3060 12GB",
+    "testSetSource": "https://github.com/Freshair129/local-llm-hub/blob/main/scripts/benchmark_mellum_thinking_vs_instruct.mjs",
+    "testSetSha256": "d9142c138d5a40a02064564259104c04c0686ef36eec63a3d031c5dab0087200",
+    "tasks": [
+      "FR-002",
+      "FR-006"
+    ],
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "model": {
+      "key": "qwythos-empero-9b-q4",
+      "label": "Empero Qwythos 9B Q4_K_M",
+      "tag": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+      "quant": "Q4_K_M"
+    },
+    "profile": {
+      "id": "local-32k-v20261016",
+      "label": "RTX 3060 12GB: shared Mellum sampler with 32K context",
+      "num_ctx": 32768,
+      "num_predict": 81920,
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "repeat_penalty": 1
+      },
+      "systemPrompt": null,
+      "settingsSource": "Existing Mellum-matched sampling profile; context raised from 16K for this hardware profile."
+    },
+    "expectedSamples": 10,
+    "execution": "Exactly one F-store model per run; unload before/after; check /api/ps around every inference; contaminated attempts are discarded and retried up to three times.",
+    "qualityMetric": "Strict pass requires fenced code, Rust compile, all harness tests, adjacent trace comment, and no unwrap/expect/panic!.",
+    "finalResidentModels": [],
+    "interrupted": false,
+    "completedAt": "2026-10-16T20:04:06.917Z",
+    "summaries": [
+      {
+        "task": "FR-002",
+        "n": 5,
+        "compiled": 0,
+        "testsPassed": 0,
+        "strictPass": 0
+      },
+      {
+        "task": "FR-006",
+        "n": 5,
+        "compiled": 3,
+        "testsPassed": 2,
+        "strictPass": 2
+      },
+      {
+        "task": "ALL",
+        "n": 10,
+        "strictPass": 2
+      }
+    ]
+  },
+  "results": [
+    {
+      "task": "FR-002",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "qwythos-empero-9b-q4",
+      "model": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 698600,
+      "promptTokens": 226,
+      "generatedTokens": 32542,
+      "generationTokensPerSecond": 48.59914219631707,
+      "thinkingChars": 150398,
+      "residency": [
+        {
+          "name": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+          "size": 6575221636,
+          "sizeVram": 6575221636,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": false,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "qwythos-empero-9b-q4",
+      "model": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 676966,
+      "promptTokens": 226,
+      "generatedTokens": 32542,
+      "generationTokensPerSecond": 48.48548187901526,
+      "thinkingChars": 128132,
+      "residency": [
+        {
+          "name": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+          "size": 6575221636,
+          "sizeVram": 6575221636,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": false,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "qwythos-empero-9b-q4",
+      "model": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 677527,
+      "promptTokens": 226,
+      "generatedTokens": 32542,
+      "generationTokensPerSecond": 48.48694348764936,
+      "thinkingChars": 122511,
+      "residency": [
+        {
+          "name": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+          "size": 6575221636,
+          "sizeVram": 6575221636,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": false,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "qwythos-empero-9b-q4",
+      "model": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 678221,
+      "promptTokens": 226,
+      "generatedTokens": 32542,
+      "generationTokensPerSecond": 48.44948328466772,
+      "thinkingChars": 120685,
+      "residency": [
+        {
+          "name": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+          "size": 6575221636,
+          "sizeVram": 6575221636,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": false,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "qwythos-empero-9b-q4",
+      "model": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 702184,
+      "promptTokens": 226,
+      "generatedTokens": 32542,
+      "generationTokensPerSecond": 48.48798253171483,
+      "thinkingChars": 117509,
+      "residency": [
+        {
+          "name": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+          "size": 6575221636,
+          "sizeVram": 6575221636,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": false,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "qwythos-empero-9b-q4",
+      "model": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 56772,
+      "promptTokens": 321,
+      "generatedTokens": 2564,
+      "generationTokensPerSecond": 52.62614845947316,
+      "thinkingChars": 7550,
+      "residency": [
+        {
+          "name": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+          "size": 6575221636,
+          "sizeVram": 6575221636,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "qwythos-empero-9b-q4",
+      "model": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 40959,
+      "promptTokens": 321,
+      "generatedTokens": 1797,
+      "generationTokensPerSecond": 52.62394498434504,
+      "thinkingChars": 5310,
+      "residency": [
+        {
+          "name": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+          "size": 6575221636,
+          "sizeVram": 6575221636,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... FAILED\n\nfailures:\n\n---- test_parse_valid_csv stdout ----\n\nthread 'test_parse_valid_csv' (15228) panicked at <LOCAL_BENCHMARK_ROOT>\\local-32k-v20261016\\qwythos-empero-9b-q4\\fr-stability\\responses\\FR-006\\43\\test.rs:37:5:\nassertion failed: res.is_ok()\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_parse_valid_csv\n\ntest result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "qwythos-empero-9b-q4",
+      "model": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 39106,
+      "promptTokens": 321,
+      "generatedTokens": 1752,
+      "generationTokensPerSecond": 52.660454556507446,
+      "thinkingChars": 5706,
+      "residency": [
+        {
+          "name": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+          "size": 6575221636,
+          "sizeVram": 6575221636,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "qwythos-empero-9b-q4",
+      "model": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 16928,
+      "promptTokens": 321,
+      "generatedTokens": 593,
+      "generationTokensPerSecond": 52.989411500310744,
+      "thinkingChars": 1004,
+      "residency": [
+        {
+          "name": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+          "size": 6575221636,
+          "sizeVram": 6575221636,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "qwythos-empero-9b-q4",
+      "model": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 43972,
+      "promptTokens": 321,
+      "generatedTokens": 1958,
+      "generationTokensPerSecond": 52.661264431385156,
+      "thinkingChars": 6174,
+      "residency": [
+        {
+          "name": "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+          "size": 6575221636,
+          "sizeVram": 6575221636,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    }
+  ],
+  "contaminationLog": [
+    {
+      "at": "2026-10-16T19:15:12.284Z",
+      "task": "FR-002",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T19:15:12.468Z",
+      "reason": "foreign model before FR-002|43",
+      "unloaded": [
+        "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T19:26:29.437Z",
+      "task": "FR-002",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T19:26:29.648Z",
+      "reason": "foreign model before FR-002|44",
+      "unloaded": [
+        "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T19:37:47.178Z",
+      "task": "FR-002",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T19:37:47.371Z",
+      "reason": "foreign model before FR-002|45",
+      "unloaded": [
+        "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T19:49:05.595Z",
+      "task": "FR-002",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T19:49:05.796Z",
+      "reason": "foreign model before FR-002|46",
+      "unloaded": [
+        "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T20:00:47.984Z",
+      "task": "FR-006",
+      "seed": 42,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T20:00:48.184Z",
+      "reason": "foreign model before FR-006|42",
+      "unloaded": [
+        "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T20:01:44.975Z",
+      "task": "FR-006",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T20:01:45.156Z",
+      "reason": "foreign model before FR-006|43",
+      "unloaded": [
+        "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T20:02:26.124Z",
+      "task": "FR-006",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T20:02:26.312Z",
+      "reason": "foreign model before FR-006|44",
+      "unloaded": [
+        "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T20:03:05.429Z",
+      "task": "FR-006",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T20:03:05.614Z",
+      "reason": "foreign model before FR-006|45",
+      "unloaded": [
+        "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T20:03:22.550Z",
+      "task": "FR-006",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T20:03:22.745Z",
+      "reason": "foreign model before FR-006|46",
+      "unloaded": [
+        "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T20:04:06.909Z",
+      "reason": "final cleanup for local-32k-v20261016 hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M",
+      "unloaded": [
+        "hf.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF:Q4_K_M"
+      ]
+    }
+  ],
+  "infrastructureFailures": []
+}

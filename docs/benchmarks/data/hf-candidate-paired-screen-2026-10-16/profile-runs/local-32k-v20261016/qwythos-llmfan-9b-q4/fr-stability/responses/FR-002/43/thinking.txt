@@ -1,0 +1,254 @@
+The user wants me to implement a Rust function `normalize_model_name` that takes a raw model name string and returns a normalized version. The function must strip certain prefixes and suffixes, then convert to lowercase. Additionally, the guard rails are strict: no use of `unwrap()`, `expect()`, or `panic!`. The traceability comment must appear directly before the function declaration.
+
+I need to think through how to strip prefixes safely. The prefixes are `'registry.ollama.ai/library/'`, `'library/'`, and `'hf.co/'`. These are all known strings. I can use `str::starts_with` to check each prefix, then use `trim_start` or `trim_start_matches` to remove them. Since I can't unwrap, I must handle the case where none of the prefixes match; in that case, I just return the original string unchanged.
+
+Similarly, quantization suffixes: `'-q4_0'`, `'-q4_k_m'`, `'-q4_k_s'`, `':q4_0'`, `':q4_k_m'`, `':q4_k_s'`. These suffixes can be present after the model name, possibly with a colon or dash. I can use `trim_end_matches` to strip any of these suffixes. Since the suffixes may appear in any order or multiple times? The spec says "strip quantization suffixes", which likely means remove any of those suffixes if present. Using `trim_end_matches` with a set of suffix strings will remove them from the end of the string. However, `trim_end_matches` only removes a suffix if it matches the entire end of the string. If a suffix is present but not at the end (like a model name that ends with a suffix but also has other characters after), we need to ensure we only strip suffixes that are at the end. Since suffixes are short (like `-q4_0`), they will be at the end if they are part of the model name. I think `trim_end_matches` with a slice of suffixes will work.
+
+Alternatively, I could use `rtrim` with a set of characters, but the suffixes contain underscores and colons, so using a set of characters is not appropriate. I must remove whole suffix strings.
+
+So the algorithm:
+
+```
+let mut name = raw;
+if name.starts_with("registry.ollama.ai/library/") {
+    name = &name["registry.ollama.ai/library/".len()..];
+}
+if name.starts_with("library/") {
+    name = &name["library/".len()..];
+}
+if name.starts_with("hf.co/") {
+    name = &name["hf.co/".len()..];
+}
+// trim suffixes (case-insensitive)
+let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+for suffix in suffixes {
+    if name.ends_with(suffix) {
+        name = &name[..name.len() - suffix.len()];
+    }
+}
+name = name.to_lowercase();
+name
+```
+
+But the guard rails require no panic. The above uses `&name[..name.len() - suffix.len()]` which is safe because we only slice after confirming the suffix is present. However, we need to be careful about overlapping suffixes: e.g., a name might have both a suffix and a prefix. The order of stripping: first prefixes, then suffixes, then lowercase. That's fine.
+
+Now, we must not use `unwrap` or `expect`. So we must avoid `name.trim_start_matches(...).unwrap()`. Instead, we can use `trim_start_matches` with a set of characters, but we need to strip whole prefixes, not just characters. For whole prefixes, we can use `trim_start` manually.
+
+Alternatively, we could use `name.strip_prefix(prefix)` which returns an `Option<&str>`. Since we cannot use `unwrap`, we must handle the `None` case. That would be:
+
+```
+let name = match name.strip_prefix("registry.ollama.ai/library/") {
+    Some(stripped) => stripped,
+    None => name,
+};
+```
+
+But we need to also handle multiple prefixes; we could chain `strip_prefix` calls. However, `strip_prefix` returns an `Option<&str>`, so we can't just use it in a chain without handling each `None`. But we can do a loop:
+
+```
+let mut name = raw;
+let prefixes = ["registry.ollama.ai/library/", "library/", "hf.co/"];
+for prefix in prefixes {
+    if let Some(stripped) = name.strip_prefix(prefix) {
+        name = stripped;
+    }
+}
+```
+
+But `strip_prefix` returns an `Option<&str>` that points into the original string, and we assign to `name`. That's fine. However, we must be careful that after stripping one prefix, the next prefix may be present in the new `name`. This is okay.
+
+Now, suffixes: we can also use `strip_suffix` which returns `Option<&str>`. The suffixes list includes both `-q4_0` and `:q4_0`. We must handle case-insensitivity. Since we need to strip suffixes case-insensitively, we could convert the suffix to lowercase before checking. But we need to preserve the original case of the rest of the string. So we can check `name.to_lowercase().ends_with(suffix.to_lowercase())` and if true, we need to strip the suffix from the original `name`. However, we must be careful about overlapping suffixes: e.g., if a name ends with `-q4_0`, we want to strip that. If it ends with `:q4_0`, we want to strip that. But what about a name that ends with `-q4_0` and also has a suffix `:q4_0` after it? That's not possible because the suffixes are distinct. So we can just loop over suffixes and strip them.
+
+But there is a nuance: If a name ends with `-q4_0`, we strip that. However, what if it also ends with `:q4_0` after we strip `-q4_0`? That would be a different suffix. But we need to apply suffix stripping after prefix stripping. So we can just loop over suffixes and strip them in any order. Since suffixes are case-insensitive, we can convert each suffix to lower case for comparison, but we must strip the original case from the name.
+
+Implementation:
+
+```
+let mut name = raw;
+let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+for suffix in suffixes {
+    // compare case-insensitively
+    let suffix_lower = suffix.to_lowercase();
+    if name.to_lowercase().ends_with(&suffix_lower) {
+        // strip the suffix from the original name
+        let suffix_len = suffix.len();
+        name = &name[..name.len() - suffix_len];
+    }
+}
+```
+
+But this will strip suffixes even if they appear in the middle of the name? No, because we only check `ends_with`. That's correct.
+
+Now, after suffix stripping, we convert to lowercase: `name = name.to_lowercase()`.
+
+Now, the guard rails: we must not use `unwrap`, `expect`, or `panic!`. The above code uses `strip_prefix` and `strip_suffix` which return `Option<&str>`, but we handle them with `if let Some(stripped) = ...`. That's fine.
+
+Now, the traceability comment must be placed directly before the function declaration. So we need to output:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    // ...
+}
+```
+
+Now, the function must return a `String`. The above uses `name` as a `&str`. At the end we need to convert to `String`. We can do `name.to_string()` or just `name` if we convert to `String` earlier. Actually, `name` is a `&str`. We need to return a `String`. So we must convert to `String` at the end. But we could also keep `name` as `String` from the start by cloning `raw`. That may be okay. But we must be careful about performance; we can just convert to `String` at the end.
+
+Thus final code:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut name = raw;
+    // Strip registry prefixes
+    if name.starts_with("registry.ollama.ai/library/") {
+        name = &name["registry.ollama.ai/library/".len()..];
+    }
+    if name.starts_with("library/") {
+        name = &name["library/".len()..];
+    }
+    if name.starts_with("hf.co/") {
+        name = &name["hf.co/".len()..];
+    }
+    // Strip quantization suffixes (case-insensitive)
+    let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+    for suffix in suffixes {
+        if name.to_lowercase().ends_with(&suffix.to_lowercase()) {
+            let suffix_len = suffix.len();
+            name = &name[..name.len() - suffix_len];
+        }
+    }
+    // Convert to lowercase
+    name = name.to_lowercase();
+    name.into()
+}
+```
+
+But we need to ensure we didn't use `unwrap` or `expect`. The code uses `starts_with` and `ends_with` which are safe. We used `name = &name["...".len()..]` which is safe because we check `starts_with` first. That's fine.
+
+Now, the guard rails also forbid `panic!`. The code does not call `panic!`. Good.
+
+Now, we must output only the Rust code inside a ```rust code block. So we need to output:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut name = raw;
+    // Strip registry prefixes
+    if name.starts_with("registry.ollama.ai/library/") {
+        name = &name["registry.ollama.ai/library/".len()..];
+    }
+    if name.starts_with("library/") {
+        name = &name["library/".len()..];
+    }
+    if name.starts_with("hf.co/") {
+        name = &name["hf.co/".len()..];
+    }
+    // Strip quantization suffixes (case-insensitive)
+    let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+    for suffix in suffixes {
+        if name.to_lowercase().ends_with(&suffix.to_lowercase()) {
+            let suffix_len = suffix.len();
+            name = &name[..name.len() - suffix_len];
+        }
+    }
+    // Convert to lowercase
+    name = name.to_lowercase();
+    name.into()
+}
+```
+
+But we need to ensure we didn't use `unwrap` or `expect`. The code uses `name.into()` which is fine.
+
+Now, the question: Should we use `strip_prefix` and `strip_suffix` to avoid manual length calculations? That would be more idiomatic, but we must avoid `unwrap`. Using `strip_prefix` returns `Option<&str>`, and we need to handle the case where it's `None`. That's fine. But we could also use `if let Some(stripped) = name.strip_prefix("registry.ollama.ai/library/") { name = stripped; }`. That uses `strip_prefix`, which is a method that returns `Option<&str>`. That's fine. But we must not use `unwrap`. So we can use `if let Some(stripped) = name.strip_prefix(prefix) { name = stripped; }`. That's okay.
+
+Now, after stripping all prefixes, we must also handle suffixes. We can use `if let Some(stripped) = name.strip_suffix(suffix) { name = stripped; }`. That's okay. But we need case-insensitive comparison. So we could convert suffix to lower case for comparison, but `strip_suffix` does exact match. So we need to compare case-insensitively, then strip the original suffix. That's a bit more complex. But we can just use `if name.to_lowercase().ends_with(suffix.to_lowercase()) { name = &name[..name.len() - suffix.len()]; }`. That's fine.
+
+Now, we must also ensure we don't use any `panic!`. The code does not call `panic!`.
+
+Now, the guard rails also forbid `unwrap` and `expect`. The code uses `into` and `to_lowercase` which are safe.
+
+Now, the traceability comment must be directly before the function declaration. That's fine.
+
+Now, we must output only the Rust code block, no extra text. So final answer:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut name = raw;
+    // Strip registry prefixes
+    if name.starts_with("registry.ollama.ai/library/") {
+        name = &name["registry.ollama.ai/library/".len()..];
+    }
+    if name.starts_with("library/") {
+        name = &name["library/".len()..];
+    }
+    if name.starts_with("hf.co/") {
+        name = &name["hf.co/".len()..];
+    }
+    // Strip quantization suffixes (case-insensitive)
+    let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+    for suffix in suffixes {
+        if name.to_lowercase().ends_with(&suffix.to_lowercase()) {
+            let suffix_len = suffix.len();
+            name = &name[..name.len() - suffix_len];
+        }
+    }
+    // Convert to lowercase
+    name = name.to_lowercase();
+    name.into()
+}
+```
+
+Now, I must ensure that the code compiles. Let's test mentally:
+
+- `name` is a `&str`. `name.starts_with` works.
+- `name = &name["...".len()..]` works.
+- `suffixes` is a `&[&str]`.
+- `name.to_lowercase().ends_with(&suffix.to_lowercase())` works.
+- `name = &name[..name.len() - suffix_len]` works.
+- `name.to_lowercase()` returns a `String`? Actually `to_lowercase` returns `String`. Wait, `to_lowercase` returns a `String` (since `str` has `to_lowercase` returning `String`). So after suffix stripping, `name` is a `&str`. Then we call `name.to_lowercase()` which returns a `String`. We assign that to `name`. That changes `name` from `&str` to `String`. Then we call `name.into()` which is `String::into` which returns `String`. But `into` on a `String` returns `String`? Actually `into` is a method that consumes the value and returns `Self`. For `String`, `into` returns `String`. So `name.into()` returns `String`. That's fine.
+
+But we need to be careful: after we call `name.to_lowercase()`, `name` is now a `String`. However, we still have `name` as a `String`. Then we call `name.into()`, which returns a `String`. That's fine.
+
+But we might also want to use `name` as a `String` and then just return it. That's okay.
+
+Now, we must also consider that after stripping suffixes, `name` may be a `&str`. But after `name.to_lowercase()`, `name` is a `String`. So we can just return `name`. But we must ensure we don't have any leftover `&str` that we try to call `into` on. That's fine.
+
+Now, the code is correct.
+
+Now, we must output only the code block. So final answer:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut name = raw;
+    // Strip registry prefixes
+    if name.starts_with("registry.ollama.ai/library/") {
+        name = &name["registry.ollama.ai/library/".len()..];
+    }
+    if name.starts_with("library/") {
+        name = &name["library/".len()..];
+    }
+    if name.starts_with("hf.co/") {
+        name = &name["hf.co/".len()..];
+    }
+    // Strip quantization suffixes (case-insensitive)
+    let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+    for suffix in suffixes {
+        if name.to_lowercase().ends_with(&suffix.to_lowercase()) {
+            let suffix_len = suffix.len();
+            name = &name[..name.len() - suffix_len];
+        }
+    }
+    // Convert to lowercase
+    name = name.to_lowercase();
+    name.into()
+}
+```
+
+Now, I must ensure that the code is minimal and correct. I think it's fine.
+
+Now, I must output only the code block. So final answer is that.
+
+Now, I will produce that.

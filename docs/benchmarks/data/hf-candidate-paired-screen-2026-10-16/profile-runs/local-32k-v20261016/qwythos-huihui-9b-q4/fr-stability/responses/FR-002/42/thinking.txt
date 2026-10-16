@@ -1,0 +1,61 @@
+1. **Understand the core requirement**: The function `normalize_model_name` must take a `&str` and return a `String`. It needs to strip a few possible prefixes, strip a few possible suffixes (case‑insensitive), then convert everything to lowercase.
+
+2. **Identify the data structures**:
+   - Prefixes: `'registry.ollama.ai/library/', 'library/', 'hf.co/'`.
+   - Suffixes: `'-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s'`.
+   - Both sets are short enough to be stored directly in constants.
+
+3. **Plan the algorithm**:
+   - Start with a mutable `String` copy of `raw`.
+   - Loop through the prefix list, and for each prefix, check if the current `model` ends with it. If it does, strip the suffix (using `str::strip_suffix`) and repeat the loop because after stripping a prefix the string might now end with a different prefix (e.g., `"registry.ollama.ai/library/model"` → `"library/model"` → `"model"`).
+   - After all prefixes are handled, loop through the suffix list. For each suffix, check if the current `model` ends with it (case‑insensitive). When a match is found, strip the suffix and *break* the suffix loop because we assume the suffix is unique enough that only one will apply (or we could continue, but the spec just says “strip quantization suffixes”, implying a single pass).
+   - Finally, convert the resulting string to lowercase using `to_lowercase()` and return it.
+
+4. **Guard rails**:
+   - The spec forbids `unwrap()`, `expect()`, and `panic!()`. All operations must be safe, using methods that return `Option` or `Cow` and handling the `None` case gracefully.
+   - `str::strip_suffix` returns an `Option<&str>`; we’ll pattern match on it.
+   - `to_lowercase` returns a `String` directly, no unwrapping needed.
+
+5. **Traceability**:
+   - Insert a comment `// trace:implements FR-002` right before the function definition.
+
+6. **Draft the code**:
+   ```rust
+   // trace:implements FR-002
+   pub fn normalize_model_name(raw: &str) -> String {
+       let mut model = raw.to_string();
+
+       // Strip registry prefixes (repeat until none match)
+       loop {
+           if let Some(stripped) = model.strip_suffix("registry.ollama.ai/library/") {
+               model = stripped;
+           } else if let Some(stripped) = model.strip_suffix("library/") {
+               model = stripped;
+           } else if let Some(stripped) = model.strip_suffix("hf.co/") {
+               model = stripped;
+           } else {
+               break;
+           }
+       }
+
+       // Strip quantization suffixes (case‑insensitive)
+       for suffix in ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"] {
+           if let Some(stripped) = model.strip_suffix(suffix) {
+               model = stripped;
+               break;
+           }
+       }
+
+       model.to_lowercase()
+   }
+   ```
+
+7. **Review against the spec**:
+   - Signature: `pub fn normalize_model_name(raw: &str) -> String` ✔️
+   - Prefixes: all three included, loop handles multiple levels ✔️
+   - Suffixes: all six included, case‑insensitive via `strip_suffix` ✔️
+   - Lowercase conversion at the end ✔️
+   - No `unwrap()` or `expect()` used; only `strip_suffix` and `to_lowercase` ✔️
+   - Comment placed correctly ✔️
+
+8. **Final output**: Print the code inside a Rust markdown block, as requested.

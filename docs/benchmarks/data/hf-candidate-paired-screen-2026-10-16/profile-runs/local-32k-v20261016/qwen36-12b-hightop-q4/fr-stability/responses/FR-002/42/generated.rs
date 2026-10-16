@@ -1,0 +1,11 @@
+use std::str;
+
+pub fn normalize_model_name(raw: &str) -> String {
+    if !raw.is_in(["library.", "hf.", "hf.co.", "hf.co."]) {
+        return std::str::strip(raw)
+    }
+    if !raw.is_in(["-q4_0", "-q4_k_m", "-q4_k_s", "-q4_k_s"] {
+        return std::str::lower(raw)
+    }
+    return raw
+}

@@ -1,0 +1,518 @@
+The user wants me to implement a Rust function `normalize_model_name` according to specific requirements. Let me break down the requirements:
+
+1. **Function signature**: `pub fn normalize_model_name(raw: &str) -> String`
+2. **Strip registry prefixes**:
+   - `'registry.ollama.ai/library/'`
+   - `'library/'`
+   - `'hf.co/'`
+3. **Strip quantization suffixes**:
+   - `'-q4_0'`, `'-q4_k_m'`, `'-q4_k_s'`
+   - `':q4_0'`, `':q4_k_m'`, `':q4_k_s'` (case-insensitive)
+4. **Convert result to lowercase**
+5. **Guard rails**: NO unwrap(), NO expect(), NO panic!
+6. **Traceability**: Include comment `// trace:implements FR-002` directly before function declaration.
+
+Let me think about the implementation:
+
+- I need to handle string slicing carefully to avoid panics
+- I need to handle case-insensitive matching for suffixes
+- I need to strip prefixes that might be at the beginning or potentially nested (though based on the requirements, they seem to be at the start)
+- The order of operations matters - probably strip prefixes first, then suffixes, then lowercase
+
+Let me draft the code:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut s = raw.to_string();
+    
+    // Strip prefixes
+    // Check for 'registry.ollama.ai/library/'
+    if s.starts_with("registry.ollama.ai/library/") {
+        s = s[22..].to_string();
+    }
+    // Check for 'library/'
+    else if s.starts_with("library/") {
+        s = s[8..].to_string();
+    }
+    // Check for 'hf.co/'
+    else if s.starts_with("hf.co/") {
+        s = s[6..].to_string();
+    }
+    
+    // Strip quantization suffixes (case-insensitive)
+    // We need to check from the end of the string
+    let s_lower = s.to_lowercase();
+    
+    // Check for suffixes (case-insensitive)
+    // -q4_0, -q4_k_m, -q4_k_s, :q4_0, :q4_k_m, :q4_k_s
+    let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+    
+    for suffix in &suffixes {
+        if s_lower.ends_with(*suffix) {
+            // Remove the suffix
+            s = s[..s_lower.len() - suffix.len()].to_string();
+            break;
+        }
+    }
+    
+    // Convert to lowercase
+    s.to_lowercase()
+}
+```
+
+Wait, there's an issue. If I lowercase `s` to check for suffixes, but then try to slice `s` (the original string), that won't work because `s` and `s_lower` have different lengths if suffixes were removed.
+
+Actually, I should check the suffixes on the original string but case-insensitively. Let me reconsider:
+
+```rust
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut s = raw;
+    
+    // Strip prefixes
+    if s.starts_with("registry.ollama.ai/library/") {
+        s = &s[22..];
+    } else if s.starts_with("library/") {
+        s = &s[8..];
+    } else if s.starts_with("hf.co/") {
+        s = &s[6..];
+    }
+    
+    // Strip quantization suffixes (case-insensitive)
+    let lower_s = s.to_lowercase();
+    let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+    
+    for suffix in &suffixes {
+        if lower_s.ends_with(*suffix) {
+            // Calculate the index to slice
+            let suffix_len = suffix.len();
+            let original_len = s.len();
+            let new_len = original_len - suffix_len;
+            s = &s[..new_len];
+            break;
+        }
+    }
+    
+    // Convert to lowercase
+    s.to_lowercase()
+}
+```
+
+But wait, `s` is a slice of the original string, so when I do `s.to_lowercase()`, I get a new owned String. Then when I check `ends_with`, I'm comparing against `lower_s` which is the lowercase version of `s`.
+
+Actually, I should be careful. If `s` is a slice (e.g., `&str`), then `s.len()` returns the length, and `s[..new_len]` works.
+
+But there's a potential issue: what if the string has multiple prefixes? For example, `registry.ollama.ai/library/library/model`? The requirements don't specify, but typically these are mutually exclusive. However, to be safe, I should handle them in order and check if they still exist after stripping.
+
+Actually, looking at the requirements again:
+- Strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/'
+
+These seem to be distinct prefixes that might appear at the beginning. I should check them in a specific order or handle them carefully.
+
+Also, for suffixes, the requirement says "case-insensitive", so I need to handle that.
+
+Let me refine:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut s = raw;
+    
+    // Strip registry prefixes
+    if s.starts_with("registry.ollama.ai/library/") {
+        s = &s[22..];
+    } else if s.starts_with("library/") {
+        s = &s[8..];
+    } else if s.starts_with("hf.co/") {
+        s = &s[6..];
+    }
+    
+    // Strip quantization suffixes (case-insensitive)
+    let lower_s = s.to_lowercase();
+    let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+    
+    for suffix in &suffixes {
+        if lower_s.ends_with(*suffix) {
+            let suffix_len = suffix.len();
+            s = &s[..s.len() - suffix_len];
+            break;
+        }
+    }
+    
+    // Convert to lowercase
+    s.to_lowercase()
+}
+```
+
+Wait, I need to be careful with `s.len() - suffix_len`. If `s.len()` is less than `suffix_len`, this would panic. But since we checked `ends_with`, the suffix must exist at the end, so `s.len() >= suffix_len` is guaranteed.
+
+However, I should also consider that the prefix stripping might result in an empty string or just a suffix. For example, if input is `registry.ollama.ai/library/-q4_0`, after stripping prefix, we get `-q4_0`, then after stripping suffix, we get empty string. That's fine.
+
+Also, what if the input is just `q4_0`? Then no prefix stripping happens, and suffix stripping happens.
+
+What if the input is `q4_0-q4_0`? Then only the first suffix (from the end) would be stripped.
+
+Let me think about edge cases:
+1. Empty string -> returns empty string
+2. Only prefix -> returns empty string after stripping
+3. Only suffix -> returns base name
+4. Prefix + suffix -> returns base name
+5. Multiple prefixes (unlikely but possible) -> handled by if-else chain, only first match works
+6. Case-insensitive suffix matching -> handled by lowercasing before check
+
+Actually, I should reconsider the prefix handling. If someone passes `REGISTRY.OLLAMA.AI/LIBRARY/MODEL`, should I strip it? The requirement says "Strip registry prefixes: 'registry.ollama.ai/library/'..." but doesn't specify case. However, typically these are case-sensitive. But to be safe, I should probably handle case-insensitive prefix matching as well, or assume they are always lowercase. Given the context, I'll assume they are case-sensitive (lowercase), but I'll note that the user should provide lowercase inputs or I should handle case-insensitive.
+
+Actually, looking at the suffix requirement: "case-insensitive", but prefixes don't mention case-insensitive. I'll assume prefixes are case-sensitive.
+
+But wait, if the input is `Registry.Ollama.ai/Library/Model`, and I don't strip it, then I check suffixes. If the suffix is `-q4_0`, it won't match because `Registry` is uppercase. So I should probably make prefix matching case-insensitive too, or just assume lowercase. Given the strict requirements, I'll implement case-sensitive for prefixes and case-insensitive for suffixes.
+
+Actually, to be thorough, I should probably handle prefixes case-insensitively as well, but the requirement doesn't explicitly say so. However, since the suffix requirement explicitly mentions case-insensitive, and prefixes don't, I'll assume prefixes are case-sensitive.
+
+Let me also consider: what if the string has multiple of the same type? For example, `library/library/model`. The first `library/` would be stripped, leaving `library/model`. Then the second `library/` would be stripped? But since I use if-else, only the first match happens. So I need to handle this with a loop or recursive calls, or check multiple times.
+
+Actually, looking at the prefixes:
+- `registry.ollama.ai/library/` (22 chars)
+- `library/` (8 chars)
+- `hf.co/` (6 chars)
+
+If I have `registry.ollama.ai/library/library/model`, stripping the first prefix gives `library/model`, then I need to check again. But since I use if-else in sequence, I only check once. So I should either:
+1. Use a loop to strip repeatedly
+2. Check if the result still starts with any of the prefixes
+
+I'll go with approach 2 to be safe:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut s = raw;
+    
+    // Strip registry prefixes (loop to handle multiple prefixes)
+    loop {
+        if s.starts_with("registry.ollama.ai/library/") {
+            s = &s[22..];
+        } else if s.starts_with("library/") {
+            s = &s[8..];
+        } else if s.starts_with("hf.co/") {
+            s = &s[6..];
+        } else {
+            break;
+        }
+    }
+    
+    // Strip quantization suffixes (case-insensitive)
+    let lower_s = s.to_lowercase();
+    let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+    
+    for suffix in &suffixes {
+        if lower_s.ends_with(*suffix) {
+            let suffix_len = suffix.len();
+            s = &s[..s.len() - suffix_len];
+            // After stripping a suffix, we should check again in case there are multiple suffixes?
+            // The requirement doesn't specify, but to be safe, let's loop too.
+            // However, typically there's only one suffix at the end.
+            // But let's add a loop to be thorough.
+            break; // Just break for now, but we could loop if needed.
+        }
+    }
+    
+    // Convert to lowercase
+    s.to_lowercase()
+}
+```
+
+Actually, for suffixes, if there are multiple (e.g., `model-q4_0-q4_0`), we should strip them all. But the requirement doesn't specify. I'll assume one suffix at most, but to be safe, I'll use a loop.
+
+Wait, I need to be careful. If I strip a suffix and then loop again, I need to re-check the lowercase version.
+
+Let me write it properly:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut s = raw;
+    
+    // Strip registry prefixes (loop to handle multiple prefixes)
+    loop {
+        if s.starts_with("registry.ollama.ai/library/") {
+            s = &s[22..];
+        } else if s.starts_with("library/") {
+            s = &s[8..];
+        } else if s.starts_with("hf.co/") {
+            s = &s[6..];
+        } else {
+            break;
+        }
+    }
+    
+    // Strip quantization suffixes (case-insensitive)
+    loop {
+        let lower_s = s.to_lowercase();
+        let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+        
+        for suffix in &suffixes {
+            if lower_s.ends_with(*suffix) {
+                let suffix_len = suffix.len();
+                s = &s[..s.len() - suffix_len];
+                // Continue loop to check if more suffixes exist
+                continue;
+            }
+        }
+        
+        // If no suffix found, break
+        break;
+    }
+    
+    // Convert to lowercase
+    s.to_lowercase()
+}
+```
+
+Actually, the loop for suffixes is not quite right. I should check if any suffix was found. Let me rewrite:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut s = raw;
+    
+    // Strip registry prefixes (loop to handle multiple prefixes)
+    loop {
+        if s.starts_with("registry.ollama.ai/library/") {
+            s = &s[22..];
+        } else if s.starts_with("library/") {
+            s = &s[8..];
+        } else if s.starts_with("hf.co/") {
+            s = &s[6..];
+        } else {
+            break;
+        }
+    }
+    
+    // Strip quantization suffixes (case-insensitive)
+    loop {
+        let lower_s = s.to_lowercase();
+        let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+        
+        for suffix in &suffixes {
+            if lower_s.ends_with(*suffix) {
+                let suffix_len = suffix.len();
+                s = &s[..s.len() - suffix_len];
+                // Continue checking for more suffixes
+            }
+        }
+        
+        // If no suffix was stripped in this iteration, break
+        // We need a flag to know if we stripped something
+        // Actually, we can break if no suffix matched, but we don't know if we matched without checking
+        // Let's use a different approach:
+        // Check if any suffix matched, if so, continue the loop, else break
+        // But we can't easily know if we matched without checking...
+        // Actually, we can just check if s changed, but that's not reliable.
+        // Better to use a flag or check if we broke out of the inner loop.
+        // Actually, if we go through all suffixes and none matched, we break the outer loop.
+        // But we need to know if we matched.
+        
+        // Actually, let's restructure:
+        // We can break if we've checked all suffixes and none matched.
+        // But we don't know if we matched.
+        // Let's use a flag.
+        let mut matched = false;
+        for suffix in &suffixes {
+            if lower_s.ends_with(*suffix) {
+                let suffix_len = suffix.len();
+                s = &s[..s.len() - suffix_len];
+                matched = true;
+                break; // break inner loop, continue outer loop
+            }
+        }
+        if !matched {
+            break;
+        }
+    }
+    
+    s.to_lowercase()
+}
+```
+
+This looks correct. But there's a subtle bug: if `s` becomes empty after stripping, `s.len()` is 0, and `s.len() - suffix_len` would be negative, causing a panic. But we checked `ends_with`, so if `s` is empty, `ends_with` would return false (unless suffix is empty, which it's not). So it's safe.
+
+Wait, if `s` is empty, `s.to_lowercase()` is empty, and `ends_with` checks if the empty string ends with the suffix. Since suffixes are non-empty, it returns false. So we're safe.
+
+But there's another issue: if `s` is just `"-q4_0"`, then after stripping, `s` becomes empty. Then in the next iteration, `s.to_lowercase()` is empty, and `ends_with` returns false for all suffixes, so we break. That's correct.
+
+Actually, I should reconsider the order of operations. The requirement says:
+1. Strip prefixes
+2. Strip suffixes
+3. Convert to lowercase
+
+But if I strip suffixes first (after prefixes), and then lowercase at the end, that's fine.
+
+However, I should also consider: what if the input is `Q4_0`? Then:
+- No prefix stripping
+- Check suffixes: `s.to_lowercase()` is `q4_0`, which ends with `q4_0` (the suffix `-q4_0` is not matched because it starts with `-`). Wait, the suffixes are `-q4_0`, etc. So `Q4_0` doesn't match `-q4_0` because it doesn't start with a dash.
+
+So `Q4_0` would remain `Q4_0`, then become `q4_0` at the end. That's correct.
+
+What if input is `model-q4_0`?
+- No prefix
+- Suffix `-q4_0` matches
+- Result: `model`
+- Lowercase: `model`
+
+What if input is `MODEL-Q4_0`?
+- No prefix
+- Suffix `-q4_0` matches (case-insensitive check)
+- Result: `MODEL`
+- Lowercase: `model`
+
+What if input is `registry.ollama.ai/library/MODEL-Q4_0`?
+- Strip prefix: `MODEL-Q4_0`
+- Strip suffix: `MODEL`
+- Lowercase: `model`
+
+That looks correct.
+
+One more edge case: what if the input is `hf.co/library/model`?
+- Strip `hf.co/`: `library/model`
+- Strip `library/`: `model`
+- No suffix
+- Lowercase: `model`
+
+Good.
+
+What if input is `registry.ollama.ai/library/library/model`?
+- First iteration: strip `registry.ollama.ai/library/` -> `library/model`
+- Second iteration: strip `library/` -> `model`
+- Good.
+
+What if input is `registry.ollama.ai/library/model-q4_0-q4_0`?
+- Strip prefix: `model-q4_0-q4_0`
+- First suffix strip: `model-q4_0`
+- Second suffix strip: `model`
+- Good.
+
+So the implementation seems correct.
+
+Now, about the guard rails: NO unwrap(), NO expect(), NO panic!. I'm not using any of those.
+
+Traceability: Include comment `// trace:implements FR-002` directly before function declaration. I'll put it right before `pub fn`.
+
+Output format: ONLY valid Rust code inside a ```rust code block.
+
+Let me write the final code:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut s = raw;
+    
+    // Strip registry prefixes (loop to handle multiple prefixes)
+    loop {
+        if s.starts_with("registry.ollama.ai/library/") {
+            s = &s[22..];
+        } else if s.starts_with("library/") {
+            s = &s[8..];
+        } else if s.starts_with("hf.co/") {
+            s = &s[6..];
+        } else {
+            break;
+        }
+    }
+    
+    // Strip quantization suffixes (case-insensitive)
+    loop {
+        let lower_s = s.to_lowercase();
+        let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+        
+        for suffix in &suffixes {
+            if lower_s.ends_with(*suffix) {
+                let suffix_len = suffix.len();
+                s = &s[..s.len() - suffix_len];
+                break; // break inner loop to continue outer loop
+            }
+        }
+        
+        // If no suffix was stripped, break outer loop
+        // We need to detect if any suffix matched. 
+        // Actually, if we break from the inner loop, we don't know if it was because of break or end of loop.
+        // Let's use a flag.
+        let mut found = false;
+        for suffix in &suffixes {
+            if lower_s.ends_with(*suffix) {
+                let suffix_len = suffix.len();
+                s = &s[..s.len() - suffix_len];
+                found = true;
+                break;
+            }
+        }
+        if !found {
+            break;
+        }
+    }
+    
+    // Convert to lowercase
+    s.to_lowercase()
+}
+```
+
+Wait, I have a bug. In the first loop for suffixes, I have two for-loops. The first one breaks, then I check `found` which is not defined in the first loop. I need to restructure.
+
+Let me fix that:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut s = raw;
+    
+    // Strip registry prefixes (loop to handle multiple prefixes)
+    loop {
+        if s.starts_with("registry.ollama.ai/library/") {
+            s = &s[22..];
+        } else if s.starts_with("library/") {
+            s = &s[8..];
+        } else if s.starts_with("hf.co/") {
+            s = &s[6..];
+        } else {
+            break;
+        }
+    }
+    
+    // Strip quantization suffixes (case-insensitive)
+    loop {
+        let lower_s = s.to_lowercase();
+        let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+        
+        let mut matched = false;
+        for suffix in &suffixes {
+            if lower_s.ends_with(*suffix) {
+                let suffix_len = suffix.len();
+                s = &s[..s.len() - suffix_len];
+                matched = true;
+                break;
+            }
+        }
+        
+        if !matched {
+            break;
+        }
+    }
+    
+    // Convert to lowercase
+    s.to_lowercase()
+}
+```
+
+This looks correct.
+
+One final check: the requirement says "Strip quantization suffixes... (case-insensitive)". I'm using `to_lowercase()` to compare, which handles case-insensitivity.
+
+Also, the requirement says to strip the specific suffixes. I have all of them.
+
+The requirement says "Strip registry prefixes...". I handle them.
+
+The requirement says "Convert result to lowercase". I do that at the end.
+
+Guard rails: No unwrap, expect, panic. Good.
+
+Traceability: Comment before function. Good.
+
+I think this is ready.

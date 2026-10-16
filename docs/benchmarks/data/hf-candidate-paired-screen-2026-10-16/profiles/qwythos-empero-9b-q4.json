@@ -1,0 +1,8 @@
+{
+  "modelKey": "qwythos-empero-9b-q4", "seeds": [42, 43, 44, 45, 46],
+  "modelCardUrl": "https://huggingface.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF",
+  "profiles": {
+    "local-32k": { "id": "local-32k-v20261016", "label": "RTX 3060 12GB: shared Mellum sampler with 32K context", "num_ctx": 32768, "num_predict": 81920, "options": { "temperature": 0.6, "top_p": 0.95, "top_k": 20, "repeat_penalty": 1.0 }, "systemPrompt": null, "settingsSource": "Existing Mellum-matched sampling profile; context raised from 16K for this hardware profile." },
+    "hf-card": { "id": "hf-card-v20261016", "label": "Empero quick-start sampler and 16K context", "num_ctx": 16384, "num_predict": 16384, "options": { "temperature": 0.6, "top_p": 0.95, "top_k": 20, "repeat_penalty": 1.05 }, "systemPrompt": null, "settingsSource": "HF card quick start: temperature=0.6, top_p=0.95, top_k=20, repeat penalty=1.05, 16K context, max new tokens=16384. The 1M context option is described as requiring multi-GPU/offload, so it is not used for this local RTX 3060 comparison." }
+  }
+}

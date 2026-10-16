@@ -1,0 +1,32 @@
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-002\42\test.rs:13:9
+   |
+ 3 |     let mut s = raw;
+   |                 --- expected due to this value
+...
+13 |     s = s.to_lowercase();
+   |         ^^^^^^^^^^^^^^^^ expected `&str`, found `String`
+   |
+help: try removing the method call
+   |
+13 -     s = s.to_lowercase();
+13 +     s = s;
+   |
+
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-002\42\test.rs:28:5
+   |
+ 2 | pub fn normalize_model_name(raw: &str) -> String {
+   |                                           ------ expected `String` because of return type
+...
+28 |     s
+   |     ^ expected `String`, found `&str`
+   |
+help: try using a conversion method
+   |
+28 |     s.to_string()
+   |      ++++++++++++
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0308`.

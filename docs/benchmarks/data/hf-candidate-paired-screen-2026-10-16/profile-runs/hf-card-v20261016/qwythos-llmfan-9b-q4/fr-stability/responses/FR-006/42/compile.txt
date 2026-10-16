@@ -1,0 +1,76 @@
+error[E0599]: no method named `len` found for struct `std::str::Split<'a, P>` in the current scope
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-006\42\test.rs:13:14
+   |
+13 |     if parts.len() < 5 {
+   |              ^^^
+   |
+help: there is a method `le` with a similar name, but with different arguments
+  --> /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library\core\src\iter\traits\iterator.rs:3979:4
+
+error[E0599]: no method named `len` found for struct `std::str::Split<'a, P>` in the current scope
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-006\42\test.rs:14:77
+   |
+14 |         return Err(format!("Invalid CSV: expected 5 columns, got {}", parts.len()));
+   |                                                                             ^^^
+   |
+help: there is a method `le` with a similar name, but with different arguments
+  --> /rustc/ac68faa20c58cbccd01ee7208bf3b6e93a7d7f96/library\core\src\iter\traits\iterator.rs:3979:4
+
+error[E0608]: cannot index into a value of type `std::str::Split<'_, &str>`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-006\42\test.rs:16:21
+   |
+16 |     let name = parts[0].trim().to_string();
+   |                     ^^^
+
+error[E0608]: cannot index into a value of type `std::str::Split<'_, &str>`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-006\42\test.rs:17:35
+   |
+17 |     let vram_used_mb = match parts[1].trim().parse::<u64>() {
+   |                                   ^^^
+
+error[E0608]: cannot index into a value of type `std::str::Split<'_, &str>`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-006\42\test.rs:19:79
+   |
+19 |         Err(_) => return Err(format!("Failed to parse vram_used_mb: {}", parts[1])),
+   |                                                                               ^^^
+
+error[E0608]: cannot index into a value of type `std::str::Split<'_, &str>`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-006\42\test.rs:21:36
+   |
+21 |     let vram_total_mb = match parts[2].trim().parse::<u64>() {
+   |                                    ^^^
+
+error[E0608]: cannot index into a value of type `std::str::Split<'_, &str>`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-006\42\test.rs:23:80
+   |
+23 |         Err(_) => return Err(format!("Failed to parse vram_total_mb: {}", parts[2])),
+   |                                                                                ^^^
+
+error[E0608]: cannot index into a value of type `std::str::Split<'_, &str>`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-006\42\test.rs:25:29
+   |
+25 |     let temp_c = match parts[3].trim().parse::<u32>() {
+   |                             ^^^
+
+error[E0608]: cannot index into a value of type `std::str::Split<'_, &str>`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-006\42\test.rs:27:73
+   |
+27 |         Err(_) => return Err(format!("Failed to parse temp_c: {}", parts[3])),
+   |                                                                         ^^^
+
+error[E0608]: cannot index into a value of type `std::str::Split<'_, &str>`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-006\42\test.rs:29:31
+   |
+29 |     let util_pct = match parts[4].trim().parse::<u32>() {
+   |                               ^^^
+
+error[E0608]: cannot index into a value of type `std::str::Split<'_, &str>`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-llmfan-9b-q4\fr-stability\responses\FR-006\42\test.rs:31:75
+   |
+31 |         Err(_) => return Err(format!("Failed to parse util_pct: {}", parts[4])),
+   |                                                                           ^^^
+
+error: aborting due to 11 previous errors
+
+Some errors have detailed explanations: E0599, E0608.
+For more information about an error, try `rustc --explain E0599`.

@@ -1,0 +1,19 @@
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    // Strip registry prefixes (case-sensitive)
+    let mut name = raw.to_string();
+    for prefix in ["registry.ollama.ai/library/", "library/", "hf.co/"] {
+        if let Some(stripped) = name.strip_prefix(prefix) {
+            name = stripped;
+        }
+    }
+
+    // Strip quantization suffixes (case-insensitive)
+    let mut name_lower = name.to_lowercase();
+    for suffix in ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"] {
+        // suffixes are already lowercase, replace all occurrences
+        name_lower = name_lower.replace(suffix, "");
+    }
+
+    name_lower
+}

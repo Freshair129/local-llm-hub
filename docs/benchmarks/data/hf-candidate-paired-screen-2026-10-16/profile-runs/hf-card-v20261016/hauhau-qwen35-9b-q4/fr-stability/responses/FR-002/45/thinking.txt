@@ -1,0 +1,726 @@
+Thinking Process:
+
+1.  **Analyze the Request:**
+    *   **Role:** AI Coder working under STD-003 and ADR-100 guard rails.
+    *   **Task:** Implement function `normalize_model_name` based on the provided specification (FR-002).
+    *   **Specification Details:**
+        1.  Function signature: `pub fn normalize_model_name(raw: &str) -> String`
+        2.  Strip registry prefixes: `'registry.ollama.ai/library/'`, `'library/'`, `'hf.co/'`
+        3.  Strip quantization suffixes: `'-q4_0'`, `'-q4_k_m'`, `'-q4_k_s'`, `':q4_0'`, `':q4_k_m'`, `':q4_k_s'` (case-insensitive)
+        4.  Convert result to lowercase
+        5.  Guard rails: NO `unwrap()`, NO `expect()`, NO `panic!`
+        6.  Traceability: Include comment `// trace:implements FR-002` directly before function declaration.
+    *   **Output Format:** ONLY valid Rust code inside a ```rust code block.
+
+2.  **Drafting the Implementation:**
+
+    *   *Signature:* `pub fn normalize_model_name(raw: &str) -> String`
+    *   *Traceability Comment:* `// trace:implements FR-002` must be directly before the function.
+    *   *Prefix Stripping:*
+        *   Need to remove known prefixes from the beginning of the string.
+        *   Prefixes: `registry.ollama.ai/library/`, `library/`, `hf.co/`
+        *   Approach: Use `trim_start_matches` or a loop/regex to remove these. Since the spec lists specific strings, `trim_start_matches` with a set of patterns or sequential replacement is safer. However, `trim_start_matches` works on a single set of chars. Since these are distinct strings, I should probably use `replace` or `strip_prefix`.
+        *   Let's check overlapping cases. `registry.ollama.ai/library/` contains `library/`. If I strip `library/` first, `registry.ollama.ai/` might remain? Or does `library/` imply the short form? Usually, `registry.ollama.ai/library/` is the full registry path.
+        *   Let's order them from longest to shortest to avoid partial matches affecting longer ones, or check each.
+        *   Actually, `trim_start_matches` isn't perfect for whole words. `replace` or checking `starts_with` is better.
+        *   Given the spec "Strip registry prefixes", it implies removing the *entire* prefix string if present.
+        *   Let's use `strip_prefix` for each known prefix. To be safe and avoid multiple calls or panics, I'll iterate through them or chain `replace`.
+        *   Better approach: Create a regex or chain `strip_prefix`. Since `raw` is `&str`, I can convert to `String` for manipulation.
+        *   Let's handle prefixes:
+            1.  `registry.ollama.ai/library/`
+            2.  `library/`
+            3.  `hf.co/`
+        *   Order matters. If I have `registry.ollama.ai/library/model`, `strip_prefix("library/")` might leave `registry.ollama.ai/model`. So check longest first.
+            *   `registry.ollama.ai/library/`
+            *   `hf.co/`
+            *   `library/`
+        *   Wait, `library/` is a substring of `registry.ollama.ai/library/`. If I strip `library/` first, `registry.ollama.ai/library/model` becomes `registry.ollama.ai/model`. That might not be desired if `registry.ollama.ai/library/` is the canonical prefix.
+        *   Let's try to remove `registry.ollama.ai/library/` first. Then `hf.co/`. Then `library/`.
+        *   Actually, `trim_start_matches` is for chars. `strip_prefix` is for strings.
+        *   Let's write a chain of conditional replacements.
+    *   *Suffix Stripping:*
+        *   Suffixes: `-q4_0`, `-q4_k_m`, `-q4_k_s`, `:q4_0`, `:q4_k_m`, `:q4_k_s`
+        *   Case-insensitive.
+        *   Approach: Convert to lowercase first? Or handle case-insensitively?
+        *   Spec says "Convert result to lowercase" (Step 4). But Step 3 says "Strip quantization suffixes ... (case-insensitive)".
+        *   Order: Strip prefixes -> Strip suffixes -> Lowercase? Or Strip prefixes -> Lowercase -> Strip suffixes?
+        *   If I lowercase first, suffixes become `-q4_0`, `:q4_0`, etc. (mostly lowercase already).
+        *   Spec order: 1. Strip prefixes, 2. Strip suffixes, 3. Convert to lowercase.
+        *   However, suffixes might be mixed case (e.g., `:Q4_0`). Lowercasing later makes them match the spec list.
+        *   Let's follow spec order roughly, or logical order.
+        *   Logical: Strip prefixes -> Strip suffixes (case-insensitive) -> Lowercase.
+        *   Or: Strip prefixes -> Lowercase -> Strip suffixes.
+        *   If I lowercase first, `:Q4_0` becomes `:q4_0`, which matches the suffix list exactly.
+        *   Let's look at the suffix list: `'-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s'`.
+        *   If I convert to lowercase at the end, I need to match these against the potentially mixed-case original string.
+        *   So: Strip Prefixes -> Strip Suffixes (case-insensitive) -> Lowercase.
+        *   Actually, if I strip suffixes case-insensitively, I can check `raw.to_lowercase().strip_prefix(...)` or use regex.
+        *   Simpler: Convert to lowercase first?
+            *   If I convert to lowercase first, then strip prefixes and suffixes against lowercase versions.
+            *   Spec Step 3 says "Strip ... (case-insensitive)". Step 4 says "Convert result to lowercase".
+            *   If I lowercase first, Step 3 becomes exact match.
+            *   Let's do: `raw` -> `prefix_strip` -> `suffix_strip` (case-insensitive) -> `to_lowercase`.
+            *   Actually, often `model-name:q4_0`. If I lowercase first, it's `model-name:q4_0`.
+            *   Let's implement a helper to strip suffixes case-insensitively.
+            *   Or, convert to lowercase immediately after prefix stripping?
+            *   Let's try: `raw` -> `strip_prefixes` -> `strip_suffixes` -> `to_lowercase`.
+            *   Wait, if I lowercase at the end, `strip_suffixes` needs to handle case insensitivity.
+            *   Easier: `raw` -> `strip_prefixes` -> `to_lowercase` -> `strip_suffixes`.
+            *   Let's check spec order again: 1. Strip prefixes, 2. Strip suffixes, 3. Lowercase.
+            *   Okay, I will follow the logical flow that satisfies case-insensitivity for suffixes.
+            *   Let's define the suffixes as a list.
+            *   Implementation detail:
+                ```rust
+                let mut name = raw.to_string();
+                // 1. Strip prefixes
+                let prefixes = ["registry.ollama.ai/library/", "library/", "hf.co/"];
+                for prefix in prefixes {
+                    if name.starts_with(prefix) {
+                        name = name[prefix.len()..].to_string();
+                        break; // Or continue? Usually one registry.
+                    }
+                }
+                // 2. Strip suffixes (case-insensitive)
+                let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+                let mut lower_name = name.to_lowercase();
+                for suffix in suffixes {
+                    if lower_name.ends_with(suffix) {
+                        lower_name = lower_name[..lower_name.len() - suffix.len()].to_string();
+                        break;
+                    }
+                }
+                // 3. Lowercase (already done above, but spec says step 4. Let's ensure final is lowercase)
+                // If I lowercase after suffix strip, I need to check suffixes against original case.
+                // Let's combine:
+                // 1. Strip prefixes
+                // 2. Lowercase
+                // 3. Strip suffixes (now exact match)
+                ```
+                *   Wait, Spec says: 1. Strip prefixes, 2. Strip suffixes, 3. Lowercase.
+                *   If I lowercase after stripping suffixes, I must handle case-insensitive matching for suffixes.
+                *   Let's do: `let mut s = raw.to_string();`
+                *   Prefix strip loop.
+                *   Suffix strip loop (checking `s.to_lowercase().ends_with(...)`).
+                *   Final lowercase.
+                *   Actually, if I lowercase at the end, the suffix check needs to be case-insensitive.
+                *   To minimize complexity and avoid `unwrap`, I'll use `to_lowercase` early or during suffix check.
+                *   Let's try:
+                    1.  `raw`
+                    2.  Strip prefixes (exact match).
+                    3.  Convert to lowercase (so suffix matching is easy).
+                    4.  Strip suffixes (exact match now).
+                    5.  Return lowercase string.
+                *   Wait, Step 3 says "Strip ... (case-insensitive)". Step 4 says "Convert result to lowercase".
+                *   If I lowercase at step 4, I can check suffixes in step 3 against the original case or a lowercase copy.
+                *   Let's do: `raw` -> `strip_prefixes` -> `strip_suffixes_case_insensitive` -> `to_lowercase`.
+                *   Implementation:
+                    ```rust
+                    let mut name = raw.to_string();
+                    // Strip prefixes
+                    let prefixes = ["registry.ollama.ai/library/", "library/", "hf.co/"];
+                    for p in prefixes {
+                        if name.starts_with(p) {
+                            name = name[p.len()..].to_string();
+                            break;
+                        }
+                    }
+                    // Strip suffixes (case-insensitive)
+                    let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+                    let lower_name = name.to_lowercase();
+                    for s in suffixes {
+                        if lower_name.ends_with(s) {
+                            name = &lower_name[..lower_name.len() - s.len()];
+                            break;
+                        }
+                    }
+                    // Convert to lowercase (already done in suffix step, but to be spec-strict)
+                    // Actually, if I used `lower_name` for suffix check, `name` might still be original case.
+                    // So `name = lower_name` or just return `lower_name` after suffix strip.
+                    ```
+    *   *Guard Rails:*
+        *   NO `unwrap()`, `expect()`, `panic!`.
+        *   Use `len()`, `starts_with`, `ends_with`, slicing safely.
+        *   Need to handle empty strings or strings where suffix is longer than string (though unlikely with valid prefixes stripped).
+        *   Safe slicing: `if lower_name.len() > s.len() && lower_name.ends_with(s) { ... }`
+    *   *Traceability:*
+        *   `// trace:implements FR-002` directly before function.
+
+3.  **Refining the Code:**
+
+    ```rust
+    // trace:implements FR-002
+    pub fn normalize_model_name(raw: &str) -> String {
+        let mut name = raw.to_string();
+
+        // 1. Strip registry prefixes
+        let prefixes = ["registry.ollama.ai/library/", "library/", "hf.co/"];
+        for prefix in prefixes {
+            if name.starts_with(prefix) {
+                name = name[prefix.len()..].to_string();
+                break; // Assuming only one registry prefix applies
+            }
+        }
+
+        // 2. Strip quantization suffixes (case-insensitive)
+        // We convert to lowercase temporarily to match suffixes case-insensitively
+        let lower_name = name.to_lowercase();
+        let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+        for suffix in suffixes {
+            if lower_name.len() > suffix.len() && lower_name.ends_with(suffix) {
+                name = lower_name[..lower_name.len() - suffix.len()].to_string();
+                break;
+            }
+        }
+
+        // 3. Convert result to lowercase
+        // If we updated `name` using `lower_name` slice, it is already lowercase.
+        // But to strictly follow "Convert result to lowercase" as a final step or ensure state:
+        // Since `lower_name` is lowercase, and we assign from it, `name` is lowercase.
+        // However, if no suffix was stripped, `name` is still original case.
+        // So we should lowercase the final result.
+        // Actually, in the loop above, if suffix is stripped, `name` becomes a slice of `lower_name` (lowercase).
+        // If no suffix is stripped, `name` remains original case.
+        // So final step: `name = name.to_lowercase();`
+
+        name = name.to_lowercase();
+
+        // Wait, if I used `lower_name` in the loop, `name` needs to be assigned the lowercase result.
+        // Let's refactor slightly for clarity and spec adherence.
+        // 1. Strip prefixes.
+        // 2. Strip suffixes (case-insensitive check, lowercase slice assignment).
+        // 3. Lowercase final result.
+
+        // Let's re-verify the loop logic.
+        // If I strip suffix, I assign `name = ...`.
+        // If I don't strip suffix, `name` remains what it was after prefix strip.
+        // Then final `to_lowercase()` makes it lowercase.
+        // This satisfies "Strip ... (case-insensitive)" and "Convert result to lowercase".
+
+        // Refining prefix strip:
+        // "registry.ollama.ai/library/" contains "library/".
+        // If input is "registry.ollama.ai/library/model", stripping "library/" first -> "registry.ollama.ai/model".
+        // Stripping "registry.ollama.ai/library/" first -> "model".
+        // So order matters. Longest prefix first.
+        // 1. "registry.ollama.ai/library/"
+        // 2. "hf.co/"
+        // 3. "library/"
+        // Let's order them.
+
+        // Refining suffix strip:
+        // Order doesn't strictly matter if they are distinct, but `:q4_0` vs `-q4_0`.
+        // Distinct.
+
+        // Final check on "NO unwrap/expect/panic".
+        // Slicing `name[prefix.len()..]` is safe if `starts_with` is true.
+        // Slicing `lower_name[..len-suffix.len()]` is safe if `len > suffix.len`.
+
+        // Final check on Traceability comment placement.
+        // `// trace:implements FR-002` directly before `pub fn`.
+    ```
+
+4.  **Final Code Structure:**
+
+    ```rust
+    // trace:implements FR-002
+    pub fn normalize_model_name(raw: &str) -> String {
+        let mut name = raw.to_string();
+
+        // 1. Strip registry prefixes
+        let prefixes = [
+            "registry.ollama.ai/library/",
+            "library/",
+            "hf.co/",
+        ];
+        for prefix in prefixes {
+            if name.starts_with(prefix) {
+                name = name[prefix.len()..].to_string();
+                break;
+            }
+        }
+
+        // 2. Strip quantization suffixes (case-insensitive)
+        let lower_name = name.to_lowercase();
+        let suffixes = [
+            "-q4_0",
+            "-q4_k_m",
+            "-q4_k_s",
+            ":q4_0",
+            ":q4_k_m",
+            ":q4_k_s",
+        ];
+        for suffix in suffixes {
+            if lower_name.len() > suffix.len() && lower_name.ends_with(suffix) {
+                name = lower_name[..lower_name.len() - suffix.len()].to_string();
+                break;
+            }
+        }
+
+        // 3. Convert result to lowercase
+        name = name.to_lowercase();
+
+        name
+    }
+    ```
+    Wait, `name` is a `String`. `lower_name` is a `String`.
+    Inside the loop: `name = lower_name[..lower_name.len() - suffix.len()].to_string();` -> `name` becomes lowercase slice.
+    After loop: `name = name.to_lowercase();`
+    If suffix was stripped, `name` is already lowercase. `to_lowercase()` is idempotent.
+    If suffix was NOT stripped, `name` is original case. `to_lowercase()` makes it lowercase.
+    This works.
+
+    One detail: Prefix order.
+    `registry.ollama.ai/library/` contains `library/`.
+    If input is `registry.ollama.ai/library/model`, `prefixes` array order:
+    1. `registry.ollama.ai/library/` -> matches -> `model`.
+    2. `library/` -> `model` starts with `library/`? No.
+    3. `hf.co/` -> No.
+    If input is `library/model`, `prefixes`:
+    1. `registry.ollama.ai/library/` -> No.
+    2. `library/` -> Yes -> `model`.
+    3. `hf.co/` -> No.
+    If input is `hf.co/model`, `prefixes`:
+    1. `registry.ollama.ai/library/` -> No.
+    2. `library/` -> No.
+    3. `hf.co/` -> Yes -> `model`.
+    So order `[registry, library, hf]` works if `library` is checked after `registry`.
+    Wait, `registry.ollama.ai/library/` ends with `library/`.
+    If I check `library/` first:
+    Input: `registry.ollama.ai/library/model`
+    1. `library/` matches (at index 24). String becomes `registry.ollama.ai/model`.
+    2. `registry.ollama.ai/library/` matches? No.
+    So `registry.ollama.ai/library/` should be checked first (longest match).
+    My draft array: `["registry.ollama.ai/library/", "library/", "hf.co/"]`. This is correct.
+
+    Wait, `library/` is a substring of `registry.ollama.ai/library/`.
+    So `registry.ollama.ai/library/` must come before `library/`.
+    My draft:
+    ```rust
+    let prefixes = [
+        "registry.ollama.ai/library/",
+        "library/",
+        "hf.co/",
+    ];
+    ```
+    This is correct.
+
+    Suffixes:
+    `"-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"`
+    Order doesn't strictly matter as they differ by char.
+    Case-insensitive check handled by `lower_name`.
+
+    Final Lowercase: `name = name.to_lowercase();`
+
+    Guard rails: `unwrap`, `expect`, `panic!` avoided.
+    Traceability comment included.
+
+    One small optimization/correction: `name = name[prefix.len()..].to_string();`
+    If `name` is `&str` initially, `to_string()` creates `String`.
+    `raw: &str`. `name = raw.to_string()`.
+    `prefix.len()` is `usize`.
+    `name[prefix.len()..]` is `&str`. `.to_string()` makes it `String`.
+    Safe.
+
+    Suffix loop:
+    `lower_name[..lower_name.len() - suffix.len()]`
+    `lower_name` is `String`. Slicing returns `&str`. `.to_string()` makes it `String`.
+    Safe.
+
+    Final output: `name`.
+
+    Let's assemble.
+
+5.  **Final Review against Constraints:**
+    *   Signature: `pub fn normalize_model_name(raw: &str) -> String` (Check)
+    *   Strip prefixes: Checked.
+    *   Strip suffixes: Checked.
+    *   Lowercase: Checked.
+    *   Guard rails (No unwrap/expect/panic): Checked.
+    *   Traceability comment: Checked.
+    *   Output ONLY valid Rust code inside ```rust block: Checked.
+
+    One tiny detail: `name` variable shadowing or reassignment.
+    `let mut name = raw.to_string();`
+    Prefix loop updates `name`.
+    Suffix loop updates `name` (using `lower_name` for calculation).
+    Final `name = name.to_lowercase();`
+    Looks consistent.
+
+    Wait, `lower_name` is a snapshot of `name` *after* prefix stripping.
+    Inside suffix loop: `name = lower_name[...].to_string();`
+    This updates `name`.
+    After loop: `name = name.to_lowercase();`
+    If suffix was stripped, `name` is already lowercase (from `lower_name` slice). `to_lowercase` keeps it lowercase.
+    If suffix not stripped, `name` is prefix-stripped (original case). `to_lowercase` makes it lowercase.
+    Correct.
+
+    Wait, `lower_name` is `name.to_lowercase()`.
+    If I strip suffix from `lower_name`, `name` gets the slice.
+    Then `name = name.to_lowercase()`.
+    Example: `Input: "Model-Q4_0"`
+    Prefix: None. `name` = `"Model-Q4_0"`.
+    `lower_name` = `"model-q4_0"`.
+    Suffix `-q4_0` found. `name` = `"model"`.
+    Final `name` = `"model".to_lowercase()` = `"model"`.
+    Correct.
+
+    Example: `Input: "registry.ollama.ai/library/Model-Q4_0"`
+    Prefix `registry.ollama.ai/library/` found. `name` = `"Model-Q4_0"`.
+    `lower_name` = `"model-q4_0"`.
+    Suffix `-q4_0` found. `name` = `"model"`.
+    Final `name` = `"model"`.
+    Correct.
+
+    Example: `Input: "hf.co/library/Model:Q4_0"`
+    Prefix `hf.co/` found. `name` = `"library/Model:Q4_0"`.
+    Prefix `library/` found? Yes. `name` = `"Model:Q4_0"`.
+    Wait, `hf.co/` matches first?
+    Array: `["registry...", "library/", "hf.co/"]`.
+    1. `registry...` No.
+    2. `library/` -> `"hf.co/library/Model:Q4_0"` starts with `library/`? No. Starts with `hf.co/`.
+    3. `hf.co/` -> Matches. `name` = `"library/Model:Q4_0"`.
+    Suffix check: `lower_name` = `"library/model:q4_0"`.
+    Suffix `:q4_0` found. `name` = `"library/model"`.
+    Final `name` = `"library/model"`.
+    Wait, `library/` prefix was stripped?
+    If `name` became `"library/model"`, then `lower_name` for suffix check is `"library/model"`.
+    Suffix `:q4_0` removed.
+    Wait, `library/model` doesn't start with `library/`?
+    Ah, `name` after prefix strip 3 (`hf.co/`) is `"library/Model:Q4_0"`.
+    Then suffix strip happens.
+    Then final lowercase.
+    Is `library/` prefix supposed to be stripped from `hf.co/library/...`?
+    Spec: "Strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/'".
+    It doesn't say "Strip ALL matching prefixes". But typically you strip the registry part.
+    If `hf.co/library/...` is passed, `hf.co/` is a registry prefix. `library/` is also a registry prefix.
+    Usually `hf.co/library/` is a specific repo path. `library/` is the Ollama default path.
+    If I strip `hf.co/` first, I get `library/Model:Q4_0`.
+    Then suffix strip.
+    Does `library/` prefix need to be stripped from `library/Model:Q4_0`?
+    If the intent is "Remove the registry path", `library/Model` implies `library/` is the path.
+    If I strip `library/`, result is `Model`.
+    If I don't, result is `library/model`.
+    Given the list includes `library/`, it implies `library/` is a valid prefix to strip.
+    So `hf.co/library/Model` -> `hf.co/` stripped -> `library/Model` -> `library/` stripped -> `Model`.
+    My code:
+    1. `registry...` No.
+    2. `library/` No (starts with `hf.co/`).
+    3. `hf.co/` Yes. `name` -> `library/Model:Q4_0`.
+    4. Suffix strip.
+    5. Final lowercase.
+    Result: `library/model`.
+    Should I strip `library/` from `library/Model`?
+    If `library/` is in the prefix list, it should be stripped if present.
+    So `library/Model` -> `Model`.
+    So I should check `library/` again?
+    Or check `library/` before `hf.co/`?
+    If I check `library/` first:
+    Input: `hf.co/library/Model`
+    1. `library/` matches? Yes (at index 6). `name` -> `hf.co/Model`.
+    2. `hf.co/` matches? Yes (at index 0). `name` -> `Model`.
+    This seems more robust (strip all matching prefixes).
+    But my code breaks after one match (`break;`).
+    If I use `break`, `hf.co/library/Model` -> `hf.co/Model` (after `library/` check) -> `Model` (after `hf.co/` check)?
+    Let's re-evaluate the prefix loop logic.
+    ```rust
+    for prefix in prefixes {
+        if name.starts_with(prefix) {
+            name = name[prefix.len()..].to_string();
+            break; // Only strips the first matching prefix found in the list order.
+        }
+    }
+    ```
+    If list is `["registry...", "library/", "hf.co/"]`.
+    Input: `hf.co/library/Model`.
+    1. `registry...` No.
+    2. `library/` -> Yes. `name` = `hf.co/Model`. `break`.
+    3. `hf.co/` skipped.
+    Result: `hf.co/model`.
+    Is `hf.co/` a registry prefix? Yes.
+    Is `library/` a registry prefix? Yes.
+    Which one is more specific?
+    Usually `hf.co/` is the provider. `library/` is the namespace.
+    If I want to normalize to `model`, I should strip both.
+    If I want to strip the *registry* path, `hf.co/library/` is the path.
+    Spec says "Strip registry prefixes".
+    If `library/` is considered a prefix, it should be stripped.
+    If I break on first match, I might miss `hf.co/`.
+    However, `registry.ollama.ai/library/` is very specific.
+    Let's assume the prefixes are mutually exclusive categories or we want to strip the longest match.
+    Longest match for `hf.co/library/Model`:
+    `hf.co/` (len 6).
+    `library/` (len 8).
+    `registry.ollama.ai/library/` (len 28).
+    If I check longest first:
+    1. `registry...` No.
+    2. `hf.co/` Yes -> `library/Model`.
+    3. `library/` Yes -> `Model`.
+    This seems better.
+    So sort prefixes by length descending?
+    Or just ensure `library/` is checked after `hf.co/` if `hf.co/` is a sub-prefix?
+    Actually, `hf.co/` does not contain `library/`. `library/` does not contain `hf.co/`.
+    So `hf.co/library/Model`:
+    Starts with `hf.co/`? Yes.
+    Starts with `library/`? No.
+    So if I check `hf.co/` first, I get `library/Model`.
+    Then loop continues? `break` stops it.
+    If I remove `break`, I might strip `library/` from `library/Model`?
+    Yes.
+    So maybe no `break`.
+    But usually, you strip the registry part, leaving the model name.
+    If `library/` is part of the model name (e.g. `library/mistral`), do we strip it?
+    Ollama format: `library/mistral` or `mistral`.
+    If input is `registry.ollama.ai/library/mistral`, strip `registry.ollama.ai/library/` -> `mistral`.
+    If input is `library/mistral`, strip `library/` -> `mistral`.
+    If input is `hf.co/library/mistral`, strip `hf.co/` -> `library/mistral` -> `mistral`.
+    So `break` might be premature if multiple prefixes apply.
+    However, `registry.ollama.ai/library/` covers the full path.
+    Let's implement without `break` or ensure order covers all.
+    Given the spec list order: `registry...`, `library/`, `hf.co/`.
+    If I iterate and strip, `break` implies "Strip the primary registry prefix".
+    If I remove `break`, I might strip `library/` from `registry.ollama.ai/library/model`?
+    `registry.ollama.ai/library/model`.
+    1. `registry...` -> `model`. `break`.
+    2. `library/` -> `model` starts with `library/`? No.
+    So `break` is fine if longest match is first.
+    Order: `registry...` (28), `library/` (8), `hf.co/` (6).
+    `registry...` is longest.
+    `library/` vs `hf.co/`.
+    `hf.co/library/model`:
+    1. `registry...` No.
+    2. `library/` -> `hf.co/model`. `break`. (Misses `hf.co/`).
+    3. `hf.co/` skipped.
+    Result `hf.co/model`.
+    Is `hf.co/model` valid? Maybe.
+    But `hf.co/library/model` -> `model` is cleaner.
+    So order: `registry...`, `hf.co/`, `library/`.
+    Or just iterate without break and re-check?
+    Let's use `break` but order them: `registry...`, `hf.co/`, `library/`.
+    Why? Because `hf.co/` is often the provider prefix. `library/` is the Ollama default namespace.
+    If I have `hf.co/library/model`, `hf.co/` is the provider.
+    Let's check `hf.co/library/model` with order `registry`, `hf`, `lib`.
+    1. `registry` No.
+    2. `hf.co/` Yes -> `library/model`. `break`.
+    3. `library/` skipped.
+    Result `library/model`.
+    Then suffix strip.
+    If I want `model`, I need to strip `library/` too.
+    Maybe `library/` is the "default" registry path in Ollama context.
+    `hf.co/library` is also a path.
+    To be safe and "Strip registry prefixes" (plural implication of types, but singular action per string), I should probably strip all that match.
+    But `break` keeps it simple.
+    Let's assume the "primary" registry is the one that defines the namespace.
+    Given the spec list: `registry.ollama.ai/library/`, `library/`, `hf.co/`.
+    I'll stick to the list order but ensure `registry...` is first (longest).
+    Then `hf.co/` vs `library/`.
+    If I put `hf.co/` second, `library/` third.
+    `hf.co/library/model` -> `library/model`.
+    If `library/` is considered a generic prefix, `library/model` might be the target.
+    Let's look at common Ollama patterns. `ollama/pull_library/mistral`.
+    Usually `library/mistral` is the ID.
+    `hf.co/mistral` vs `library/mistral`.
+    If I strip `hf.co/`, I get `library/mistral`.
+    If I strip `library/`, I get `mistral`.
+    Let's create a loop that strips all matching prefixes to be robust.
+    But `break` is safer to avoid infinite loops or weird overlaps.
+    Let's stick to the provided list order in the spec, but sort by length to ensure longest match wins (greedy).
+    List: `registry.ollama.ai/library/` (29 chars), `library/` (8 chars), `hf.co/` (6 chars).
+    Sorted: `registry...`, `hf.co/`, `library/`.
+    Wait, `registry.ollama.ai/library/` contains `library/`.
+    So `registry...` must be first.
+    Then `hf.co/`.
+    Then `library/`.
+    If `hf.co/library/model`:
+    1. `registry...` No.
+    2. `hf.co/` Yes -> `library/model`. `break`.
+    3. `library/` skipped.
+    Result `library/model`.
+    If I want `model`, I need `library/` stripped too.
+    Maybe `library/` is the fallback for `registry.ollama.ai/library/`?
+    Let's assume the spec implies these are the valid prefixes to remove.
+    If I use `break`, I remove the *first* found.
+    To be most robust, I should try all.
+    But `break` is common for "strip registry prefix".
+    I will use the provided order but ensure `registry...` is first.
+    Then `hf.co/` then `library/`.
+    Wait, `library/` is the most generic.
+    If I have `registry.ollama.ai/library/model`, `registry...` matches.
+    If I have `library/model`, `library/` matches.
+    If I have `hf.co/model`, `hf.co/` matches.
+    So order `registry`, `hf`, `library` seems best to handle `hf.co/library/` as `hf` then `lib`?
+    If I use `break`, `hf.co/library/` -> `library/`.
+    If I want `model`, I need to strip `library/` too.
+    Maybe `library/` should be checked last?
+    Yes.
+    So: `registry...`, `hf.co/`, `library/`.
+    Input `hf.co/library/model`:
+    1. `registry` No.
+    2. `hf.co/` Yes -> `library/model`.
+    3. `library/` Yes -> `model`.
+    This works!
+    So order: `registry...`, `hf.co/`, `library/`.
+    But wait, `registry.ollama.ai/library/` ends with `library/`.
+    If I check `registry...` first, it matches. `break`.
+    So `registry...` takes precedence.
+    Then `hf.co/`.
+    Then `library/`.
+    This handles `hf.co/library/model` -> `hf.co/` -> `library/model` -> `library/` -> `model`.
+    Wait, `break` after `hf.co/`?
+    If I use `break`, `hf.co/` matches, `name` becomes `library/model`, `break`.
+    Then `library/` is skipped.
+    So `library/model` remains.
+    Is `library/model` a valid normalized name?
+    Usually `model` is the name.
+    So `library/` should be stripped if possible.
+    So maybe `break` is not needed, or order matters.
+    Let's remove `break`?
+    `for prefix in prefixes { ... name = ...; }`
+    If I iterate all, `registry...` matches -> `model`.
+    Next `hf.co/` -> `model` starts with `hf`? No.
+    Next `library/` -> `model` starts with `lib`? No.
+    So `break` or not doesn't matter for `registry...`.
+    For `hf.co/library/model`:
+    1. `registry...` No.
+    2. `hf.co/` Yes -> `library/model`.
+    3. `library/` Yes -> `model`.
+    So `break` after `hf.co/` prevents `library/` strip.
+    So if I want to strip *all* applicable prefixes, remove `break`.
+    But if I strip `registry...`, `name` becomes `model`.
+    Next `hf.co/` -> No.
+    Next `library/` -> No.
+    So `break` is fine if longest match is first.
+    But `hf.co/library/` contains `library/`.
+    So `registry...` is longest.
+    `hf.co/library/` vs `hf.co/model`.
+    If I use `break`, `hf.co/library/model` -> `library/model`.
+    Is `library/model` normalized?
+    Maybe `library/` is considered part of the registry prefix `hf.co/library/`.
+    If `library/` is in the prefix list, it should be stripped.
+    So `hf.co/library/` is effectively `hf.co/` + `library/`.
+    I will implement without `break` to ensure all matching prefixes are stripped.
+    Or simply order them `registry`, `hf.co`, `library` and use `break` only if we assume one primary registry.
+    Given "Strip registry prefixes" (plural), removing all found prefixes seems correct.
+    So:
+    ```rust
+    let prefixes = [
+        "registry.ollama.ai/library/",
+        "hf.co/",
+        "library/",
+    ];
+    for prefix in prefixes {
+        if name.starts_with(prefix) {
+            name = name[prefix.len()..].to_string();
+        }
+    }
+    ```
+    This handles `registry...` (longest), then `hf.co/`, then `library/`.
+    Input `registry.ollama.ai/library/model` -> `model`.
+    Input `hf.co/library/model` -> `hf.co/` -> `library/model` -> `library/` -> `model`.
+    Input `library/model` -> `model`.
+    Input `model` -> `model`.
+    This seems most robust.
+    Wait, `registry.ollama.ai/library/` contains `library/`.
+    If I check `registry...` first, it matches. `name` = `model`.
+    Next `hf.co/` -> `model` starts with `hf`? No.
+    Next `library/` -> `model` starts with `lib`? No.
+    So `break` is not strictly needed if order is longest-first.
+    But `hf.co/` is shorter than `library/`.
+    Input `hf.co/library/model`.
+    1. `registry...` No.
+    2. `hf.co/` Yes -> `library/model`.
+    3. `library/` Yes -> `model`.
+    So order `registry`, `hf`, `lib` works with `break` if `hf` is before `lib`.
+    Wait, `registry` is 29, `lib` is 8, `hf` is 6.
+    So `registry`, `hf`, `lib`.
+    If `registry` matches, `break`.
+    If `registry` no, `hf` matches. `break`.
+    If `hf` no, `lib` matches. `break`.
+    This requires `hf` before `lib` to strip `hf.co/library/` fully?
+    Input `hf.co/library/model`.
+    1. `registry` No.
+    2. `hf` Yes -> `library/model`. `break`.
+    3. `lib` skipped.
+    Result `library/model`.
+    So `lib` must be checked after `hf`? Yes, if `hf` matches, does it imply `lib` should be checked?
+    If I want to strip `library/` from `library/model`, `lib` must be checked.
+    So `hf` then `lib`.
+    Order: `registry...`, `hf.co/`, `library/`.
+    With `break`, `hf.co/library/model` -> `library/model`.
+    If I want `model`, I need `library/` stripped.
+    So `break` prevents full stripping of `hf.co/library/`.
+    Maybe `hf.co/library/` is treated as a single prefix?
+    Spec list: `'hf.co/'`, `'library/'`.
+    So they are separate.
+    I will use `break` but order `registry`, `hf`, `lib`.
+    Wait, `registry.ollama.ai/library/` contains `library/`.
+    So `registry` must be first.
+    If I use `break`, `registry...` covers `library/` for Ollama registry.
+    For `hf.co`, `hf.co/library/` is common.
+    If I use `break`, I get `library/model`.
+    Is `library/model` acceptable?
+    Given the spec, `library/` is a prefix.
+    So `library/model` should become `model`.
+    So `hf` then `lib` allows `lib` to be checked after `hf` strips the `hf` part.
+    So `break` after `hf` stops `lib` check.
+    So remove `break`?
+    Or use `break` but order `registry`, `lib`, `hf`?
+    Input `hf.co/library/model`.
+    1. `registry` No.
+    2. `lib` Yes -> `hf.co/model`. `break`.
+    3. `hf` skipped.
+    Result `hf.co/model`.
+    So `hf` must be checked before `lib` to strip `hf` part first?
+    Actually, `hf.co/` is 6 chars. `library/` is 8 chars.
+    `hf.co/library/` is 20 chars.
+    If I treat them as separate strips:
+    `hf.co/library/model` -> `hf.co/` -> `library/model`.
+    Then `library/` -> `model`.
+    So order `hf`, `lib` works with `break`?
+    1. `hf` matches. `name` = `library/model`. `break`.
+    2. `lib` skipped.
+    So `library/model` remains.
+    So to strip `library/` as well, `lib` must be checked.
+    So `break` is the issue.
+    I will remove `break` to ensure all prefixes are stripped.
+    But `registry...` contains `library/`.
+    If `registry...` matches, `name` = `model`.
+    Next `hf` -> No.
+    Next `lib` -> No.
+    So `registry...` covers it.
+    So `break` not needed for `registry`.
+    For `hf.co/library/`:
+    1. `registry` No.
+    2. `hf` Yes -> `library/model`.
+    3. `lib` Yes -> `model`.
+    So `hf`, `lib` order works.
+    So prefixes: `registry...`, `hf.co/`, `library/`.
+    And no `break` (or `break` only if we assume one registry type).
+    Given "Strip registry prefixes", plural implies all applicable.
+    So no `break`.
+    Wait, `name[prefix.len()..]` creates new string.
+    Iterating all is fine.
+    So:
+    ```rust
+    let prefixes = [
+        "registry.ollama.ai/library/",
+        "hf.co/",
+        "library/",
+    ];
+    for prefix in prefixes {
+        if name.starts_with(prefix) {
+            name = name[prefix.len()..].to_string();
+        }
+    }
+    ```
+    This is robust.
+
+    Final check: Suffixes.
+    `lower_name` created once.
+    Loop over suffixes.
+    `lower_name` is `String`.
+    `name` is `String`.
+    Safe.
+
+    Final Lowercase.
+    `name = name.to_lowercase();`
+
+    Code looks solid.

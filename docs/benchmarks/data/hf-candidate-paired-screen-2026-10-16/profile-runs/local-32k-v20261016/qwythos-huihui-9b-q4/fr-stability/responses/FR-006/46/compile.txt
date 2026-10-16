@@ -1,0 +1,41 @@
+error[E0560]: struct `GpuStats` has no field named `vram_used`
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-006\46\test.rs:27:25
+   |
+27 |     Ok(GpuStats { name, vram_used, vram_total, temp, util })
+   |                         ^^^^^^^^^ unknown field
+   |
+help: a field with a similar name exists
+   |
+27 |     Ok(GpuStats { name, vram_used_mb, vram_total, temp, util })
+   |                                  +++
+
+error[E0560]: struct `GpuStats` has no field named `vram_total`
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-006\46\test.rs:27:36
+   |
+27 |     Ok(GpuStats { name, vram_used, vram_total, temp, util })
+   |                                    ^^^^^^^^^^ unknown field
+   |
+help: a field with a similar name exists
+   |
+27 |     Ok(GpuStats { name, vram_used, vram_total_mb, temp, util })
+   |                                              +++
+
+error[E0560]: struct `GpuStats` has no field named `temp`
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-006\46\test.rs:27:48
+   |
+27 |     Ok(GpuStats { name, vram_used, vram_total, temp, util })
+   |                                                ^^^^ `GpuStats` does not have this field
+   |
+   = note: available fields are: `vram_used_mb`, `vram_total_mb`, `temp_c`, `util_pct`
+
+error[E0560]: struct `GpuStats` has no field named `util`
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-006\46\test.rs:27:54
+   |
+27 |     Ok(GpuStats { name, vram_used, vram_total, temp, util })
+   |                                                      ^^^^ `GpuStats` does not have this field
+   |
+   = note: available fields are: `vram_used_mb`, `vram_total_mb`, `temp_c`, `util_pct`
+
+error: aborting due to 4 previous errors
+
+For more information about this error, try `rustc --explain E0560`.

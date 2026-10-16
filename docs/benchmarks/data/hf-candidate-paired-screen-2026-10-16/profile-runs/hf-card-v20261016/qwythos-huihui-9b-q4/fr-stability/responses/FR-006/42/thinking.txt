@@ -1,0 +1,45 @@
+1. **Understand the Goal**: Implement a Rust struct `GpuStats` and a parsing function `parse_gpu_csv` that satisfies the FR-006 specification, adhering to the STD-003 and ADR-100 guard rails (no `unwrap()`, `expect()`, or `panic!`).
+
+2. **Define the Struct**: The spec provides an exact struct definition:
+   ```rust
+   #[derive(Debug, PartialEq)]
+   pub struct GpuStats {
+       pub name: String,
+       pub vram_used_mb: u64,
+       pub vram_total_mb: u64,
+       pub temp_c: u32,
+       pub util_pct: u32,
+   }
+   ```
+   This is straightforward; I just need to copy it into the final code block.
+
+3. **Design the Function Signature**: Specified as `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`. It must return a `Result` to handle parsing errors gracefully.
+
+4. **Parse the CSV Line**:
+   - Split the string by commas using `split(',')`. This yields an iterator of `&str`.
+   - Convert each token to the appropriate numeric type (`u64` for VRAM, `u32` for temp and util). Use a helper or inline conversion.
+   - Ensure at least 5 columns exist; otherwise return `Err("Expected 5 CSV columns")`.
+   - Handle potential whitespace: the spec example includes spaces after commas, so trimming each token is advisable.
+
+5. **Robust Error Handling**:
+   - For numeric conversion failures (`parse::<u64>()` or `parse::<u32>()`), return a descriptive error string (e.g., `"VRAM used parse failed"`).
+   - Avoid any use of `unwrap()`, `expect()`, or `panic!`. Instead, wrap each step in `Ok(...)` and propagate errors with `.ok()` or `.map_err(...)`.
+
+6. **Traceability**: The spec demands a comment `// trace:implements FR-006` placed directly before the function declaration. This is a simple string literal.
+
+7. **Assemble the Code**:
+   - Open the Rust code block.
+   - Insert the struct definition.
+   - Add the trace comment.
+   - Write the function, following the logic outlined above.
+   - Ensure the final `Result` is returned correctly.
+
+8. **Review against Guard Rails**:
+   - Scan for any `unwrap()`, `expect()`, or `panic!`. (If present, replace with explicit error handling.)
+   - Verify that the function returns a `String` error type, matching the spec.
+
+9. **Final Polish**: Add comments where helpful for readability, but keep them concise. Ensure proper indentation and formatting.
+
+10. **Output**: Produce the combined snippet, ready to be placed inside the requested code block.
+
+Proceeding with these steps yields the final implementation below.

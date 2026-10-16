@@ -1,0 +1,25 @@
+error[E0599]: no method named `startswith` found for reference `&str` in the current scope
+ --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-002\45\test.rs:8:20
+  |
+8 |     } else if name.startswith("library/") {
+  |                    ^^^^^^^^^^
+  |
+help: there is a method `starts_with` with a similar name
+  |
+8 |     } else if name.starts_with("library/") {
+  |                          +
+
+error[E0599]: no method named `startswith` found for reference `&str` in the current scope
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-002\45\test.rs:10:20
+   |
+10 |     } else if name.startswith("hf.co/") {
+   |                    ^^^^^^^^^^
+   |
+help: there is a method `starts_with` with a similar name
+   |
+10 |     } else if name.starts_with("hf.co/") {
+   |                          +
+
+error: aborting due to 2 previous errors
+
+For more information about this error, try `rustc --explain E0599`.

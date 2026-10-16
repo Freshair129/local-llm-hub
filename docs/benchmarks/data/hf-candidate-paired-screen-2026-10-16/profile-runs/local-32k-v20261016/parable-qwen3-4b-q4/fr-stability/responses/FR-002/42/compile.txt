@@ -1,0 +1,87 @@
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\parable-qwen3-4b-q4\fr-stability\responses\FR-002\42\test.rs:17:17
+   |
+15 |         let mut s = s.clone();
+   |                     --------- expected due to this value
+16 |         if s.ends_with("-q4_0") {
+17 |             s = s.trim_end_matches("-q4_0");
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `String`, found `&str`
+   |
+help: try using a conversion method
+   |
+17 |             s = s.trim_end_matches("-q4_0").to_string();
+   |                                            ++++++++++++
+
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\parable-qwen3-4b-q4\fr-stability\responses\FR-002\42\test.rs:19:17
+   |
+15 |         let mut s = s.clone();
+   |                     --------- expected due to this value
+...
+19 |             s = s.trim_end_matches("-q4_k_m");
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `String`, found `&str`
+   |
+help: try using a conversion method
+   |
+19 |             s = s.trim_end_matches("-q4_k_m").to_string();
+   |                                              ++++++++++++
+
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\parable-qwen3-4b-q4\fr-stability\responses\FR-002\42\test.rs:21:17
+   |
+15 |         let mut s = s.clone();
+   |                     --------- expected due to this value
+...
+21 |             s = s.trim_end_matches("-q4_k_s");
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `String`, found `&str`
+   |
+help: try using a conversion method
+   |
+21 |             s = s.trim_end_matches("-q4_k_s").to_string();
+   |                                              ++++++++++++
+
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\parable-qwen3-4b-q4\fr-stability\responses\FR-002\42\test.rs:23:17
+   |
+15 |         let mut s = s.clone();
+   |                     --------- expected due to this value
+...
+23 |             s = s.trim_end_matches(":q4_0");
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `String`, found `&str`
+   |
+help: try using a conversion method
+   |
+23 |             s = s.trim_end_matches(":q4_0").to_string();
+   |                                            ++++++++++++
+
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\parable-qwen3-4b-q4\fr-stability\responses\FR-002\42\test.rs:25:17
+   |
+15 |         let mut s = s.clone();
+   |                     --------- expected due to this value
+...
+25 |             s = s.trim_end_matches(":q4_k_m");
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `String`, found `&str`
+   |
+help: try using a conversion method
+   |
+25 |             s = s.trim_end_matches(":q4_k_m").to_string();
+   |                                              ++++++++++++
+
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\parable-qwen3-4b-q4\fr-stability\responses\FR-002\42\test.rs:27:17
+   |
+15 |         let mut s = s.clone();
+   |                     --------- expected due to this value
+...
+27 |             s = s.trim_end_matches(":q4_k_s");
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `String`, found `&str`
+   |
+help: try using a conversion method
+   |
+27 |             s = s.trim_end_matches(":q4_k_s").to_string();
+   |                                              ++++++++++++
+
+error: aborting due to 6 previous errors
+
+For more information about this error, try `rustc --explain E0308`.

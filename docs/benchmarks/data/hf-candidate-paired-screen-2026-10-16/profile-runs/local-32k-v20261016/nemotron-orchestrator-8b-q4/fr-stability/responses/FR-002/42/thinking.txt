@@ -1,0 +1,77 @@
+The user wants me to implement a Rust function that normalizes model names according to specific rules. Let me break down what needs to be done:
+
+1. Function signature: pub fn normalize_model_name(raw: &str) -> String
+2. Strip registry prefixes (three different ones)
+3. Strip quantization suffixes (multiple variants, case-insensitive)
+4. Convert to lowercase
+5. No unwrap(), expect(), or panic! (so I need to handle errors gracefully, probably via Result or Option)
+6. Include traceability comment
+
+Let me think about this carefully:
+
+For stripping prefixes:
+- 'registry.ollama.ai/library/' - this is a full URL path
+- 'library/' - shorter version
+- 'hf.co/' - Hugging Face prefix
+
+For stripping quantization suffixes:
+- '-q4_0', '-q4_k_m', '-q4_k_s' and their colon-prefixed versions (':q4_0', etc.)
+
+I need to remove these from the end of the string.
+
+Approach:
+1. First, I'll create a function that takes the raw string
+2. I'll create a list of all the prefixes to strip
+3. For each prefix, I'll check if it exists at the beginning of the string and remove it if it does
+4. Then I'll create a list of all quantization suffixes
+5. For each suffix, I'll check if it exists at the end of the string and remove it if it does
+6. Finally, I'll convert the result to lowercase
+
+But wait - the user said NO unwrap(), NO expect(), NO panic! So I can't just do things that might fail. I need to handle this in a safe way.
+
+Let me structure this properly:
+
+I'll create a function that:
+- Creates a vector of all the prefixes to remove
+- Iterates over them and strips them from the beginning of the string if present
+- Creates a vector of all the quantization suffixes (case-insensitive)
+- Converts the result to lowercase
+
+Let me write this in Rust:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut name = raw.to_string();
+    
+    // Step 1: Strip registry prefixes
+    let prefixes_to_strip: Vec<&str> = vec![
+        "registry.ollama.ai/library/",
+        "library/",
+        "hf.co/",
+    ];
+    
+    for &prefix in &prefixes_to_strip {
+        if name.starts_with(prefix) {
+            name = name[prefix.len()..].to_string();
+        }
+    }
+    
+    // Step 2: Strip quantization suffixes (case-insensitive)
+    let quantization_suffixes: Vec<&str> = vec![
+        "-q4_0", "-q4_k_m", "-q4_k_s",
+        ":q4_0", ":q4_k_m", ":q4_k_s",
+    ];
+    
+    for &suffix in &quantization_suffixes {
+        if name.ends_with(suffix) {
+            name = name[..name.len() - suffix.len()].to_string();
+        }
+    }
+    
+    // Step 3: Convert to lowercase
+    name.to_lowercase()
+}
+```
+
+Let me verify this implementation:

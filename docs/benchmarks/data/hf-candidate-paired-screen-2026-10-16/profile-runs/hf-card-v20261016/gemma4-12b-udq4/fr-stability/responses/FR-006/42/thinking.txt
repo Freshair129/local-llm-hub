@@ -1,0 +1,110 @@
+*   Role: AI Coder under STD-003 and ADR-100 (implies strict adherence to coding standards, error handling, and specific instructions).
+    *   Task: Implement FR-006.
+    *   Input: A CSV string line like "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25".
+    *   Output: A Rust code block containing a struct and a parsing function.
+
+    *   Struct `GpuStats`:
+        *   `name`: `String`
+        *   `vram_used_mb`: `u64`
+        *   `vram_total_mb`: `u64`
+        *   `temp_c`: `u32`
+        *   `util_pct`: `u32`
+        *   Derives: `Debug`, `PartialEq`
+
+    *   Function `parse_gpu_csv`:
+        *   Signature: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`
+        *   Logic: Split CSV by comma, trim whitespace, parse values.
+        *   Error Handling:
+            *   Fewer than 5 columns -> `Err`.
+            *   Parsing failure -> `Err`.
+            *   *Strict Rule*: No `unwrap()`, `expect()`, or `panic!`.
+
+    *   Traceability: `// trace:implements FR-006` before the function.
+
+    *   Split string: `line.split(',')`.
+    *   Collect/Iterate:
+        1. Name (String)
+        2. vram_used_mb (u64)
+        3. vram_total_mb (u64)
+        4. temp_c (u32)
+        5. util_pct (u32)
+    *   Verification: Ensure count == 5.
+
+    *   *Iteration 1:*
+        ```rust
+        pub struct GpuStats { ... }
+        // trace:implements FR-006
+        pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+            let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+            if parts.len() < 5 { return Err("Too few columns".into()); }
+            let name = parts[0].to_string();
+            let vram_used = parts[1].parse::<u64>().map_err(|e| e.to_string())?;
+            // ... and so on
+        }
+        ```
+
+    *   *Refinement for Robustness:*
+        The prompt says "fewer than 5", but standard CSV logic usually implies exactly 5 for this specific format. I'll check if length is exactly 5 or at least 5. The prompt says "fewer than 5".
+
+    *   *Refinement for `parse` results:*
+        Must use `.map_err(|e| e.to_string())?` or similar to avoid `unwrap`.
+
+    *   Struct defined? Yes.
+    *   Signature correct? Yes.
+    *   CSV logic correct? Yes.
+    *   Error handling robust? Yes.
+    *   No `unwrap`/`expect`/`panic`? Checked.
+    *   Traceability comment included? Yes.
+    *   Both in one block? Yes.
+
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats {
+        pub name: String,
+        pub vram_used_mb: u64,
+        pub vram_total_mb: u64,
+        pub temp_c: u32,
+        pub util_pct: u32,
+    }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+        let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+
+        if parts.len() < 5 {
+            return Err(format!("Expected at least 5 columns, found {}", parts.len()));
+        }
+
+        let name = parts[0].to_string();
+        let vram_used_mb = parts[1].parse::<u64>()
+            .map_err(|e| format!("Failed to parse vram_used_mb: {}", e))?;
+        let vram_total_mb = parts[2].parse::<u64>()
+            .map_err(|e| format!("Failed to parse vram_total_mb: {}", e))?;
+        let temp_c = parts[3].parse::<u32>()
+            .map_err(|e| format!("Failed to parse temp_c: {}", e))?;
+        let util_pct = parts[4].parse::<u32>()
+            .map_err(|e| format!("Failed to parse util_pct: {}", e))?;
+
+        Ok(GpuStats {
+            name,
+            vram_used_mb,
+            vram_total_mb,
+            temp_c,
+            util_pct,
+        })
+    }
+    ```
+
+    *Self-Correction during coding:* Ensure I handle the "fewer than 5" check precisely as requested. The prompt says "fewer than 5". If it has 6, it's technically fine according to the rule, but usually, CSV parsers take the first N. I'll stick to the "fewer than 5" check.
+
+    Double-check `Result` type. `Result<GpuStats, String>`. Correct.
+
+    Wait, looking at the requirements again:
+    - "Return Err(String) if columns are fewer than 5"
+    - "Return Err(String) if numbers fail to parse"
+
+    My logic:
+    `parts.len() < 5` -> Err.
+    `parse().map_err(...)?` -> Err.
+
+    This meets all requirements.

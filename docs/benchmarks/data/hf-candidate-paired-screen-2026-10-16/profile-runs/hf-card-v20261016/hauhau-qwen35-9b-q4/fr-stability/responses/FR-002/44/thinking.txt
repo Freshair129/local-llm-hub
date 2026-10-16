@@ -1,0 +1,586 @@
+Thinking Process:
+
+1.  **Analyze the Request:**
+    *   **Role:** AI Coder working under STD-003 and ADR-100 guard rails.
+    *   **Task:** Implement function `normalize_model_name` according to specific FR-002.
+    *   **Specification:**
+        1.  Function signature: `pub fn normalize_model_name(raw: &str) -> String`
+        2.  Strip registry prefixes: `'registry.ollama.ai/library/'`, `'library/'`, `'hf.co/'`.
+        3.  Strip quantization suffixes: `'-q4_0'`, `'-q4_k_m'`, `'-q4_k_s'`, `':q4_0'`, `':q4_k_m'`, `':q4_k_s'` (case-insensitive).
+        4.  Convert result to lowercase.
+        5.  Guard rails: NO `unwrap()`, NO `expect()`, NO `panic!`.
+        6.  Traceability: Include comment `// trace:implements FR-002` directly before function declaration.
+    *   **Output Format:** ONLY valid Rust code inside a ```rust code block.
+
+2.  **Drafting the Implementation:**
+    *   **Function Signature:** `pub fn normalize_model_name(raw: &str) -> String`
+    *   **Traceability Comment:** `// trace:implements FR-002`
+    *   **Step 1: Strip Prefixes.**
+        *   Need to handle `'registry.ollama.ai/library/'`, `'library/'`, `'hf.co/'`.
+        *   Order matters or overlap handling. `'registry.ollama.ai/library/'` contains `'library/'`.
+        *   Using `trim_start_matches` or `replace`? Since some prefixes overlap, iterating or chaining `replace` is safer.
+        *   Let's define the set of prefixes to remove.
+        *   `raw` is `&str`.
+        *   Example: `registry.ollama.ai/library/mistral:latest` -> `mistral:latest`
+        *   Example: `library/mistral:latest` -> `mistral:latest`
+        *   Example: `hf.co/mistral:latest` -> `mistral:latest`
+        *   Implementation: Use `replace` or match. Since it's a `&str` input, creating a mutable `String` is needed.
+        *   Chain `replace` calls.
+        *   `registry.ollama.ai/library/` is the longest, check that first, then `library/`, then `hf.co/`.
+        *   Actually, `replace` works fine if the order is specific or if the strings don't overlap in a way that causes issues. `registry.ollama.ai/library/` ends with `library/`.
+        *   Better approach: Create a mutable copy and trim prefixes.
+        *   Order:
+            1. `registry.ollama.ai/library/`
+            2. `library/`
+            3. `hf.co/`
+        *   Wait, `library/` is a substring of `registry.ollama.ai/library/`. If I replace `registry...` first, the shorter one might not match anymore if I'm not careful, but usually `replace` finds all occurrences.
+        *   Let's use a sequence of `replace` operations.
+        *   Prefixes:
+            *   `"registry.ollama.ai/library/"`
+            *   `"library/"`
+            *   `"hf.co/"`
+        *   Note: `library/` might appear in `registry.ollama.ai/library/model-name`. If I replace `registry...` first, I get `model-name`. Then `library/` won't match.
+        *   So order: Longest prefix first.
+    *   **Step 2: Strip Suffixes.**
+        *   Suffixes: `'-q4_0'`, `'-q4_k_m'`, `'-q4_k_s'`, `':q4_0'`, `':q4_k_m'`, `':q4_k_s'`.
+        *   Case-insensitive.
+        *   Need to trim these from the end.
+        *   Example: `mistral-q4_0:latest` -> `mistral:latest`? Or `mistral-q4_0`?
+        *   Usually, model names like `mistral:q4_0` or `mistral-q4_0`.
+        *   The spec says "Strip quantization suffixes".
+        *   Suffixes include `:q4_0` and `-q4_0`.
+        *   Need to handle case-insensitivity.
+        *   Approach: Iterate over the list of suffixes, check if the string ends with them (case-insensitive), and remove them.
+        *   Since `:q4_0` might be followed by `:latest`, need to ensure we strip the suffix part.
+        *   Example: `mistral:q4_0:latest` -> `mistral:latest`? Or `mistral:latest`?
+        *   Common pattern: `model:tag` where tag is `q4_0`.
+        *   Let's create a mutable string, convert to lowercase first or handle case-insensitively during suffix check.
+        *   Spec says "Convert result to lowercase" (Step 4). So maybe do stripping first, then lowercase.
+        *   Or lowercase first, then strip?
+        *   If I lowercase first: `MISTRAL-Q4_0` -> `mistral-q4_0`.
+        *   Suffixes list: `'-q4_0'`, `'-q4_k_m'`, `'-q4_k_s'`, `':q4_0'`, `':q4_k_m'`, `':q4_k_s'`.
+        *   I should check if the string ends with any of these (case-insensitive).
+        *   Since I need to output lowercase, doing the conversion at the end is fine, but suffix stripping needs to know the case before conversion or convert the suffixes too.
+        *   Easier: Convert `raw` to lowercase first?
+        *   Spec: "3. Strip quantization suffixes... (case-insensitive)" then "4. Convert result to lowercase".
+        *   Strictly following order: Strip (case-insensitive), then Lowercase.
+        *   However, if I strip `:Q4_0` from `Model:Q4_0`, I get `Model:`. Then lowercasing gives `model:`.
+        *   If I lowercase first: `model:q4_0`, strip `:q4_0` -> `model`.
+        *   Let's lowercase first, it simplifies suffix matching (exact match).
+        *   Wait, spec says "3. Strip... 4. Convert...".
+        *   If I lowercase first, I am technically doing step 4 before step 3. But usually, these are commutative enough.
+        *   Let's check the suffixes again. `'-q4_0'`.
+        *   If I have `Mistral-Q4_0:7b`. Lowercase: `mistral-q4_0:7b`. Strip `-q4_0` -> `mistral:7b`.
+        *   Implementation detail: Use `ends_with` checks.
+        *   Since `&str` is owned after `to_string`, I can work on a `String`.
+    *   **Step 3: Convert to lowercase.**
+        *   `to_lowercase()`.
+    *   **Guard Rails:**
+        *   No `unwrap()`, `expect()`, `panic!`.
+        *   Safe string handling.
+    *   **Traceability:**
+        *   `// trace:implements FR-002` before function.
+
+3.  **Refining the Logic (Mental Walkthrough):**
+
+    ```rust
+    pub fn normalize_model_name(raw: &str) -> String {
+        // trace:implements FR-002
+        let mut name = raw.to_string();
+
+        // 2. Strip registry prefixes
+        // Order matters: longest first
+        name = name.replace("registry.ollama.ai/library/", "");
+        name = name.replace("library/", "");
+        name = name.replace("hf.co/", "");
+
+        // 3. Strip quantization suffixes (case-insensitive)
+        // Since we might lowercase later, but spec says 3 then 4.
+        // Let's do case-insensitive strip first.
+        let suffixes_lower = vec![
+            "-q4_0", "-q4_k_m", "-q4_k_s",
+            ":q4_0", ":q4_k_m", ":q4_k_s",
+        ];
+        // Convert suffixes to lowercase for comparison or check raw case-insensitively
+        // Easier: convert name to lowercase now for suffix matching?
+        // Spec: 3. Strip (case-insensitive), 4. Convert.
+        // If I lowercase now, step 4 is effectively done.
+        // Let's keep order strict or logically equivalent.
+        // To be safe with "case-insensitive", I'll compare lowercase versions.
+        
+        let name_lower = name.to_lowercase();
+        let mut temp_name = name_lower.clone();
+
+        for suffix in &suffixes_lower {
+            if temp_name.ends_with(*suffix) {
+                temp_name = temp_name[..temp_name.len() - suffix.len()].to_string();
+            }
+        }
+
+        // 4. Convert result to lowercase
+        // Already done above, but to strictly follow order:
+        // name_lower is already lower.
+        // Let's assign back.
+        // Wait, if I lowercase first, I satisfy "Convert result to lowercase" at any point.
+        // Let's do:
+        // 1. Copy to mutable
+        // 2. Strip prefixes
+        // 3. Strip suffixes (case insensitive)
+        // 4. Lowercase
+        // But stripping suffixes case-insensitively on mixed case string is fine.
+        // Let's optimize: Lowercase first makes suffix stripping trivial.
+        // Let's assume logical order allows this.
+        // Actually, to be pedantic about "3. Strip... 4. Convert":
+        // 1. Copy to String
+        // 2. Prefix replace
+        // 3. Suffix trim (case insensitive loop)
+        // 4. Lowercase
+        
+        // Let's implement strictly.
+        let mut s = raw.to_string();
+        
+        // Prefixes
+        s = s.replace("registry.ollama.ai/library/", "");
+        s = s.replace("library/", "");
+        s = s.replace("hf.co/", "");
+        
+        // Suffixes (Case Insensitive)
+        // Create lowercase copy for checking
+        let s_lower = s.to_lowercase();
+        let suffixes = vec![
+            "-q4_0", "-q4_k_m", "-q4_k_s",
+            ":q4_0", ":q4_k_m", ":q4_k_s",
+        ];
+        for suffix in &suffixes {
+            if s_lower.ends_with(*suffix) {
+                s_lower = s_lower[..s_lower.len() - suffix.len()].to_string();
+            }
+        }
+        
+        // 4. Convert to lowercase
+        // s_lower is already lowercase.
+        // But wait, if I modify s_lower, I need to return the lowercase version.
+        // So:
+        // 1. Strip prefixes from `s`
+        // 2. Lowercase `s` -> `s_low`
+        // 3. Strip suffixes from `s_low`
+        // 4. Return `s_low`
+        
+        // Let's combine:
+        let mut s = raw.to_string();
+        // Prefixes
+        s = s.replace("registry.ollama.ai/library/", "");
+        s = s.replace("library/", "");
+        s = s.replace("hf.co/", "");
+        
+        // Lowercase for suffix check (Case Insensitive requirement)
+        let s_lower = s.to_lowercase();
+        
+        // Suffixes
+        let suffixes = vec![
+            "-q4_0", "-q4_k_m", "-q4_k_s",
+            ":q4_0", ":q4_k_m", ":q4_k_s",
+        ];
+        for suffix in &suffixes {
+            if s_lower.ends_with(*suffix) {
+                s_lower = &s_lower[..s_lower.len() - suffix.len()];
+            }
+        }
+        
+        // 4. Convert result to lowercase
+        // s_lower is already lower, but let's ensure the final result is lower.
+        // Since we used s_lower for suffix removal, we need to return s_lower.
+        // But we need to make sure s_lower is returned as String.
+        // s_lower is &str.
+        
+        // Wait, `s_lower` is `s.to_lowercase()`.
+        // After trimming, `s_lower` is a `String`.
+        // So return `s_lower`.
+        
+        // Refined logic:
+        let mut name = raw.to_string();
+        // 2. Prefixes
+        name = name.replace("registry.ollama.ai/library/", "");
+        name = name.replace("library/", "");
+        name = name.replace("hf.co/", "");
+        
+        // 3. Suffixes (Case Insensitive)
+        let name_lower = name.to_lowercase();
+        let suffixes = [
+            "-q4_0", "-q4_k_m", "-q4_k_s",
+            ":q4_0", ":q4_k_m", ":q4_k_s",
+        ];
+        for suffix in &suffixes {
+            if name_lower.ends_with(suffix) {
+                name_lower = name_lower[..name_lower.len() - suffix.len()].to_string();
+            }
+        }
+        
+        // 4. Convert to lowercase
+        // name_lower is already lower, but to strictly follow:
+        // Let's just return name_lower.
+        
+        name_lower
+    }
+    ```
+    Wait, `name_lower = name_lower[..name_lower.len() - suffix.len()].to_string();` works.
+    Need to ensure imports? `String`, `&str` are standard. `Vec` or array.
+    No external dependencies.
+    
+    Check Guard Rails:
+    `unwrap()`? No.
+    `expect()`? No.
+    `panic!()`? No.
+    
+    Check Traceability:
+    `// trace:implements FR-002` directly before function.
+    
+    Check Prefixes:
+    `registry.ollama.ai/library/`
+    `library/`
+    `hf.co/`
+    Note: `registry.ollama.ai/library/` contains `library/`.
+    If input is `registry.ollama.ai/library/mistral`, `replace("library/", "")` might remove the one inside `registry...` too if not careful?
+    `registry.ollama.ai/library/` ends with `library/`.
+    If I replace `library/` first:
+    `registry.ollama.ai/library/mistral` -> `registry.ollama.ai/mistral` (bad)
+    So `registry.ollama.ai/library/` must be replaced first.
+    Order:
+    1. `registry.ollama.ai/library/`
+    2. `library/`
+    3. `hf.co/`
+    
+    Check Suffixes:
+    `-q4_0`, `-q4_k_m`, `-q4_k_s`
+    `:q4_0`, `:q4_k_m`, `:q4_k_s`
+    Case insensitive.
+    
+    Check Lowercase:
+    Final result must be lowercase.
+    
+    Code Structure:
+    ```rust
+    // trace:implements FR-002
+    pub fn normalize_model_name(raw: &str) -> String {
+        // ...
+    }
+    ```
+    Wait, specification says "Include comment '// trace:implements FR-002' directly before function declaration."
+    So:
+    ```rust
+    // trace:implements FR-002
+    pub fn normalize_model_name(raw: &str) -> String {
+    }
+    ```
+    
+    Let's refine the suffix stripping.
+    Since `name_lower` is used for suffix stripping, and `name_lower` is a `String` (from `name.to_lowercase()`), assignment `name_lower = ...` works.
+    One detail: `name_lower` is `String`. `name_lower[..].to_string()` returns `String`.
+    
+    Is `replace` safe? Yes.
+    Is `ends_with` safe? Yes.
+    
+    Let's write the code.
+
+4.  **Final Code Construction:**
+
+    ```rust
+    // trace:implements FR-002
+    pub fn normalize_model_name(raw: &str) -> String {
+        let mut name = raw.to_string();
+        
+        // 2. Strip registry prefixes
+        name = name.replace("registry.ollama.ai/library/", "");
+        name = name.replace("library/", "");
+        name = name.replace("hf.co/", "");
+        
+        // 3. Strip quantization suffixes (case-insensitive)
+        // Convert to lowercase for consistent suffix matching
+        let name_lower = name.to_lowercase();
+        let suffixes = [
+            "-q4_0", "-q4_k_m", "-q4_k_s",
+            ":q4_0", ":q4_k_m", ":q4_k_s",
+        ];
+        
+        let mut trimmed = name_lower;
+        for suffix in &suffixes {
+            if trimmed.ends_with(suffix) {
+                trimmed = trimmed[..trimmed.len() - suffix.len()].to_string();
+            }
+        }
+        
+        // 4. Convert result to lowercase
+        // trimmed is already lowercase from step 3 preparation, 
+        // but to strictly adhere to order (Strip -> Lowercase):
+        // We prepared a lowercase copy for stripping. 
+        // The final result must be lowercase.
+        trimmed
+    }
+    ```
+    Wait, `name` was lowercased into `name_lower`. Then `trimmed` is mutated.
+    Step 4 says "Convert result to lowercase". Since `trimmed` is derived from `name.to_lowercase()`, it is lowercase.
+    However, to be pedantic about "3. Strip... 4. Convert", I could lowercase *after* stripping.
+    But stripping suffixes case-insensitively requires case handling.
+    If I lowercase first, I satisfy the suffix stripping requirement (case-insensitive effectively becomes exact match).
+    Then I lowercase the result (which is already lower).
+    
+    Optimized flow:
+    1. Copy `raw` to `String`.
+    2. Strip prefixes.
+    3. Strip suffixes (using lowercase comparison to satisfy case-insensitive requirement).
+    4. Ensure final string is lowercase (it is, if we worked on a lowercase copy).
+    
+    Let's stick to the variable names clearly.
+    
+    One edge case: `trimmed` starts as `name_lower`.
+    After loop, `trimmed` holds the result.
+    It is lowercase.
+    
+    Wait, `name` variable was modified by prefixes.
+    `name_lower = name.to_lowercase()`.
+    `trimmed` is `String`.
+    Loop modifies `trimmed`.
+    Return `trimmed`.
+    
+    This looks correct.
+
+    Wait, check guard rails again: NO `unwrap()`, NO `expect()`, NO `panic!`.
+    My code uses `replace`, `to_lowercase`, `ends_with`, `to_string`. All safe.
+    
+    Check Traceability: `// trace:implements FR-002` directly before function.
+    
+    Check Output Format: ONLY valid Rust code inside a ```rust code block.
+    
+    Final check on prefixes:
+    `registry.ollama.ai/library/`
+    `library/`
+    `hf.co/`
+    Order:
+    1. `registry.ollama.ai/library/`
+    2. `library/` (catches cases like `library/mistral`)
+    3. `hf.co/` (catches cases like `hf.co/mistral`)
+    
+    Example: `registry.ollama.ai/library/mistral-q4_0:latest`
+    1. Replace long prefix -> `mistral-q4_0:latest`
+    2. Replace `library/` -> `mistral-q4_0:latest` (no change)
+    3. Replace `hf.co/` -> `mistral-q4_0:latest` (no change)
+    4. Lowercase -> `mistral-q4_0:latest`
+    5. Suffixes:
+       `:q4_0`? No, ends with `:latest`.
+       `-q4_0`? Yes.
+       Trim `-q4_0` -> `mistral:latest`
+    
+    Example: `HuggingFace/mistral-q4_0`
+    1. Prefixes: None match.
+    2. Suffixes: `:q4_0` or `-q4_0`.
+       `mistral-q4_0` matches `-q4_0`.
+       Result `mistral`.
+    
+    Looks good.
+
+    One small detail: `trimmed` initialization.
+    `let mut trimmed = name_lower;`
+    Then loop.
+    Then return `trimmed`.
+    This is safe.
+
+    Wait, `name_lower` is `String`. `trimmed` is `String`.
+    `trimmed = trimmed[..trimmed.len() - suffix.len()].to_string();`
+    This is safe.
+
+    Final check on imports. No imports needed for `String`, `&str`, `replace`, `to_lowercase`, `ends_with`.
+    Array of strings is fine.
+
+    Let's assemble.
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut name = raw.to_string();
+
+    // 2. Strip registry prefixes
+    // Order matters to prevent partial matches (e.g., "library/" inside "registry.../library/")
+    name = name.replace("registry.ollama.ai/library/", "");
+    name = name.replace("library/", "");
+    name = name.replace("hf.co/", "");
+
+    // 3. Strip quantization suffixes (case-insensitive)
+    // Convert to lowercase for consistent suffix matching
+    let name_lower = name.to_lowercase();
+    let suffixes = [
+        "-q4_0", "-q4_k_m", "-q4_k_s",
+        ":q4_0", ":q4_k_m", ":q4_k_s",
+    ];
+
+    let mut trimmed = name_lower;
+    for suffix in &suffixes {
+        if trimmed.ends_with(suffix) {
+            trimmed = trimmed[..trimmed.len() - suffix.len()].to_string();
+        }
+    }
+
+    // 4. Convert result to lowercase
+    // trimmed is already lowercase from the preparation step above
+    trimmed
+}
+```
+    Wait, `name_lower` is `String`. `trimmed` is `String`.
+    Is `name_lower` used elsewhere? No.
+    Is `trimmed` used? Yes, returned.
+    Is `name` used? No, intermediate.
+    
+    One optimization: `name_lower` can be `trimmed` directly.
+    `let mut trimmed = name.to_lowercase();`
+    
+    Revised:
+    ```rust
+    let mut name = raw.to_string();
+    // Prefixes
+    name = name.replace("registry.ollama.ai/library/", "");
+    name = name.replace("library/", "");
+    name = name.replace("hf.co/", "");
+    
+    // Suffixes (Case Insensitive)
+    let mut trimmed = name.to_lowercase();
+    let suffixes = [
+        "-q4_0", "-q4_k_m", "-q4_k_s",
+        ":q4_0", ":q4_k_m", ":q4_k_s",
+    ];
+    for suffix in &suffixes {
+        if trimmed.ends_with(suffix) {
+            trimmed = trimmed[..trimmed.len() - suffix.len()].to_string();
+        }
+    }
+    trimmed
+    ```
+    This is cleaner.
+
+    Final check on "Convert result to lowercase".
+    If I do `name.to_lowercase()` before suffix stripping, I am effectively converting to lowercase.
+    If I do it after, it's the same for ASCII.
+    Given `trimmed` holds the lowercase version after initialization, the return value is lowercase.
+    So step 4 is satisfied.
+
+    Wait, `name` is a `String`. `name.to_lowercase()` returns a `String`.
+    `trimmed` is a `String`.
+    The loop modifies `trimmed`.
+    The return value is `trimmed`.
+    So yes, it returns a lowercase string.
+
+    Double check: `trimmed = trimmed[..trimmed.len() - suffix.len()].to_string();`
+    If `trimmed.len() - suffix.len()` is 0, `trimmed[..0]` is `""`. `to_string()` is `""`. Safe.
+    If `trimmed.len() < suffix.len()`, `ends_with` should be false.
+    `ends_with` checks length implicitly.
+    So safe.
+
+    One tiny detail: `name` variable name shadowing? No, `name` is local. `trimmed` is local.
+    `raw` is input.
+    
+    Ready to output.
+
+    Wait, check guard rails again: "NO unwrap(), NO expect(), NO panic!".
+    My code doesn't use them.
+
+    Check Traceability: `// trace:implements FR-002` directly before function.
+    My code has that.
+
+    Check Output: ONLY valid Rust code inside a ```rust code block.
+    My code is inside.
+
+    One more check: `registry.ollama.ai/library/` vs `library/`.
+    If input is `registry.ollama.ai/library/mistral`.
+    1. Replace `registry...` -> `mistral`.
+    2. Replace `library/` -> `mistral`.
+    3. Replace `hf.co/` -> `mistral`.
+    Works.
+
+    If input is `library/mistral`.
+    1. Replace `registry...` -> `library/mistral`.
+    2. Replace `library/` -> `mistral`.
+    3. Replace `hf.co/` -> `mistral`.
+    Works.
+
+    If input is `hf.co/mistral`.
+    1. Replace `registry...` -> `hf.co/mistral`.
+    2. Replace `library/` -> `hf.co/mistral`.
+    3. Replace `hf.co/` -> `mistral`.
+    Works.
+
+    Seems robust.
+
+    Final check on Suffixes.
+    `"-q4_0"`.
+    Input: `mistral-q4_0`.
+    `name.to_lowercase()` -> `mistral-q4_0`.
+    `ends_with("-q4_0")` -> true.
+    Trim -> `mistral`.
+    Input: `mistral:q4_0`.
+    `ends_with(":q4_0")` -> true.
+    Trim -> `mistral`.
+    Input: `mistral:q4_0:latest`.
+    `ends_with(":q4_0")` -> false (ends with `:latest`).
+    `ends_with("-q4_0")` -> false.
+    Wait, `mistral:q4_0:latest`.
+    Does it end with `:q4_0`? No, ends with `:latest`.
+    So it stays `mistral:q4_0:latest`.
+    Is that correct?
+    Usually quantization is part of the tag. `mistral:q4_0`.
+    If tag is `q4_0:latest`, that's weird.
+    Usually `model:q4_0`.
+    If `mistral:q4_0:latest` is passed, maybe user wants to keep `:latest`.
+    Spec says "Strip quantization suffixes".
+    So `:q4_0` is a suffix.
+    If string is `mistral:q4_0:latest`, does it end with `:q4_0`?
+    `:latest` != `:q4_0`.
+    So it keeps `:latest`.
+    This seems correct behavior for a suffix stripper (only strip if at the very end).
+    
+    Okay, ready.
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let mut name = raw.to_string();
+
+    // 2. Strip registry prefixes
+    // Order matters to handle nested prefixes (e.g., "registry.../library/" contains "library/")
+    name = name.replace("registry.ollama.ai/library/", "");
+    name = name.replace("library/", "");
+    name = name.replace("hf.co/", "");
+
+    // 3. Strip quantization suffixes (case-insensitive)
+    // Prepare a lowercase copy for consistent suffix matching
+    let mut trimmed = name.to_lowercase();
+    let suffixes = [
+        "-q4_0", "-q4_k_m", "-q4_k_s",
+        ":q4_0", ":q4_k_m", ":q4_k_s",
+    ];
+
+    for suffix in &suffixes {
+        if trimmed.ends_with(suffix) {
+            trimmed = trimmed[..trimmed.len() - suffix.len()].to_string();
+        }
+    }
+
+    // 4. Convert result to lowercase
+    // trimmed is already lowercase from the preparation step above
+    trimmed
+}
+```
+    Wait, `trimmed` is `String`.
+    `name` is `String`.
+    `raw` is `&str`.
+    All good.
+    Wait, `name` is modified by prefixes.
+    `trimmed` is initialized from modified `name`.
+    `trimmed` is modified by suffixes.
+    `trimmed` is returned.
+    Correct.
+
+    One tiny optimization: `trimmed` initialization.
+    `let mut trimmed = name.to_lowercase();`
+    If `name` is empty? `to_lowercase` returns empty. `ends_with` returns false. Returns empty. Safe.
+    If `trimmed.len() == suffix.len()`?
+    `trimmed[..0]` -> `""`. Safe.
+
+    Okay.

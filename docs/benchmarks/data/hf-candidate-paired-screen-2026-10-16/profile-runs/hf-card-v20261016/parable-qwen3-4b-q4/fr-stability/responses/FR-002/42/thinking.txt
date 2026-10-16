@@ -1,0 +1,422 @@
+Okay, I need to implement the normalize_model_name function according to the specification. Let me go through each requirement step by step.
+
+First, the function signature is pub fn normalize_model_name(raw: &str) -> String. That's straightforward. The next step is to strip registry prefixes. The prefixes are 'registry.ollama.ai/library/', 'library/', and 'hf.co/'. I need to check if the raw string starts with any of these. I'll have to handle each prefix by removing them. But how do I check for all three? Maybe using a match statement or a series of if conditions. Wait, since the order might matter, maybe I should check the longest prefixes first. For example, 'registry.ollama.ai/library/' is longer than 'library/', so checking for that first would prevent partial matches. But since the problem says to strip the prefixes, I need to make sure that if a string starts with one of the prefixes, it's removed. However, the user might have a string that starts with a longer prefix, but the other ones are shorter. So I should check in order of longest to shortest. Alternatively, I can use a regex to match the prefixes. But the user didn't mention regex, so maybe a simple string check would be better.
+
+Wait, the problem says to strip the registry prefixes. So for example, if the input is "registry.ollama.ai/library/mymodel", the prefix is "registry.ollama.ai/library/", so after stripping, it becomes "mymodel". Similarly, "library/my_model" becomes "my_model", and "hf.co/models/my_model" becomes "my_model".
+
+Next, the quantization suffixes. The suffixes are '-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s', and they are case-insensitive. So I need to check if the string ends with any of these, regardless of case. So maybe I can convert the string to lowercase first, then check for any of the suffixes. Or perhaps I can check the original string, but in a case-insensitive way. However, the problem says to convert the result to lowercase after stripping, so maybe it's better to process the string in a case-insensitive manner for the suffixes. Wait, but the suffixes can appear anywhere in the string, not just at the end. Wait, the specification says "strip quantization suffixes" which are suffixes. So they should be at the end of the string. So for example, "mymodel-q4_0" would have the suffix "-q4_0". So the function should check if the string ends with any of those suffixes (case-insensitive), and remove them.
+
+So the steps are:
+
+1. Remove registry prefixes.
+2. Remove quantization suffixes.
+3. Convert to lowercase.
+
+Now, how to implement each step.
+
+For the registry prefixes, I can check if the raw string starts with any of the three prefixes. Let's create a list of the prefixes. But since the order matters, I should check the longest ones first. So first check for 'registry.ollama.ai/library/', then 'library/', then 'hf.co/'. But wait, 'hf.co/' is a different prefix. So perhaps the code would be something like:
+
+if raw.starts_with("registry.ollama.ai/library/") {
+    raw = raw.trim_start_matches("registry.ollama.ai/library/");
+} else if raw.starts_with("library/") {
+    raw = raw.trim_start_matches("library/");
+} else if raw.starts_with("hf.co/") {
+    raw = raw.trim_start_matches("hf.co/");
+}
+
+But this approach would only check for the first occurrence of any of the prefixes. However, if the string starts with more than one prefix, like "registry.ollama.ai/library/hf.co/models", but that's not possible since the first prefix is longer. So this approach should work.
+
+Once the registry prefixes are stripped, then we need to process the quantization suffixes.
+
+For the suffixes, I need to check if the string ends with any of the suffixes, case-insensitively. So I can convert the string to lowercase first, then check for the suffixes. For example:
+
+let s = raw.to_lowercase();
+if s.ends_with("-q4_0") || s.ends_with("-q4_k_m") || s.ends_with("-q4_k_s") || s.ends_with(":q4_0") || s.ends_with(":q4_k_m") || s.ends_with(":q4_k_s") {
+    let suffix = s.split_off(s.len() - 4);
+    // Wait, no, because the suffix can be of varying lengths. For example, "-q4_0" is 5 characters, but maybe the suffix is longer. So the correct way is to check if the string ends with any of the suffixes. Once found, remove the suffix.
+
+Wait, but the suffixes are "-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s". So each of these is a suffix of varying lengths. For example, "-q4_0" is 5 characters, while ":q4_0" is 5 characters as well. So, the code would need to check if the string ends with any of these suffixes, and if so, remove them. But since the suffixes can be of different lengths, how do I know which one to remove?
+
+Wait, the specification says to strip the suffixes. So if the string ends with any of these suffixes, we need to remove the entire suffix. So for example, "my_model-q4_0" becomes "my_model", and "my_model:q4_0" becomes "my_model".
+
+But the suffixes can be of varying lengths. So the code would need to check for each possible suffix and remove the longest possible one? Or just remove the first occurrence of any of the suffixes. But the problem says to strip the suffixes, so perhaps any occurrence of any of the suffixes should be stripped. But the problem says "strip quantization suffixes", implying that the suffixes are at the end of the string. So the code should check if the string ends with any of the suffixes, and if so, remove them.
+
+So the code would be:
+
+let s = raw.to_lowercase();
+let mut result = s;
+if result.ends_with("-q4_0") {
+    result = result.trim_end_matches("-q4_0");
+} else if result.ends_with("-q4_k_m") {
+    result = result.trim_end_matches("-q4_k_m");
+} else if result.ends_with("-q4_k_s") {
+    result = result.trim_end_matches("-q4_k_s");
+} else if result.ends_with(":q4_0") {
+    result = result.trim_end_matches(":q4__0");
+} else if result.ends_with(":q4_k_m") {
+    result = result.trim_end_matches(":q4_k_m");
+} else if result.ends_with(":q4_k_s") {
+    result = result.trim_end_matches(":q4_k_s");
+}
+
+Wait, but the suffixes are case-insensitive, but we already converted the string to lowercase. So the code should check for the lowercase suffixes. However, the original string may have uppercase letters, but after converting to lowercase, the code will check for the lowercase suffixes. So that's correct.
+
+Wait, but the problem says to convert the result to lowercase. So after stripping the prefixes and suffixes, the string is converted to lowercase. So the code should process the string in lowercase, then strip the suffixes, then return the lowercase string.
+
+Wait, no. The steps are:
+
+1. Strip registry prefixes.
+
+2. Strip quantization suffixes.
+
+3. Convert the result to lowercase.
+
+So the order is important. The stripping of suffixes should be done on the string after the registry prefixes have been stripped, and then the entire string is converted to lowercase.
+
+So the code steps:
+
+- Take the raw string.
+
+- Strip the registry prefixes.
+
+- Then, process the string to remove any of the quantization suffixes (case-insensitive).
+
+- Then, convert the entire string to lowercase.
+
+Wait, but the problem says to "convert result to lowercase" after all the stripping. So the order is:
+
+After stripping the registry prefixes and quantization suffixes, the resulting string is converted to lowercase.
+
+So the code would be:
+
+let mut s = raw;
+
+// strip registry prefixes
+// ...
+
+// strip quantization suffixes
+// ...
+
+// convert to lowercase
+s = s.to_lowercase();
+
+Wait, no. Because the stripping of suffixes may have already been done on a lowercase version. Wait, the problem says to strip the suffixes case-insensitively, so the code should check for the suffixes in the original string, but the suffixes can be in any case. So the code should process the original string, check for any of the suffixes (case-insensitive), and remove them. But since the suffixes are case-insensitive, perhaps the code should first convert the string to lowercase, then check for the suffixes, and then remove them. Because the suffixes can be in any case, but after stripping, the string is converted to lowercase.
+
+Wait, the problem says to "strip quantization suffixes" case-insensitively, but the final result is converted to lowercase. So the code can first convert the string to lowercase, then check for the suffixes, and then remove them. Then, the final result is already lowercase. So the code can be:
+
+let s = raw.to_lowercase();
+// process the suffixes on this lowercase string, then return s.
+
+Wait, but the registry prefixes are not case-insensitive. The problem says to strip the registry prefixes, but the prefixes are exact. So for example, "registry.ollama.ai/library/" is a specific prefix, and the code should check for that exact string. So the code for the registry prefixes is case-sensitive.
+
+So the code steps:
+
+1. Process the raw string to remove the registry prefixes (case-sensitive).
+
+   a. Check for "registry.ollama.ai/library/" at the start. If present, remove it.
+
+   b. Else check for "library/" at the start. Remove it.
+
+   c. Else check for "hf.co/" at the start. Remove it.
+
+2. Then, take the resulting string, convert it to lowercase.
+
+3. Then, process the lowercase string to remove any of the quantization suffixes.
+
+   a. Check if ends with "-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", or ":q4_k_s". If so, remove them.
+
+   b. So, after converting to lowercase, check each suffix in order, and remove the first occurrence of any of them.
+
+But the problem says to strip the suffixes, so if the string ends with multiple suffixes, which one to remove? For example, "model:q4_0-q4_k_m" would end with "-q4_k_m" but also "-q4_0" is part of the string. However, the code is supposed to strip the suffixes. So perhaps the code should check for each suffix in order, and remove the first occurrence of any of them. But since the suffixes are case-insensitive, but we have already converted the string to lowercase, the code can check for the lowercase suffixes.
+
+Wait, the code is:
+
+After step 1, the registry prefixes are stripped. Then the string is converted to lowercase. Then, the code checks for the suffixes. So the steps are:
+
+let mut s = raw;
+
+// strip registry prefixes
+s = s.trim_start_matches("registry.ollama.ai/library/");
+s = s.trim_start_matches("library/");
+s = s.trim_start_matches("hf.co/");
+
+// then convert to lowercase
+s = s.to_lowercase();
+
+// then process the suffixes
+if s.ends_with("-q4_0") {
+    s = s.trim_end_matches("-q4_0");
+} else if s.ends_with("-q4_k_m") {
+    s = s.trim_end_matches("-q4_k_m");
+} else if s.ends_with("-q4_k_s") {
+    s = s.trim_end_matches("-q4_k_s");
+} else if s.ends_with(":q4_0") {
+    s = s.trim_end_matches(":q4_0");
+} else if s.ends_with(":q4_k_m") {
+    s = s.trim_end_matches(":q4_k_m");
+} else if s.ends_with(":q4_k_s") {
+    s = s.trim_end_matches(":q4_k_s");
+}
+
+return s;
+
+Wait, but this approach only removes the first suffix that matches. However, the problem says to strip all possible suffixes. For example, if the string ends with "-q4_0" and also has ":q4_k_s" in the middle, but the code only checks the end. So the code as written would only check the end of the string. So the code is correct as written.
+
+But what if the string ends with a suffix that is a combination of multiple suffixes? For example, "model:q4_0:q4_k_s". The code would first check for "-q4_0", which is not present. Then check for "-q4_k_m", etc. Then check for ":q4_0" which is present, so it would remove that. But the string is "model:q4_0:q4_k_s", after removing ":q4_0", it becomes "model:q4_k_s". Then, the code would check again if the new string ends with any of the suffixes. But in the code above, the code only checks once. So the code would only remove the first suffix that matches. However, the problem statement says to strip all quantization suffixes. So perhaps the code should check all possible suffixes, and remove the first occurrence of any of them. However, the code as written only checks once, so it would miss any suffixes that are present after the first removal.
+
+Wait, the problem says to "strip quantization suffixes", so any occurrence of the suffixes should be stripped. However, the suffixes are at the end of the string. So the code should check if the string ends with any of the suffixes and remove them. So the code should check the string once, and if it ends with any of the suffixes, remove it. But the code as written would only check for one suffix. So the code should check all possible suffixes, and if any of them is at the end, remove it. However, the code as written would check for each suffix in order, and if one is found, remove it. But if the code checks for the suffixes in a different order, it may miss some. For example, if the code checks for "-q4_0" first, and the string ends with ":q4_0", then the code would not find it and miss the suffix.
+
+Wait, no. The code as written checks for each suffix in the order: "-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s". So if the string ends with ":q4_0", the code would check the first three, which are not present, and then check for ":q4_0", which is present, so it would remove it. So the code is correct.
+
+But what if the string ends with a suffix that is not in the order checked? For example, "-q4_k_s" is checked before ":q4_0". But if the string ends with "-q4_k_s", the code would remove it. So the code is correct.
+
+So the code as written would handle all possible suffixes.
+
+Now, the problem says to not use unwrap(), expect(), or panic(). So the code must not panic. So the code should process the string in a way that doesn't cause panics.
+
+Now, the code must be written in Rust, with the trace comment.
+
+Putting it all together:
+
+pub fn normalize_model_name(raw: &str) -> String {
+    // trace:implements FR-002
+    let mut s = raw;
+
+    // Strip registry prefixes
+    s = s.trim_start_matches("registry.ollama.ai/library/");
+    s = s.trim_start_matches("library/");
+    s = s.trim_start_matches("hf.co/");
+
+    // Convert to lowercase
+    let s = s.to_lowercase();
+
+    // Strip quantization suffixes
+    if s.ends_with("-q4_0") {
+        s = s.trim_end_matches("-q4_0");
+    } else if s.ends_with("-q4_k_m") {
+        s = s.trim_end_matches("-q4_k_m");
+    } else if s.ends_with("-q4_k_s") {
+        s = s.trim_end_matches("-q4_k_s");
+    } else if s.ends_with(":q4_0") {
+        s = s.trim_end_matches(":q4_0");
+    } else if s.ends_with(":q4_k_m") {
+        s = s.trim_end_matches(":q4_k_m");
+    } else if s.ends_with(":q4_k_s") {
+        s = s.trim_end_matches(":q4_k_s");
+    }
+
+    s
+}
+
+Wait, but in the code above, after the registry prefixes are stripped, the code converts to lowercase. Then, the code checks for the suffixes. However, the code for the registry prefixes is case-sensitive. So for example, "Library/..." would be stripped as "..." because the code checks for "library/" exactly. But the problem says that the registry prefixes are "registry.ollama.ai/library/", "library/", "hf.co/". So the code is correct.
+
+But the code for the registry prefixes uses trim_start_matches, which removes the prefix from the start of the string. So for example, "registry.ollama.ai/library/mymodel" becomes "mymodel", and "library/my_model" becomes "my_model".
+
+Then, the code converts to lowercase. So the string is now in lowercase. Then, the code checks for the suffixes. So the code is correct.
+
+But the code for the suffixes checks for the lowercase suffixes. So the code should handle all cases.
+
+Now, test cases:
+
+Test case 1: "registry.ollama.ai/library/my_model-q4_0"
+After stripping registry prefix: "my_model-q4_0"
+Convert to lowercase: "my_model-q4_0"
+Check suffixes: ends with "-q4_0", so trim it: "my_model"
+Result: "my_model"
+
+Test case 2: "hf.co/models:q4_k_s"
+Strip registry prefix: "hf.co/models:q4_k_s" (since it starts with "hf.co/"), then trim_start_matches("hf.co/") becomes "models:q4_k_s"
+Convert to lowercase: "models:q4_k_s"
+Check suffixes: ends with ":q4_k_s", so trim it: "models"
+Result: "models"
+
+Test case 3: "library/my_model:q4_0"
+Strip registry prefix: "my_model:q4_0"
+Convert to lowercase: "my_model:q4_0"
+Check suffixes: ends with ":q4_0", trim it: "my_model"
+Result: "my_model"
+
+Test case 4: "my_model"
+No registry prefixes, no suffixes. Convert to lowercase: "my_model"
+
+Test case 5: "MyModel-q4_k_m"
+Strip registry prefixes: "MyModel-q4_k_m"
+Convert to lowercase: "mymodel-q4_k_m"
+Check suffixes: ends with "-q4_k_m", trim it: "mymodel"
+Result: "mymodel"
+
+Test case 6: "my_model:q4_0:q4_k_s"
+After stripping registry, convert to lowercase: "my_model:q4_0:q4_k_s"
+Check suffixes: ends with ":q4_k_s", trim it: "my_model:q4_0"
+Then, the code would not check again, so the suffix "-q4_0" is still present. But the code only checks once. So the code would leave "-q4_0" in the string. But according to the specification, should we remove all possible suffixes?
+
+The specification says to strip the suffixes, but the code only removes the first suffix that is found at the end. So in this example, the code would only remove the last suffix, but not the first. However, the problem says to strip all quantization suffixes. So perhaps the code should check again after each removal.
+
+But the code as written only checks once. So, for example, if the string is "my_model:q4_0:q4_k_s", after stripping the last suffix, it becomes "my_model:q4_0", but the code does not check again. So the code would leave the "-q4_0" suffix. But according to the specification, all suffixes should be stripped. However, the problem says "strip quantization suffixes", which are suffixes. So the code should check if the string ends with any of the suffixes and remove them. So the code should check for each suffix in a loop until none are found.
+
+But the code as written only checks once. So perhaps the code should loop until no more suffixes are found. For example:
+
+loop {
+    let s = s.to_lowercase();
+    if s.ends_with("-q4_0") {
+        s = s.trim_end_matches("-q4_0");
+    } else if s.ends_with("-q4_k_m") {
+        s = s.trim_end_matches("-q4_k_m");
+    } else if s.ends_with("-q4_k_s") {
+        s = s.trim_end_matches("-q4_k_s");
+    } else if s.ends_with(":q4_0") {
+        s = s.trim_end_matches(":q4_0");
+    } else if s.ends_with(":q4_k_m") {
+        s = s.trim_end_matches(":q4_k_m");
+    } else if s.ends_with(":q4_k_s") {
+        s = s.trim_end_matches(":q4_k_s");
+    } else {
+        break;
+    }
+}
+
+But this would loop until no suffix is found. However, in the code above, the code only checks once. So the code may not remove all possible suffixes.
+
+But the problem says to strip the suffixes, but the suffixes are at the end of the string. So if the string ends with a suffix, it is stripped. If after stripping, the new string ends with a suffix, it should be stripped again. So the code should check multiple times.
+
+But the code as written only checks once. So this is a possible bug.
+
+The specification says "strip quantization suffixes", which implies that all instances of the suffixes should be stripped. So the code should check for the suffixes in a loop until none are found.
+
+So the code should be modified to loop until no suffix is found.
+
+But how to implement this in Rust?
+
+The code would need to process the string in a loop, converting to lowercase each time, and checking for suffixes. But the code is supposed to process the string once, not multiple times.
+
+Alternatively, perhaps the code should check all possible suffixes in a single pass, but that's not possible because the suffixes can be of varying lengths and may appear after each other.
+
+But the problem says that the suffixes are case-insensitive and should be stripped. So the code should check for the suffixes in the string, and if any are found at the end, remove them.
+
+But the code as written only checks once. So the code may not remove all possible suffixes.
+
+For example, consider the string "model:q4_0:q4_k_s". The code would first check if it ends with "-q4_0", which it doesn't. Then check "-q4_k_m", no. Then "-q4_k_s", yes. So it would remove ":q4_k_s" from the end, resulting in "model:q4_0". Then, the code would not check again, so the "-q4_0" is still present.
+
+But according to the specification, all suffixes should be stripped. So the code should strip all possible suffixes, regardless of order.
+
+Therefore, the code should process the string in a loop until no more suffixes are found.
+
+So the code could be:
+
+let mut s = raw.to_lowercase();
+
+loop {
+    let mut s = s.clone();
+    if s.ends_with("-q4_0") {
+        s = s.trim_end_matches("-q4_0");
+    } else if s.ends_with("-q4_k_m") {
+        s = s.trim_end_matches("-q4_k_m");
+    } else if s.ends_with("-q4_k_s") {
+        s = s.trim_end_matches("-q4_k_s");
+    } else if s.ends_with(":q4_0") {
+        s = s.trim_end_matches(":q4_0");
+    } else if s.ends_with(":q4_k_m") {
+        s = s.trim_end_matches(":q4_k_m");
+    } else if s.ends_with(":q4_k_s") {
+        s = s.trim_end_matches(":q4_k_s");
+    } else {
+        break;
+    }
+    s = s.to_lowercase();
+}
+
+But this code would loop until no suffix is found. However, this may not be efficient, but according to the specification, it's needed.
+
+But the problem says to implement the specification, which may require that all possible suffixes are stripped. So the code should be modified to handle that.
+
+So the code should first strip the registry prefixes, then convert to lowercase, then in a loop, check for any of the suffixes, and remove them, and repeat until no more suffixes are found.
+
+So the code would be:
+
+pub fn normalize_model_name(raw: &str) -> String {
+    // trace:implements FR-002
+    let mut s = raw;
+
+    // Strip registry prefixes
+    s = s.trim_start_matches("registry.ollama.ai/library/");
+    s = s.trim_start_matches("library/");
+    s = s.trim_start_matches("hf.co/");
+
+    // Convert to lowercase
+    let mut s = s.to_lowercase();
+
+    // Strip quantization suffixes repeatedly
+    loop {
+        let mut s = s.clone();
+        if s.ends_with("-q4_0") {
+            s = s.trim_end_matches("-q4_0");
+        } else if s.ends_with("-q4_k_m") {
+            s = s.trim_end_matches("-q4_k_m");
+        } else if s.ends_with("-q4_k_s") {
+            s = s.trim_end_matches("-q4_k_s");
+        } else if s.ends_with(":q4_0") {
+            s = s.trim_end_matches(":q4_0");
+        } else if s.ends_with(":q4_k_m") {
+            s = s.trim_end_matches(":q4_k_m");
+        } else if s.ends_with(":q4_k_s") {
+            s = s.trim_end_matches(":q4_k_s");
+        } else {
+            break;
+        }
+        s = s.to_lowercase();
+    }
+
+    s
+}
+
+Wait, but this code has a problem. The loop is inside the function, and the variable s is cloned each time. However, in the first iteration, s is converted to lowercase. Then, in the loop, the code checks if the current s ends with any of the suffixes. If yes, it trims them, then converts to lowercase again. This would cause the string to be converted to lowercase each time a suffix is removed. But the suffixes are already in lowercase. So the code should not convert to lowercase again after trimming.
+
+Wait, the code first converts the string to lowercase, and then in the loop, it clones the string, then checks for the suffixes. But the suffixes are already lowercase. So the code should not convert to lowercase again. Therefore, the loop should process the string in lowercase, and the suffixes are already in lowercase. So the code should not re-convert to lowercase in the loop.
+
+Therefore, the code should be:
+
+pub fn normalize_model_name(raw: &str) -> String {
+    // trace:implements FR-002
+    let mut s = raw;
+
+    // Strip registry prefixes
+    s = s.trim_start_matches("registry.ollama.ai/library/");
+    s = s.trim_start_matches("library/");
+    s = s.trim_start_matches("hf.co/");
+
+    // Convert to lowercase
+    let mut s = s.to_lowercase();
+
+    // Strip quantization suffixes repeatedly
+    loop {
+        let mut s = s.clone();
+        if s.ends_with("-q4_0") {
+            s = s.trim_end_matches("-q4_0");
+        } else if s.ends_with("-q4_k_m") {
+            s = s.trim_end_matches("-q4_k_m");
+        } else if s.ends_with("-q4_k_s") {
+            s = s.trim_end_matches("-q4_k_s");
+        } else if s.ends_with(":q4_0") {
+            s = s.trim_end_matches(":q4_0");
+        } else if s.ends_with(":q4_k_m") {
+            s = s.trim_end_matches(":q4_k_m");
+        } else if s.ends_with(":q4_k_s") {
+            s = s.trim_end_matches(":q4_k_s");
+        } else {
+            break;
+        }
+        s = s.to_lowercase();
+    }
+
+    s
+}
+
+But this code would convert the string to lowercase each time a suffix is trimmed. However, the suffixes are already in lowercase, so the code is correct. However, the code may be inefficient, but it's required to handle all possible suffixes.
+
+So this code should handle the case where the string ends with multiple suffixes.
+
+But the problem's specification says to strip the suffixes. So this code is correct.
+
+Now, the code must be written in Rust, with the trace comment, and no unwrap(), expect(), or panic!.
+
+So the final code is as above.

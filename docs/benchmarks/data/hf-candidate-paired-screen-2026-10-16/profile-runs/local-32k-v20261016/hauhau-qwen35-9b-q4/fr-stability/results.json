@@ -1,0 +1,563 @@
+{
+  "metadata": {
+    "startedAt": "2026-10-16T14:08:35.941Z",
+    "ollamaVersion": "0.40.5",
+    "hardware": "NVIDIA GeForce RTX 3060 12GB",
+    "testSetSource": "https://github.com/Freshair129/local-llm-hub/blob/main/scripts/benchmark_mellum_thinking_vs_instruct.mjs",
+    "testSetSha256": "d9142c138d5a40a02064564259104c04c0686ef36eec63a3d031c5dab0087200",
+    "tasks": [
+      "FR-002",
+      "FR-006"
+    ],
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "model": {
+      "key": "hauhau-qwen35-9b-q4",
+      "label": "Hauhau Qwen3.5-9B Aggressive Q4_K_M",
+      "tag": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+      "quant": "Q4_K_M"
+    },
+    "profile": {
+      "id": "local-32k-v20261016",
+      "label": "RTX 3060 12GB: shared Mellum sampler with 32K context",
+      "num_ctx": 32768,
+      "num_predict": 81920,
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "repeat_penalty": 1
+      },
+      "systemPrompt": null,
+      "settingsSource": "Existing Mellum-matched sampling profile; context raised from 16K for this hardware profile."
+    },
+    "expectedSamples": 10,
+    "execution": "Exactly one F-store model per run; unload before/after; check /api/ps around every inference; contaminated attempts are discarded and retried up to three times.",
+    "qualityMetric": "Strict pass requires fenced code, Rust compile, all harness tests, adjacent trace comment, and no unwrap/expect/panic!.",
+    "finalResidentModels": [],
+    "interrupted": false,
+    "completedAt": "2026-10-16T14:34:21.706Z",
+    "summaries": [
+      {
+        "task": "FR-002",
+        "n": 5,
+        "compiled": 4,
+        "testsPassed": 4,
+        "strictPass": 4
+      },
+      {
+        "task": "FR-006",
+        "n": 5,
+        "compiled": 5,
+        "testsPassed": 5,
+        "strictPass": 5
+      },
+      {
+        "task": "ALL",
+        "n": 10,
+        "strictPass": 9
+      }
+    ]
+  },
+  "results": [
+    {
+      "task": "FR-002",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "hauhau-qwen35-9b-q4",
+      "model": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 240587,
+      "promptTokens": 196,
+      "generatedTokens": 5037,
+      "generationTokensPerSecond": 46.91041899032108,
+      "thinkingChars": 14915,
+      "residency": [
+        {
+          "name": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+          "size": 6573155941,
+          "sizeVram": 6573155941,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "hauhau-qwen35-9b-q4",
+      "model": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 219631,
+      "promptTokens": 196,
+      "generatedTokens": 9719,
+      "generationTokensPerSecond": 46.54561874840474,
+      "thinkingChars": 31581,
+      "residency": [
+        {
+          "name": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+          "size": 6573155941,
+          "sizeVram": 6573155941,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "hauhau-qwen35-9b-q4",
+      "model": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 171967,
+      "promptTokens": 196,
+      "generatedTokens": 6696,
+      "generationTokensPerSecond": 47.101963088268064,
+      "thinkingChars": 20191,
+      "residency": [
+        {
+          "name": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+          "size": 6573155941,
+          "sizeVram": 6573155941,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "hauhau-qwen35-9b-q4",
+      "model": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 238083,
+      "promptTokens": 196,
+      "generatedTokens": 10701,
+      "generationTokensPerSecond": 46.60838175502548,
+      "thinkingChars": 35911,
+      "residency": [
+        {
+          "name": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+          "size": 6573155941,
+          "sizeVram": 6573155941,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "hauhau-qwen35-9b-q4",
+      "model": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 192483,
+      "promptTokens": 196,
+      "generatedTokens": 8549,
+      "generationTokensPerSecond": 46.50600276135443,
+      "thinkingChars": 26831,
+      "residency": [
+        {
+          "name": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+          "size": 6573155941,
+          "sizeVram": 6573155941,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "hauhau-qwen35-9b-q4",
+      "model": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 92651,
+      "promptTokens": 291,
+      "generatedTokens": 3830,
+      "generationTokensPerSecond": 46.89456363445357,
+      "thinkingChars": 11610,
+      "residency": [
+        {
+          "name": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+          "size": 6573155941,
+          "sizeVram": 6573155941,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "hauhau-qwen35-9b-q4",
+      "model": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 92069,
+      "promptTokens": 291,
+      "generatedTokens": 3756,
+      "generationTokensPerSecond": 46.60397596435922,
+      "thinkingChars": 10563,
+      "residency": [
+        {
+          "name": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+          "size": 6573155941,
+          "sizeVram": 6573155941,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "hauhau-qwen35-9b-q4",
+      "model": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 85104,
+      "promptTokens": 291,
+      "generatedTokens": 3539,
+      "generationTokensPerSecond": 47.88001913901957,
+      "thinkingChars": 10221,
+      "residency": [
+        {
+          "name": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+          "size": 6573155941,
+          "sizeVram": 6573155941,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "hauhau-qwen35-9b-q4",
+      "model": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 100882,
+      "promptTokens": 291,
+      "generatedTokens": 4318,
+      "generationTokensPerSecond": 47.94694043666404,
+      "thinkingChars": 12656,
+      "residency": [
+        {
+          "name": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+          "size": 6573155941,
+          "sizeVram": 6573155941,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_valid_csv ... ok\ntest test_parse_invalid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "hauhau-qwen35-9b-q4",
+      "model": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 101755,
+      "promptTokens": 291,
+      "generatedTokens": 3479,
+      "generationTokensPerSecond": 51.504348149851744,
+      "thinkingChars": 10246,
+      "residency": [
+        {
+          "name": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+          "size": 6573155941,
+          "sizeVram": 6573155941,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    }
+  ],
+  "contaminationLog": [
+    {
+      "at": "2026-10-16T14:12:44.159Z",
+      "task": "FR-002",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:12:44.484Z",
+      "reason": "foreign model before FR-002|43",
+      "unloaded": [
+        "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:16:24.121Z",
+      "task": "FR-002",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:16:24.391Z",
+      "reason": "foreign model before FR-002|44",
+      "unloaded": [
+        "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:19:16.369Z",
+      "task": "FR-002",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:19:16.609Z",
+      "reason": "foreign model before FR-002|45",
+      "unloaded": [
+        "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:23:14.696Z",
+      "task": "FR-002",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:23:14.931Z",
+      "reason": "foreign model before FR-002|46",
+      "unloaded": [
+        "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:26:27.432Z",
+      "task": "FR-006",
+      "seed": 42,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:26:27.721Z",
+      "reason": "foreign model before FR-006|42",
+      "unloaded": [
+        "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:28:00.385Z",
+      "task": "FR-006",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:28:00.686Z",
+      "reason": "foreign model before FR-006|43",
+      "unloaded": [
+        "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:29:32.776Z",
+      "task": "FR-006",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:29:33.087Z",
+      "reason": "foreign model before FR-006|44",
+      "unloaded": [
+        "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:30:58.194Z",
+      "task": "FR-006",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:30:58.406Z",
+      "reason": "foreign model before FR-006|45",
+      "unloaded": [
+        "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:32:39.318Z",
+      "task": "FR-006",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:32:39.677Z",
+      "reason": "foreign model before FR-006|46",
+      "unloaded": [
+        "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T14:34:21.695Z",
+      "reason": "final cleanup for local-32k-v20261016 hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+      "unloaded": [
+        "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M"
+      ]
+    }
+  ],
+  "infrastructureFailures": []
+}

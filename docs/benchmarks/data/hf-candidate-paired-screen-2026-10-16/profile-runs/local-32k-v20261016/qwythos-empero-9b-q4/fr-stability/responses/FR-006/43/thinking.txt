@@ -1,0 +1,82 @@
+Alright, I need to implement the specification for FR-006. Let me read through the requirements carefully to make sure I don't miss anything.
+
+First, I have to define a struct called GpuStats. It should derive Debug and PartialEq. The fields are: name (String), vram_used_mb (u64), vram_total_mb (u64), temp_c (u32), util_pct (u32). All public. That's straightforward.
+
+Next, the function signature: pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>. So it takes a string slice and returns either a GpuStats or an error string.
+
+The parsing logic: Given a CSV line like "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25", split by commas, parse each part. The first part is the name, which is a string, so no parsing needed. The rest are numbers: vram_used_mb, vram_total_mb, temp_c, util_pct. They need to be parsed from strings into the appropriate integer types. I should handle errors if the number of columns is less than 5, or if any of the numeric strings fail to parse. The spec says to return Err(String) in those cases, not panic.
+
+Guard rails: I must not use unwrap(), expect(), or panic! anywhere. So I have to use match or if-else to handle errors from parsing. Also, the function should propagate errors properly.
+
+Traceability: Include a comment '// trace:implements FR-006' directly before the function declaration. So I need to add that comment right above the function definition.
+
+Output: Both the struct and the function must be inside a single ```rust code block. That means I should write the struct first, then the function.
+
+Let me think about the parsing steps:
+
+1. Split the line by commas. I'll use line.split(',').collect::<Vec<&str>>() to get a vector of strings.
+2. Check if the length is at least 5. If not, return an error like "Invalid CSV: expected 5 columns".
+3. Extract name from the first element. The name might contain spaces, but since it's a String, I can just take it as is.
+4. Parse the remaining four elements into numbers. I'll need to convert each to a string first (they're &str), then parse into u64 or u32. For each parse, I should use a method that returns a Result, like u64::from_str_radix(s, 10).unwrap_or_else(|_| ...). But since I can't unwrap, I have to handle the error. I could do something like u64::from_str_radix(s, 10).map_err(|_| "Failed to parse integer"). That way I propagate the error.
+5. After parsing all four numbers, construct the GpuStats struct and return Ok(...).
+
+I need to be careful with the order of parsing: the CSV is "name, vram_used_mb, vram_total_mb, temp_c, util_pct". So index 1 is vram_used_mb (u64), index 2 is vram_total_mb (u64), index 3 is temp_c (u32), index 4 is util_pct (u32).
+
+I also need to make sure that the error messages are meaningful. For instance, if the CSV has fewer than 5 columns, I'll return an error. If any numeric field fails to parse, I'll return an error with a message like "Failed to parse integer". That matches the spec.
+
+Now, let me draft the code.
+
+First, the struct:
+
+```rust
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+```
+
+That looks correct.
+
+Next, the function:
+
+```rust
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let parts: Vec<&str> = line.split(',').collect();
+    if parts.len() < 5 {
+        return Err("Invalid CSV: expected 5 columns".to_string());
+    }
+    let name = parts[0].to_string();
+    let vram_used_mb = parts[1].parse::<u64>()
+        .map_err(|_| "Failed to parse integer".to_string())?;
+    let vram_total_mb = parts[2].parse::<u64>()
+        .map_err(|_| "Failed to parse integer".to_string())?;
+    let temp_c = parts[3].parse::<u32>()
+        .map_err(|_| "Failed to parse integer".to_string())?;
+    let util_pct = parts[4].parse::<u32>()
+        .map_err(|_| "Failed to parse integer".to_string())?;
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}
+```
+
+Wait, I used `parse::<u64>()` which returns a Result<u64, ParseIntError>. I'm mapping it to a custom error string. That's fine, but I need to make sure that I'm not using unwrap or expect. The `?` operator is allowed, as long as I'm handling errors properly. The `map_err` is also okay. So this should satisfy the guard rails.
+
+One thing to consider: the name field is a String. If the CSV contains extra spaces around the name, should I trim? The spec doesn't mention trimming, but it's probably a good idea to keep it as is, because the name might intentionally have spaces. However, the example "NVIDIA GeForce RTX 3060" doesn't have spaces after the commas, so the split will give clean strings. I'll just take the first part as name without trimming, matching the spec exactly.
+
+Now, I need to output both the struct and the function inside a single ```rust code block. So I'll combine them.
+
+Also, I need to ensure that the comment is directly before the function declaration. So the comment should be right above the `pub fn parse_gpu_csv` line.
+
+Let me double-check the guard rails: no unwrap, no expect, no panic. I'm using `?` and `map_err`, which are safe. The error handling is robust.
+
+I think that's all. Let me write the final code.

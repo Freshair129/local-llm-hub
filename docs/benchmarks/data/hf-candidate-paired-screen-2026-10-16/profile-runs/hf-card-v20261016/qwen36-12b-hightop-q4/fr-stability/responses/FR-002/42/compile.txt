@@ -1,0 +1,14 @@
+error: mismatched closing delimiter: `}`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwen36-12b-hightop-q4\fr-stability\responses\FR-002\42\test.rs:7:18
+   |
+ 3 | pub fn normalize_model_name(raw: &str) -> String {
+   |                                                  - closing delimiter possibly meant for this
+...
+ 7 |     if !raw.is_in(["-q4_0", "-q4_k_m", "-q4_k_s", "-q4_k_s"] {
+   |                  ^ unclosed delimiter
+...
+11 | }
+   | ^ mismatched closing delimiter
+
+error: aborting due to 1 previous error
+

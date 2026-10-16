@@ -1,0 +1,37 @@
+```rust
+pub fn normalize_model_name(raw: &str) -> String {
+    // trace:implements FR-002
+    let mut name = raw.trim();
+    
+    // Strip registry prefixes
+    if name.starts_with("registry.ollama.ai/library/") {
+        name = &name[23..];
+    } else if name.starts_with("library/") {
+        name = &name[8..];
+    } else if name.starts_with("hf.co/") {
+        name = &name[6..];
+    }
+    
+    // Strip quantization suffixes (case-insensitive)
+    let len = name.len();
+    let lower_check = name.to_lowercase();
+    
+    // Check for suffixes with colon prefix (e.g., ":q4_0")
+    if lower_check.ends_with(":q4_0") {
+        name = &name[..len - 5];
+    } else if lower_check.ends_with(":q4_k_m") {
+        name = &name[..len - 8];
+    } else if lower_check.ends_with(":q4_k_s") {
+        name = &name[..len - 8];
+    } else if lower_check.ends_with("-q4_0") {
+        name = &name[..len - 5];
+    } else if lower_check.ends_with("-q4_k_m") {
+        name = &name[..len - 8];
+    } else if lower_check.ends_with("-q4_k_s") {
+        name = &name[..len - 8];
+    }
+    
+    // Convert to lowercase
+    name.to_lowercase()
+}
+```

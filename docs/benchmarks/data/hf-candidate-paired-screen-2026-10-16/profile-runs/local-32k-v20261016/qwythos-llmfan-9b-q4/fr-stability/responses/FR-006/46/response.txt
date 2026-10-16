@@ -1,0 +1,25 @@
+```rust
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let mut iter = line.split(',').map(|s| s.trim());
+    let name = iter.next().ok_or("not enough columns")?.to_string();
+    let vram_used = iter.next().ok_or("not enough columns")?.parse::<u64>()
+        .map_err(|e| format!("failed to parse vram_used: {}", e))?;
+    let vram_total = iter.next().ok_or("not enough columns")?.parse::<u64>()
+        .map_err(|e| format!("failed to parse vram_total: {}", e))?;
+    let temp = iter.next().ok_or("not enough columns")?.parse::<u32>()
+        .map_err(|e| format!("failed to parse temp: {}", e))?;
+    let util = iter.next().ok_or("not enough columns")?.parse::<u32>()
+        .map_err(|e| format!("failed to parse util: {}", e))?;
+    Ok(GpuStats { name, vram_used_mb: vram_used, vram_total_mb: vram_total, temp_c: temp, util_pct: util })
+}
+```

@@ -1,0 +1,32 @@
+error: mismatched closing delimiter: `}`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwen36-12b-hightop-q4\fr-stability\responses\FR-006\44\test.rs:27:23
+   |
+26 |         if line_len < 4 {
+   |                         - closing delimiter possibly meant for this
+27 |             return Err(std::str::parse(line, &[std::str::parse(line)];);
+   |                       ^ unclosed delimiter
+28 |         }
+   |         ^ mismatched closing delimiter
+
+error: unexpected closing delimiter: `)`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwen36-12b-hightop-q4\fr-stability\responses\FR-006\44\test.rs:38:63
+   |
+20 | pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+   |                                                              - the nearest open delimiter
+21 |     // Ensure the CSV line has at least 5 columns
+22 |     if let line_len = std::str::len(line)) {
+   |                                          - missing open `(` for this delimiter
+23 |         if line_len < 5 {
+24 |             return Err(std::str::parse(line, &[std::str::parse(line]));
+   |                                                               -    - missing open `[` for this delimiter
+   |                                                               |
+   |                                                               the nearest open delimiter
+...
+38 |     let matches = std::matches(line, &[std::str::parse(line]););
+   |                                                       -    -  ^ unexpected closing delimiter
+   |                                                       |    |
+   |                                                       |    missing open `[` for this delimiter
+   |                                                       the nearest open delimiter
+
+error: aborting due to 2 previous errors
+

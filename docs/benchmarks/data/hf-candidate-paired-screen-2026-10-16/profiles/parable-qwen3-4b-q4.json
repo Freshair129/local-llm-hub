@@ -1,0 +1,8 @@
+{
+  "modelKey": "parable-qwen3-4b-q4", "seeds": [42, 43, 44, 45, 46],
+  "modelCardUrl": "https://huggingface.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF",
+  "profiles": {
+    "local-32k": { "id": "local-32k-v20261016", "label": "RTX 3060 12GB: shared Mellum sampler with 32K context", "num_ctx": 32768, "num_predict": 81920, "options": { "temperature": 0.6, "top_p": 0.95, "top_k": 20, "repeat_penalty": 1.0 }, "systemPrompt": null, "settingsSource": "Existing Mellum-matched sampling profile; context raised from 16K for this hardware profile." },
+    "hf-card": { "id": "hf-card-v20261016", "label": "Parable card with inherited Qwen3-4B thinking sampler; matched 16K context", "num_ctx": 16384, "num_predict": 81920, "options": { "temperature": 0.6, "top_p": 0.95, "top_k": 20, "min_p": 0.0, "repeat_penalty": 1.0 }, "systemPrompt": null, "settingsSource": "Parable card does not give sampler values; inherited the official Qwen3-4B thinking sampler (temperature=0.6, top_p=0.95, top_k=20, min_p=0). Context is matched at 16K." }
+  }
+}

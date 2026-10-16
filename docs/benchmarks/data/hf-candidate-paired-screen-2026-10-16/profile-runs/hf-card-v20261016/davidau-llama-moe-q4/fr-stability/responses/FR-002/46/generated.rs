@@ -1,0 +1,11 @@
+// trace:implements FR-002
+
+pub fn normalize_model_name(raw: &str) -> String {
+    let raw = raw.replace("registry.ollama.ai/library/", "");
+    let raw = raw.replace("library/", "");
+    let raw = raw.replace("hf.co/", "");
+    let raw = raw.to_lowercase();
+    let raw = raw.strip_suffix("-q4_0").or_else(|_| raw).strip_suffix("-q4_k_m").or_else(|_| raw).strip_suffix("-q4_k_s").or_else(|_| raw).strip_suffix(":q4_0").or_else(|_| raw).strip_suffix(":q4_k_m").or_else(|_| raw).strip_suffix(":q4_k_s").or_else(|_| raw);
+
+    raw
+}

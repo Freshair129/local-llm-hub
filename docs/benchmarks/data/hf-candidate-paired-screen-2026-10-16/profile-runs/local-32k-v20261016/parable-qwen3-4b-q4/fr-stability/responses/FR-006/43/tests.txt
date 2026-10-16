@@ -1,0 +1,19 @@
+
+running 2 tests
+test test_parse_invalid_csv ... ok
+test test_parse_valid_csv ... FAILED
+
+failures:
+
+---- test_parse_valid_csv stdout ----
+
+thread 'test_parse_valid_csv' (24916) panicked at <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\parable-qwen3-4b-q4\fr-stability\responses\FR-006\43\test.rs:33:5:
+assertion failed: res.is_ok()
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    test_parse_valid_csv
+
+test result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+

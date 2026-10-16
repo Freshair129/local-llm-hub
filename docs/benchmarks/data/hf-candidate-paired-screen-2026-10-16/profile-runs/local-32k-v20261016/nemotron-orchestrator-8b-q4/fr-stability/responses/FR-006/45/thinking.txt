@@ -1,0 +1,40 @@
+The user wants me to implement a Rust struct and function according to specific requirements. Let me carefully parse each of their instructions:
+
+1. Define the GpuStats struct with exact fields and attributes:
+   - pub struct GpuStats {
+   -     pub name: String,
+   -     pub vram_used_mb: u64,
+   -     pub vram_total_mb: u64,
+   -     pub temp_c: u32,
+   -     pub util_pct: u32,
+   - }
+   - With #[derive(Debug, PartialEq)]
+
+2. Function signature: pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>
+
+3. Given a CSV line like "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25", parse it into GpuStats.
+
+4. Robust error handling: Return Err(String) if columns are fewer than 5 or numbers fail to parse.
+
+5. Guard rails: STRICTLY FORBIDDEN to use unwrap(), expect(), or panic! Return Err instead.
+
+6. Traceability: Include comment '// trace:implements FR-006' directly before function declaration.
+
+7. Output BOTH 'pub struct GpuStats' and 'pub fn parse_gpu_csv' inside the ```rust code block.
+
+Let me implement this:
+
+For the struct:
+- Derive Debug and PartialEq
+- All fields are public
+- Correct types: u64 for MB values, u32 for temperature and utilization
+
+For the function:
+- Split the line by commas
+- Check we have exactly 5 columns
+- Parse each number column to appropriate type
+- Return Ok with GpuStats on success
+- Return Err with meaningful message on failure
+- Never use unwrap(), expect(), or panic!()
+
+Let me write this properly:

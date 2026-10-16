@@ -1,0 +1,197 @@
+The user wants me to implement a Rust function `normalize_model_name` that takes a raw model name string and returns a normalized version. The spec includes several steps: strip registry prefixes, strip quantization suffixes, convert to lowercase, and obey guard rails (no unwrap/expect/panic). I need to produce only the final Rust code, not any surrounding explanation or identity statements. The user specifically said "Output ONLY valid Rust code inside a ```rust code block." So I must ensure the output is exactly that block with no extra text.
+
+First, consider the function signature: `pub fn normalize_model_name(raw: &str) -> String`. This is straightforward.
+
+Next, strip registry prefixes: `'registry.ollama.ai/library/', 'library/', 'hf.co/'`. These are string literals to be removed from the front of the input if present. Since they may appear at the start, I can check if the raw string starts with any of these prefixes using `raw.starts_with` and then slice off the prefix length.
+
+Third, strip quantization suffixes: `-q4_0`, `-q4_k_m`, `-q4_k_s`, `:q4_0`, `:q4_k_m`, `:q4_k_s`. These are case-insensitive, so I should convert the raw string to lowercase before checking for these suffixes, or check both cases. However, the spec says "case-insensitive", meaning I should treat them as case-insensitive matches. Since we will eventually lower-case the result, it's probably fine to just lower-case after stripping prefixes and then strip suffixes that may appear in either case. But note that the suffixes themselves contain underscores, hyphens, and colons. They can appear at the end of the string. So after lower-casing, I can check if the string ends with any of these suffixes (converted to lowercase for comparison) and strip them.
+
+Fourth, convert result to lowercase. This could be done after stripping prefixes and suffixes, or before. Since the function must return a String that is fully lowercased, it's simplest to do `raw.to_lowercase()` at the end, but need to ensure we don't double-lowercase. However, the spec says "convert result to lowercase" as step 4, after steps 1-3. So I can strip prefixes and suffixes from the original string (or from a lowercased version?). The spec says "Strip quantization suffixes: -q4_0, -q4_k_m, -q4_k_s, :q4_0, :q4_k_m, :q4_k_s (case-insensitive)". This suggests that we should look for these suffixes in a case-insensitive way. The easiest approach is to convert the entire string to lowercase first, then strip prefixes and suffixes (since they will be exactly matching after lowercasing). However, the spec order says: 1. Strip registry prefixes; 2. Strip quantization suffixes; 3. Convert result to lowercase. So we should do them in that order. But if we convert to lowercase after stripping suffixes, then suffixes may be case-insensitive, but we can just check for both cases. However, the simplest solution that meets the spec is to lower-case at the end. So we must preserve the original case for the prefix/suffix removal steps and only lower-case at the end.
+
+Thus algorithm:
+- Let `raw` be input.
+- Strip prefixes: if `raw` starts with any of the prefixes, replace `raw = &raw[prefix_len..]`. Since there could be multiple prefixes (like "registry.ollama.ai/library/" and "library/"), we need to check each in order? The spec says "strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/'". It doesn't specify order, but typically we want to strip any of them. Since these strings are distinct, we can just iterate over the list of prefixes and if one matches at the start, remove it. However, there is a nuance: "registry.ollama.ai/library/" is longer than "library/". If the input could be "library/model" or "registry.ollama.ai/library/model", we want to strip whichever matches. Since they are not overlapping, we can check them in any order and break after first match. But we must ensure that we don't double-strip if both match (which shouldn't happen because they are distinct). So we can define a function `strip_prefixes(raw)` that returns the string with all prefixes removed.
+
+- Strip suffixes: after prefix removal, check if `raw` ends with any of the suffix strings (case-insensitive). Since we haven't lowercased yet, we need to compare case-insensitively. So we can convert the suffix list to a set of lowercased versions and also keep original for matching? Or just compare raw string to each suffix after lowercasing: `raw.to_lowercase().ends_with(suffix.to_lowercase())`. But we must ensure that we remove the suffix from the original (non-lowercased) string. So we can iterate over each suffix (original case), compute its lowercase version, and if the lowercased raw ends with that suffix's lowercase, then find the position of the suffix in raw (case-insensitive). However, `str::ends_with` is case-sensitive. We could use `raw.to_lowercase()` to compare, but we need to strip from original raw. A simple approach: after prefix removal, convert raw to lowercase for suffix checking and stripping, then at the end lower-case it again? That would double-lower-case. So maybe we can strip suffixes in a case-insensitive manner by first converting raw to lowercase for matching, then map back to original? That's messy.
+
+Simplify: The spec says "Strip quantization suffixes: -q4_0, -q4_k_m, -q4_k_s, :q4_0, :q4_k_m, :q4_k_s (case-insensitive)". Since we will ultimately lower-case the result, it's okay to just treat them case-insensitively and strip them from the original string. So we can implement a loop that checks each suffix in its original case, but also check the lowercased version: `if raw.to_lowercase().ends_with(suffix.to_lowercase()) { let pos = raw.len() - suffix.len(); raw = &raw[..pos]; continue; }`. However, there is a nuance: the suffix could be part of a longer string that matches case-insensitively but not exactly. For example, raw "Model-q4_0" lowercased is "model-q4_0". The suffix "-q4_0" lowercased is "-q4_0". So `raw.to_lowercase().ends_with("-q4_0")` is true. Then we need to strip the suffix from raw: `raw = &raw[..raw.len() - suffix.len()]`. This works if suffix length matches the original case (since we used original suffix string). But the original suffix may be "-q4_0" with hyphen and underscores, which are ASCII, so length is same. So we can just use original suffix string to determine position: `raw = &raw[..raw.len() - suffix.len()]`. That's fine because the suffix string is exactly the characters we want to strip; even if raw contains uppercase letters in the suffix (like "Model-Q4_0"), the suffix string "-q4_0" will not match case-sensitively, but we need case-insensitive removal. So we need to handle that.
+
+Thus a robust approach: after stripping prefixes (which are ASCII and case-sensitive), we can convert raw to lowercase for suffix checking. Then we need to strip the suffix from the original raw string. Since we have lowercased raw, we can compute the position of the suffix in lowercased raw using `raw.to_lowercase().ends_with(suffix.to_lowercase())`. If true, we can compute the index where the suffix starts: find the first occurrence of suffix (case-insensitive) at the end. That's a bit more complex. But we can just use `raw.to_lowercase()` and then strip from that string, but we must preserve original case for the final output? The spec says "convert result to lowercase" after stripping suffixes, so we can just lower-case the final string after all removals. So we can do all removals on a lowercased version of raw, then at the end lower-case it again (which is no-op). That would be fine. However, the spec says "Strip prefixes: ...", which are case-sensitive. But if we lower-case raw before stripping prefixes, we may lose case information needed for prefix detection? The prefixes are all ASCII and contain lowercase letters, but the input could have uppercase letters in the prefix (like "Registry.ollama.ai/library/"). The spec says to strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/'. It does not say case-insensitive for prefixes, so we should treat them as exact matches. So we must check raw for these prefixes exactly as given. So we can't lower-case before prefix stripping.
+
+Thus the order: first strip prefixes (exact match). Then strip suffixes (case-insensitive). Then lower-case.
+
+Implementation approach:
+- Define a list of prefixes `['registry.ollama.ai/library/', 'library/', 'hf.co/']`.
+- Iterate over them: if `raw.starts_with(prefix)`, then `raw = &raw[prefix.len()..]`. Break after first because they are distinct.
+
+- Then define a list of suffixes `['-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s']`.
+- For each suffix, compute `suffix_lc = suffix.to_lowercase()`. If `raw.to_lowercase().ends_with(suffix_lc)`, then we need to strip the suffix from raw. Since raw may have uppercase letters in the suffix (like "Model-Q4_0"), we can find the start index of the suffix case-insensitively: we could use `raw.len() - suffix.len()` after lowercasing? But the length of suffix is constant regardless of case. So we can compute `pos = raw.len() - suffix.len()`. If the lowercased raw ends with suffix_lc, then the original raw ends with either suffix or a case variant. We need to remove exactly the suffix characters from original raw. The simplest approach: just lower-case raw for removal: `raw_lc = raw.to_lowercase()`. Then we can strip suffixes from raw_lc, and after all removals we will have a lowercased string (since we lowercased). That's okay because we will later lower-case again (no-op). So we could just convert to lowercase at the start of suffix removal. But the spec says step 4 is convert result to lowercase; we could do it earlier, but that might be okay as long as we still produce correct output. However, we must ensure that we don't inadvertently strip a prefix that was case-insensitive? The spec says prefixes are exact match (case-sensitive). If we lower-case raw for suffix removal, we must keep original raw for prefix removal. So we can just do prefix removal on original raw, then suffix removal on lowercased version of raw (or we can convert to lowercase after prefix removal and before suffix removal). That would be fine because we will lower-case at the end anyway.
+
+But there is a nuance: some suffixes start with a colon `:`. For example, `:q4_0`. This could appear after the model name. If we lower-case raw, the colon remains. So it's okay.
+
+Thus algorithm:
+```rust
+pub fn normalize_model_name(raw: &str) -> String {
+    // trace:implements FR-002
+    let prefixes = ["registry.ollama.ai/library/", "library/", "hf.co/"];
+    let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+    // Strip prefixes (case-sensitive)
+    for prefix in &prefixes {
+        if raw.starts_with(prefix) {
+            raw = &raw[prefix.len()..];
+            break;
+        }
+    }
+    // Convert to lowercase for suffix stripping and final output
+    let mut normalized = raw.to_lowercase();
+    for suffix in &suffixes {
+        let suffix_lc = suffix.to_lowercase();
+        if normalized.ends_with(&suffix_lc) {
+            normalized = &normalized[..normalized.len() - suffix_lc.len()];
+        }
+    }
+    // Convert result to lowercase (already done, but spec says step 4)
+    normalized
+}
+```
+
+But we need to ensure guard rails: no unwrap/expect/panic. The code uses `raw = &raw[prefix.len()..]` which is safe because we only slice after confirming starts_with. Similarly `normalized = &normalized[..normalized.len() - suffix_lc.len()]` is safe because ends_with ensures the slice length is non-negative.
+
+Now, check that the prefixes are correct: `'registry.ollama.ai/library/'`, `'library/'`, `'hf.co/'`. In Rust strings, these are literal strings with quotes. The spec uses single quotes in description but we can use double quotes in code.
+
+Suffixes: `-q4_0`, `-q4_k_m`, `-q4_k_s`, `:q4_0`, `:q4_k_m`, `:q4_k_s`. In Rust, these are also string literals.
+
+Now consider edge cases: If raw is empty after prefix removal? That's fine; the function will just return empty string.
+
+Now think about case-insensitivity for suffixes: The spec says "Strip quantization suffixes: '-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s' (case-insensitive)". So we must treat them case-insensitively. Our approach lowercases both raw and suffix before comparison, so that's correct.
+
+Now think about the order: The spec says "Strip registry prefixes: ...", "Strip quantization suffixes: ...", "Convert result to lowercase". In our code we first strip prefixes (case-sensitive), then we convert to lowercase for suffix stripping (which effectively includes the final lowercasing). That's okay. However, note that after prefix removal we might still have uppercase letters. Converting to lowercase before suffix stripping is fine because suffixes are case-insensitive, and we will lower-case anyway at the end. So this meets spec.
+
+Now consider potential double-lowercase: The final output should be lowercased; we already lowercased before suffix stripping, so final output is lowercased. That's correct.
+
+Now think about guard rails: No unwrap, no expect, no panic. Our code uses only safe operations.
+
+Now think about the traceability comment: "Include comment '// trace:implements FR-002' directly before function declaration." So we must place that comment exactly before `pub fn normalize_model_name`. In our snippet we have it inside the function body, but spec says directly before function declaration. So we need to write:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    ...
+}
+```
+
+Thus final code block must start with that comment line, then the function definition. The output should be only the code block. So we must not include any other text. We'll produce exactly the Rust code inside triple backticks with language identifier "rust". Ensure no extra newlines outside the block.
+
+Now consider formatting: The spec says "Output ONLY valid Rust code inside a ```rust code block." So we must output exactly that block, no additional explanation.
+
+One more nuance: The function signature is `pub fn normalize_model_name(raw: &str) -> String`. That's correct.
+
+Now think about potential bug: In the prefix removal loop, we break after first match. If a string could match multiple prefixes (e.g., "library/model" also matches "registry.ollama.ai/library/"? No, they are distinct). So it's fine.
+
+Now think about suffix removal loop: we iterate over each suffix and remove if ends_with. However, after removing one suffix, the normalized string may end with another suffix. Example: model name "model-q4_0:q4_k_m". After removing "-q4_0", we get "model:q4_k_m". That still ends with ":q4_k_m", so we will remove that suffix. This matches spec? It says strip quantization suffixes (list). It doesn't specify order of removal or multiple occurrences. But typical model names have only one suffix. However, the code will handle multiple if needed. That's fine.
+
+Now think about colon suffix: The suffix list includes `:q4_0`, `:q4_k_m`, `:q4_k_s`. These start with a colon. So after prefix removal, we might have something like "model:q4_0". Lowercased, ends_with `:q4_0`? Yes. Remove that suffix. That's correct.
+
+Now think about case-insensitivity: The suffix list includes `-q4_0`. If raw has "-Q4_0", lowercased it matches. Good.
+
+Now think about the guard rails: no unwrap/expect/panic. Our code uses only safe ops.
+
+Now think about performance: Not required.
+
+Now think about final output: Must be exactly the Rust code block with comment and function. So produce something like:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let prefixes = ["registry.ollama.ai/library/", "library/", "hf.co/"];
+    let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+    // Strip prefixes (case-sensitive)
+    for prefix in &prefixes {
+        if raw.starts_with(prefix) {
+            raw = &raw[prefix.len()..];
+            break;
+        }
+    }
+    // Convert to lowercase for suffix stripping and final output
+    let mut normalized = raw.to_lowercase();
+    for suffix in &suffixes {
+        let suffix_lc = suffix.to_lowercase();
+        if normalized.ends_with(&suffix_lc) {
+            normalized = &normalized[..normalized.len() - suffix_lc.len()];
+        }
+    }
+    // Convert result to lowercase (already done, but spec says step 4)
+    normalized
+}
+```
+
+That's correct.
+
+Now consider that the spec says "Strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/'". It doesn't mention any ordering. The code uses a vector and iterates in order; that's fine.
+
+Now think about potential bug: If raw is something like "registry.ollama.ai/library/model", after prefix removal we get "model". Good. If raw is "library/model", after prefix removal we get "model". Good. If raw is "hf.co/library/model", after prefix removal we get "library/model"? Actually "hf.co/" is a prefix, not "hf.co/library/". The spec says "hf.co/" as prefix, so "hf.co/library/model" would have "hf.co/" stripped leaving "library/model". That seems correct.
+
+Now think about suffix removal: If raw is "model-q4_0", after lowercasing and stripping suffix "-q4_0", we get "model". Good.
+
+Now think about case where raw has no prefix or suffix; it just lowercases. Good.
+
+Now think about guard rails: The code uses `raw = &raw[prefix.len()..]` which is safe because we only slice after confirming starts_with. That's fine.
+
+Now think about the comment: It must be exactly `// trace:implements FR-002`. No extra spaces. Good.
+
+Now think about formatting: Use standard Rust style. That should be fine.
+
+Now consider that the spec says "Only bring up your identity if the user asks." Not relevant.
+
+Now think about final output: The user wants only valid Rust code inside a ```rust block. So we must output exactly that block, no other text. We'll produce the block as described.
+
+One more nuance: The function signature includes `pub fn normalize_model_name(raw: &str) -> String`. That's correct. In Rust, `String` is owned. Our code returns a `String` from `normalized`. Since we never use `to_string()` on a slice directly, but we assign slices to `String`? Actually `raw` is `&str`, and after slicing we get a new `&str`. In the loop, we assign `raw = &raw[prefix.len()..];` which is fine. Then we convert to `let mut normalized = raw.to_lowercase();` which returns a `String`. Then we slice `normalized = &normalized[..normalized.len() - suffix_lc.len()];` which yields a `&str`. At the end we return `normalized`, but it's a `&str` not a `String`. The function signature expects a `String`. That would be a type mismatch. So we need to convert final slice back to `String`. Actually in Rust, returning a `String` from a function that builds slices is fine if you clone or use `to_string()`. But the function signature says `-> String`. If we just return `normalized`, which is a `&str`, it won't compile. So we must ensure final value is owned `String`. We can do `let normalized = raw.to_lowercase();` and then after stripping suffixes we might get a `&str`. But we could just keep using `String` for the whole process: we can start with `let mut s = raw.to_string();` and then manipulate it. That would be safer.
+
+Thus adjust code to use an owned `String` from the start, so that slicing returns a `String`. However, `String` has methods like `.to_lowercase()` which returns a new `String`. Then slicing a `String` yields a `&str`, but we can assign it back to a `String` via cloning or using `.into()`. Actually `s = s[..s.len() - suffix_lc.len()].to_string();` would be safe. Or we could use `s.truncate(s.len() - suffix_lc.len())`. That's simpler.
+
+Thus rewrite the function to operate on an owned `String` after lowercasing. But we need to preserve case for prefix removal, which is case-sensitive. So we must keep original raw as a `&str` for prefix removal, but after that we can convert to owned `String` and then lower-case. Or we can just clone the raw string early into a mutable `String` and then strip prefixes on it (which is fine because we still have original case). Then we can lower-case after stripping suffixes.
+
+But spec says "convert result to lowercase" as step 4, so we must ensure final output is lowercased. So we could just do `raw.to_lowercase()` at the end. But we need to be careful about type.
+
+Simplify: Use a mutable owned `String` from the start: `let mut s = raw.to_string();`. Then strip prefixes on it (still case-sensitive). Then strip suffixes (case-insensitive) by converting to lowercase for comparison and using `.truncate`. Finally return `s`. That will satisfy all steps.
+
+Now adjust code accordingly:
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    let prefixes = ["registry.ollama.ai/library/", "library/", "hf.co/"];
+    let suffixes = ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"];
+    let mut s = raw.to_string();
+
+    // Strip prefixes (case-sensitive)
+    for prefix in &prefixes {
+        if s.starts_with(prefix) {
+            s.truncate(s.len() - prefix.len());
+            break;
+        }
+    }
+
+    // Convert to lowercase for suffix stripping and final output
+    let mut normalized = s.to_lowercase();
+
+    for suffix in &suffixes {
+        let suffix_lc = suffix.to_lowercase();
+        if normalized.ends_with(&suffix_lc) {
+            normalized.truncate(normalized.len() - suffix_lc.len());
+        }
+    }
+
+    // Convert result to lowercase (already done)
+    normalized
+}
+```
+
+Now check that `normalized` is a `String` because we did `let mut normalized = s.to_lowercase();`. That returns a `String`. Then we call `.truncate` on it, which is fine. At the end we return `normalized`, which matches the signature. Good.
+
+Now think about guard rails: No unwrap/expect/panic. We used only safe operations.
+
+Now think about traceability comment: It must be exactly `// trace:implements FR-002`. So we need to ensure that line is before the function declaration and not inside. That's correct.
+
+Now think about formatting of code block: Use triple backticks with language identifier "rust". Ensure no extra whitespace outside. Provide final answer.
+
+Now produce final output accordingly.

@@ -1,0 +1,83 @@
+error[E0277]: `?` couldn't convert the error to `String`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-006\42\test.rs:20:54
+   |
+13 | pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+   |                                     ------------------------ expected `String` because of this
+...
+20 |     let vram_used_mb = u64::from_str(parts[1].trim())?;
+   |                        ------------------------------^ the trait `From<ParseIntError>` is not implemented for `String`
+   |                        |
+   |                        this can't be annotated with `?` because it has type `Result<_, ParseIntError>`
+   |
+   = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+   = help: `String` implements trait `From<T>`:
+             From<&String>
+             From<&mut str>
+             From<&str>
+             From<Box<str>>
+             From<Cow<'_, str>>
+             From<char>
+
+error[E0277]: `?` couldn't convert the error to `String`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-006\42\test.rs:21:55
+   |
+13 | pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+   |                                     ------------------------ expected `String` because of this
+...
+21 |     let vram_total_mb = u64::from_str(parts[2].trim())?;
+   |                         ------------------------------^ the trait `From<ParseIntError>` is not implemented for `String`
+   |                         |
+   |                         this can't be annotated with `?` because it has type `Result<_, ParseIntError>`
+   |
+   = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+   = help: `String` implements trait `From<T>`:
+             From<&String>
+             From<&mut str>
+             From<&str>
+             From<Box<str>>
+             From<Cow<'_, str>>
+             From<char>
+
+error[E0277]: `?` couldn't convert the error to `String`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-006\42\test.rs:22:48
+   |
+13 | pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+   |                                     ------------------------ expected `String` because of this
+...
+22 |     let temp_c = u32::from_str(parts[3].trim())?;
+   |                  ------------------------------^ the trait `From<ParseIntError>` is not implemented for `String`
+   |                  |
+   |                  this can't be annotated with `?` because it has type `Result<_, ParseIntError>`
+   |
+   = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+   = help: `String` implements trait `From<T>`:
+             From<&String>
+             From<&mut str>
+             From<&str>
+             From<Box<str>>
+             From<Cow<'_, str>>
+             From<char>
+
+error[E0277]: `?` couldn't convert the error to `String`
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-006\42\test.rs:23:50
+   |
+13 | pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+   |                                     ------------------------ expected `String` because of this
+...
+23 |     let util_pct = u32::from_str(parts[4].trim())?;
+   |                    ------------------------------^ the trait `From<ParseIntError>` is not implemented for `String`
+   |                    |
+   |                    this can't be annotated with `?` because it has type `Result<_, ParseIntError>`
+   |
+   = note: the question mark operation (`?`) implicitly performs a conversion on the error value using the `From` trait
+   = help: `String` implements trait `From<T>`:
+             From<&String>
+             From<&mut str>
+             From<&str>
+             From<Box<str>>
+             From<Cow<'_, str>>
+             From<char>
+
+error: aborting due to 4 previous errors
+
+For more information about this error, try `rustc --explain E0277`.

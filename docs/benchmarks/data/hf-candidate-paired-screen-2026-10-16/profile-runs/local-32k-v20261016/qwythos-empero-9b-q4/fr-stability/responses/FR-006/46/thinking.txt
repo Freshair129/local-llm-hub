@@ -1,0 +1,78 @@
+The user has asked for a Rust implementation that follows a specific set of requirements, labeled as FR-006. I need to produce a code block that contains both the struct definition and the function, with proper error handling, traceability comments, and adherence to the guard rails (no unwrap/expect/panic). I must also ensure that the output includes only the requested code block and not any extraneous commentary.
+
+First, I should examine the struct definition. The spec says:
+
+```
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+```
+
+I need to copy this exactly, preserving the derive macros and field types. The struct must be public, and the fields must be public as well. No modifications are allowed.
+
+Next, the function signature is:
+
+```
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>
+```
+
+I must include the traceability comment `// trace:implements FR-006` directly before the function declaration, as per requirement 6.
+
+Now, the parsing logic. The CSV line is expected to have five comma-separated values: name, vram_used_mb, vram_total_mb, temp_c, util_pct. The name is a string, so I can split it directly. The numeric fields must be parsed as u64, u64, u32, u32 respectively. If the split yields fewer than five parts, I must return an Err(String) describing the error. If any of the numeric strings fail to parse (e.g., non-numeric characters), I must also return an Err(String). I must not use unwrap, expect, or panic. So I will use `match` on the number of parts, and then match on each parsing operation, returning Err with appropriate messages.
+
+I need to ensure that the error messages are descriptive: for insufficient columns, maybe "Expected 5 columns, got {n}". For parsing errors, maybe "Failed to parse column {i} as {type}" where type is the Rust type name.
+
+Now, I need to construct the struct from the parsed values. Since the struct fields are public, I can directly construct it with `GpuStats { name: name, vram_used_mb: vram_used, vram_total_mb: vram_total, temp_c: temp, util_pct: util }`.
+
+I must also consider that the spec says "Return Err(String) if columns are fewer than 5 or numbers fail to parse." So any failure must be caught and returned as an Err.
+
+Now, I must ensure that the final output contains only the code block with the struct and function, no other text. I must not include any additional explanation or commentary. The spec also says "Output BOTH 'pub struct GpuStats' and 'pub fn parse_gpu_csv' inside the ```rust code block." So I must include both.
+
+Let me verify the guard rails: no unwrap, no expect, no panic. I will use `match` and `Ok`/`Err`. I will also include the traceability comment exactly as specified.
+
+Now, I need to decide the order of the code. Usually, the struct is defined before the function, but the spec doesn't enforce order. I will place the struct first, then the comment, then the function. That matches the typical style.
+
+Now, I need to write the function body. I will split the line by commas, trimming whitespace. I will handle the case where the split yields fewer than 5 parts. I will also handle the case where any part is empty or whitespace only, but the spec only mentions fewer than 5 columns, not empty columns. However, to be robust, I could treat empty columns as parse failures. I think it's safe to treat any part that is not a valid number as a parse failure.
+
+I will parse the first part as a String (name). The rest as numbers. I will use `parse::<u64>` for vram_used and vram_total, and `parse::<u32>` for temp and util. For each, I will match on the result, returning Err with a message.
+
+Now, I must ensure that the error messages are clear. For insufficient columns, maybe "Expected 5 columns, got {parts.len()}". For parse errors, maybe "Failed to parse column {i} as {type}" where type is the Rust type name (e.g., "u64").
+
+Now, I must ensure that the final code block is valid Rust. I will include the struct and function in one block.
+
+Now, I must consider any edge cases: a line with extra commas (e.g., "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25, extra") will produce more than 5 parts. The spec says "if columns are fewer than 5". It does not say what to do if more than 5. I think we can treat extra columns as an error as well, maybe "Expected 5 columns, got {parts.len()}". That would be consistent.
+
+Now, I must think about the function's signature: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`. This matches the spec.
+
+Now, I must think about the struct's derive: `#[derive(Debug, PartialEq)]`. This matches the spec.
+
+Now, I must think about the guard rails: no unwrap, no expect, no panic. I will use `match` and `Ok`/`Err`.
+
+Now, I must think about the traceability comment: `// trace:implements FR-006`. I must include it directly before the function declaration.
+
+Now, I must think about the output: only the code block.
+
+Now, I must think about the final code: I will write the struct, then the comment, then the function.
+
+Now, I will produce the final answer.
+
+Wait: The spec says "Output BOTH 'pub struct GpuStats' and 'pub fn parse_gpu_csv' inside the ```rust code block." That means I must include both in the same block. I will do that.
+
+Now, I will write the code.
+
+I must also think about the parsing of the name: it's a String, so I don't need to parse it as a number. I just take the first part as name. However, the CSV line might have leading or trailing spaces. I should trim each part. I will use `part.trim()` to remove whitespace.
+
+Now, I must think about the error messages: I will use `Err(format!("Expected 5 columns, got {}", parts.len()))` for insufficient columns. For parse errors, I will use `Err(format!("Failed to parse column {} as {}", i, type_name))`.
+
+Now, I must think about the type names: for u64, the type name is "u64". For u32, it's "u32". I will use `type_name` as a string literal.
+
+Now, I must think about the struct fields: they are public, so I can construct them directly.
+
+Now, I will write the code.
+
+Now, I will produce the final answer.

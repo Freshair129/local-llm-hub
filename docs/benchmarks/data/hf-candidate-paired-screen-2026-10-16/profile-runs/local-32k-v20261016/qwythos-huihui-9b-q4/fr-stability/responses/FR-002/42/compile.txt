@@ -1,0 +1,59 @@
+error[E0308]: mismatched types
+ --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-002\42\test.rs:8:21
+  |
+3 |     let mut model = raw.to_string();
+  |                     --------------- expected due to this value
+...
+8 |             model = stripped;
+  |                     ^^^^^^^^ expected `String`, found `&str`
+  |
+help: try using a conversion method
+  |
+8 |             model = stripped.to_string();
+  |                             ++++++++++++
+
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-002\42\test.rs:10:21
+   |
+ 3 |     let mut model = raw.to_string();
+   |                     --------------- expected due to this value
+...
+10 |             model = stripped;
+   |                     ^^^^^^^^ expected `String`, found `&str`
+   |
+help: try using a conversion method
+   |
+10 |             model = stripped.to_string();
+   |                             ++++++++++++
+
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-002\42\test.rs:12:21
+   |
+ 3 |     let mut model = raw.to_string();
+   |                     --------------- expected due to this value
+...
+12 |             model = stripped;
+   |                     ^^^^^^^^ expected `String`, found `&str`
+   |
+help: try using a conversion method
+   |
+12 |             model = stripped.to_string();
+   |                             ++++++++++++
+
+error[E0308]: mismatched types
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwythos-huihui-9b-q4\fr-stability\responses\FR-002\42\test.rs:21:21
+   |
+ 3 |     let mut model = raw.to_string();
+   |                     --------------- expected due to this value
+...
+21 |             model = stripped;
+   |                     ^^^^^^^^ expected `String`, found `&str`
+   |
+help: try using a conversion method
+   |
+21 |             model = stripped.to_string();
+   |                             ++++++++++++
+
+error: aborting due to 4 previous errors
+
+For more information about this error, try `rustc --explain E0308`.

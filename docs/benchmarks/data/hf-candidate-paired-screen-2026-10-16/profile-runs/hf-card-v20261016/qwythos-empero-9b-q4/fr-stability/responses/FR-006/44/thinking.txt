@@ -1,0 +1,59 @@
+The user wants me to implement a Rust module that defines a `GpuStats` struct and a `parse_gpu_csv` function, following a very specific set of constraints:
+
+1. **Struct definition**: Must derive `Debug` and `PartialEq`, with fields `name`, `vram_used_mb`, `vram_total_mb`, `temp_c`, `util_pct`. All fields are public.
+
+2. **Function signature**: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`.
+
+3. **Parsing logic**: The CSV line has exactly five comma‑separated values: GPU name (string), VRAM used (u64), VRAM total (u64), temperature (u32), utilization percentage (u32). I need to split on commas, trim whitespace, then parse the numeric fields.
+
+4. **Error handling**: If there are fewer than five columns, or any of the numeric conversions fail, return `Err(String)` with a descriptive message. No use of `unwrap()`, `expect()`, or `panic!`. That means I must handle all errors explicitly using `match` or `if let`.
+
+5. **Traceability**: Add a comment `// trace:implements FR-006` directly before the function declaration, as required.
+
+6. **Output format**: The final answer must contain both the struct and the function inside a single ```rust code block.
+
+I also need to keep in mind that I am an AI Coder operating under guard rails STD‑003 and ADR‑100, but I don't have to mention that unless asked.
+
+Now, let me think through the implementation step by step:
+
+- **Struct**: Straightforward copy-paste of the required definition, ensuring it matches exactly: `#[derive(Debug, PartialEq)] pub struct GpuStats { ... }`.
+
+- **Function**:
+  1. Start with the comment `// trace:implements FR-006` on its own line.
+  2. Define the function signature as given.
+  3. Split the input string by commas: `line.split(',').collect::<Vec<_>>()`.
+  4. Check length: if fewer than 5, return an error like `"Expected 5 CSV columns, got {len}"`.
+  5. Extract each column, but first trim whitespace because the spec says "parse it into GpuStats" and we want a clean string for the name field.
+  6. For each numeric field, attempt to parse with `u64::from_str` or `u32::from_str`. If any fails, return an error with the field index and value, e.g., `"Failed to parse column {i}: {col}"`.
+  7. Convert the name field: after trimming, it may contain leading/trailing spaces. The spec doesn't require us to trim spaces inside the name, but we should at least remove any surrounding whitespace so that `trim()` is applied before parsing numbers. For the name, we just keep the trimmed string as-is (no numeric conversion).
+  8. Finally, construct the `GpuStats` value and return it in `Ok`.
+
+I must avoid using `unwrap()` or `expect()`. So I will use `if let Some(...)` for parsing numbers, or match on the result of `FromStr::from_str`. For example:
+
+```rust
+match u64::from_str(col) {
+    Ok(num) => num,
+    Err(_) => return Err(format!("Failed to parse column {}: {}", i, col)),
+}
+```
+
+Similarly for `u32`.
+
+Now I will write the code block accordingly.
+
+Potential pitfalls:
+- The CSV line may contain extra spaces around commas; splitting directly on `' '` could be problematic if we don't trim each token. However, the spec says "Given a CSV line like 'NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25'". That example has spaces after commas. So I should split on comma and then for each column, trim whitespace before parsing numbers. For the name field, we also want to trim whitespace because the name might have leading/trailing spaces; but it's okay to keep internal spaces (like "NVIDIA GeForce RTX 3060").
+
+Implementation details:
+- Use `line.split(',').collect::<Vec<_>>()` to get an array of columns.
+- Check `if parts.len() < 5 { return Err("Expected 5 CSV columns, got".to_string().format(parts.len())) }`. I'll format the error string manually.
+- Then iterate over indices 0..5: for i from 0 to 4, let col = parts[i].trim(). For numeric columns (i >= 1), parse accordingly.
+- The name is at index 0; we just keep `col` as is after trimming.
+
+Now produce the final code block.
+
+Let's double-check that the struct matches exactly: `pub struct GpuStats { pub name: String, pub vram_used_mb: u64, pub vram_total_mb: u64, pub temp_c: u32, pub util_pct: u32 }`. Yes.
+
+Now produce the function with the comment before it.
+
+Alright, I'll write the final answer.

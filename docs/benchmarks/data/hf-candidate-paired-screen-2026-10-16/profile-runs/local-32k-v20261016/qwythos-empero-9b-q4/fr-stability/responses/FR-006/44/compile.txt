@@ -1,0 +1,110 @@
+error[E0599]: no associated function or constant named `from_str` found for type `u64` in the current scope
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-006\44\test.rs:17:26
+   |
+17 |     let vram_used = u64::from_str(parts[1].trim())?;
+   |                          ^^^^^^^^ associated function or constant not found in `u64`
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: trait `FromStr` which provides `from_str` is implemented but not in scope; perhaps you want to import it
+   |
+ 1 + use std::str::FromStr;
+   |
+help: there is an associated function `from` with a similar name
+   |
+17 -     let vram_used = u64::from_str(parts[1].trim())?;
+17 +     let vram_used = u64::from(parts[1].trim())?;
+   |
+
+error[E0599]: no associated function or constant named `from_str` found for type `u64` in the current scope
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-006\44\test.rs:18:27
+   |
+18 |     let vram_total = u64::from_str(parts[2].trim())?;
+   |                           ^^^^^^^^ associated function or constant not found in `u64`
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: trait `FromStr` which provides `from_str` is implemented but not in scope; perhaps you want to import it
+   |
+ 1 + use std::str::FromStr;
+   |
+help: there is an associated function `from` with a similar name
+   |
+18 -     let vram_total = u64::from_str(parts[2].trim())?;
+18 +     let vram_total = u64::from(parts[2].trim())?;
+   |
+
+error[E0599]: no associated function or constant named `from_str` found for type `u32` in the current scope
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-006\44\test.rs:19:21
+   |
+19 |     let temp = u32::from_str(parts[3].trim())?;
+   |                     ^^^^^^^^ associated function or constant not found in `u32`
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: trait `FromStr` which provides `from_str` is implemented but not in scope; perhaps you want to import it
+   |
+ 1 + use std::str::FromStr;
+   |
+help: there is an associated function `from` with a similar name
+   |
+19 -     let temp = u32::from_str(parts[3].trim())?;
+19 +     let temp = u32::from(parts[3].trim())?;
+   |
+
+error[E0599]: no associated function or constant named `from_str` found for type `u32` in the current scope
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-006\44\test.rs:20:21
+   |
+20 |     let util = u32::from_str(parts[4].trim())?;
+   |                     ^^^^^^^^ associated function or constant not found in `u32`
+   |
+   = help: items from traits can only be used if the trait is in scope
+help: trait `FromStr` which provides `from_str` is implemented but not in scope; perhaps you want to import it
+   |
+ 1 + use std::str::FromStr;
+   |
+help: there is an associated function `from` with a similar name
+   |
+20 -     let util = u32::from_str(parts[4].trim())?;
+20 +     let util = u32::from(parts[4].trim())?;
+   |
+
+error[E0560]: struct `GpuStats` has no field named `vram_used`
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-006\44\test.rs:21:25
+   |
+21 |     Ok(GpuStats { name, vram_used, vram_total, temp, util })
+   |                         ^^^^^^^^^ unknown field
+   |
+help: a field with a similar name exists
+   |
+21 |     Ok(GpuStats { name, vram_used_mb, vram_total, temp, util })
+   |                                  +++
+
+error[E0560]: struct `GpuStats` has no field named `vram_total`
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-006\44\test.rs:21:36
+   |
+21 |     Ok(GpuStats { name, vram_used, vram_total, temp, util })
+   |                                    ^^^^^^^^^^ unknown field
+   |
+help: a field with a similar name exists
+   |
+21 |     Ok(GpuStats { name, vram_used, vram_total_mb, temp, util })
+   |                                              +++
+
+error[E0560]: struct `GpuStats` has no field named `temp`
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-006\44\test.rs:21:48
+   |
+21 |     Ok(GpuStats { name, vram_used, vram_total, temp, util })
+   |                                                ^^^^ `GpuStats` does not have this field
+   |
+   = note: available fields are: `vram_used_mb`, `vram_total_mb`, `temp_c`, `util_pct`
+
+error[E0560]: struct `GpuStats` has no field named `util`
+  --> <LOCAL_BENCHMARK_ROOT>\local-32k-v20261016\qwythos-empero-9b-q4\fr-stability\responses\FR-006\44\test.rs:21:54
+   |
+21 |     Ok(GpuStats { name, vram_used, vram_total, temp, util })
+   |                                                      ^^^^ `GpuStats` does not have this field
+   |
+   = note: available fields are: `vram_used_mb`, `vram_total_mb`, `temp_c`, `util_pct`
+
+error: aborting due to 8 previous errors
+
+Some errors have detailed explanations: E0560, E0599.
+For more information about an error, try `rustc --explain E0560`.

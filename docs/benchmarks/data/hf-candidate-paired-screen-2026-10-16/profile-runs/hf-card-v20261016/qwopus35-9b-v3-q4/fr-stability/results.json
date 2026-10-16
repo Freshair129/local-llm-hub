@@ -1,0 +1,563 @@
+{
+  "metadata": {
+    "startedAt": "2026-10-16T16:23:50.520Z",
+    "ollamaVersion": "0.40.5",
+    "hardware": "NVIDIA GeForce RTX 3060 12GB",
+    "testSetSource": "https://github.com/Freshair129/local-llm-hub/blob/main/scripts/benchmark_mellum_thinking_vs_instruct.mjs",
+    "testSetSha256": "d9142c138d5a40a02064564259104c04c0686ef36eec63a3d031c5dab0087200",
+    "tasks": [
+      "FR-002",
+      "FR-006"
+    ],
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "model": {
+      "key": "qwopus35-9b-v3-q4",
+      "label": "Jackrong Qwopus3.5-9B-v3 Q4_K_M",
+      "tag": "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+      "quant": "Q4_K_M"
+    },
+    "profile": {
+      "id": "hf-card-v20261016",
+      "label": "Qwopus card; matched sampler and 16K context",
+      "num_ctx": 16384,
+      "num_predict": 81920,
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "repeat_penalty": 1
+      },
+      "systemPrompt": null,
+      "settingsSource": "The GGUF card provides Ollama instructions but no exact sampler; uses the shared Mellum sampler as a documented fallback and a matched 16K task context. Model-provided template is retained."
+    },
+    "expectedSamples": 10,
+    "execution": "Exactly one F-store model per run; unload before/after; check /api/ps around every inference; contaminated attempts are discarded and retried up to three times.",
+    "qualityMetric": "Strict pass requires fenced code, Rust compile, all harness tests, adjacent trace comment, and no unwrap/expect/panic!.",
+    "finalResidentModels": [],
+    "interrupted": false,
+    "completedAt": "2026-10-16T16:36:47.760Z",
+    "summaries": [
+      {
+        "task": "FR-002",
+        "n": 5,
+        "compiled": 5,
+        "testsPassed": 1,
+        "strictPass": 1
+      },
+      {
+        "task": "FR-006",
+        "n": 5,
+        "compiled": 5,
+        "testsPassed": 5,
+        "strictPass": 4
+      },
+      {
+        "task": "ALL",
+        "n": 10,
+        "strictPass": 5
+      }
+    ]
+  },
+  "results": [
+    {
+      "task": "FR-002",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "qwopus35-9b-v3-q4",
+      "model": "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 88184,
+      "promptTokens": 196,
+      "generatedTokens": 4217,
+      "generationTokensPerSecond": 52.223072544782774,
+      "thinkingChars": 13291,
+      "residency": [
+        {
+          "name": "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+          "size": 6147423600,
+          "sizeVram": 6147423600,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... FAILED\n\nfailures:\n\n---- test_normalize_cases stdout ----\n\nthread 'test_normalize_cases' (21152) panicked at <LOCAL_BENCHMARK_ROOT>\\hf-card-v20261016\\qwopus35-9b-v3-q4\\fr-stability\\responses\\FR-002\\42\\test.rs:39:5:\nassertion `left == right` failed\n  left: \"ary/llama3.2:1b-instruct\"\n right: \"llama3.2:1b-instruct\"\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_normalize_cases\n\ntest result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "qwopus35-9b-v3-q4",
+      "model": "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 166735,
+      "promptTokens": 196,
+      "generatedTokens": 8255,
+      "generationTokensPerSecond": 51.58711525213963,
+      "thinkingChars": 24018,
+      "residency": [
+        {
+          "name": "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+          "size": 6147423600,
+          "sizeVram": 6147423600,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... FAILED\n\nfailures:\n\n---- test_normalize_cases stdout ----\n\nthread 'test_normalize_cases' (41812) panicked at <LOCAL_BENCHMARK_ROOT>\\hf-card-v20261016\\qwopus35-9b-v3-q4\\fr-stability\\responses\\FR-002\\43\\test.rs:53:5:\nassertion `left == right` failed\n  left: \"brary/llama3.2:1b-instruct\"\n right: \"llama3.2:1b-instruct\"\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_normalize_cases\n\ntest result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "qwopus35-9b-v3-q4",
+      "model": "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 116939,
+      "promptTokens": 196,
+      "generatedTokens": 5718,
+      "generationTokensPerSecond": 52.06090247893113,
+      "thinkingChars": 19499,
+      "residency": [
+        {
+          "name": "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+          "size": 6147423600,
+          "sizeVram": 6147423600,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... FAILED\n\nfailures:\n\n---- test_normalize_cases stdout ----\n\nthread 'test_normalize_cases' (20260) panicked at <LOCAL_BENCHMARK_ROOT>\\hf-card-v20261016\\qwopus35-9b-v3-q4\\fr-stability\\responses\\FR-002\\44\\test.rs:44:5:\nassertion `left == right` failed\n  left: \"rary/llama3.2:1b-instruct\"\n right: \"llama3.2:1b-instruct\"\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_normalize_cases\n\ntest result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "qwopus35-9b-v3-q4",
+      "model": "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 75722,
+      "promptTokens": 196,
+      "generatedTokens": 3611,
+      "generationTokensPerSecond": 52.39716751156797,
+      "thinkingChars": 12293,
+      "residency": [
+        {
+          "name": "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+          "size": 6147423600,
+          "sizeVram": 6147423600,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "qwopus35-9b-v3-q4",
+      "model": "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 143015,
+      "promptTokens": 196,
+      "generatedTokens": 7043,
+      "generationTokensPerSecond": 51.844204272523676,
+      "thinkingChars": 24073,
+      "residency": [
+        {
+          "name": "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+          "size": 6147423600,
+          "sizeVram": 6147423600,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... FAILED\n\nfailures:\n\n---- test_normalize_cases stdout ----\n\nthread 'test_normalize_cases' (17296) panicked at <LOCAL_BENCHMARK_ROOT>\\hf-card-v20261016\\qwopus35-9b-v3-q4\\fr-stability\\responses\\FR-002\\46\\test.rs:25:26:\nattempt to subtract with overflow\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_normalize_cases\n\ntest result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "qwopus35-9b-v3-q4",
+      "model": "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 41819,
+      "promptTokens": 291,
+      "generatedTokens": 1800,
+      "generationTokensPerSecond": 52.31164581621338,
+      "thinkingChars": 4691,
+      "residency": [
+        {
+          "name": "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+          "size": 6147423600,
+          "sizeVram": 6147423600,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "qwopus35-9b-v3-q4",
+      "model": "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 35962,
+      "promptTokens": 291,
+      "generatedTokens": 1376,
+      "generationTokensPerSecond": 52.51586085861601,
+      "thinkingChars": 3442,
+      "residency": [
+        {
+          "name": "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+          "size": 6147423600,
+          "sizeVram": 6147423600,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "qwopus35-9b-v3-q4",
+      "model": "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 33327,
+      "promptTokens": 291,
+      "generatedTokens": 1384,
+      "generationTokensPerSecond": 52.6738145489719,
+      "thinkingChars": 3024,
+      "residency": [
+        {
+          "name": "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+          "size": 6147423600,
+          "sizeVram": 6147423600,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "qwopus35-9b-v3-q4",
+      "model": "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 39768,
+      "promptTokens": 291,
+      "generatedTokens": 1701,
+      "generationTokensPerSecond": 52.599798376716414,
+      "thinkingChars": 4311,
+      "residency": [
+        {
+          "name": "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+          "size": 6147423600,
+          "sizeVram": 6147423600,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "qwopus35-9b-v3-q4",
+      "model": "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "hf-card-v20261016",
+      "wallMs": 33412,
+      "promptTokens": 291,
+      "generatedTokens": 1384,
+      "generationTokensPerSecond": 52.56789415105073,
+      "thinkingChars": 3323,
+      "residency": [
+        {
+          "name": "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+          "size": 6147423600,
+          "sizeVram": 6147423600,
+          "contextLength": 16384,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    }
+  ],
+  "contaminationLog": [
+    {
+      "at": "2026-10-16T16:25:18.925Z",
+      "task": "FR-002",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:25:19.115Z",
+      "reason": "foreign model before FR-002|43",
+      "unloaded": [
+        "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:28:05.855Z",
+      "task": "FR-002",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:28:06.065Z",
+      "reason": "foreign model before FR-002|44",
+      "unloaded": [
+        "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:30:03.022Z",
+      "task": "FR-002",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:30:03.238Z",
+      "reason": "foreign model before FR-002|45",
+      "unloaded": [
+        "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:31:18.978Z",
+      "task": "FR-002",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:31:19.183Z",
+      "reason": "foreign model before FR-002|46",
+      "unloaded": [
+        "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:33:42.207Z",
+      "task": "FR-006",
+      "seed": 42,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:33:42.387Z",
+      "reason": "foreign model before FR-006|42",
+      "unloaded": [
+        "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:34:24.209Z",
+      "task": "FR-006",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:34:24.420Z",
+      "reason": "foreign model before FR-006|43",
+      "unloaded": [
+        "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:35:00.391Z",
+      "task": "FR-006",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:35:00.616Z",
+      "reason": "foreign model before FR-006|44",
+      "unloaded": [
+        "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:35:33.953Z",
+      "task": "FR-006",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:35:34.172Z",
+      "reason": "foreign model before FR-006|45",
+      "unloaded": [
+        "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:36:13.957Z",
+      "task": "FR-006",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:36:14.154Z",
+      "reason": "foreign model before FR-006|46",
+      "unloaded": [
+        "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:36:47.756Z",
+      "reason": "final cleanup for hf-card-v20261016 hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M",
+      "unloaded": [
+        "hf.co/Jackrong/Qwopus3.5-9B-v3-GGUF:Q4_K_M"
+      ]
+    }
+  ],
+  "infrastructureFailures": []
+}

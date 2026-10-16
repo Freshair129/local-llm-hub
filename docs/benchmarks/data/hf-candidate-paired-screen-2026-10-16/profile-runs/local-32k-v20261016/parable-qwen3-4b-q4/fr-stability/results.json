@@ -1,0 +1,563 @@
+{
+  "metadata": {
+    "startedAt": "2026-10-16T16:36:48.130Z",
+    "ollamaVersion": "0.40.5",
+    "hardware": "NVIDIA GeForce RTX 3060 12GB",
+    "testSetSource": "https://github.com/Freshair129/local-llm-hub/blob/main/scripts/benchmark_mellum_thinking_vs_instruct.mjs",
+    "testSetSha256": "d9142c138d5a40a02064564259104c04c0686ef36eec63a3d031c5dab0087200",
+    "tasks": [
+      "FR-002",
+      "FR-006"
+    ],
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "model": {
+      "key": "parable-qwen3-4b-q4",
+      "label": "AnkitAI Parable Qwen3-4B Q4_K_M",
+      "tag": "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+      "quant": "Q4_K_M"
+    },
+    "profile": {
+      "id": "local-32k-v20261016",
+      "label": "RTX 3060 12GB: shared Mellum sampler with 32K context",
+      "num_ctx": 32768,
+      "num_predict": 81920,
+      "options": {
+        "temperature": 0.6,
+        "top_p": 0.95,
+        "top_k": 20,
+        "repeat_penalty": 1
+      },
+      "systemPrompt": null,
+      "settingsSource": "Existing Mellum-matched sampling profile; context raised from 16K for this hardware profile."
+    },
+    "expectedSamples": 10,
+    "execution": "Exactly one F-store model per run; unload before/after; check /api/ps around every inference; contaminated attempts are discarded and retried up to three times.",
+    "qualityMetric": "Strict pass requires fenced code, Rust compile, all harness tests, adjacent trace comment, and no unwrap/expect/panic!.",
+    "finalResidentModels": [],
+    "interrupted": false,
+    "completedAt": "2026-10-16T16:46:58.446Z",
+    "summaries": [
+      {
+        "task": "FR-002",
+        "n": 5,
+        "compiled": 3,
+        "testsPassed": 2,
+        "strictPass": 0
+      },
+      {
+        "task": "FR-006",
+        "n": 5,
+        "compiled": 5,
+        "testsPassed": 3,
+        "strictPass": 2
+      },
+      {
+        "task": "ALL",
+        "n": 10,
+        "strictPass": 2
+      }
+    ]
+  },
+  "results": [
+    {
+      "task": "FR-002",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "parable-qwen3-4b-q4",
+      "model": "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 110504,
+      "promptTokens": 189,
+      "generatedTokens": 6694,
+      "generationTokensPerSecond": 79.66684548664112,
+      "thinkingChars": 25181,
+      "residency": [
+        {
+          "name": "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+          "size": 7551781437,
+          "sizeVram": 7551781437,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "parable-qwen3-4b-q4",
+      "model": "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 89558,
+      "promptTokens": 189,
+      "generatedTokens": 6722,
+      "generationTokensPerSecond": 79.71588981741337,
+      "thinkingChars": 28431,
+      "residency": [
+        {
+          "name": "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+          "size": 7551781437,
+          "sizeVram": 7551781437,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "parable-qwen3-4b-q4",
+      "model": "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 56973,
+      "promptTokens": 189,
+      "generatedTokens": 4391,
+      "generationTokensPerSecond": 83.03333106540708,
+      "thinkingChars": 16243,
+      "residency": [
+        {
+          "name": "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+          "size": 7551781437,
+          "sizeVram": 7551781437,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "parable-qwen3-4b-q4",
+      "model": "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 120615,
+      "promptTokens": 189,
+      "generatedTokens": 8843,
+      "generationTokensPerSecond": 76.91784732039548,
+      "thinkingChars": 35384,
+      "residency": [
+        {
+          "name": "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+          "size": 7551781437,
+          "sizeVram": 7551781437,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "parable-qwen3-4b-q4",
+      "model": "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 89867,
+      "promptTokens": 189,
+      "generatedTokens": 6778,
+      "generationTokensPerSecond": 79.70320586331495,
+      "thinkingChars": 29025,
+      "residency": [
+        {
+          "name": "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+          "size": 7551781437,
+          "sizeVram": 7551781437,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... FAILED\n\nfailures:\n\n---- test_normalize_cases stdout ----\n\nthread 'test_normalize_cases' (26940) panicked at <LOCAL_BENCHMARK_ROOT>\\local-32k-v20261016\\parable-qwen3-4b-q4\\fr-stability\\responses\\FR-002\\46\\test.rs:28:5:\nassertion `left == right` failed\n  left: \"mradermacher/qwen3.5-9b-coder-gguf:q4_k_m\"\n right: \"mradermacher/qwen3.5-9b-coder-gguf\"\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_normalize_cases\n\ntest result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "parable-qwen3-4b-q4",
+      "model": "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 21568,
+      "promptTokens": 275,
+      "generatedTokens": 1447,
+      "generationTokensPerSecond": 88.08621467176654,
+      "thinkingChars": 4221,
+      "residency": [
+        {
+          "name": "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+          "size": 7551781437,
+          "sizeVram": 7551781437,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "parable-qwen3-4b-q4",
+      "model": "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 31437,
+      "promptTokens": 275,
+      "generatedTokens": 2237,
+      "generationTokensPerSecond": 86.27669139340443,
+      "thinkingChars": 7283,
+      "residency": [
+        {
+          "name": "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+          "size": 7551781437,
+          "sizeVram": 7551781437,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... FAILED\n\nfailures:\n\n---- test_parse_valid_csv stdout ----\n\nthread 'test_parse_valid_csv' (24916) panicked at <LOCAL_BENCHMARK_ROOT>\\local-32k-v20261016\\parable-qwen3-4b-q4\\fr-stability\\responses\\FR-006\\43\\test.rs:33:5:\nassertion failed: res.is_ok()\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_parse_valid_csv\n\ntest result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "parable-qwen3-4b-q4",
+      "model": "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 24626,
+      "promptTokens": 275,
+      "generatedTokens": 1717,
+      "generationTokensPerSecond": 87.12290042436007,
+      "thinkingChars": 5182,
+      "residency": [
+        {
+          "name": "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+          "size": 7551781437,
+          "sizeVram": 7551781437,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... FAILED\n\nfailures:\n\n---- test_parse_valid_csv stdout ----\n\nthread 'test_parse_valid_csv' (41520) panicked at <LOCAL_BENCHMARK_ROOT>\\local-32k-v20261016\\parable-qwen3-4b-q4\\fr-stability\\responses\\FR-006\\44\\test.rs:35:5:\nassertion failed: res.is_ok()\nnote: run with `RUST_BACKTRACE=1` environment variable to display a backtrace\n\n\nfailures:\n    test_parse_valid_csv\n\ntest result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 45,
+      "attempt": 1,
+      "modelKey": "parable-qwen3-4b-q4",
+      "model": "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 32922,
+      "promptTokens": 275,
+      "generatedTokens": 2316,
+      "generationTokensPerSecond": 86.51373086093825,
+      "thinkingChars": 7344,
+      "residency": [
+        {
+          "name": "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+          "size": 7551781437,
+          "sizeVram": 7551781437,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-006",
+      "seed": 46,
+      "attempt": 1,
+      "modelKey": "parable-qwen3-4b-q4",
+      "model": "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-32k-v20261016",
+      "wallMs": 29937,
+      "promptTokens": 275,
+      "generatedTokens": 2137,
+      "generationTokensPerSecond": 86.57494799730107,
+      "thinkingChars": 6879,
+      "residency": [
+        {
+          "name": "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+          "size": 7551781437,
+          "sizeVram": 7551781437,
+          "contextLength": 32768,
+          "runner": "llamacpp"
+        }
+      ],
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": false,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": false,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 2 tests\ntest test_parse_invalid_csv ... ok\ntest test_parse_valid_csv ... ok\n\ntest result: ok. 2 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    }
+  ],
+  "contaminationLog": [
+    {
+      "at": "2026-10-16T16:38:38.847Z",
+      "task": "FR-002",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:38:39.088Z",
+      "reason": "foreign model before FR-002|43",
+      "unloaded": [
+        "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:40:08.657Z",
+      "task": "FR-002",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:40:08.848Z",
+      "reason": "foreign model before FR-002|44",
+      "unloaded": [
+        "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:41:05.824Z",
+      "task": "FR-002",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:41:06.033Z",
+      "reason": "foreign model before FR-002|45",
+      "unloaded": [
+        "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:43:06.659Z",
+      "task": "FR-002",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:43:06.854Z",
+      "reason": "foreign model before FR-002|46",
+      "unloaded": [
+        "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:44:36.733Z",
+      "task": "FR-006",
+      "seed": 42,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:44:36.918Z",
+      "reason": "foreign model before FR-006|42",
+      "unloaded": [
+        "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:44:58.495Z",
+      "task": "FR-006",
+      "seed": 43,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:44:58.699Z",
+      "reason": "foreign model before FR-006|43",
+      "unloaded": [
+        "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:45:30.156Z",
+      "task": "FR-006",
+      "seed": 44,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:45:30.350Z",
+      "reason": "foreign model before FR-006|44",
+      "unloaded": [
+        "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:45:54.988Z",
+      "task": "FR-006",
+      "seed": 45,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:45:55.159Z",
+      "reason": "foreign model before FR-006|45",
+      "unloaded": [
+        "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:46:28.084Z",
+      "task": "FR-006",
+      "seed": 46,
+      "phase": "before",
+      "unexpected": [
+        "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:46:28.301Z",
+      "reason": "foreign model before FR-006|46",
+      "unloaded": [
+        "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M"
+      ]
+    },
+    {
+      "at": "2026-10-16T16:46:58.434Z",
+      "reason": "final cleanup for local-32k-v20261016 hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M",
+      "unloaded": [
+        "hf.co/AnkitAI/Parable-Qwen3-4B-Claude-Fable-5-GGUF:Q4_K_M"
+      ]
+    }
+  ],
+  "infrastructureFailures": []
+}

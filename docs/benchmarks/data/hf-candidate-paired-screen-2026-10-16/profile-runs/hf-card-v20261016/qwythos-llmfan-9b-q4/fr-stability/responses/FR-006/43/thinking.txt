@@ -1,0 +1,162 @@
+The user wants me to implement a Rust snippet that defines a `GpuStats` struct and a `parse_gpu_csv` function, adhering to several guard rails (STD-003 and ADR-100). The prompt also includes a note about identity: I am Qwythos, created by Empero AI. However, for this task the user explicitly said "You are an AI Coder working under STD-003 and ADR-100 guard rails." That's a role instruction, not an identity correction. The identity note is separate and should be kept in mind for any meta‑information about who I am, but it doesn't affect the code output.
+
+The specification:
+
+1. Define a struct `GpuStats` with fields:
+   - `name: String`
+   - `vram_used_mb: u64`
+   - `vram_total_mb: u64`
+   - `temp_c: u32`
+   - `util_pct: u32`
+   The struct must derive `Debug` and `PartialEq`.
+
+2. Implement a function `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`.
+
+3. Parse a CSV line like `"NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"` into the struct.
+
+4. Robust error handling: if the line has fewer than 5 columns, or any numeric parsing fails, return `Err(String)` with a descriptive message.
+
+5. Guard rails: never use `.unwrap()`, `.expect()`, or `panic!`. All error paths must be handled via `Result`.
+
+6. Traceability: include a comment `// trace:implements FR-006` directly before the function declaration.
+
+7. Output both the struct and the function inside a single code block.
+
+So I need to write Rust code that defines the struct (with the required derive macros) and then implements the parsing function. The function should split the line by commas, iterate over the tokens, parse the first token as a `String` (trimming whitespace), then parse the remaining four tokens as numbers: three `u64` (VRAM used, total, maybe something else? Actually the spec says `vram_used_mb` and `vram_total_mb` are u64, so we need two u64 fields. Wait the struct has five fields: name, vram_used_mb, vram_total_mb, temp_c, util_pct. That's 5 fields. The CSV line has 5 values: name, used, total, temperature, utilization. So after splitting we get 5 tokens. I'll parse them accordingly.
+
+I also need to handle empty lines or lines with fewer than 5 columns. If the split yields fewer than 5 parts, return `Err("insufficient columns")`. For each numeric field, use `parse::<u64>()` and `parse::<u32>()` which returns a `Result`. I should propagate errors via `map_err` or `and_then`. Since the function signature is `Result<GpuStats, String>`, I need to collect any error into a `String`. The simplest approach: after splitting, if `parts.len() < 5`, return `Err("insufficient columns")`. Then parse each part:
+
+```
+let name = parts[0].trim().to_string();
+let vram_used = match parts[1].trim().parse::<u64>() {
+    Ok(v) => v,
+    Err(_) => return Err("failed to parse vram_used_mb".into()),
+};
+let vram_total = match parts[2].trim().parse::<u64>() {
+    Ok(v) => v,
+    Err(_) => return Err("failed to parse vram_total_mb".into()),
+};
+let temp = match parts[3].trim().parse::<u32>() {
+    Ok(t) => t,
+    Err(_) => return Err("failed to parse temp_c".into()),
+};
+let util = match parts[4].trim().parse::<u32>() {
+    Ok(u) => u,
+    Err(_) => return Err("failed to parse util_pct".into()),
+};
+```
+
+Then construct the struct: `Ok(GpuStats { name, vram_used_mb: vram_used, vram_total_mb: vram_total, temp_c: temp, util_pct: util })`.
+
+All error messages are `String` via `.into()`. No unwrap/expect.
+
+Now I need to ensure the struct definition matches exactly the spec. The spec says:
+
+```
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+```
+
+I will write that exactly.
+
+Now the function signature: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`.
+
+Include the trace comment right before the function: `// trace:implements FR-006`.
+
+Now produce the final answer: just the code block with both definitions and the function. The user didn't ask for any explanation beyond the code; they said "Output BOTH 'pub struct GpuStats' and 'pub fn parse_gpu_csv' inside the ```rust code block." So I will output only the code block, no extra text.
+
+Now consider any additional nuance: The spec says "Robust error handling: Return Err(String) if columns are fewer than 5 or numbers fail to parse." That's satisfied.
+
+Also note that the first field is `name` which is a String, not parsed from a number; we just treat it as a string, but we might still want to trim whitespace. That's fine.
+
+Now check the guard rails: "STRICTLY FORBIDDEN to use unwrap(), expect(), or panic!" I have not used any of those. I only used `match` and explicit `.into()` for error strings. Good.
+
+Now think about potential edge cases: The CSV line could contain leading/trailing whitespace, empty fields, extra commas. If there are more than 5 columns (like trailing commas), the split will produce an empty string at the end, but we only care about exactly 5 columns. The spec says "if columns are fewer than 5" - it doesn't mention more, but we could treat any extra columns as invalid? Usually for robust parsing we might ignore them or error. The spec didn't specify, so we can just accept lines with exactly 5 non-empty fields; if there are extra fields, we could either ignore them or return an error. The spec says "if columns are fewer than 5" - that suggests we only need to guard against fewer. But maybe we should also require exactly 5. However the spec didn't say to reject more. I'll just check `parts.len() < 5` and then assume there are exactly 5. If there are extra, we could ignore them or return an error; but it's not required. I think it's fine to just require at least 5 because we will index up to 4. If there are more than 5, we still can parse the first 5 and ignore the rest. That matches typical CSV parsing. So that's okay.
+
+Now about numeric parsing: using `parse::<u64>()` returns `Ok(num)` or `Err(ParseIntError)`. The error type is `ParseIntError`, which implements `Display`. I convert to `String` via `.into()`. That's fine.
+
+Now about the struct fields: `pub name: String` - we need to import `String`? It's built-in, so no import needed. Similarly for `u64`, `u32`. All good.
+
+Now about the derive macros: `#[derive(Debug, PartialEq)]` is correct.
+
+Now about the function: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`. That matches.
+
+Now about the trace comment: It must be directly before the function declaration. So we will write:
+
+```
+// trace:implements FR-006
+pub fn parse_gpu_csv(...)
+```
+
+Now I'll produce the final answer: a Rust code block containing the struct and the function.
+
+Let's also think about any potential nuance with the spec: "Given a CSV line like 'NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25', parse it into GpuStats." That suggests that the first field is the GPU name, which can contain spaces and commas? Usually CSV would have quotes around fields with commas. But the spec doesn't mention quoting; we assume simple comma-separated values without quoting. So we just split on commas. That's fine.
+
+Now think about the guard rails: "STRICTLY FORBIDDEN to use unwrap(), expect(), or panic!" I must not use any of those. I will also avoid `unwrap_or_default`, `expect`, etc. I'll keep it simple.
+
+Now think about any potential memory safety or performance issues: Not needed for this spec.
+
+Now think about the output format: The user expects just the code block, no explanation. So I will produce that.
+
+Now I'll double-check the struct definition: It must be exactly as given. Let's copy it precisely:
+
+```
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+```
+
+Now the function:
+
+```
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let parts = line.split(',').collect::<Vec<_>>();
+    if parts.len() < 5 {
+        return Err("insufficient columns".into());
+    }
+
+    let name = parts[0].trim().to_string();
+    let vram_used_mb = match parts[1].trim().parse::<u64>() {
+        Ok(v) => v,
+        Err(_) => return Err("failed to parse vram_used_mb".into()),
+    };
+    let vram_total_mb = match parts[2].trim().parse::<u64>() {
+        Ok(v) => v,
+        Err(_) => return Err("failed to parse vram_total_mb".into()),
+    };
+    let temp_c = match parts[3].trim().parse::<u32>() {
+        Ok(t) => t,
+        Err(_) => return Err("failed to parse temp_c".into()),
+    };
+    let util_pct = match parts[4].trim().parse::<u32>() {
+        Ok(u) => u,
+        Err(_) => return Err("failed to parse util_pct".into()),
+    };
+
+    Ok(GpuStats { name, vram_used_mb, vram_total_mb, temp_c, util_pct })
+}
+```
+
+Now I will combine them into a single code block.
+
+One more check: The spec says "Return Err(String) if columns are fewer than 5 or numbers fail to parse." That is satisfied. It also says "Robust error handling." Good.
+
+Now think about the guard rails again: "STRICTLY FORBIDDEN to use unwrap(), expect(), or panic!" I didn't use any. I used `match` and `.into()`. Good.
+
+Now think about the traceability: "Include comment '// trace:implements FR-006' directly before function declaration." That is done.
+
+Now think about the output: "Output BOTH 'pub struct GpuStats' and 'pub fn parse_gpu_csv' inside the ```rust code block." That's satisfied.
+
+Now I'll produce the final answer.

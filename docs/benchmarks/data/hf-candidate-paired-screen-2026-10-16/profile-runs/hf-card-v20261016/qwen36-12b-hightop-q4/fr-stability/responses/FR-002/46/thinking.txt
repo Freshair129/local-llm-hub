@@ -1,0 +1,134 @@
+We need to implement:
+
+pub fn normalize_model_name(raw: &str) -> String
+
+with:
+
+1. Function signature: pub fn normalize_model_name(raw: &str) -> String
+2. Strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'library/'
+3. Strip quantization suffixes: '-q4_0', '-q4_k_m', '-q4_k_s', '-q4_k_m', '-q4_k_s' (case-insensitive)
+4. Convert result to lowercase
+5. Guard rails: NO unwrap(), NO expect(), NO panic!
+6. Traceability: Include '// trace:implements FR-002' directly before function declaration.
+
+We need to produce the exact Rust code inside a ```rust code block.
+
+We must be careful: The code block should be enclosed in ```rust code. The output should be the code.
+
+We need to implement a function that normalizes a raw string, stripping prefixes and quantization suffixes, and returning lowercase.
+
+Let's write a function:
+
+pub fn normalize_model_name(raw: &str) -> String {
+    // Strip registry prefixes
+    const prefix: Option<String> = std::str::matches(raw, `::registry.ollama.ai/library/`)
+    const prefix: Option<String> = std::str::matches(raw, `::registry.ollama.ai/library/`]; or `::registry.ollama.ai/library/`? Actually pattern: 'library/', 'library/'? The spec says: 'library.ollama.ai/library/', 'library/', 'library/'? We need to be precise. It says: 'library.ollama.ai/library/', 'library/', 'library/'? Possibly 'library.ollama.ai/library/'. But to be safe, we can use `::registry.ollama.ai/library/`? Actually the spec likely says `::registry.ollama.ai/library/`? Let's look at examples: "registry.ollama.ai/library/". I think it's `::registry.ollama.ai/library/`? But to be consistent, we can use `::registry.ollama.ai/library/`.
+
+But the guard rails: "NO unwrap(), NO expect(), NO panic!" So we need to use `::std::no_unwrap` and `::std::no_expect` and `::std::no_panic`.
+
+We need to strip prefixes: `::registry.ollama.ai/library/`? Actually the spec says: 'registry.ollama.ai/library/', 'library/', 'library/'? Possibly `::registry.ollama.ai/library/`? Let's see: "Strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'library/'" So it includes both `::registry.ollama.ai/library/` and `::registry.ollama.ai/library/`? That's a union. But for pattern matching, we can use `::str::matches`. But maybe the spec expects `::registry.ollama.ai/library/` as one, and `::registry.ollama.ai/library/` as another? Actually they wrote `registry.ollama.ai/library/` and `library/` and `library/`? It might be `::registry.ollama.ai/library/` and `::registry.ollama.ai/library/`? Could be `::registry.ollama.ai/library/` and `::registry.ollama.ai/library/`? I think they want to strip both `::registry.ollama.ai/library/` and `::registry.ollama.ai/library/`? Let's check: In the spec: "Strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'library/'" So it includes both `::registry.ollama.ai/library/` and `::registry.ollama.ai/library/`? But they wrote three lines, maybe they expect a union. But for pattern matching, we can use `::str::matches` to match both. But we need to ensure we strip correctly.
+
+Given guard rails, we should not unwrap or expect, so we can use `::std::no_unwrap` and `::std::no_expect` and `::std::no_panic`.
+
+Now, we need to strip prefixes:
+
+We can do:
+
+pub fn normalize_model_name(raw: &str) -> String {
+    // Strip registry prefixes
+    const prefix: Option<String> = std::str::matches(raw, `::registry.ollama.ai/library/`)
+    const prefix: Option<String> = std::str::matches(raw, `::registry.ollama.ai/library/`]; or use union.
+
+    // Strip quantization suffixes
+    const quant_suffix: Option<String> = std::str::matches(raw, `':q4_0`, `':q4_k_m`, `':q4_k_s`, `':q4_k_m`, `':q4_k_s'`);
+    // case-insensitive: we can use `::str::matches` with `case` option? Actually `::str::matches` is case-insensitive by default, but we need to strip those suffixes. So `::str::matches` is fine.
+
+    // Convert to lowercase
+    return std::str::trim(raw).str_lowercase().trim().str_lowercase().trim().trim().trim().trim();
+}
+
+That seems simple. But we need to ensure we strip prefixes and suffixes and then lowercase.
+
+But note: The prefix stripping could be done with a union if they want both `::registry.ollama.ai/library/` and `::registry.ollama.ai/library/`. But using `::str::matches` might not be necessary if only one of them matches. However, we can use `::str::matches` to strip both.
+
+Let's check: In Rust, `std::str::matches` is case-insensitive by default, so it would strip both.
+
+But we need to strip quantization suffixes, which are case-insensitive. So we need to strip `::str::matches` with case option? Actually `std::str::matches` is case-insensitive by default. But we want to strip suffixes, which might be case-insensitive, so we can use `::str::matches` with `case`? Actually `::str::matches` is case-insensitive by default. But we want to strip suffixes, which are case-insensitive. So we can use `::str::matches` with `case` flag.
+
+But the spec says: "Strip quantization suffixes: '-q4_0', '-q4_k_m', '-q4_k_s', '-q4_k_m', '-q4_k_s' (case-insensitive)" So it includes both `-q4_0` and `-q4_k_m` and `-q4_k_s`. So we need to strip those suffixes.
+
+Thus we can do:
+
+const suffix: Option<String> = std::str::matches(raw, `:q4_0`, `:q4_k_m`, `:q4_k_s`, `:q4_k_m`, `:q4_k_s`);
+return std::str::trim(suffix).str_lowercase().trim().trim().trim().trim().trim();
+
+But we need to ensure we strip only those suffixes, not all characters. So using matches is fine.
+
+Now, the guard rails: NO unwrap(), NO expect(), NO panic! So we need to use `::std::no_unwrap` and `::std::no_expect` and `::std::no_panic`.
+
+Thus final code:
+
+pub fn normalize_model_name(raw: &str) -> String {
+    // Strip registry prefixes
+    const prefix: Option<String> = std::str::matches(raw, `::registry.ollama.ai/library/`)
+    const prefix: Option<String> = std::str::matches(raw, `::registry.ollama.ai/library/`]; or use union.
+
+    // Strip quantization suffixes
+    const suffix: Option<String> = std::str::matches(raw, `:q4_0`, `:q4_k_m`, `:q4_k_s`, `:q4_k_m`, `:q4_k_s`);
+    // case-insensitive: we can use `::str::matches` with `case` option? Actually `::str::matches` is case-insensitive by default, so it would strip both. But we want to strip only suffixes, which are case-insensitive, so we need to use `::str::matches` with `case`. But note: The spec says "Strip quantization suffixes" which includes `-q4_k_m` and `-q4_k_s`. So we need to strip those suffixes, which are case-insensitive. So we can use `::str::matches` with `case` flag.
+
+    // Convert to lowercase
+    return std::str::trim(suffix).str_lowercase().trim().trim().trim().trim().trim();
+}
+
+Now, we must include the comment " '// trace:implements FR-002' ' directly before function declaration.'" inside the code block.
+
+Thus final code:
+
+```rust
+pub fn normalize_model_name(raw: &str) -> String {
+    // Strip registry prefixes
+    const prefix: Option<String> = std::str::matches(raw, `::registry.ollama.ai/library/`)
+    const prefix: Option<String> = std::str::matches(raw, `::registry.ollama.ai/library/`]; or use union.
+
+    // Strip quantization suffixes
+    const suffix: Option<String> = std::str::matches(raw, `:q4_0`, `:q4_k_m`, `:q4_k_s`, `:q4_k_m`, `:q4_k_s`);
+    // case-insensitive: we can use `::str::matches` with `case` flag.
+
+    // Convert to lowercase
+    return std::str::trim(suffix).str_lowercase().trim().trim().trim().trim().trim();
+}
+```
+
+But we need to be careful: The guard rails are inside the function definition. So we need to include them? The spec says: "Guard rails: NO unwrap(), NO expect(), NO panic!" So we must include them inside the function definition.
+
+Thus final code:
+
+```rust
+pub fn normalize_model_name(raw: &str) -> String {
+    // Strip registry prefixes
+    const prefix: Option<String> = std::str::matches(raw, `::registry.ollama.ai/library/`)
+    const prefix: Option<String> = std::str::matches(raw, `::registry.ollama.ai/library/`]; or use union.
+
+    // Strip quantization suffixes
+    const suffix: Option<String> = std::str::matches(raw, `:q4_0`, `:q4_k_m`, `:q4_k_s`, `:q4_k_m`, `:q4_k_s`);
+    // case-insensitive: we can use `::str::matches` with `case` flag.
+
+    // Convert to lowercase
+    return std::str::trim(suffix).str_lowercase().trim().trim().trim().trim().trim();
+}
+```
+
+But we need to be sure that the prefix stripping works. Using `std::str::matches` is correct. But we might need to ensure that we strip both `::registry.ollama.ai/library/` and `::registry.ollama.ai/library/`? The spec says three lines, so it likely expects a union. But using `::str::matches` might still strip both. However, if we want to be precise, we can use `::str::matches` with `&&`? But we already used `&&`. It's fine.
+
+But we should check if there's any other prefix like `server/`? No.
+
+Now guard rails: we have them inside the function.
+
+Thus final answer.
+
+But we must output only the code block inside the ```rust code.
+
+We should also include the Rust version? The spec says "Output ONLY valid Rust code inside a ```rust code block.```" So we output the code.
+
+Thus final.

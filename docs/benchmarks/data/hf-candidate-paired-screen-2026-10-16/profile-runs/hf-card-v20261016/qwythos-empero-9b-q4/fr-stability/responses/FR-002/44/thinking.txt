@@ -1,0 +1,104 @@
+The user wants me to implement a specific function in Rust, following a set of guard rails and traceability requirements. I need to produce only the valid Rust code inside a ````rust` block, with no extra commentary or explanations.
+
+First, let's parse the specification:
+
+- Function signature: `pub fn normalize_model_name(raw: &str) -> String`. This means we need a public function that takes a reference to a string slice and returns a owned `String`.
+
+- Strip registry prefixes: `'registry.ollama.ai/library/', 'library/', 'hf.co/'`. These are the known prefixes to remove from the model name. I need to check if the input starts with any of these and, if so, remove them. The removal should be case-sensitive? The spec doesn't say otherwise, but they are given as literal strings, so likely case-sensitive. However, the later step is to convert the result to lowercase, which will make the final output case-insensitive anyway. So I can just slice off the prefix if it matches exactly.
+
+- Strip quantization suffixes: `-q4_0`, `-q4_k_m`, `-q4_k_s`, `:q4_0`, `:q4_k_m`, `:q4_k_s`. These are case-insensitive, meaning we need to match them regardless of case. The spec says "case-insensitive", so I should convert the suffix to a common case (e.g., lowercase) before checking, or use a regex that is case-insensitive. Since Rust doesn't have built-in case-insensitive string matching without converting, the simplest approach is to convert the suffix to lowercase and then compare with the input after stripping any prefix. But we also need to strip them from the original string; we could just replace any occurrence of those suffixes (case-insensitive) with empty string. That can be done by iterating over the set of suffixes, converting each to lowercase for comparison, and using `replace` with case-insensitive flag? The standard `str::replace` is case-sensitive. To make it case-insensitive, we could convert the whole string to lowercase before removing suffixes, but that would also affect the prefix removal (which is case-sensitive). However, the final step is to convert the result to lowercase anyway, so we could just lower-case the entire input at the end. But we need to strip the suffixes regardless of case, but we can do it after lower-casing because we will lower-case at the end. Actually if we lower-case first, the suffixes become exactly `-q4_0`, etc., and the prefixes remain as they are (since they are already lowercase). That simplifies things: we can convert `raw` to a mutable copy (or just keep the original) and apply case-insensitive removal by converting to lowercase for comparison. But we need to preserve the original case for prefix removal? The spec says "strip registry prefixes", no mention of case sensitivity, but they are all lowercase in the given strings. So we can just match them exactly; after lowercasing at the end, it doesn't matter. So we could just lower-case everything at the end and not worry about case-sensitive matching earlier. However, the suffixes are case-insensitive, meaning we need to strip them regardless of case. If we lower-case the whole string first, then the suffixes become exactly those strings, so we can just replace them with empty. That works.
+
+Thus a simple approach: start with `raw`, convert to lowercase for suffix removal, but also need to preserve original for prefix removal? Actually after lowercasing everything, prefix removal still works because prefixes are all lowercase anyway. So we can just lower-case the whole string at the very end, but we need to strip prefixes before that? The order doesn't matter because we will lower-case at the end anyway. But we must not use `unwrap` or `expect`. So we should handle missing suffixes gracefully (e.g., if no suffix matches, do nothing). For prefix removal, we can check via `starts_with` and slice accordingly. That's safe.
+
+Implementation steps:
+
+1. Define a constant vector of prefix strings: `["registry.ollama.ai/library/", "library/", "hf.co/"]`.
+2. Define a constant vector of suffix strings (case-insensitive): `["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"]`.
+3. Convert `raw` to a mutable copy (or just keep original and use lower-case for suffix removal). Since we need to preserve case for prefix removal? Actually after we strip prefixes, we will lower-case at the end, so we can just lower-case everything at the end; but we need to strip suffixes case-insensitively, which we can do by converting the string to lowercase for suffix removal. However, we also need to strip prefixes (case-sensitive). So we might want to keep original case for prefix removal and then later lower-case. But if we lower-case at the end, we could just lower-case after stripping prefixes. That means we should first strip prefixes from `raw` (case-sensitive), then strip suffixes from that result (case-insensitive). At the end, we lower-case everything.
+
+Thus algorithm:
+
+- Let `mut name = raw.to_string()`.
+- For each prefix in `PREFIXES`, if `name.starts_with(prefix)`, `name = &name[prefix.len()..]`.
+- For each suffix in `SUFFIXES` (case-insensitive), we need to remove them. Since `SUFFIXES` are all lowercase, we can convert `name` to lowercase for matching? But `name` may contain uppercase letters. The spec says suffix removal is case-insensitive. So we need to find occurrences of suffix regardless of case. The simplest way: convert `name` to lowercase for suffix removal, but that would also affect prefix removal if we had already removed prefixes (which are case-sensitive). However, after removing prefixes, the remaining part may have uppercase letters. We want to strip suffixes case-insensitively, so we could just lower-case the whole string, then remove suffixes (which will be exactly the lowercase strings), then lower-case again? That seems redundant. Better: we can iterate over the suffix set and replace any occurrence of them in a case-insensitive manner. Since Rust's `replace` is case-sensitive, we could convert both the string and the suffix to a common case for comparison. For example, we could convert the entire `name` to lowercase (or uppercase) and then replace the suffixes. However, that would also affect any characters that were originally uppercase but not part of a suffix. That's fine because after final lower-case conversion, it doesn't matter. So we can just lower-case the whole string at the end; before that we could convert it to lowercase for suffix removal and then later we will lower-case again (idempotent). So we can do:
+
+```
+let mut name = raw.to_string();
+for prefix in PREFIXES {
+    if let Some(stripped) = name.strip_prefix(prefix) {
+        name = stripped;
+    }
+}
+let mut name_lower = name.to_lowercase();
+for suffix in SUFFIXES {
+    // suffixes are all lowercase, so we can replace directly
+    name_lower = name_lower.replace(suffix, "");
+}
+name_lower
+```
+
+But this will also remove any occurrences of the suffix in the middle of the string (e.g., if a model name contains "q4_0" somewhere else). The spec likely intends to strip only trailing quantization suffixes. Usually model names have suffix at the end, but we might want to strip only the final suffix. However, the spec just says "Strip quantization suffixes: '-q4_0', '-q4_k_m', ...". It doesn't say "only trailing". But typical usage is that these suffixes appear at the end of the model name. If they appear elsewhere, stripping them may be undesirable. But we can assume they only appear at the end; but to be safe we could just replace all occurrences. The spec didn't say trailing, just "strip quantization suffixes". Usually you'd want to remove them from the name regardless of position, but it's ambiguous. However, many model names have these suffixes as trailing parts (like "q4_0", "q4_k_s"). If we replace all occurrences, we might inadvertently remove them from the middle of a name that contains them as part of the name (unlikely). So I think replacing all is acceptable.
+
+Now for guard rails: No `unwrap`, no `expect`, no `panic!`. Use safe functions like `strip_prefix` which returns an `Option`. If the prefix is not present, we just skip. That's fine. For suffix removal via `replace`, that's safe and returns a new string. So all good.
+
+Now traceability: Include comment `// trace:implements FR-002` directly before function declaration. That means the comment should appear right before `pub fn normalize_model_name`. Example:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String { ... }
+```
+
+We must output ONLY valid Rust code inside a ```rust block, no extra text. So we will produce exactly that.
+
+Now I'll write the code. Let's consider imports: none needed beyond standard library. Use `std::string` methods. We'll define constants inside the function or as module-level statics? The spec doesn't restrict where to put them; but it's fine to define them inside the function for clarity. However, we might want to keep code concise.
+
+Implementation:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    // Strip registry prefixes (case-sensitive)
+    let mut name = raw.to_string();
+    for prefix in ["registry.ollama.ai/library/", "library/", "hf.co/"] {
+        if let Some(stripped) = name.strip_prefix(prefix) {
+            name = stripped;
+        }
+    }
+
+    // Strip quantization suffixes (case-insensitive)
+    // Convert to lowercase for case-insensitive matching
+    let mut name_lower = name.to_lowercase();
+    for suffix in ["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"] {
+        // suffixes are already lowercase, replace all occurrences
+        name_lower = name_lower.replace(suffix, "");
+    }
+
+    name_lower
+}
+```
+
+But we need to ensure that after stripping prefixes, the name may still have uppercase letters. Converting to lowercase will also strip any uppercase characters, which is fine because we will return a lowercase string anyway. So we can just lower-case everything at the end, but we also want to preserve case for suffix removal? Since suffix removal is case-insensitive, we can just lower-case after prefix stripping and before suffix removal. That's fine.
+
+Now consider edge cases: If the input is empty string, `strip_prefix` will not match any prefix, and `to_lowercase` will produce empty string, which is correct.
+
+If the input contains multiple suffix occurrences, `replace` will remove all of them. That's acceptable.
+
+Now ensure no unwrap/expect/panic! used. `strip_prefix` returns Option, we use pattern matching. `replace` returns new String, safe.
+
+Now final output: only the Rust code block.
+
+Thus I'll produce exactly that.
+
+But the spec says "Output ONLY valid Rust code inside a ```rust code block." So I must not include any other text before or after the block. So my answer will be just the block.
+
+One more nuance: The comment `// trace:implements FR-002` should be directly before the function declaration. That's satisfied.
+
+Now final code.
+
+Let's double-check that we didn't accidentally use any unsafe methods. `to_string`, `strip_prefix`, `to_lowercase`, `replace` are all safe. Good.
+
+Now I'll output the block.
+
+But wait, the spec includes "Guard rails: NO unwrap(), NO expect(), NO panic!". That means we must not call any method that could cause a panic, and we must not use those constructs. Our code does not call `unwrap`, `expect`, or `panic!`. Good.
+
+Now final answer.

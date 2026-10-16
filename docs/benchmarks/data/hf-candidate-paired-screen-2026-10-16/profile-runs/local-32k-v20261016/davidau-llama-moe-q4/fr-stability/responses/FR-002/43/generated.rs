@@ -1,0 +1,19 @@
+// trace:implements FR-002
+
+pub fn normalize_model_name(raw: &str) -> String {
+    // Strip registry prefixes
+    let mut raw = raw.to_string();
+    raw = raw.replace("registry.ollama.ai/library/", "").replace("library/", "");
+    raw = raw.replace("hf.co/", "");
+
+    // Strip quantization suffixes
+    for suffix in vec!["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"] {
+        raw = raw.to_lowercase();
+        raw = raw.replace(suffix, "");
+    }
+
+    // Convert result to lowercase
+    raw = raw.to_lowercase();
+
+    raw
+}

@@ -1,0 +1,160 @@
+*   Role: AI Coder under STD-003 and ADR-100 guard rails.
+    *   Task: Implement FR-006 specification.
+    *   Requirements:
+        1.  Define `GpuStats` struct with specific fields (`name`, `vram_used_mb`, `vram_total_mb`, `temp_c`, `util_pct`).
+        2.  Function signature: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`.
+        3.  Input format: "Name, used, total, temp, util".
+        4.  Error handling: Return `Err(String)` for missing columns or parse failures.
+        5.  Constraint: No `unwrap()`, `expect()`, or `panic!`.
+        6.  Traceability: Comment `// trace:implements FR-006` before the function.
+        7.  Output format: Both struct and function in a single Rust code block.
+
+    *   `GpuStats` struct:
+        ```rust
+        #[derive(Debug, PartialEq)]
+        pub struct GpuStats {
+            pub name: String,
+            pub vram_used_mb: u64,
+            pub vram_total_mb: u64,
+            pub temp_c: u32,
+            pub util_pct: u32,
+        }
+        ```
+
+    *   `parse_gpu_csv` logic:
+        *   Split the input string by comma.
+        *   Check if the resulting slice has at least 5 elements.
+        *   Trim whitespace from each element.
+        *   Parse `vram_used_mb` (u64), `vram_total_mb` (u64), `temp_c` (u32), `util_pct` (u32).
+        *   Use `?` or `match`/`if let` to handle parsing errors without panicking.
+
+    *   *Splitting:* `let parts: Vec<&str> = line.split(',').collect();`
+    *   *Length check:* `if parts.len() < 5 { return Err("Insufficient columns".to_string()); }`
+    *   *Parsing:*
+        ```rust
+        let name = parts[0].trim().to_string();
+        let vram_used = parts[1].trim().parse::<u64>().map_err(|e| e.to_string())?;
+        let vram_total = parts[2].trim().parse::<u64>().map_err(|e| e.to_string())?;
+        let temp = parts[3].trim().parse::<u32>().map_err(|e| e.to_string())?;
+        let util = parts[4].trim().parse::<u32>().map_err(|e| e.to_string())?;
+        ```
+    *   *Return:* `Ok(GpuStats { ... })`
+
+    *   Check: `unwrap()`? No.
+    *   Check: `expect()`? No.
+    *   Check: `panic!`? No.
+    *   Check: Trace comment? Yes.
+    *   Check: Struct and Function included? Yes.
+
+    *   Wait, the prompt says "Return Err(String) if columns are fewer than 5".
+    *   Let's make sure the error messages are descriptive but simple.
+
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats {
+        pub name: String,
+        pub vram_used_mb: u64,
+        pub vram_total_mb: u64,
+        pub temp_c: u32,
+        pub util_pct: u32,
+    }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+        let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+
+        if parts.len() < 5 {
+            return Err("Input line contains fewer than 5 columns".to_string());
+        }
+
+        let name = parts[0].to_string();
+        let vram_used_mb = parts[1].parse::<u64>()
+            .map_err(|e| format!("Failed to parse vram_used_mb: {}", e))?;
+        let vram_total_mb = parts[2].parse::<u64>()
+            .map_err(|e| format!("Failed to parse vram_total_mb: {}", e))?;
+        let temp_c = parts[3].parse::<u32>()
+            .map_err(|e| format!("Failed to parse temp_c: {}", e))?;
+        let util_pct = parts[4].parse::<u32>()
+            .map_err(|e| format!("Failed to parse util_pct: {}", e))?;
+
+        Ok(GpuStats {
+            name,
+            vram_used_mb,
+            vram_total_mb,
+            temp_c,
+            util_pct,
+        })
+    }
+    ```
+
+    *   `vram_used_mb` is `u64`.
+    *   `vram_total_mb` is `u64`.
+    *   `temp_c` is `u32`.
+    *   `util_pct` is `u32`.
+    *   Correct.
+
+    Wait, I should ensure I don't use `unwrap()` even in the `map_err`. The prompt says "STRICTLY FORBIDDEN to use unwrap(), expect(), or panic!".
+
+    One small detail: `parts[0]` is the name. If `parts.len()` is at least 5, `parts[0]` is safe.
+
+    Check the order: "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"
+    1. Name
+    2. Used
+    3. Total
+    4. Temp
+    5. Util
+    Matches the struct order.
+
+    Final check of the prompt requirements:
+    1. Define struct? Yes.
+    2. Function signature? Yes.
+    3. Parse specific line? Yes.
+    4. Robust error handling? Yes.
+    5. Guard rails (no unwrap/expect/panic)? Yes.
+    6. Traceability? Yes.
+    7. Output both? Yes.
+
+    The code looks solid.
+
+    ```rust
+    #[derive(Debug, PartialEq)]
+    pub struct GpuStats {
+        pub name: String,
+        pub vram_used_mb: u64,
+        pub vram_total_mb: u64,
+        pub temp_c: u32,
+        pub util_pct: u32,
+    }
+
+    // trace:implements FR-006
+    pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+        let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+
+        if parts.len() < 5 {
+            return Err(format!("Expected at least 5 columns, found {}", parts.len()));
+        }
+
+        let name = parts[0].to_string();
+        
+        let vram_used_mb = parts[1].parse::<u64>()
+            .map_err(|e| format!("Error parsing vram_used_mb: {}", e))?;
+            
+        let vram_total_mb = parts[2].parse::<u64>()
+            .map_err(|e| format!("Error parsing vram_total_mb: {}", e))?;
+            
+        let temp_c = parts[3].parse::<u32>()
+            .map_err(|e| format!("Error parsing temp_c: {}", e))?;
+            
+        let util_pct = parts[4].parse::<u32>()
+            .map_err(|e| format!("Error parsing util_pct: {}", e))?;
+
+        Ok(GpuStats {
+            name,
+            vram_used_mb,
+            vram_total_mb,
+            temp_c,
+            util_pct,
+        })
+    }
+    ```
+    This looks perfect.

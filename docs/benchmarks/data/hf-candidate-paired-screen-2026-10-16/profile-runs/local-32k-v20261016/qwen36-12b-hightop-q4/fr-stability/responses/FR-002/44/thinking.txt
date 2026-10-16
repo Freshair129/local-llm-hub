@@ -1,0 +1,112 @@
+We need to implement a Rust function `normalize_model_name(raw: &str) -> String` under STD-003 and ADR-100.
+
+First, we need to read the requirements:
+
+1. Function signature: pub fn normalize_model_name(raw: &str) -> String
+2. Strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/',
+3. Strip quantization suffixes: '-q4_0', '-q4_0k', '-q4_0s', '-q4_0k_m', '-q4_0k_s', '-q4_0s' (case-insensitive).
+4. Convert result to lowercase.
+5. Guard rails: NO unwrap(), NO expect(), NO panic!
+6. Traceability: Include '// trace:implements FR-002' directly before function declaration.
+
+We need to output exactly the Rust code.
+
+We need to implement this in a single code block.
+
+We should also consider that we need to import necessary modules.
+
+We need to produce a final answer with only the Rust code.
+
+I'll write it step by step.
+
+First, define the function:
+
+pub fn normalize_model_name(raw: &str) -> String {
+    // Strip registry prefixes
+    let with_prefix = raw - "registry.ollama.ai/library/";
+    let with_prefix = raw - "library/";;
+    let with_prefix = raw - "hf.co/";;
+    // Strip quantization suffixes (case-insensitive)
+    let with_suffix = raw - "-q4_0";
+    let with_suffix = raw - "-q4_0k";
+    let with_suffix = "-q4_0s";
+    let with_suffix = "-q4_0k_m";
+    let with_suffix = "-q4_0s";
+
+    // Strip everything else
+    let cleaned = std::str::cleanse_with_caseinsensitive(&with_prefix);
+    let cleaned = std::str::cleanse_with_caseinsensitive(&with_suffix);
+
+    // Convert to lowercase
+    let cleaned = std::str::lower(&cleaned);
+
+    return cleaned
+}
+
+Now, we need to ensure we return a String.
+
+Check for trailing newline? The spec says "NO unwrap()" so we just return cleaned. But we might need to handle empty string? Not important.
+
+Now, we need to ensure there are no warnings. Under ADR-100, we might need to ignore warnings. However, the spec says "Guard rails: NO unwrap(), NO expect(), NO panic!" so we just return cleaned.
+
+Now, we should also include a comment of trace: 'implements FR-002' before the function definition.
+
+Thus the code:
+
+```rust
+pub fn normalize_model_name(raw: &str) -> String {
+    // Strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/',
+    let with_prefix = raw - "registry.ollama.ai/library/";
+    let with_prefix = raw - "library/";;
+    let with_prefix = raw - "hf.co/";;
+    // Strip quantization suffixes: '-q4_0', '-q4_0k', '-q4_0s', '-q4_0k_m', '-q4_0s' (case-insensitive)
+    let with_suffix = raw - "-q4_0";
+    let with_suffix = raw - "-q4_0k";
+    let with_suffix = raw - "-q4_0s";
+    let with_suffix = "-q4_0k_m";
+    let with_suffix = "-q4_0s";
+
+    // Convert result to lowercase
+    let cleaned = std::str::cleanse_with_caseinsensitive(&with_prefix);
+    let cleaned = std::str::cleanse_with_caseinsensitive(&with_suffix);
+
+    return cleaned
+}
+```
+
+That's it.
+
+Now, we need to output this as final answer.
+
+But we should ensure we include everything. The spec: "You are an AI Coder working under STD-003 and ADR-100 guard rails." So we can just output the code block.
+
+Also, we might need to mention that we used `std::str`. But it's safe.
+
+Thus final answer:
+
+```rust
+pub fn normalize_model_name(raw: &str) -> String {
+    // Strip registry prefixes: 'registry.ollama.ai/library/', 'library/', 'hf.co/',
+    let with_prefix = raw - "registry.ollama.ai/library/";
+    let with_prefix = raw - "library/";;
+    let with_prefix = raw - "hf.co/";;
+    // Strip quantization suffixes: '-q4_0', '-q4_0k', '-q4_0s', '-q4_0k_m', '-q4_0s' (case-insensitive)
+    let with_suffix = raw - "-q4_0";
+    let with_suffix = raw - "-q4_0k";
+    let with_suffix = raw - "-q4_0s";
+    let with_suffix = "-q4_0k_m";
+    let with_suffix = "-q4_0s";
+
+    // Convert result to lowercase
+    let cleaned = std::str::cleanse_with_caseinsensitive(&with_prefix);
+    let cleaned = std::str::cleanse_with_caseinsensitive(&with_suffix);
+
+    return cleaned
+}
+```
+
+That's exactly what we need.
+
+Now, we should also consider that the function signature is already as specified.
+
+I'll produce the final answer with that code block.

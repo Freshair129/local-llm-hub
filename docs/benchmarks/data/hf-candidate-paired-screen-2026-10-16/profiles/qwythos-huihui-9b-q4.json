@@ -1,0 +1,9 @@
+{
+  "modelKey": "qwythos-huihui-9b-q4", "seeds": [42, 43, 44, 45, 46],
+  "modelCardUrl": "https://huggingface.co/mradermacher/Huihui-Qwythos-9B-Claude-Mythos-5-1M-abliterated-i1-GGUF",
+  "upstreamModelCardUrl": "https://huggingface.co/empero-ai/Qwythos-9B-Claude-Mythos-5-1M-GGUF",
+  "profiles": {
+    "local-32k": { "id": "local-32k-v20261016", "label": "RTX 3060 12GB: shared Mellum sampler with 32K context", "num_ctx": 32768, "num_predict": 81920, "options": { "temperature": 0.6, "top_p": 0.95, "top_k": 20, "repeat_penalty": 1.0 }, "systemPrompt": null, "settingsSource": "Existing Mellum-matched sampling profile; context raised from 16K for this hardware profile." },
+    "hf-card": { "id": "hf-card-v20261016", "label": "Huihui card plus upstream Qwythos quick-start settings; 16K context", "num_ctx": 16384, "num_predict": 16384, "options": { "temperature": 0.6, "top_p": 0.95, "top_k": 20, "repeat_penalty": 1.05 }, "systemPrompt": null, "settingsSource": "Huihui GGUF card gives no sampler values; inherits upstream Qwythos quick-start temperature=0.6, top_p=0.95, top_k=20, repetition penalty=1.05, and 16K context. Output cap follows that upstream card's 16384 recommendation." }
+  }
+}

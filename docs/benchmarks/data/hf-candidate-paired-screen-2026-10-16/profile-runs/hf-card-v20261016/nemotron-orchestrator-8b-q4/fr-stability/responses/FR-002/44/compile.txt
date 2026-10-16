@@ -1,0 +1,70 @@
+warning: variable `has_suffix` is assigned to, but never used
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\nemotron-orchestrator-8b-q4\fr-stability\responses\FR-002\44\test.rs:23:9
+   |
+23 |     let mut has_suffix = false;
+   |         ^^^^^^^^^^^^^^
+   |
+   = note: consider using `_has_suffix` instead
+   = note: `#[warn(unused_variables)]` (part of `#[warn(unused)]`) on by default
+
+warning: value assigned to `normalized` is never read
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\nemotron-orchestrator-8b-q4\fr-stability\responses\FR-002\44\test.rs:22:26
+   |
+22 |     let mut normalized = String::new();
+   |                          ^^^^^^^^^^^^^ this value is reassigned later and never used
+...
+57 |         normalized = lower_result;
+   |         ---------- `normalized` is overwritten here before the previous value is read
+   |
+   = note: `#[warn(unused_assignments)]` (part of `#[warn(unused)]`) on by default
+
+warning: value assigned to `has_suffix` is never read
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\nemotron-orchestrator-8b-q4\fr-stability\responses\FR-002\44\test.rs:53:9
+   |
+53 |         has_suffix = true;
+   |         ^^^^^^^^^^^^^^^^^
+   |
+   = help: maybe it is overwritten before being read?
+
+warning: value assigned to `has_suffix` is never read
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\nemotron-orchestrator-8b-q4\fr-stability\responses\FR-002\44\test.rs:48:9
+   |
+48 |         has_suffix = true;
+   |         ^^^^^^^^^^^^^^^^^
+   |
+   = help: maybe it is overwritten before being read?
+
+warning: value assigned to `has_suffix` is never read
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\nemotron-orchestrator-8b-q4\fr-stability\responses\FR-002\44\test.rs:43:9
+   |
+43 |         has_suffix = true;
+   |         ^^^^^^^^^^^^^^^^^
+   |
+   = help: maybe it is overwritten before being read?
+
+warning: value assigned to `has_suffix` is never read
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\nemotron-orchestrator-8b-q4\fr-stability\responses\FR-002\44\test.rs:38:9
+   |
+38 |         has_suffix = true;
+   |         ^^^^^^^^^^^^^^^^^
+   |
+   = help: maybe it is overwritten before being read?
+
+warning: value assigned to `has_suffix` is never read
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\nemotron-orchestrator-8b-q4\fr-stability\responses\FR-002\44\test.rs:33:9
+   |
+33 |         has_suffix = true;
+   |         ^^^^^^^^^^^^^^^^^
+   |
+   = help: maybe it is overwritten before being read?
+
+warning: value assigned to `has_suffix` is never read
+  --> <LOCAL_BENCHMARK_ROOT>\hf-card-v20261016\nemotron-orchestrator-8b-q4\fr-stability\responses\FR-002\44\test.rs:28:9
+   |
+28 |         has_suffix = true;
+   |         ^^^^^^^^^^^^^^^^^
+   |
+   = help: maybe it is overwritten before being read?
+
+warning: 8 warnings emitted
+

@@ -1,0 +1,390 @@
+The user wants me to implement a specific Rust function `normalize_model_name` that follows a set of rules and guard rails. I need to output only the Rust code inside a triple-backtick block. Let's break down the requirements:
+
+1. **Function signature**: `pub fn normalize_model_name(raw: &str) -> String`. The input is a string slice, output is an owned String.
+
+2. **Strip registry prefixes**: `'registry.ollama.ai/library/', 'library/', 'hf.co/'`. These are literal strings that may appear at the start of the model name. I need to check for each prefix and remove it if present. Since they have different lengths, I could use a series of `if` statements or a map; but to keep it simple and avoid extra allocations, I can just do sequential checks.
+
+3. **Strip quantization suffixes**: `'-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s'`. These are case-insensitive. The spec says "case-insensitive", but the examples are all lowercase; still, I should handle both uppercase and lowercase suffixes. The easiest way is to convert the whole string to lowercase after stripping prefixes, or to check each suffix in a case-insensitive manner. However, since we also need to convert the final result to lowercase (step 4), maybe it's simpler to just strip the suffixes using `contains` checks that are case-insensitive by using `raw.to_lowercase().ends_with(...)`? But we need to preserve the original for the prefix stripping. I could do two passes: first, create a mutable copy of `raw` (or use `String::from(raw)`) and apply the suffix stripping with case-insensitive checks, then convert the result to lowercase. That satisfies both steps without duplicating the string unnecessarily.
+
+4. **Convert result to lowercase**: After prefix stripping and suffix removal, convert the whole string to lowercase. This can be done via `result.to_lowercase()`.
+
+5. **Guard rails**: NO unwrap(), NO expect(), NO panic! So all operations must be safe or use methods that never panic (e.g., `trim()`, `to_string()`, `replace()`, etc.). The prefix stripping could involve `starts_with` which returns a bool, so no unwrapping there. For suffix removal, I might use `contains` and then `replacen`? Actually, the spec says "strip quantization suffixes", meaning if the string ends with one of those suffixes (case-insensitive), remove it. So I can do a series of `if s.ends_with(...)` checks, each time constructing a new String via `s[0..=len-2]` or using slice indexing. Using `s.len()` and slicing is safe as long as we guard the length with `if s.len() >= suffix_len`. But I could also just use `s.trim_end_matches`? That would be more generic but maybe less explicit. To keep it simple, I can do something like:
+
+```rust
+let mut s = raw.to_string(); // safe copy
+// strip prefixes
+if s.starts_with("registry.ollama.ai/library/") {
+    s = s.trim_start_matches("registry.ollama.ai/library/").to_string();
+}
+if s.startswith("library/") {
+    s = s.trim_start_matches("library/").to_string();
+}
+if s.startswith("hf.co/") {
+    s = s.trim_start_matches("hf.co/").to_string();
+}
+// strip suffixes case-insensitively
+let lower = s.to_lowercase(); // safe, no unwrap
+if lower.ends_with("-q4_0") || lower.ends_with("-q4_k_m") || lower.ends_with("-q4_k_s") {
+    s = s[..s.len()-5].to_string(); // need to be careful for short strings
+}
+// etc.
+```
+
+But using `s[..s.len()-5]` could panic if length is less than 5, but we guard with `if lower.ends_with(...)` which ensures the suffix exists. However, `ends_with` will return true even for short strings? Actually `ends_with` works correctly: `lower.ends_with("-q4_0")` returns true only if the string ends with that exact suffix; if the original string was shorter than the suffix, the lower case version would be shorter too, but we could have a mismatch. But we can just do `if lower.ends_with("-q4_0")` and then slice accordingly; since `ends_with` guarantees the suffix length, slicing will be safe.
+
+But to avoid any chance of panic, I can use `s.trim_end_matches` for the suffixes as well, but that may also be fine.
+
+Alternatively, we could just do a series of simple checks: define a helper function or macro that strips a suffix case-insensitively. However, to stay within the guard rails and keep it readable, I can just use `if lower.ends_with("-q4_0")` etc., then slice accordingly.
+
+6. **Traceability**: Include comment `// trace:implements FR-002` directly before function declaration. So the code block will start with that comment.
+
+Now let's craft the exact implementation. I'll try to be as straightforward as possible, using only safe string methods.
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    // copy input to mutable owned String (safe, no unwrap)
+    let mut s = raw.to_string();
+
+    // strip registry prefixes (order matters for overlapping prefixes)
+    if s.start_with("registry.ollama.ai/library/") {
+        s = s.trim_start_matches("registry.ollama.ai/library/").to_string();
+    }
+    if s.startswith("library/") {
+        s = s.trim_start_matches("library/").to_string();
+    }
+    if s.startswith("hf.co/") {
+        s = s.trim_start_matches("hf.co/").to_string();
+    }
+
+    // strip quantization suffixes (case-insensitive)
+    let lower = s.to_lowercase(); // safe conversion, no unwrap needed
+    if lower.ends_with("-q4_0") || lower.ends_with("-q4_k_m") || lower.ends_with("-q4_k_s") {
+        // safe slice because ends_with guarantees suffix length
+        s = s[..s.len()-5].to_string();
+    } else if lower.ends_with(":q4_0") || lower.ends_with(":q4_k_m") || lower.ends_with(":q4_k_s") {
+        s = s[..s.len()-5].to_string();
+    }
+
+    // convert final result to lowercase (already done via 'lower' but we must return a String)
+    // Actually we can just use lower for the suffix stripping, then return lower trimmed to original length?
+    // Simpler: after stripping suffixes, we can just return lower trimmed of any remaining leading whitespace (none).
+    // Let's just return lower to satisfy case-insensitive suffix removal and final lowercase.
+    lower
+}
+```
+
+But the spec says "Convert result to lowercase" as step 4, after stripping prefixes and suffixes. However, we used `to_lowercase()` only for suffix detection; we could also apply it to the final string. That's fine: after all stripping, we can just return `lower` (since it is already lowercased). But we must ensure that if the suffix was something like `-Q4_0`, the `lower` version would be `-q4_0`. So using `lower` for suffix detection works. Then we slice `s` based on the original string length, but after slicing we could just return `lower` again. Or we could just apply `to_lowercase()` once at the end.
+
+Simplify: Use `let mut s = raw.to_string();` then strip prefixes; then define a helper that strips suffix case-insensitively; then finally convert to lowercase and return.
+
+But the simplest is: after stripping prefixes, do:
+
+```rust
+let lower = s.to_lowercase();
+if lower.ends_with("-q4_0") || lower.ends_with("-q4_k_m") || lower.ends_with("-q4_k_s") {
+    s = s[..s.len()-5].to_string(); // safe because ends_with ensures suffix length
+} else if lower.ends_with(":q4_0") || lower.ends_with(":q4_k_m") || lower.ends_with(":q4_k_s") {
+    s = s[..s.len()-5].to_string();
+}
+lower
+```
+
+But then `lower` includes the suffix removal? Actually we need to remove the suffix from `s`, but we used the original `s` length. If we later convert `s` to lowercase, we might get a mismatched suffix if we didn't adjust length. Wait, we can just slice `lower` directly: `let suffix = lower[..(lower.len()-suffix_len)].to_string();`. That would be more consistent: after detecting the suffix in `lower`, we can slice `lower` accordingly and assign to `s`. Example:
+
+```rust
+let lower = s.to_lowercase();
+if lower.ends_with("-q4_0") || lower.ends_with("-q4_k_m") || lower.ends_with("-q4_k_s") {
+    s = lower[..(lower.len()-5)].to_string();
+} else if lower.ends_with(":q4_0") || lower.ends_with(":q4_k_m") || lower.ends_with(":q4_k_s") {
+    s = lower[..(lower.len()-5)].to_string();
+}
+s
+```
+
+But we also need to consider that `lower` might be shorter than the suffix length if the original string was short? However, `ends_with` will return true only if the suffix fits at the end. So slicing should be safe.
+
+Now after that, we might want to return `s` which is already lowercase (since we derived it from `lower`). But maybe we want to preserve any leading/trailing whitespace? The spec doesn't mention trimming, just stripping prefixes and suffixes, converting to lowercase. So we can just return `s`. That seems fine.
+
+Now think about the case where there is both a prefix and a suffix, e.g., `registry.ollama.ai/library/mistral:q4_0`. After stripping prefix, we get `mistral:q4_0`. Then we strip suffix `:q4_0` (case-insensitive). So final result should be `mistral`. That matches the spec.
+
+Now test some mental examples:
+
+- Input: `"library/llama2-q4_k_m"` -> prefix "library/" stripped -> `"llama2-q4_k_m"`. Suffix "-q4_k_m" (case-insensitive) -> `"llama2"`.
+- Input: `"registry.ollama.ai/library/mistral"` -> prefix stripped -> `"mistral"`. No suffix. Lowercase -> `"mistral"`.
+- Input: `"hf.co/timothy/llama3-q4_0"` -> prefix "hf.co/" stripped -> `"timothy/llama3-q4_0"`. Suffix "-q4_0" -> `"timothy/llama3"`. Lowercase -> `"timothy/llama3"`.
+- Input: `"mistral:Q4_K_S"` -> suffix `:Q4_K_S` (case-insensitive) -> `"mistral"`.
+- Input: `"q4_0"` (just a suffix without prefix) -> suffix "-q4_0" -> empty string `""`? That's okay; spec didn't say to handle edge cases. It just says "strip quantization suffixes". If the string is exactly the suffix, after removal we get empty string. That's fine.
+
+Now think about overlapping prefixes: if a name starts with both "registry.ollama.ai/library/" and "library/", e.g., `"registry.ollama.ai/library/library/llama2"` (some weird case). The order of checks matters; we can just check each one sequentially. The spec doesn't define exact ordering, but we can assume they are separate cases (like "registry.ollama.ai/library/" only for Ollama's registry and "library/" for the generic Ollama library). Overlap is unlikely but we handle it.
+
+Now think about case-insensitivity: the suffix `-q4_k_m` appears as both dash-prefixed and colon-prefixed. The spec lists them: `'-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s'`. So we need to check for each.
+
+Now think about the guard rails: no unwrap, no expect, no panic. We used `trim_start_matches` which returns a new String; it never panics. We used `to_string()` which is safe. We used `ends_with` which returns bool, safe. We used slice indexing `s[..(lower.len()-5)]`. That could panic if the length is less than 5 but we guard with `ends_with` which ensures suffix fits. However, what about the case where `lower` ends with a suffix that is exactly the whole string? Example: `"q4_0"` -> `lower.ends_with("-q4_0")` true, `lower.len()` = 5, slice `s[..(5-5)]` = `s[..0]`, which yields empty string, safe. So slicing is safe.
+
+Now think about the final step: "Convert result to lowercase". In our implementation, we derived `lower` from the prefix-stripped `s`. That's effectively converting the result to lowercase. However, if the original input had uppercase letters after stripping suffix (like `"Mistral:Q4_K_S"`), we first strip suffix using `lower` detection, which yields `s = lower[..(lower.len()-5)]` = `"mistral"`. Then we return that, which is already lowercase. That's fine.
+
+Now think about the comment: `// trace:implements FR-002` must be directly before the function declaration. So the code block should start with that comment, then the `pub fn ...`. Good.
+
+Now I'll refine the implementation to be concise and clear.
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    // copy input to mutable owned String (safe, no unwrap)
+    let mut s = raw.to_string();
+
+    // strip registry prefixes (order matters for overlapping prefixes)
+    if s.startswith("registry.ollama.ai/library/") {
+        s = s.trim_start_matches("registry.ollama.ai/library/").to_string();
+    }
+    if s.startswith("library/") {
+        s = s.trim_start_matches("library/").to_string();
+    }
+    if s.startswith("hf.co/") {
+        s = s.trim_start_matches("hf.co/").to_string();
+    }
+
+    // strip quantization suffixes (case-insensitive)
+    let lower = s.to_lowercase(); // safe conversion, no unwrap needed
+    if lower.ends_with("-q4_0") || lower.ends_with("-q4_k_m") || lower.ends_with("-q4_k_s") {
+        s = lower[..(lower.len()-5)].to_string();
+    } else if lower.ends_with(":q4_0") || lower.ends_with(":q4_k_m") || lower.ends_with(":q4_k_s") {
+        s = lower[..(lower.len()-5)].to_string();
+    }
+
+    // result is already lowercase from the 'lower' variable, but we need to return a String.
+    // Since we mutated `s` based on `lower`, we can just return `lower`.
+    lower
+}
+```
+
+But note: after we set `s = lower[..(lower.len()-5)].to_string()`, we haven't re-assigned `lower`. The final return is `lower`, which still includes the suffix if we didn't adjust it. Actually, the spec says "strip quantization suffixes" and then "convert result to lowercase". It doesn't say that after stripping suffixes you must keep the original string; you just need to strip them. So maybe the best is to just apply the suffix removal to `s` directly using case-insensitive checks (like `if lower.ends_with(...)` but then slice `lower` accordingly, and assign back to `s`). That way we can just return `s`. Let's simplify: after prefix stripping, we compute `let lower = s.to_lowercase();`. Then we replace `s` with the suffix-stripped version of `lower`. Example:
+
+```rust
+let lower = s.to_lowercase();
+if lower.ends_with("-q4_0") || lower.ends_with("-q4_k_m") || lower.ends_with("-q4_k_s") {
+    s = lower[..(lower.len()-5)].to_string();
+} else if lower.ends_with(":q4_0") || lower.ends_with(":q4_k_m") || lower.ends_with(":q4_k_s") {
+    s = lower[..(lower.len()-5)].to_string();
+}
+```
+
+Now `s` holds the suffix-stripped version, but it's still maybe mixed-case (e.g., `"Mistral:Q4_K_S"` -> after prefix stripping we have `"mistral:q4_k_s"` (since `lower` is all lowercase). Then we slice `lower` to `"mistral"` and assign back to `s`. That yields `"mistral"` which is lowercase. So the final `s` is already lowercase because we derived it from `lower`. However, if the suffix was something like `-Q4_K_S` (mixed case), `lower` would be `-q4_k_s`, slice yields `"mistral"`; fine.
+
+Now after that, we just return `s`. That's simpler and matches "convert result to lowercase" as part of the suffix removal logic. So final function:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    // copy input to mutable owned String (safe, no unwrap)
+    let mut s = raw.to_string();
+
+    // strip registry prefixes (order matters for overlapping prefixes)
+    if s.startswith("registry.ollama.ai/library/") {
+        s = s.trim_start_matches("registry.ollama.ai/library/").to_string();
+    }
+    if s.startswith("library/") {
+        s = s.trim_start_matches("library/").to_string();
+    }
+    if s.startswith("hf.co/") {
+        s = s.trim_start_matches("hf.co/").to_string();
+    }
+
+    // strip quantization suffixes (case-insensitive)
+    let lower = s.to_lowercase(); // safe conversion, no unwrap needed
+    if lower.ends_with("-q4_0") || lower.ends_with("-q4_k_m") || lower.ends_with("-q4_k_s") {
+        s = lower[..(lower.len()-5)].to_string();
+    } else if lower.ends_with(":q4_0") || lower.ends_with(":q4_k_m") || lower.ends_with(":q4_k_s") {
+        s = lower[..(lower.len()-5)].to_string();
+    }
+
+    // `s` is now the suffix‑stripped, lowercase version
+    s
+}
+```
+
+Now check for any use of unwrap: we used `trim_start_matches` which returns a new String; that's safe. We used `to_lowercase()` which returns a String; safe. Slicing uses `lower.len()` which is safe. The only possible issue is that `lower[..(lower.len()-5)]` could panic if `lower.len()-5` is negative? That would happen if `lower` length is less than 5 but still ends with a suffix of length 5 (like `"q4_0"`). However, `ends_with("-q4_0")` would be true only for strings of length at least 5. So it's safe.
+
+Now think about the case where the suffix is exactly the whole string and we slice to get an empty string; that's fine.
+
+Now test some edge cases:
+
+- Input: `"registry.ollama.ai/library/mistral-q4_k_m"` -> prefix stripped -> `"mistral-q4_k_m"`. `lower` = same. Ends with `-q4_k_m` (length 6? Actually suffix "-q4_k_m" length 6). So `lower.len()-5` = 10-6 = 4, slice yields `"mistral"`? Wait, original `mistral-q4_k_m` length: "mistral" (6) + "-" (1) + "q4" (2) + "_" (1) + "k" (1) + "m" (1) = 13? Let's compute precisely: "mistral" = 6, plus "-q4_k_m" = 7? Actually "-q4_k_m" is 7 characters: dash, q, 4, _, k, m. That gives 13 total length. `lower.len()-5` yields 8 (since suffix length is 7). Wait we need to ensure suffix length is correct. The suffix list includes `-q4_0`, `-q4_k_m`, `-q4_k_s`. Those are dash + 3 letters + underscore + 1 letter = 5? Let's count: "-q4_0": dash (1), q (2), 4 (3), underscore (4), zero (5). So length 5. "-q4_k_m": dash (1), q (2), 4 (3), underscore (4), k (5), m (6). That's length 6. "-q4_k_s": dash, q, 4, _, k, s = 6 as well. Similarly, colon-prefixed suffixes `:q4_0`: colon (1), q, 4, underscore, zero = 5; `:q4_k_m`: colon, q, 4, _, k, m = 6. So the suffix length varies between 5 and 6. Our code uses a constant offset of 5 for all suffixes, which is wrong for `-q4_k_m` (length 6). That could cause off-by-one errors. However, we can just use `lower.len()-suffix_len` where `suffix_len` depends on the suffix. But we could also use a helper function `strip_suffix_case_insensitive` that takes a slice of possible suffixes and returns the stripped string. Or we can do a more robust approach: after converting to lowercase, we can replace any occurrence of those suffixes using `replace` or `trim_end_matches`. But `trim_end_matches` will trim all characters that match a set, not just the exact suffix. For example, `trim_end_matches("-q4_0")` works if the suffix is exactly that string; `trim_end_matches("-q4_k_m")` also works because it's a single string. So we could do:
+
+```rust
+let lower = s.to_lowercase();
+if lower.ends_with("-q4_0") {
+    s = lower[..(lower.len()-5)].to_string();
+} else if lower.ends_with("-q4_k_m") {
+    s = lower[..(lower.len()-6)].to_string();
+} else if lower.ends_with("-q4_k_s") {
+    s = lower[..(lower.len()-6)].to_string();
+} else if lower.ends_with(":q4_0") {
+    s = lower[..(lower.len()-5)].to_string();
+} else if lower.ends_with(":q4_k_m") {
+    s = lower[..(lower.len()-6)].to_string();
+} else if lower.ends_with(":q4_k_s") {
+    s = lower[..(lower.len()-6)].to_string();
+}
+```
+
+But that's a bit verbose. However, it's still safe and avoids the constant offset issue. Or we could just use `trim_end_matches` for each suffix: if `lower.trim_end_matches("-q4_0") != lower`, then set `s = lower[..(lower.len()-5)].to_string()`? That seems messy.
+
+Alternatively, we could define a helper function that strips a case-insensitive suffix given a list of possible suffix strings:
+
+```rust
+fn strip_suffix_case_insensitive(s: &str, suffixes: &[&str]) -> String {
+    let lower = s.to_lowercase();
+    for suffix in suffixes.iter() {
+        if lower.ends_with(suffix) {
+            return lower[..(lower.len()-suffix.len())].to_string();
+        }
+    }
+    s.to_string()
+}
+```
+
+Then we can call `strip_suffix_case_insensitive(&s, &["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"])`. This is clean and ensures the correct offset for each suffix. That also respects guard rails (no unwrap). And we can incorporate that into the function.
+
+Now we need to decide on the exact style of the implementation. The spec says "Implement this exact specification" but doesn't restrict the internal complexity. However, it also says "Guard rails: NO unwrap(), NO expect(), NO panic!" So we can use helper functions as long as they are safe.
+
+Let's produce a clean final version with that helper. We'll define `fn strip_suffix_case_insensitive(s: &str, suffixes: &[&str]) -> String` inside the same function or as a nested function. Since Rust allows nested functions, we could just use a local closure or a separate function defined earlier; but to keep it simple and self-contained within `normalize_model_name`, we can define a private helper inside the same block using `let mut s = raw.to_string();` then call a closure that returns a `String`. That might be more concise.
+
+But the spec didn't restrict the shape of the function beyond the signature, so it's okay to have a nested function. However, we also want readability. Let's define a private helper `fn strip_suffix_case_insensitive(s: &str, suffixes: &[&str]) -> String` before the main function? That would be separate from the main function but still within the same block. But the spec says "Include comment '// trace:implements FR-002' directly before function declaration." It doesn't say that `normalize_model_name` must be the only function; just that the comment should be directly before its declaration. So we can have a helper defined after or before, but the comment will still be right before `pub fn normalize_model_name`. That's fine.
+
+Now let's craft the final code:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    // copy input to mutable owned String (safe, no unwrap)
+    let mut s = raw.to_string();
+
+    // strip registry prefixes (order matters for overlapping prefixes)
+    if s.startswith("registry.ollama.ai/library/") {
+        s = s.trim_start_matches("registry.ollama.ai/library/").to_string();
+    }
+    if s.startswith("library/") {
+        s = s.trim_start_matches("library/").to_string();
+    }
+    if s.startswith("hf.co/") {
+        s = s.trim_start_matches("hf.co/").to_string();
+    }
+
+    // strip quantization suffixes (case-insensitive)
+    let lower = s.to_lowercase(); // safe conversion, no unwrap needed
+    if lower.ends_with("-q4_0") {
+        s = lower[..(lower.len()-5)].to_string();
+    } else if lower.ends_with("-q4_k_m") {
+        s = lower[..(lower.len()-6)].to_string();
+    } else if lower.ends_with("-q4_k_s") {
+        s = lower[..(lower.len()-6)].to_string();
+    } else if lower.ends_with(":q4_0") {
+        s = lower[..(lower.len()-5)].to_string();
+    } else if lower.ends_with(":q4_k_m") {
+        s = lower[..(lower.len()-6)].to_string();
+    } else if lower.ends_with(":q4_k_s") {
+        s = lower[..(lower.len()-6)].to_string();
+    }
+
+    // `s` is now the suffix‑stripped, lowercase version
+    s
+}
+```
+
+But we still have the issue that after stripping a suffix, the resulting string might not be fully lowercase if the original suffix had uppercase letters that were trimmed away? Actually, we derived `lower` from `s`, so `lower` is all lowercase. Then we sliced `lower` to get the prefix part of the original `s`. That yields a string that is still all lowercase because it came directly from `lower`. So after any suffix removal, `s` becomes a substring of `lower`, thus all lowercase. Good.
+
+Now test mentally:
+
+- Input: `"registry.ollama.ai/library/mistral-q4_k_m"` -> prefix stripped -> `"mistral-q4_k_m"`. `lower` = same. Ends with `-q4_k_m` (length 6). So slice `lower[..(lower.len()-6)]` = `"mistral"` (since "mistral-q4_k_m" length is 13, minus 6 = 7, so slice yields first 7 chars: "mistral"? Let's compute: "mistral" = 6 letters; plus dash? Actually "mistral-q4_k_m": "mistral" (6) + "-" (1) + "q4_k_m" (5?) Wait "q4_k_m" is q,4,_,k,m = 5. So total length = 6+1+5 = 12? Let's recount: "mistral" (6), dash (1), "q4_k_m" (5) = 12. So `lower.len()` = 12. Subtract suffix length 6 = 6. Slice yields first 6 characters = `"mistral"` (correct). So final result = `"mistral"`. Good.
+
+- Input: `"mistral:Q4_K_S"` -> prefix stripped maybe no prefix; `lower` = `"mistral:q4_k_s"`. Ends with `:q4_k_s` (length 6). Slice yields first 6 characters = `"mistral"` (since "mistral" length = 6). Good.
+
+- Input: `"mistral-q4_0"` -> `lower` = same; ends with `-q4_0` (5). Slice yields first 7? Wait "mistral-q4_0": "mistral" (6) + "-" (1) + "q4_0" (4) = 11. Subtract suffix length 5 = 6; slice yields first 6 characters = `"mistral"` (correct). Good.
+
+Now think about overlapping prefixes: if we have `"registry.ollama.ai/library/library/llama2"`? That seems weird but after first prefix removal we get `"library/llama2"`. Then second prefix removal yields `"llama2"`. Good.
+
+Now consider a name that includes both a prefix and a suffix, e.g., `"hf.co/timothy/llama3-q4_k_m"` -> prefix stripped -> `"timothy/llama3-q4_k_m"`; `lower` = same; ends with `-q4_k_m` (6); slice yields first 12 characters: `"timothy/llama3"`? Let's compute: "timothy/llama3-q4_k_m": "timothy/" (7) + "llama3" (6) + "-q4_k_m" (7?) Actually "-q4_k_m" is 7? Wait we counted earlier that "-q4_k_m" length = 7? Let's recount: dash (1), q (2), 4 (3), underscore (4), k (5), m (6). That's 6. So total length = "timothy/" (7) + "llama3" (6) + "-q4_k_m" (7?) Let's just compute: "timothy/llama3-q4_k_m": t i m o t h y / l l a m a 3 - q 4 _ k m = 20? Hard. But the slice should produce a sensible name. The spec doesn't define exact behavior for overlapping suffixes; just that they are stripped. So it's fine.
+
+Now think about edge case where suffix is exactly the whole string and we have to handle the dash or colon prefix: e.g., `"q4_k_m"` -> `lower` ends with `-q4_k_m`. Slice yields first 0 characters (since length = 6, suffix length = 6) = empty string. That's okay.
+
+Now think about the case where there is a suffix but also a prefix that includes the suffix as part of the prefix? E.g., `"registry.ollama.ai/library/-q4_k_m"` -> after prefix removal we have `"-q4_k_m"`; `lower` ends with `-q4_k_m`; slice yields empty string. That's fine.
+
+Now think about the guard rails: we used `startswith` method (but note that `String` has a method `starts_with` not `startswith`). Actually in Rust, the trait `std::str::Pattern` provides `starts_with` for `&str`. For `String`, you can call `s.startswith(...)`? Let's recall: The `String` type implements `From<&str>` and also has a method `starts_with` via the `Pattern` trait. In practice, we can do `s.startswith("registry.ollama.ai/library/")` if we import the `Pattern` trait. But more simply, we can just use `s.startswith(...)` which works because `String` implements `Pattern`. However, to be safe and avoid any potential compile errors (if the spec expects exactly that), we could just use `s.startswith(...)`. The spec didn't restrict the exact method name; it just said "strip registry prefixes". So using `starts_with` is fine.
+
+Alternatively, we could use `s.startswith` and then assign `s = s.trim_start_matches(...).to_string()`. That's safe.
+
+Now check for any use of `.unwrap()` in the helper `trim_start_matches`: it returns a new `String`, which we then assign to `s`. That's fine.
+
+Now think about the final comment: `// trace:implements FR-002` directly before function declaration. That is satisfied.
+
+Now we should output only valid Rust code inside a triple backticks block labeled `rust`. So final answer will be exactly that.
+
+Before finalizing, let's double-check the code for any syntactic issues:
+
+```rust
+// trace:implements FR-002
+pub fn normalize_model_name(raw: &str) -> String {
+    // copy input to mutable owned String (safe, no unwrap)
+    let mut s = raw.to_string();
+
+    // strip registry prefixes (order matters for overlapping prefixes)
+    if s.startswith("registry.ollama.ai/library/") {
+        s = s.trim_start_matches("registry.ollama.ai/library/").to_string();
+    }
+    if s.startswith("library/") {
+        s = s.trim_start_matches("library/").to_string();
+    }
+    if s.startswith("hf.co/") {
+        s = s.trim_start_matches("hf.co/").to_string();
+    }
+
+    // strip quantization suffixes (case-insensitive)
+    let lower = s.to_lowercase(); // safe conversion, no unwrap needed
+    if lower.ends_with("-q4_0") {
+        s = lower[..(lower.len()-5)].to_string();
+    } else if lower.ends_with("-q4_k_m") {
+        s = lower[..(lower.len()-6)].to_string();
+    } else if lower.ends_with("-q4_k_s") {
+        s = lower[..(lower.len()-6)].to_string();
+    } else if lower.ends_with(":q4_0") {
+        s = lower[..(lower.len()-5)].to_string();
+    } else if lower.ends_with(":q4_k_m") {
+        s = lower[..(lower.len()-6)].to_string();
+    } else if lower.ends_with(":q4_k_s") {
+        s = lower[..(lower.len()-6)].to_string();
+    }
+
+    // `s` is now the suffix‑stripped, lowercase version
+    s
+}
+```
+
+Now, verify that `trim_start_matches` returns a `String`. Yes, `String::trim_start_matches` returns `&str`, but we need to assign it to `s`, which is a `String`. Actually, `trim_start_matches` returns a new string slice; we can just do `s = s.trim_start_matches(...).to_string();` as in the code. That's fine.
+
+Now check that `s.startswith` works: `String` implements `starts_with` (via `Pattern`). If not, we could use `if s.startswith("registry.ollama.ai/library/")`. That should compile.
+
+Now check that `lower.ends_with` works: `&str` has `ends_with`, fine.
+
+Now check the slicing: `lower[..(lower.len()-5)]` returns a slice of type `&str`. Then `.to_string()` yields a `String`. Good.
+
+Now think about potential off-by-one errors for suffixes of length 6. For `"-q4_k_m"` we used `lower.len()-6`. That's correct. For `":q4_k_m"` also length 6, so same.
+
+Now check for suffix `-q4_0` (length 5) and `:q4_0` (length 5). Good.
+
+Now think about the case where the suffix is exactly a dash-prefixed version but there is also a colon-prefixed version; we handle them separately with else-if chain, so only one will be applied. That's fine.
+
+Now think about the scenario where the suffix is ambiguous (e.g., `"mistral-q4_k_m"` vs `"mistral:q4_k_m"`). Since we check dash first then colon, we will strip dash suffix first, but that's okay because they are distinct patterns.
+
+Now think about the scenario where a suffix includes both dash and colon (like `"mistral-dash:q4_k_m"`), which is unlikely but our code would strip the first suffix encountered. That's acceptable.
+
+Now think about the guard rails: no unwrap, no expect, no panic. Did we use any method that could panic? `trim_start_matches` returns a new string slice; safe. `to_string()` is safe. `to_lowercase()` is safe. `ends_with` returns bool. Slicing `lower[..(lower.len()-5)]` uses the length of `lower`, which is at least 5 if we have an `ends_with` true. So safe.
+
+Now think about the comment: `// trace:implements FR-002`. That's placed directly before `pub fn normalize_model_name`. Good.
+
+Now let's produce the final output exactly as a code block.
+
+Potential improvement: maybe we could use `s = s.trim_start_matches("registry.ollama.ai/library/").to_string();` but we need to ensure that `trim_start_matches` returns a `&str`, which it does; then `.to_string()` yields a `String`. That's fine.
+
+Now final answer.

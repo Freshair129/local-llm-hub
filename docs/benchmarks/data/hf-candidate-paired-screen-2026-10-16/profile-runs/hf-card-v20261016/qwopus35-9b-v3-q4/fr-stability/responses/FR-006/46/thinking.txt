@@ -1,0 +1,86 @@
+The user wants me to implement a Rust specification for FR-006. Let me break down the requirements:
+
+1. Define a struct `GpuStats` with specific fields and derives (Debug, PartialEq)
+2. Implement a function `parse_gpu_csv` that takes a CSV line and returns Result<GpuStats, String>
+3. Parse specific CSV format: "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"
+   - Field 1: GPU name (String)
+   - Field 2: VRAM used (u64)
+   - Field 3: VRAM total (u64)
+   - Field 4: Temperature (u32)
+   - Field 5: Utilization percentage (u32)
+4. Robust error handling: Check for fewer than 5 columns, handle parse errors
+5. Guard rails: NO unwrap(), expect(), or panic! - must use match or if let
+6. Traceability: Include comment '// trace:implements FR-006' before function declaration
+7. Output both struct and function in a single code block
+
+Let me write the implementation:
+
+```rust
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    // Split by comma and trim whitespace
+    let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
+    
+    // Check we have exactly 5 fields
+    if parts.len() != 5 {
+        return Err(format!("Expected 5 CSV columns, got {}", parts.len()));
+    }
+    
+    // Parse each field with error handling
+    let name = parts[0].to_string();
+    let vram_used_mb = parts[1].parse::<u64>()
+        .map_err(|_| format!("Failed to parse VRAM used: {}", parts[1]))?;
+    let vram_total_mb = parts[2].parse::<u64>()
+        .map_err(|_| format!("Failed to parse VRAM total: {}", parts[2]))?;
+    let temp_c = parts[3].parse::<u32>()
+        .map_err(|_| format!("Failed to parse temperature: {}", parts[3]))?;
+    let util_pct = parts[4].parse::<u32>()
+        .map_err(|_| format!("Failed to parse utilization: {}", parts[4]))?;
+    
+    Ok(GpuStats {
+        name,
+        vram_used_mb,
+        vram_total_mb,
+        temp_c,
+        util_pct,
+    })
+}
+```
+
+Wait, I should double-check the requirements:
+- Struct definition with Debug and PartialEq derives ✓
+- Function signature matches exactly ✓
+- Parse CSV with 5 fields ✓
+- Error handling for fewer columns ✓
+- Error handling for parse failures ✓
+- No unwrap/expect/panic ✓
+- Traceability comment before function ✓
+- Both in same code block ✓
+
+The implementation looks correct. I used `split(',').map(|s| s.trim())` to handle the example "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25" properly since there might be spaces around commas.
+
+Actually, looking at the example "NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25", there are spaces after commas. So trimming is necessary.
+
+Also, I should make sure to handle the case where there are more than 5 fields? The spec says "fewer than 5" but it's safer to check for != 5. However, strictly following the spec, I'll check for len() != 5.
+
+Let me verify the struct fields order matches the CSV order:
+1. name (String)
+2. vram_used_mb (u64)
+3. vram_total_mb (u64)
+4. temp_c (u32)
+5. util_pct (u32)
+
+Yes, that matches.
+
+One more check: the traceability comment should be '// trace:implements FR-006' directly before the function declaration. I have that.
+
+I think this is complete.

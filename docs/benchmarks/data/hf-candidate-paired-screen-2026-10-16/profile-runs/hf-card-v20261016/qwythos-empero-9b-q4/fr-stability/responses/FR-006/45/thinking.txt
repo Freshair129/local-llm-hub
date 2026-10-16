@@ -1,0 +1,117 @@
+The user wants a Rust implementation of a specific feature request (FR-006). I need to follow the exact specification:
+
+1. Define a `struct GpuStats` with fields: `name: String`, `vram_used_mb: u64`, `vram_total_mb: u64`, `temp_c: u32`, `util_pct: u32`. It must derive `Debug` and `PartialEq`.
+
+2. Provide a function signature: `pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String>`.
+
+3. The CSV line format is `"NVIDIA GeForce RTX 3060, 5800, 12288, 35, 25"`. I need to split the line by commas, trim whitespace, then parse each field:
+   - First field -> `name` (String)
+   - Second and third fields -> `vram_used_mb` and `vram_total_mb` (u64)
+   - Fourth field -> `temp_c` (u32)
+   - Fifth field -> `util_pct` (u32)
+
+4. Error handling: Return `Err(String)` if there are fewer than 5 columns, or if any of the numeric conversions fail (`u64::from_str`, `u32::from_str`). I must not use `unwrap()`, `expect()`, or `panic!`.
+
+5. Guard rails: The user explicitly says "STRICTLY FORBIDDEN to use unwrap(), expect(), or panic!". So I will use `map_err` for the string-to-number conversions and collect errors appropriately.
+
+6. Traceability: Include a comment `// trace:implements FR-006` directly before the function declaration, as per spec #6.
+
+7. Output both the struct and the function inside a single ```rust code block.
+
+Now I will construct the code.
+
+First, the struct:
+
+```rust
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+```
+
+Second, the function. I need to split on commas. Using `line.split(',')` yields an iterator over `&str`. Convert each to a trimmed string using `map(|s| s.trim())`. If the length is less than 5, return `Err("invalid CSV: fewer than 5 columns".to_string())`. Then map over the remaining parts with indices 1..=4. For each, try to parse the appropriate numeric type; if parsing fails, return an error string that includes the column index and the raw value.
+
+Implementation steps:
+
+- `let cols = line.split(',').map(|s| s.trim()).collect::<Vec<_>>();`
+- Check `cols.len() < 5` → error.
+- Use `match cols.as_slice()` to pattern-match exactly five elements, returning early if not.
+- Construct a `Result<GpuStats, String>` by mapping each numeric conversion with `map_err`. For the name field, just keep it as is. For the other fields, use `u64::from_str` for vram fields and `u32::from_str` for temp and util.
+- Combine them into a `GpuStats`.
+
+I'll need to make sure the error messages are helpful: "invalid CSV: fewer than 5 columns", "column {i} failed to parse as u64: {val}", and similarly for u32.
+
+Now write the function:
+
+```rust
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let cols = line.split(',').map(|s| s.trim()).collect::<Vec<_>>();
+    if cols.len() < 5 {
+        return Err("invalid CSV: fewer than 5 columns".to_string());
+    }
+    match cols.as_slice() {
+        [name, vram_used, vram_total, temp, util] => {
+            Ok(GpuStats {
+                name: name.clone(),
+                vram_used_mb: u64::from_str(vram_used)
+                    .map_err(|_| format!("column 2 failed to parse as u64: {}", vram_used)),
+                vram_total_mb: u64::from_str(vram_total)
+                    .map_err(|_| format!("column 3 failed to parse as u64: {}", vram_total)),
+                temp_c: u32::from_str(temp)
+                    .map_err(|_| format!("column 4 failed to parse as u32: {}", temp)),
+                util_pct: u32::from_str(util)
+                    .map_err(|_| format!("column 5 failed to parse as u32: {}", util)),
+            })
+        }
+        _ => Err("invalid CSV: wrong number of fields".to_string()), // fallback, unreachable after length check
+    }
+}
+```
+
+Note: The `_` case is technically unreachable because we already checked length and pattern matched exactly five items. However, to be safe, I could return an error for any unexpected pattern. Since the spec says "Return Err(String) if columns are fewer than 5 or numbers fail to parse", the fallback is not strictly needed but doesn't harm. I'll keep it as a safeguard.
+
+Now, combine both pieces into a single code block:
+
+```rust
+#[derive(Debug, PartialEq)]
+pub struct GpuStats {
+    pub name: String,
+    pub vram_used_mb: u64,
+    pub vram_total_mb: u64,
+    pub temp_c: u32,
+    pub util_pct: u32,
+}
+
+// trace:implements FR-006
+pub fn parse_gpu_csv(line: &str) -> Result<GpuStats, String> {
+    let cols = line.split(',').map(|s| s.trim()).collect::<Vec<_>>();
+    if cols.len() < 5 {
+        return Err("invalid CSV: fewer than 5 columns".to_string());
+    }
+    match cols.as_slice() {
+        [name, vram_used, vram_total, temp, util] => {
+            Ok(GpuStats {
+                name: name.clone(),
+                vram_used_mb: u64::from_str(vram_used)
+                    .map_err(|_| format!("column 2 failed to parse as u64: {}", vram_used)),
+                vram_total_mb: u64::from_str(vram_total)
+                    .map_err(|_| format!("column 3 failed to parse as u64: {}", vram_total)),
+                temp_c: u32::from_str(temp)
+                    .map_err(|_| format!("column 4 failed to parse as u32: {}", temp)),
+                util_pct: u32::from_str(util)
+                    .map_err(|_| format!("column 5 failed to parse as u32: {}", util)),
+            })
+        }
+        _ => Err("invalid CSV: wrong number of fields".to_string()),
+    }
+}
+```
+
+That satisfies all the requirements: struct definition, function signature, parsing logic, robust error handling without unwrap/expect/panic, traceability comment, and both items in a single code block.
+
+Now I will output this as the final answer.
