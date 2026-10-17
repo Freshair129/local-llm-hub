@@ -6,6 +6,7 @@
 
 import { showToast } from './toast.js';
 import { invoke } from './api.js';
+import { gpuTelemetryView } from './gpu_telemetry_view.js';
 
 let currentSortBy = 'cpu'; // 'cpu' | 'memory'
 let processSearchQuery = '';
@@ -18,12 +19,12 @@ let activeTmTab = 'sectors'; // 'sectors' | 'perf' | 'procs'
 // 60-point sliding history buffers for real-time graphs
 const MAX_HISTORY = 60;
 const history = {
-  gpu3d: Array(MAX_HISTORY).fill(13),
-  gpuCopy: Array(MAX_HISTORY).fill(0),
-  gpuEncode: Array(MAX_HISTORY).fill(0),
-  gpuDecode: Array(MAX_HISTORY).fill(0),
-  gpuVramDedicated: Array(MAX_HISTORY).fill(0.8),
-  gpuVramShared: Array(MAX_HISTORY).fill(0.0),
+  gpu3d: [],
+  gpuCopy: [],
+  gpuEncode: [],
+  gpuDecode: [],
+  gpuVramDedicated: [],
+  gpuVramShared: [],
   cpu: Array(MAX_HISTORY).fill(39),
   memory: Array(MAX_HISTORY).fill(14.0),
   disk0: Array(MAX_HISTORY).fill(5),
@@ -32,8 +33,9 @@ const history = {
   disk3: Array(MAX_HISTORY).fill(23),
   netTailscale: Array(MAX_HISTORY).fill(0),
   netPrimary: Array(MAX_HISTORY).fill(96.5),
-  gpu0: Array(MAX_HISTORY).fill(13)
+  gpu0: []
 };
+let currentGpuTelemetry = null;
 
 export async function initProcessManager() {
   setupProcessEvents();
@@ -93,7 +95,7 @@ export function selectPerfDevice(deviceKey) {
 
   if (deviceKey === 'gpu0') {
     if (titleEl) titleEl.textContent = 'GPU';
-    if (fullnameEl) fullnameEl.textContent = 'NVIDIA GeForce RTX 3060';
+    if (fullnameEl) fullnameEl.textContent = gpuTelemetryView(currentGpuTelemetry).name;
     if (gpuEngineGrid) gpuEngineGrid.style.display = 'grid';
     if (gpuMemSection) gpuMemSection.style.display = 'flex';
     if (singleGraphSection) singleGraphSection.style.display = 'none';
@@ -180,21 +182,25 @@ export async function refreshProcesses() {
 }
 
 function pushTelemetryData(telemetry) {
-  const gpu = telemetry.gpus?.[0];
-  const gpuUtil = gpu?.utilization_pct !== undefined ? gpu.utilization_pct : 13;
-  const vramUsedGb = gpu?.vram_used_bytes ? (gpu.vram_used_bytes / (1024 ** 3)) : 0.8;
+  const gpu = telemetry.gpus?.[0] || null;
+  currentGpuTelemetry = gpu;
+  const gpuView = gpuTelemetryView(gpu);
   const cpuPct = telemetry.cpu_usage_pct !== undefined ? telemetry.cpu_usage_pct : 39;
-  const ramGb = telemetry.system_ram_used_bytes ? (telemetry.system_ram_used_bytes / (1024 ** 3)) : 14.0;
+  const ramGb = telemetry.system_ram_used_bytes !== undefined
+    ? telemetry.system_ram_used_bytes / (1024 ** 3)
+    : 14.0;
 
-  pushValue(history.gpu3d, gpuUtil);
-  pushValue(history.gpuCopy, (gpuUtil * 0.1));
-  pushValue(history.gpuEncode, 0);
-  pushValue(history.gpuDecode, 0);
-  pushValue(history.gpuVramDedicated, vramUsedGb);
-  pushValue(history.gpuVramShared, 0.0);
+  if (gpuView.available) {
+    if (gpuView.utilizationPct !== null) {
+      pushValue(history.gpu3d, gpuView.utilizationPct);
+      pushValue(history.gpu0, gpuView.utilizationPct);
+    }
+    if (gpuView.vramUsedGb !== null) pushValue(history.gpuVramDedicated, gpuView.vramUsedGb);
+  } else {
+    clearGpuHistory();
+  }
   pushValue(history.cpu, cpuPct);
   pushValue(history.memory, ramGb);
-  pushValue(history.gpu0, gpuUtil);
 
   // Update specs values
   const specGpuUtil = document.getElementById('spec-gpu-util');
@@ -202,12 +208,24 @@ function pushTelemetryData(telemetry) {
   const specGpuTotalMem = document.getElementById('spec-gpu-total-mem');
   const specGpuTemp = document.getElementById('spec-gpu-temp');
   const perfVal3d = document.getElementById('perf-val-3d');
+  const perfGpuName = document.getElementById('perf-sub-gpu0-name');
+  const perfFullname = document.getElementById('perf-view-fullname');
+  const sectorGpuTemp = document.getElementById('sector-gpu-temp');
+  const sectorGpuName = document.getElementById('sector-gpu-name');
+  const perfVramTotal = document.getElementById('perf-vram-total');
 
-  if (specGpuUtil) specGpuUtil.textContent = `${Math.round(gpuUtil)}%`;
-  if (perfVal3d) perfVal3d.textContent = `${Math.round(gpuUtil)}%`;
-  if (specGpuDedicated) specGpuDedicated.textContent = `${vramUsedGb.toFixed(1)}/12.0 GB`;
-  if (specGpuTotalMem) specGpuTotalMem.textContent = `${(vramUsedGb + 0.1).toFixed(1)}/28.0 GB`;
-  if (specGpuTemp) specGpuTemp.textContent = `${gpu?.temperature_c || 35} °C`;
+  if (specGpuUtil) specGpuUtil.textContent = gpuView.utilizationText;
+  if (perfVal3d) perfVal3d.textContent = gpuView.utilizationText;
+  if (specGpuDedicated) specGpuDedicated.textContent = gpuView.vramText;
+  if (specGpuTotalMem) specGpuTotalMem.textContent = 'Unavailable';
+  if (specGpuTemp) specGpuTemp.textContent = gpuView.temperatureText;
+  if (perfGpuName) perfGpuName.textContent = gpuView.name;
+  if (perfFullname) perfFullname.textContent = gpuView.name;
+  if (sectorGpuTemp) sectorGpuTemp.textContent = gpuView.temperatureText;
+  if (sectorGpuName) sectorGpuName.textContent = gpuView.name;
+  if (perfVramTotal) perfVramTotal.textContent = gpuView.vramTotalGb === null
+    ? 'Unavailable'
+    : `${gpuView.vramTotalGb.toFixed(1)} GB`;
 
   // Update sidebar subtexts
   const perfSubCpu = document.getElementById('perf-sub-cpu');
@@ -216,20 +234,28 @@ function pushTelemetryData(telemetry) {
 
   if (perfSubCpu) perfSubCpu.textContent = `${Math.round(cpuPct)}% 4.29 GHz`;
   if (perfSubMem) perfSubMem.textContent = `${ramGb.toFixed(1)}/32.0 GB (${Math.round((ramGb / 32) * 100)}%)`;
-  if (perfSubGpu) perfSubGpu.textContent = `${Math.round(gpuUtil)}% (${gpu?.temperature_c || 35} °C)`;
+  if (perfSubGpu) {
+    perfSubGpu.textContent = gpuView.available
+      ? `${gpuView.utilizationText} (${gpuView.temperatureText})`
+      : 'GPU monitoring unavailable';
+  }
 }
 
 function pushSimulatedTick() {
-  const baseGpu = 12 + Math.sin(Date.now() / 3000) * 4;
-  pushValue(history.gpu3d, baseGpu);
-  pushValue(history.gpuCopy, Math.max(0, Math.sin(Date.now() / 5000) * 2));
-  pushValue(history.gpuEncode, 0);
-  pushValue(history.gpuDecode, 0);
-  pushValue(history.gpuVramDedicated, 0.8 + (Math.sin(Date.now() / 8000) * 0.05));
-  pushValue(history.gpuVramShared, 0.0);
+  currentGpuTelemetry = null;
+  clearGpuHistory();
   pushValue(history.cpu, 39 + Math.sin(Date.now() / 2000) * 5);
   pushValue(history.memory, 14.0);
-  pushValue(history.gpu0, baseGpu);
+}
+
+function clearGpuHistory() {
+  history.gpu3d = [];
+  history.gpuCopy = [];
+  history.gpuEncode = [];
+  history.gpuDecode = [];
+  history.gpuVramDedicated = [];
+  history.gpuVramShared = [];
+  history.gpu0 = [];
 }
 
 function pushValue(arr, val) {
@@ -265,9 +291,8 @@ function updateHardwareGraphs() {
 
   // Update Sector Labels
   const lastCpu = history.cpu[history.cpu.length - 1] || 39;
-  const lastGpu = history.gpu3d[history.gpu3d.length - 1] || 13;
+  const gpuView = gpuTelemetryView(currentGpuTelemetry);
   const lastRam = history.memory[history.memory.length - 1] || 14.1;
-  const lastVram = history.gpuVramDedicated[history.gpuVramDedicated.length - 1] || 0.8;
 
   const sectorCpuLoad = document.getElementById('sector-cpu-load');
   const sectorGpuUtil = document.getElementById('sector-gpu-util');
@@ -276,8 +301,8 @@ function updateHardwareGraphs() {
   const sectorRamBar = document.getElementById('sector-ram-bar');
 
   if (sectorCpuLoad) sectorCpuLoad.textContent = `${lastCpu.toFixed(1)}%`;
-  if (sectorGpuUtil) sectorGpuUtil.textContent = `${lastGpu.toFixed(1)}%`;
-  if (sectorGpuVram) sectorGpuVram.textContent = `${lastVram.toFixed(1)} / 12.0 GB VRAM`;
+  if (sectorGpuUtil) sectorGpuUtil.textContent = gpuView.utilizationText;
+  if (sectorGpuVram) sectorGpuVram.textContent = `${gpuView.vramText} VRAM`;
   if (sectorRamText) sectorRamText.textContent = `${lastRam.toFixed(1)} / 32.0 GB (${Math.round((lastRam / 32) * 100)}%)`;
   if (sectorRamBar) sectorRamBar.style.width = `${Math.round((lastRam / 32) * 100)}%`;
 
@@ -299,7 +324,8 @@ function updateHardwareGraphs() {
   setPathD('path-fill-decode', pDecode.fill);
 
   // 2. VRAM dedicated & shared
-  const pVram = buildSvgPath(history.gpuVramDedicated, 12.0, 600, 90);
+  const vramTotalGb = gpuTelemetryView(currentGpuTelemetry).vramTotalGb || 1;
+  const pVram = buildSvgPath(history.gpuVramDedicated, vramTotalGb, 600, 90);
   setPathD('path-line-vram', pVram.line);
   setPathD('path-fill-vram', pVram.fill);
 
@@ -334,7 +360,7 @@ function updateHardwareGraphs() {
 
 function setPathD(elementId, d) {
   const el = document.getElementById(elementId);
-  if (el && d) el.setAttribute('d', d);
+  if (el && typeof d === 'string') el.setAttribute('d', d);
 }
 
 function renderMiniSparkline(containerId, dataArray, maxVal) {

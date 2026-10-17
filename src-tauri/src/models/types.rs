@@ -75,6 +75,10 @@ pub struct UnifiedModel {
     pub quantization: Option<String>,
     pub is_active: bool,
     #[serde(default)]
+    pub lifecycle_status_known: bool,
+    #[serde(default)]
+    pub lifecycle_supported: bool,
+    #[serde(default)]
     pub is_duplicate: bool,
     #[serde(default)]
     pub is_preferred: bool,
@@ -99,15 +103,23 @@ impl UnifiedModel {
         quantization: Option<String>,
         is_active: bool,
     ) -> Self {
+        let backend = backend.into();
+        let (lifecycle_status_known, lifecycle_supported) = match backend.as_str() {
+            "ollama" => (false, true),
+            "vllm" | "gguf" => (true, false),
+            _ => (false, false),
+        };
         Self {
             id: id.into(),
             name: name.into(),
             canonical_name: canonical_name.into(),
-            backend: backend.into(),
+            backend,
             format: format.into(),
             size_bytes,
             quantization,
             is_active,
+            lifecycle_status_known,
+            lifecycle_supported,
             is_duplicate: false,
             is_preferred: false,
             duplicate_group: None,
@@ -751,6 +763,8 @@ mod tests {
             size_bytes: 4500000000,
             quantization: Some("Q4_0".to_string()),
             is_active: true,
+            lifecycle_status_known: true,
+            lifecycle_supported: true,
             is_duplicate: true,
             is_preferred: true,
             duplicate_group: Some("llama3".to_string()),
@@ -768,6 +782,8 @@ mod tests {
             size_bytes: 4500000000,
             quantization: Some("Q4_0".to_string()),
             is_active: false,
+            lifecycle_status_known: true,
+            lifecycle_supported: false,
             is_duplicate: true,
             is_preferred: false,
             duplicate_group: Some("llama3".to_string()),

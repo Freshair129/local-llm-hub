@@ -1,5 +1,7 @@
 # Feature Implementation & Domain Verification Audit Report
 
+> Historical snapshot dated September 30, 2026. The current source status and acceptance limits for model lifecycle, GPU telemetry, and desktop use are recorded in [the October 15 readiness report](readiness-fixes-2026-10-15.md), which supersedes this report's claims in those areas.
+
 **Repository**: `Freshair129/local-llm-hub`  
 **Target Architecture**: Tauri v2 + Rust Backend + Vanilla JS Bento Shell  
 **Audit Date**: September 30, 2026  

@@ -20,21 +20,14 @@ let tuningState = {
 
 // Telemetry State
 let gpuTelemetryState = {
-  name: "NVIDIA GeForce RTX 3060",
-  vramUsedGb: 7.6,
-  vramTotalGb: 12.0,
-  coreClock: 1777,
-  memClock: 7500,
-  coreTemp: 52.0,
-  hotspotTemp: 64.2,
-  memoryTemp: 58.0,
-  powerDraw: 142.0,
-  powerTdp: 170.0,
-  voltageMv: 1050,
-  fanRpm: 1350,
-  fanDutyPct: 45,
-  cudaLoad: 44,
-  pcieLink: "PCIe Gen4 x16 @ x16"
+  name: null,
+  coreClock: null,
+  memClock: null,
+  coreTemp: null,
+  hotspotTemp: null,
+  powerDraw: null,
+  fanRpm: null,
+  cudaLoad: null
 };
 
 export async function initGpuTuning() {
@@ -43,15 +36,27 @@ export async function initGpuTuning() {
 }
 
 export async function refreshGpuTelemetry() {
+  gpuTelemetryState = {
+    name: null,
+    coreClock: null,
+    memClock: null,
+    coreTemp: null,
+    hotspotTemp: null,
+    powerDraw: null,
+    fanRpm: null,
+    cudaLoad: null
+  };
   try {
     const readings = await invoke('get_sensor_tree');
     if (Array.isArray(readings) && readings.length > 0) {
       for (const r of readings) {
-        const id = r.id.toLowerCase();
-        const name = r.name.toLowerCase();
-        if (id.includes('/nvidiagpu/0') || id.includes('/gpu/0') || id.includes('gpu')) {
-          if (name.includes('core') && r.kind === 'temperature') gpuTelemetryState.coreTemp = r.value;
+        const id = String(r.id || '').toLowerCase();
+        const name = String(r.name || '').toLowerCase();
+        const hw = String(r.hw || '');
+        if (id.includes('/nvidiagpu/0') || id.includes('/gpu/0') || id.includes('gpu') || hw.toLowerCase().includes('gpu')) {
+          gpuTelemetryState.name = hw || gpuTelemetryState.name;
           if (name.includes('hotspot') && r.kind === 'temperature') gpuTelemetryState.hotspotTemp = r.value;
+          else if (name.includes('core') && r.kind === 'temperature') gpuTelemetryState.coreTemp = r.value;
           if (name.includes('core') && r.kind === 'load') gpuTelemetryState.cudaLoad = r.value;
           if (r.kind === 'fan' || name.includes('fan')) gpuTelemetryState.fanRpm = r.value;
           if (r.kind === 'power') gpuTelemetryState.powerDraw = r.value;
@@ -77,13 +82,18 @@ export function renderGpuDashboard() {
   const fanRpmEl = document.getElementById('gpu-val-fan-rpm');
   const cudaLoadEl = document.getElementById('gpu-val-cuda-load');
 
-  if (coreClockEl) coreClockEl.textContent = `${(gpuTelemetryState.coreClock + tuningState.coreOffset).toLocaleString()} MHz`;
-  if (memClockEl) memClockEl.textContent = `${(gpuTelemetryState.memClock + tuningState.memOffset).toLocaleString()} MHz`;
-  if (coreTempEl) coreTempEl.textContent = `${gpuTelemetryState.coreTemp.toFixed(1)} °C`;
-  if (hotspotTempEl) hotspotTempEl.textContent = `${gpuTelemetryState.hotspotTemp.toFixed(1)} °C`;
-  if (powerDrawEl) powerDrawEl.textContent = `${gpuTelemetryState.powerDraw.toFixed(0)} W / ${gpuTelemetryState.powerTdp} W`;
-  if (fanRpmEl) fanRpmEl.textContent = `${gpuTelemetryState.fanRpm.toLocaleString()} RPM (${tuningState.fanDuty}%)`;
-  if (cudaLoadEl) cudaLoadEl.textContent = `${gpuTelemetryState.cudaLoad.toFixed(1)}%`;
+  const formatMetric = (value, digits, unit) => Number.isFinite(value)
+    ? `${value.toFixed(digits)} ${unit}`
+    : 'Unavailable';
+  if (coreClockEl) coreClockEl.textContent = formatMetric(gpuTelemetryState.coreClock, 0, 'MHz');
+  if (memClockEl) memClockEl.textContent = formatMetric(gpuTelemetryState.memClock, 0, 'MHz');
+  if (coreTempEl) coreTempEl.textContent = formatMetric(gpuTelemetryState.coreTemp, 1, '°C');
+  if (hotspotTempEl) hotspotTempEl.textContent = formatMetric(gpuTelemetryState.hotspotTemp, 1, '°C');
+  if (powerDrawEl) powerDrawEl.textContent = formatMetric(gpuTelemetryState.powerDraw, 0, 'W');
+  if (fanRpmEl) fanRpmEl.textContent = formatMetric(gpuTelemetryState.fanRpm, 0, 'RPM');
+  if (cudaLoadEl) cudaLoadEl.textContent = formatMetric(gpuTelemetryState.cudaLoad, 1, '%');
+  const titleEl = document.getElementById('gpu-tuning-title');
+  if (titleEl) titleEl.textContent = gpuTelemetryState.name || 'GPU Live Telemetry';
 }
 
 function setupTuningControls() {
@@ -140,7 +150,7 @@ function setupTuningControls() {
       fanAutoBtn.classList.add('active');
       fanManualBtn.classList.remove('active');
       if (fanSlider) fanSlider.disabled = true;
-      showToast('GPU Fan set to Automatic Curve', 'info');
+      showToast('Automatic fan mode selected locally. Hub cannot apply an automatic fan curve.', 'info');
     });
 
     fanManualBtn.addEventListener('click', () => {
@@ -148,7 +158,7 @@ function setupTuningControls() {
       fanManualBtn.classList.add('active');
       fanAutoBtn.classList.remove('active');
       if (fanSlider) fanSlider.disabled = false;
-      showToast('GPU Fan set to Manual Duty Control', 'info');
+      showToast('Manual fan mode selected. Apply only sends a fan command when LHM supports this controller.', 'info');
     });
   }
 
@@ -193,9 +203,12 @@ function setupTuningControls() {
             percent: tuningState.fanDuty
           });
         }
-        showToast(`Afterburner Settings Applied: Core ${tuningState.coreOffset >= 0 ? '+' : ''}${tuningState.coreOffset} MHz | Mem ${tuningState.memOffset >= 0 ? '+' : ''}${tuningState.memOffset} MHz | Power ${tuningState.powerTarget}%`, 'success');
+        const fanMessage = tuningState.isAutoFan
+          ? 'No hardware command was sent because automatic fan mode is selected.'
+          : `Fan duty set to ${tuningState.fanDuty}% through LHM.`;
+        showToast(`${fanMessage} Core and memory offsets and power target remain unapplied.`, tuningState.isAutoFan ? 'info' : 'success');
       } catch (err) {
-        showToast(`Hardware tuning applied: ${err.message || err}`, 'success');
+        showToast(`Hardware fan control failed: ${err.message || err}`, 'error');
       }
     });
   }
@@ -203,13 +216,13 @@ function setupTuningControls() {
   if (btnReset) {
     btnReset.addEventListener('click', () => {
       applyPreset({ core: 0, mem: 0, power: 100, fan: 45, name: "Stock Default" });
-      showToast('GPU settings reset to Factory Defaults', 'info');
+      showToast('Local tuning values reset. Hub did not change GPU hardware settings.', 'info');
     });
   }
 
   if (btnSave) {
     btnSave.addEventListener('click', () => {
-      showToast(`Tuning profile saved to Local Config: ${tuningState.appliedProfile}`, 'success');
+      showToast('Saving tuning profiles is not available yet.', 'info');
     });
   }
 }
@@ -240,5 +253,5 @@ function applyPreset({ core, mem, power, fan, name }) {
   if (fanVal) fanVal.textContent = `${fan}%`;
 
   renderGpuDashboard();
-  showToast(`Loaded Profile: ${name}`, 'info');
+  showToast(`Selected local tuning values: ${name}. Hardware settings were not changed.`, 'info');
 }

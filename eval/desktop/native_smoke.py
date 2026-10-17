@@ -51,10 +51,12 @@ def main():
     permissions['projects']['demo']['roots'] = [str(workspace)]
     (config / 'permissions.yaml').write_text(yaml.safe_dump(permissions))
     env = dict(os.environ)
+    isolated_temp = out / 'tmp'
+    isolated_temp.mkdir()
     env.update(LOCAL_LLM_HUB_TOKEN=secrets.token_urlsafe(32),
                LOCAL_LLM_HUB_URL=f'http://127.0.0.1:{hub_port}',
                WEBVIEW2_USER_DATA_FOLDER=str(out / 'webview-profile'),
-               TEMP=str(root / '.hub/tmp'), TMP=str(root / '.hub/tmp'))
+               TEMP=str(isolated_temp), TMP=str(isolated_temp))
     owned = []
     logs = []
     receipt = {'provider': 'mock', 'transport': 'native Tauri IPC -> Hub HTTP',
@@ -158,13 +160,25 @@ def main():
         click('.ptab[data-domain="model-management"]')
         click('#nav-arena')
         click('#btn-run-arena')
-        wait(lambda: script("return ['a','b'].every(id => document.querySelector('#arena-output-'+id+' .error-badge')) && !document.querySelector('#btn-run-arena').disabled"), 'Arena outage', 145)
-        passed('Both Arena errors are visible and busy state is released')
+        wait(lambda: script("const button=document.querySelector('#btn-run-arena'); return ['a','b'].every(id => document.querySelector('#arena-output-'+id+' .error-badge')) && button.textContent.includes('Launch Battle') && button.disabled"), 'Arena outage', 145)
+        passed('Both Arena errors are visible and unavailable catalog keeps retry disabled')
         click('#nav-models')
         command('POST', '/window/rect', {'width': 1600, 'height': 900})
         click('#btn-refresh-models')
         wait(lambda: script("return document.querySelector('#chat-model-select').value === '' && document.querySelector('#chat-send-btn').disabled && document.querySelector('#btn-run-arena').disabled"), 'catalog fails closed', 90)
         passed('Failed catalog refresh clears stale selections and disables inference')
+        hub = spawn('hub-recovery', [sys.executable, '-m', 'local_llm_hub.cli', '--config', str(config),
+                                     '--env-file', str(out / 'absent.env'), 'serve'])
+        with httpx.Client(trust_env=False, timeout=2) as health:
+            wait(lambda: health.get(env['LOCAL_LLM_HUB_URL'] + '/health').status_code == 200, 'Hub recovery')
+        click('#btn-refresh-models')
+        wait(lambda: script("return document.querySelector('#chat-model-select').value === 'mock-local' && !document.querySelector('#chat-send-btn').disabled && !document.querySelector('#btn-run-arena').disabled"), 'catalog recovery', 90)
+        passed('Recovered Hub catalog re-enables Chat and Arena')
+        click('#nav-arena')
+        type_text('#arena-prompt-input', 'echo:arena-recovered')
+        click('#btn-run-arena')
+        wait(lambda: script("return ['a','b'].every(id => document.querySelector('#arena-output-'+id).textContent.includes('arena-recovered')) && !document.querySelector('#btn-run-arena').disabled"), 'Arena recovery', 90)
+        passed('Arena succeeds again after provider recovery')
         receipt['status'] = 'PASS'
     except Exception as error:
         receipt['status'] = 'FAIL'

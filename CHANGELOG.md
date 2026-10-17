@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Model lifecycle controls now display unknown state when Ollama `/api/ps` cannot be parsed or reached, preserve model tags and quantization in identity checks, require a valid completed response, and refresh state after an operation.
+- Lifecycle controls are available in grid and list views for confirmed Ollama models; vLLM and local model files no longer report unsupported process operations as successful.
+- GPU fields now show unavailable readings instead of synthetic GPU identity, VRAM, temperature, utilization, clock, fan, or power values when no sensor reading exists.
+- Model cards no longer invent task counts, success rates, token quotas, context limits, model sizes, or a countdown timer when the catalog does not provide them.
+
+### Verification
+
+- Focused JS contract tests and Rust command fixture tests are recorded in `docs/reports/readiness-fixes-2026-10-15.md`; hardware inference remains outside the verification scope.
+
 ## [0.1.2] — 2026-10-01 (Borderless & Titlebar Batch Release)
 
 ### 🎨 UI & Window Management

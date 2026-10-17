@@ -104,6 +104,10 @@ This specification defines the hardware telemetry sensor mapping, unit conventio
 
 ## 4. Fallback & Graceful Degradation Rules
 
-1. **NVML / nvidia-smi Missing**: If NVIDIA GPU management tools are not found, GPU metrics set `gpu_available: false` and render fallback notification without affecting CPU or RAM telemetry.
+1. **nvidia-smi Missing or Failed**: The native GPU command returns an empty GPU list. The presentation layer renders GPU metrics as `Unavailable`; it does not substitute mock readings. The current dashboard presents the first detected GPU only.
 2. **Missing Sensor Channels**: Any unavailable sensor channel (e.g. absent fan RPM or auxiliary motherboard probe) emits `None` / `null` rather than dummy zero readings to avoid misleading diagnostics.
 3. **Cumulative Network Delta**: Network metrics maintain persistent cumulative byte counters in `AppState` to compute smooth transfer speed (`MB/s`) across ticks rather than recreating network interfaces every sample.
+
+### Current implementation boundary (2026-10-15)
+
+The current `nvidia-smi` query supplies GPU index, name, VRAM used/total, utilization and core temperature. Hotspot, fan, clocks and board power are only available when a sensor provider supplies them; otherwise the UI shows `Unavailable`. The frontend still has CPU/RAM fallback behavior, so this specification must not be read as evidence that all displayed CPU/RAM fields are live measurements. Cross-application VRAM arbitration is not implemented by this telemetry pipeline.

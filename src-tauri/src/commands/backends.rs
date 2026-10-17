@@ -3,13 +3,17 @@
 //! Backend health probing service implementation for Ollama, vLLM, HuggingFace cache, and local GGUF folders.
 //! Compliant with ADR-100 (Safe Error Handling, Zero Panics, Strict Result types).
 
+use crate::commands::models::{fetch_ollama_loaded_model_names, ollama_model_identity_matches};
 use crate::models::types::ProbeResult;
 use crate::state::BackendConfig;
+use serde_json::Value;
 use std::path::Path;
 use std::time::{Duration, Instant};
 
 const PROBE_TIMEOUT_SECS: u64 = 5;
 const MAX_RETRIES: usize = 1;
+const OLLAMA_STATE_VERIFY_TIMEOUT: Duration = Duration::from_secs(8);
+const OLLAMA_STATE_POLL_INTERVAL: Duration = Duration::from_millis(200);
 
 /// Probes an HTTP endpoint with a 5-second timeout and 1 retry on transient failure.
 async fn probe_http_endpoint(
@@ -207,7 +211,8 @@ pub async fn start_model(
             let payload = serde_json::json!({
                 "model": model_name,
                 "prompt": "",
-                "keep_alive": "15m"
+                "keep_alive": "15m",
+                "stream": false
             });
             let resp = client
                 .post(&target)
@@ -217,25 +222,16 @@ pub async fn start_model(
                 .await
                 .map_err(|e| format!("Failed to connect to Ollama: {}", e))?;
 
-            if resp.status().is_success() {
-                Ok(format!(
-                    "Model '{}' successfully loaded and warmed in Ollama (keep_alive: 15m)",
-                    model_name
-                ))
-            } else {
-                Err(format!(
-                    "Ollama returned status {}: {}",
-                    resp.status(),
-                    resp.text().await.unwrap_or_default()
-                ))
-            }
+            require_ollama_success(resp, "load").await?;
+            verify_ollama_model_state(client, base_url, model_name, true).await?;
+            Ok(format!("Ollama confirms '{}' is loaded", model_name))
         }
-        "vllm" => Ok(format!(
-            "Model '{}' is managed by vLLM runtime.",
+        "vllm" => Err(format!(
+            "vLLM model '{}' is served by the external server; Hub does not manage its lifecycle",
             model_name
         )),
-        "gguf" => Ok(format!(
-            "Local GGUF model '{}' is ready for direct inference.",
+        "gguf" => Err(format!(
+            "GGUF model '{}' is a local file; configure an inference server before loading it",
             model_name
         )),
         _ => Err(format!("Unsupported backend '{}'", backend)),
@@ -257,7 +253,8 @@ pub async fn stop_model(
             let target = format!("{}/api/generate", base_url);
             let payload = serde_json::json!({
                 "model": model_name,
-                "keep_alive": 0
+                "keep_alive": 0,
+                "stream": false
             });
             let resp = client
                 .post(&target)
@@ -267,22 +264,108 @@ pub async fn stop_model(
                 .await
                 .map_err(|e| format!("Failed to connect to Ollama: {}", e))?;
 
-            if resp.status().is_success() {
-                Ok(format!(
-                    "Model '{}' successfully unloaded from GPU VRAM (keep_alive: 0)",
-                    model_name
-                ))
-            } else {
-                Err(format!(
-                    "Ollama returned status {}: {}",
-                    resp.status(),
-                    resp.text().await.unwrap_or_default()
-                ))
-            }
+            require_ollama_success(resp, "unload").await?;
+            verify_ollama_model_state(client, base_url, model_name, false).await?;
+            Ok(format!("Ollama confirms '{}' is unloaded", model_name))
         }
-        "vllm" => Ok(format!("vLLM model '{}' stopped.", model_name)),
-        "gguf" => Ok(format!("GGUF model '{}' unloaded.", model_name)),
+        "vllm" => Err(format!(
+            "vLLM model '{}' is served by the external server; Hub does not manage its lifecycle",
+            model_name
+        )),
+        "gguf" => Err(format!(
+            "GGUF model '{}' is a local file; Hub has no process to unload",
+            model_name
+        )),
         _ => Err(format!("Unsupported backend '{}'", backend)),
+    }
+}
+
+async fn require_ollama_success(
+    response: reqwest::Response,
+    operation: &str,
+) -> Result<(), String> {
+    let status = response.status();
+    let body = response
+        .text()
+        .await
+        .map_err(|err| format!("Could not read Ollama {operation} acknowledgement: {err}"))?;
+    if !status.is_success() {
+        return Err(format!("Ollama returned status {status}: {body}"));
+    }
+    let value = serde_json::from_str::<Value>(&body).map_err(|err| {
+        format!("Ollama {operation} returned an invalid JSON acknowledgement: {err}")
+    })?;
+    if let Some(error) = value.get("error").filter(|error| !error.is_null()) {
+        return Err(format!(
+            "Ollama {operation} failed: {}",
+            error.as_str().unwrap_or("backend returned an error field")
+        ));
+    }
+    if value.get("done").and_then(Value::as_bool) != Some(true) {
+        return Err(format!(
+            "Ollama {operation} acknowledgement did not confirm completion"
+        ));
+    }
+    Ok(())
+}
+
+async fn verify_ollama_model_state(
+    client: &reqwest::Client,
+    base_url: &str,
+    model_name: &str,
+    expected_loaded: bool,
+) -> Result<(), String> {
+    verify_ollama_model_state_with_timing(
+        client,
+        base_url,
+        model_name,
+        expected_loaded,
+        OLLAMA_STATE_VERIFY_TIMEOUT,
+        OLLAMA_STATE_POLL_INTERVAL,
+    )
+    .await
+}
+
+async fn verify_ollama_model_state_with_timing(
+    client: &reqwest::Client,
+    base_url: &str,
+    model_name: &str,
+    expected_loaded: bool,
+    timeout: Duration,
+    poll_interval: Duration,
+) -> Result<(), String> {
+    let deadline = tokio::time::Instant::now() + timeout;
+    let mut last_error = None;
+
+    loop {
+        match fetch_ollama_loaded_model_names(client, base_url).await {
+            Ok(names) => {
+                let is_loaded = names
+                    .iter()
+                    .any(|name| ollama_model_identity_matches(name, model_name));
+                if is_loaded == expected_loaded {
+                    return Ok(());
+                }
+            }
+            Err(err) => last_error = Some(err),
+        }
+
+        if tokio::time::Instant::now() >= deadline {
+            let state = if expected_loaded {
+                "loaded"
+            } else {
+                "unloaded"
+            };
+            let detail = last_error
+                .map(|error| format!(" Last status check failed: {error}"))
+                .unwrap_or_default();
+            return Err(format!(
+                "Ollama acknowledged the request but did not confirm '{}' is {state} through /api/ps.{detail}",
+                model_name
+            ));
+        }
+
+        tokio::time::sleep(poll_interval.min(timeout)).await;
     }
 }
 
@@ -329,6 +412,7 @@ pub async fn pull_model(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::commands::test_support::{spawn_json_http_fixture, FixtureReply};
 
     // trace:verifies FR-001
     #[test]
@@ -386,6 +470,136 @@ mod tests {
         let res = stop_model(&client, &cfg, "ollama", "test-model").await;
         assert!(res.is_err());
         assert!(res.unwrap_err().contains("Failed to connect to Ollama"));
+    }
+
+    // trace:verifies FR-005
+    #[tokio::test]
+    async fn start_model_requires_acknowledgement_and_loaded_state() {
+        let (base_url, fixture) = spawn_json_http_fixture(vec![
+            FixtureReply::json(200, r#"{"response":"","done":true}"#),
+            FixtureReply::json(
+                200,
+                r#"{"models":[{"name":"mellum:latest","model":"mellum:latest"}]}"#,
+            ),
+        ])
+        .await;
+        let client = reqwest::Client::new();
+        let mut config = BackendConfig::default();
+        config.ollama_url = base_url;
+
+        let result = start_model(&client, &config, "ollama", "mellum:latest").await;
+        assert!(result.is_ok(), "{result:?}");
+        assert!(result.unwrap().contains("confirms"));
+
+        let requests = fixture.await.expect("fixture task");
+        assert!(requests[0].starts_with("POST /api/generate "));
+        assert!(requests[0].contains(r#""keep_alive":"15m""#));
+        assert!(requests[0].contains(r#""stream":false"#));
+        assert!(requests[1].starts_with("GET /api/ps "));
+    }
+
+    // trace:verifies FR-005
+    #[tokio::test]
+    async fn stop_model_requires_acknowledgement_and_unloaded_state() {
+        let (base_url, fixture) = spawn_json_http_fixture(vec![
+            FixtureReply::json(200, r#"{"response":"","done":true}"#),
+            FixtureReply::json(200, r#"{"models":[]}"#),
+        ])
+        .await;
+        let client = reqwest::Client::new();
+        let mut config = BackendConfig::default();
+        config.ollama_url = base_url;
+
+        let result = stop_model(&client, &config, "ollama", "mellum:latest").await;
+        assert!(result.is_ok(), "{result:?}");
+        assert!(result.unwrap().contains("confirms"));
+
+        let requests = fixture.await.expect("fixture task");
+        assert!(requests[0].starts_with("POST /api/generate "));
+        assert!(requests[0].contains(r#""keep_alive":0"#));
+        assert!(requests[1].starts_with("GET /api/ps "));
+    }
+
+    // trace:verifies FR-005
+    #[tokio::test]
+    async fn start_model_rejects_an_error_in_success_status_body() {
+        let (base_url, _fixture) = spawn_json_http_fixture(vec![FixtureReply::json(
+            200,
+            r#"{"error":"model unavailable"}"#,
+        )])
+        .await;
+        let client = reqwest::Client::new();
+        let mut config = BackendConfig::default();
+        config.ollama_url = base_url;
+
+        let result = start_model(&client, &config, "ollama", "missing-model").await;
+        assert!(result.unwrap_err().contains("model unavailable"));
+    }
+
+    // trace:verifies FR-005
+    #[tokio::test]
+    async fn start_model_rejects_malformed_success_acknowledgement() {
+        let (base_url, _fixture) =
+            spawn_json_http_fixture(vec![FixtureReply::json(200, "{")]).await;
+        let client = reqwest::Client::new();
+        let mut config = BackendConfig::default();
+        config.ollama_url = base_url;
+
+        let result = start_model(&client, &config, "ollama", "model:latest").await;
+        assert!(result.unwrap_err().contains("invalid JSON acknowledgement"));
+    }
+
+    // trace:verifies FR-005
+    #[tokio::test]
+    async fn start_model_rejects_acknowledgement_without_done_true() {
+        let (base_url, _fixture) =
+            spawn_json_http_fixture(vec![FixtureReply::json(200, r#"{"response":""}"#)]).await;
+        let client = reqwest::Client::new();
+        let mut config = BackendConfig::default();
+        config.ollama_url = base_url;
+
+        let result = start_model(&client, &config, "ollama", "model:latest").await;
+        assert!(result.unwrap_err().contains("did not confirm completion"));
+    }
+
+    // trace:verifies FR-005
+    #[tokio::test]
+    async fn loaded_state_verification_does_not_accept_a_different_tag() {
+        let (base_url, _fixture) = spawn_json_http_fixture(vec![FixtureReply::json(
+            200,
+            r#"{"models":[{"name":"model:v2","model":"model:v2"}]}"#,
+        )])
+        .await;
+        let client = reqwest::Client::new();
+
+        let result = verify_ollama_model_state_with_timing(
+            &client,
+            &base_url,
+            "model:v1",
+            true,
+            Duration::from_millis(10),
+            Duration::from_millis(1),
+        )
+        .await;
+        assert!(result
+            .unwrap_err()
+            .contains("did not confirm 'model:v1' is loaded"));
+    }
+
+    // trace:verifies FR-005
+    #[tokio::test]
+    async fn unmanaged_backends_report_lifecycle_as_unsupported() {
+        let client = reqwest::Client::new();
+        let config = BackendConfig::default();
+
+        assert!(start_model(&client, &config, "vllm", "served-model")
+            .await
+            .unwrap_err()
+            .contains("external server"));
+        assert!(stop_model(&client, &config, "gguf", "model.gguf")
+            .await
+            .unwrap_err()
+            .contains("no process"));
     }
 
     // trace:verifies FR-012
