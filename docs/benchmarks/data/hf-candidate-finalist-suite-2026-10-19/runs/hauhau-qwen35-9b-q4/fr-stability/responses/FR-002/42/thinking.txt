@@ -1,0 +1,334 @@
+Thinking Process:
+
+1.  **Analyze the Request:**
+    *   **Role:** AI Coder working under STD-003 and ADR-100 guard rails.
+    *   **Task:** Implement `FR-002` specification.
+    *   **Specification Details:**
+        1.  Function signature: `pub fn normalize_model_name(raw: &str) -> String`
+        2.  Strip registry prefixes: `'registry.ollama.ai/library/'`, `'library/'`, `'hf.co/'`
+        3.  Strip quantization suffixes: `'-q4_0'`, `'-q4_k_m'`, `'-q4_k_s'`, `':q4_0'`, `':q4_k_m'`, `':q4_k_s'` (case-insensitive)
+        4.  Convert result to lowercase
+        5.  Guard rails: NO `unwrap()`, NO `expect()`, NO `panic!`
+        6.  Traceability: Include comment `// trace:implements FR-002` directly before function declaration.
+    *   **Output Format:** ONLY valid Rust code inside a ```rust code block.
+
+2.  **Drafting the Implementation:**
+
+    *   *Function Signature:* `pub fn normalize_model_name(raw: &str) -> String`
+    *   *Traceability Comment:* `// trace:implements FR-002`
+    *   *Prefix Stripping:* Need to check if the string starts with any of the prefixes and remove them.
+        *   Prefixes:
+            *   "registry.ollama.ai/library/"
+            *   "library/"
+            *   "hf.co/"
+        *   Since these are prefixes, I should check `raw.starts_with` or use regex, but simple string slicing is more efficient and adheres to "NO panic!" if I handle indices carefully.
+        *   Order matters? Usually, I should strip the longest specific prefix first if there's overlap, but these seem distinct enough.
+        *   "library/" is a substring of "registry.ollama.ai/library/", so checking the longer one first is safer.
+    *   *Suffix Stripping:* Need to handle quantization suffixes like `-q4_0`, `:q4_0`, etc.
+        *   Suffixes: `'-q4_0'`, `'-q4_k_m'`, `'-q4_k_s'`, `':q4_0'`, `':q4_k_m'`, `':q4_k_s'`.
+        *   Case-insensitive: Convert to lowercase before stripping or check case-insensitively. Since the final step is converting to lowercase anyway, I can lowercase the input first to simplify suffix matching.
+    *   *Lowercase Conversion:* `raw.to_lowercase()`
+    *   *Guard Rails:* Avoid `unwrap()`, `expect()`, `panic!`. Use `if let`, `match`, or `len` checks.
+    *   *Logic Flow:*
+        1.  Start with `raw`.
+        2.  Maybe lowercase it early to handle case-insensitive suffix matching easily.
+        3.  Strip prefixes.
+        4.  Strip suffixes.
+        5.  Trim whitespace (optional but good for robustness? Spec doesn't explicitly say, but "normalize" implies cleaning. Let's stick strictly to spec first, but trimming is often implied in normalization. However, spec says "Strip registry prefixes" and "Strip quantization suffixes" and "Convert result to lowercase". I'll stick to these specific transformations to avoid over-engineering, but trimming is usually safe. Let's look at the suffix stripping: `'-q4_0'`. If input is `model-q4_0`, result `model`. If input is `model:q4_0`, result `model`.
+        6.  Ensure no panics.
+
+    *   *Refining Prefix Stripping:*
+        Let's create a helper or do it inline. Inline is fine.
+        Check `registry.ollama.ai/library/`, then `hf.co/`, then `library/`.
+        Wait, `library/` is a substring of `registry.ollama.ai/library/`.
+        If input is `registry.ollama.ai/library/mistral`, removing `registry.ollama.ai/library/` leaves `mistral`.
+        If input is `library/mistral`, removing `library/` leaves `mistral`.
+        So check longer prefixes first.
+
+    *   *Refining Suffix Stripping:*
+        Convert to lowercase first.
+        Suffixes:
+        `"-q4_0"`
+        `"-q4_k_m"`
+        `"-q4_k_s"`
+        `":q4_0"`
+        `":q4_k_m"`
+        `":q4_k_s"`
+        Since we lowercase, `:Q4_0` becomes `:q4_0`.
+        Check if the string ends with these suffixes.
+        Use `.ends_with`.
+
+    *   *Combining Operations:*
+        1.  `let mut name = raw.to_lowercase();`
+        2.  `if name.starts_with("registry.ollama.ai/library/") { name = name[23..].to_string(); }` (len of prefix)
+        3.  `else if name.starts_with("hf.co/") { name = name[5..].to_string(); }` (len of prefix)
+        4.  `else if name.starts_with("library/") { name = name[7..].to_string(); }` (len of prefix)
+        5.  `if name.ends_with("-q4_0") { name = name[..name.len()-5].to_string(); }`
+        6.  ... repeat for other suffixes.
+        7.  Or loop through suffixes.
+        8.  Edge case: What if stripping prefix results in empty string? Spec doesn't say, but `String` allows empty.
+        9.  Edge case: What if stripping suffix results in empty string?
+        10. Guard rails: Use `if` instead of `unwrap`.
+
+    *   *Optimizing Suffix Stripping:*
+        Since we need to strip *any* of the suffixes, and they might overlap (e.g. `-q4_0` vs `:q4_0`), we should check all applicable ones.
+        Actually, usually model names look like `model-name:version` or `model-name-quant`.
+        Let's create a vector of suffixes.
+        `["-q4_0", "-q4_k_m", "-q4_k_s", ":q4_0", ":q4_k_m", ":q4_k_s"]`
+        Iterate and strip if found.
+
+    *   *Optimizing Prefix Stripping:*
+        Prefixes: `["registry.ollama.ai/library/", "hf.co/", "library/"]`
+        Iterate and strip if found.
+
+    *   *Implementation Detail:*
+        To avoid `unwrap`, use `len()` checks.
+        Example: `name[23..].to_string()` is safe if `name.len() >= 23`.
+        So:
+        ```rust
+        if name.len() >= 23 && name.starts_with("registry.ollama.ai/library/") {
+            name = &name[23..];
+        }
+        ```
+
+    *   *Final Polish:*
+        Ensure imports are minimal (none needed for basic string ops).
+        Ensure comment is exactly `// trace:implements FR-002`.
+        Ensure signature matches exactly.
+        Ensure no `unwrap`/`expect`/`panic`.
+
+3.  **Constructing the Code:**
+
+    ```rust
+    // trace:implements FR-002
+    pub fn normalize_model_name(raw: &str) -> String {
+        let mut name = raw.to_lowercase();
+
+        // Strip registry prefixes
+        if name.len() >= 23 && name.starts_with("registry.ollama.ai/library/") {
+            name = name[23..].to_string();
+        } else if name.len() >= 5 && name.starts_with("hf.co/") {
+            name = name[5..].to_string();
+        } else if name.len() >= 7 && name.starts_with("library/") {
+            name = name[7..].to_string();
+        }
+
+        // Strip quantization suffixes
+        // Suffixes: '-q4_0', '-q4_k_m', '-q4_k_s', ':q4_0', ':q4_k_m', ':q4_k_s'
+        let suffixes = [
+            "-q4_0", "-q4_k_m", "-q4_k_s",
+            ":q4_0", ":q4_k_m", ":q4_k_s",
+        ];
+
+        // Since we might have multiple potential suffixes, we iterate to find the best match
+        // or simply apply the first one found. Usually only one applies at the end.
+        for suffix in suffixes.iter() {
+            if name.len() >= suffix.len() && name.ends_with(suffix) {
+                name = name[..name.len() - suffix.len()].to_string();
+                break; // Assume one quantization suffix at the end
+            }
+        }
+
+        name
+    }
+    ```
+
+    Wait, check the prefix lengths again.
+    "registry.ollama.ai/library/"
+    r-e-g-i-s-t-r-y-.o-l-l-a-m-a-.-a-i-/-l-i-b-r-a-r-y-/
+    123456789012345678901234567890123
+    Length: 26 characters?
+    Let's count:
+    r(1)e(2)g(3)i(4)s(5)t(6)r(7)y(8).(9)o(10)l(11)l(12)a(13)m(14)a(15).(16)a(17)i(18)/(19)l(20)i(21)b(22)r(23)a(24)r(25)y(26)/(27)
+    Length is 27.
+    "hf.co/"
+    h(1)f(2).(3)c(4)o(5)/(6) -> Length 6.
+    "library/"
+    l(1)i(2)b(3)r(4)a(5)r(6)y(7)/(8) -> Length 8.
+
+    Let's recount "registry.ollama.ai/library/":
+    "registry" (8) + "." (1) + "ollama" (6) + "." (1) + "ai" (2) + "/" (1) + "library" (7) + "/" (1)
+    8+1+6+1+2+1+7+1 = 27.
+
+    Let's recount "hf.co/":
+    "hf" (2) + "." (1) + "co" (2) + "/" (1) = 6.
+
+    Let's recount "library/":
+    "library" (7) + "/" (1) = 8.
+
+    So lengths are 27, 6, 8.
+    Suffixes:
+    "-q4_0" -> 5 chars
+    "-q4_k_m" -> 8 chars
+    "-q4_k_s" -> 8 chars
+    ":q4_0" -> 5 chars
+    ":q4_k_m" -> 8 chars
+    ":q4_k_s" -> 8 chars
+
+    Refined Code:
+
+    ```rust
+    // trace:implements FR-002
+    pub fn normalize_model_name(raw: &str) -> String {
+        let mut name = raw.to_lowercase();
+
+        // Strip registry prefixes
+        if name.len() >= 27 && name.starts_with("registry.ollama.ai/library/") {
+            name = name[27..].to_string();
+        } else if name.len() >= 6 && name.starts_with("hf.co/") {
+            name = name[6..].to_string();
+        } else if name.len() >= 8 && name.starts_with("library/") {
+            name = name[8..].to_string();
+        }
+
+        // Strip quantization suffixes
+        let suffixes = [
+            "-q4_0", "-q4_k_m", "-q4_k_s",
+            ":q4_0", ":q4_k_m", ":q4_k_s",
+        ];
+
+        for suffix in suffixes.iter() {
+            if name.len() >= suffix.len() && name.ends_with(suffix) {
+                name = name[..name.len() - suffix.len()].to_string();
+                break;
+            }
+        }
+
+        name
+    }
+    ```
+
+    Double check: `name[27..]` creates a slice, then `.to_string()` converts to owned String.
+    `name[..name.len() - suffix.len()]` creates a slice, then `.to_string()`.
+    This avoids `unwrap` if length check passes.
+    The order of prefix checks: "registry..." (27) vs "library/" (8).
+    If input is `registry.ollama.ai/library/mistral`, `starts_with("library/")` is true.
+    If we check "library/" first, it strips to `registry.ollama.ai/mistral`.
+    If we check "registry..." first, it strips to `mistral`.
+    Usually, `registry.ollama.ai/library/` implies the container is specified. `library/mistral` might be a shorthand.
+    Spec says "Strip registry prefixes: '...', '...', '...'". It implies removing them if present.
+    If a string starts with `registry.ollama.ai/library/`, it *also* starts with `library/`.
+    To be most normalized (cleanest), the full registry path is preferred to be stripped to the model name.
+    So checking the longest prefix first is better.
+    Order: `registry...` (27), then `library/` (8), then `hf.co/` (6).
+    Wait, `hf.co/` is shorter than `library/`.
+    Let's check overlaps.
+    `registry.ollama.ai/library/` ends with `library/`.
+    So if I check `library/` first, `registry.ollama.ai/library/mistral` matches `library/` -> `registry.ollama.ai/mistral`.
+    Then `registry.ollama.ai/mistral` doesn't match `registry.ollama.ai/library/` (starts with `registry.` but not the full path).
+    So checking longest first is crucial.
+    Longest: `registry.ollama.ai/library/` (27).
+    Next: `library/` (8).
+    Next: `hf.co/` (6).
+    Wait, `hf.co/` is 6. `library/` is 8.
+    So order: 27, 8, 6.
+
+    Suffixes:
+    `"-q4_k_m"` (8), `"-q4_k_s"` (8), `"-q4_0"` (5)
+    `":q4_k_m"` (8), `":q4_k_s"` (8), `":q4_0"` (5)
+    Order doesn't strictly matter for suffixes as long as we check all and break on first match.
+    Usually suffixes are distinct enough.
+
+    One more thing: `name` is mutable. `name[..n]` returns a slice `&str`. `.to_string()` consumes it.
+    This is valid Rust.
+
+    Final check on constraints:
+    1. Signature: `pub fn normalize_model_name(raw: &str) -> String` - Match.
+    2. Strip prefixes - Match.
+    3. Strip suffixes - Match.
+    4. Lowercase - Match.
+    5. Guard rails (no unwrap/expect/panic) - Match.
+    6. Traceability comment - Match.
+
+    Wait, `name[27..]` on a mutable `String`? `name` is `String` (owned) after `to_lowercase()`.
+    `name[27..]` creates a `&str`. `.to_string()` makes it a `String`.
+    Correct.
+
+    One edge case: If multiple prefixes match?
+    `registry.ollama.ai/library/model`
+    Matches `registry.ollama.ai/library/` (27). Result `model`.
+    Matches `library/` (8). Result `registry.ollama.ai/model`.
+    We want the most specific one. So check longest first.
+    Correct.
+
+    One edge case: Suffixes.
+    `model-q4_0:q4_k_m`? Unlikely, but if it ends with `:q4_k_m`, it strips that.
+    If it ends with `-q4_0`, it strips that.
+    If both exist (e.g. `model-q4_0:q4_k_m`), usually the last one is the version.
+    Iterating and breaking on first match is standard for "normalize".
+    I will sort suffixes by length descending to ensure longer suffixes (more specific) are removed first?
+    Actually, `"-q4_k_m"` is 8, `"-q4_0"` is 5.
+    If string is `model-q4_k_m`, it ends with 8 chars.
+    If string is `model-q4_0`, it ends with 5 chars.
+    If string is `model-q4_k_m-q4_0` (weird), last is 5.
+    Order: 8 chars then 5 chars.
+    My array has 5 chars first.
+    Let's sort suffixes by length descending to be safe, or just ensure logic holds.
+    Actually, `break` ensures we only strip one suffix.
+    If input is `model-q4_k_m`, and we check `"-q4_0"` first. `ends_with("-q4_0")` is false.
+    Then check `"-q4_k_m"`. True. Strip.
+    So order of suffixes doesn't strictly matter unless one is a suffix of another.
+    `"-q4_0"` is not a suffix of `"-q4_k_m"`.
+    `"-q4_k_m"` ends with `m`. `-q4_0` ends with `0`.
+    So they are distinct.
+    However, `":q4_0"` vs `"-q4_0"`.
+    If input is `model-q4_0`, ends with `"-q4_0"`.
+    If input is `model:q4_0`, ends with `":q4_0"`.
+    So distinct.
+    Order:
+    1. `registry.ollama.ai/library/` (27)
+    2. `library/` (8)
+    3. `hf.co/` (6)
+    4. Suffixes (any order, but maybe longer first).
+
+    Let's write clean code.
+
+    ```rust
+    // trace:implements FR-002
+    pub fn normalize_model_name(raw: &str) -> String {
+        let mut name = raw.to_lowercase();
+
+        // 1. Strip registry prefixes (Longest first to avoid partial matches)
+        if name.len() >= 27 && name.starts_with("registry.ollama.ai/library/") {
+            name = name[27..].to_string();
+        } else if name.len() >= 8 && name.starts_with("library/") {
+            name = name[8..].to_string();
+        } else if name.len() >= 6 && name.starts_with("hf.co/") {
+            name = name[6..].to_string();
+        }
+
+        // 2. Strip quantization suffixes
+        let suffixes = [
+            "-q4_k_m", "-q4_k_s", "-q4_0",
+            ":q4_k_m", ":q4_k_s", ":q4_0",
+        ];
+
+        for suffix in suffixes.iter() {
+            if name.len() >= suffix.len() && name.ends_with(suffix) {
+                name = name[..name.len() - suffix.len()].to_string();
+                break;
+            }
+        }
+
+        name
+    }
+    ```
+    Wait, `name[27..]` works on `String`?
+    `String` implements `Deref<Target = str>`.
+    Indexing `&str` works.
+    `name[27..]` returns `&str`.
+    `.to_string()` consumes it.
+    Yes.
+
+    Wait, `name` is `String`.
+    `name.len()` returns `usize`.
+    `name[27..]` is valid slice syntax for `&str` view.
+    Wait, `String` supports range indexing returning `&str`.
+    Yes.
+
+    Final check on guard rails:
+    `name.len() >= 27` prevents index out of bounds.
+    `name[..name.len() - suffix.len()]` prevents negative index.
+    `unwrap`/`expect`/`panic` avoided.
+
+    Looks good.

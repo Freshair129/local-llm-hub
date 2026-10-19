@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "runDate": "2026-10-19",
+  "status": "paused_incomplete",
+  "report": "../../reviews/hf-candidate-finalist-suite-2026-10-19.md",
+  "sourceRepository": "https://github.com/Freshair129/local-llm-hub",
+  "sourceCommit": "444fe445ac19016d421579fb6a0bfb0e28f455d6",
+  "fixture": "scripts/benchmark_mellum_thinking_vs_instruct.mjs",
+  "hardware": "NVIDIA GeForce RTX 3060 12 GB",
+  "ollamaVersion": "0.40.5",
+  "model": {
+    "key": "hauhau-qwen35-9b-q4",
+    "label": "Hauhau Qwen3.5-9B Aggressive Q4_K_M",
+    "tag": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+    "quant": "Q4_K_M"
+  },
+  "modelCardUrl": "https://huggingface.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive",
+  "profile": {
+    "id": "local-16k",
+    "label": "RTX 3060 local context",
+    "num_ctx": 16384,
+    "num_predict": 81920
+  },
+  "sampling": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "repeat_penalty": 1
+  },
+  "frStability": {
+    "fixtureSnapshot": "source/test_set.json",
+    "testSetSha256": "d9142c138d5a40a02064564259104c04c0686ef36eec63a3d031c5dab0087200",
+    "tasks": [
+      "FR-002",
+      "FR-006"
+    ],
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71
+    ],
+    "expectedSamples": 60,
+    "completedSamples": 3,
+    "strictPasses": 2,
+    "compiled": 2,
+    "harnessPasses": 2,
+    "completedPairs": [
+      {
+        "seed": 42,
+        "task": "FR-002"
+      },
+      {
+        "seed": 43,
+        "task": "FR-002"
+      },
+      {
+        "seed": 44,
+        "task": "FR-002"
+      }
+    ],
+    "strictGate": "Strict pass requires fenced code, Rust compile, all task harness tests, adjacent trace comment, and no forbidden unwrap/expect/panic construct."
+  },
+  "humanEvalPlus": {
+    "status": "not_started",
+    "tasks": 164
+  },
+  "pause": {
+    "afterTask": "FR-002",
+    "afterSeed": 44,
+    "ollamaEndpointsEmpty": true,
+    "benchmarkRunnerActive": false,
+    "observedGpuMemoryUsedMiB": 907
+  },
+  "fileSha256": {
+    ".gitattributes": "705fd4d6451a31d36b3df7de96f83f30ac976c9b4a6d1e51671d8e2f33e2d0da",
+    "README.md": "dfeae4c8b2c1e919ee08473a7682fecdbca43a984c2f42ad9b9cb9e0bb314eef",
+    "runs/hauhau-qwen35-9b-q4/fr-stability/responses/FR-002/42/compile.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runs/hauhau-qwen35-9b-q4/fr-stability/responses/FR-002/42/generated.rs": "8bcf2caa0805eddddd60ca9ba704c0b218bf6b7cd2bb1b0294fa7a5859eab6cf",
+    "runs/hauhau-qwen35-9b-q4/fr-stability/responses/FR-002/42/response.txt": "129059bbff96a72ba6f9ff3887e70d086a64ab1bc2adf253bac63a2cb30925b8",
+    "runs/hauhau-qwen35-9b-q4/fr-stability/responses/FR-002/42/test.rs": "34fd05584fafabfae25334c1e01fcd3306f8739a2564925226040416c5dbcf8d",
+    "runs/hauhau-qwen35-9b-q4/fr-stability/responses/FR-002/42/tests.txt": "eb5ff06d38bf5f355085523bf77cdd5d0559a632994dcd4237d9e03d9f6e5f6e",
+    "runs/hauhau-qwen35-9b-q4/fr-stability/responses/FR-002/42/thinking.txt": "301cc5ff21f45bf6fa5d5a84b9ce9a0bacebc48e543eb576025c22d90952bdc2",
+    "runs/hauhau-qwen35-9b-q4/fr-stability/responses/FR-002/43/compile.txt": "5fe0b00f0f4d25de47ca0539481edfcf7c38f67e8a47c02fc845d4317283a2a4",
+    "runs/hauhau-qwen35-9b-q4/fr-stability/responses/FR-002/43/generated.rs": "3a2fa9d48f8671080b73ed0ba06d45479cdeddbaee5aad97d97550ad0296bef2",
+    "runs/hauhau-qwen35-9b-q4/fr-stability/responses/FR-002/43/response.txt": "27f5913df896b36f0e1c524d00b6c692713fa41b4f7774cd80358e33f204a303",
+    "runs/hauhau-qwen35-9b-q4/fr-stability/responses/FR-002/43/test.rs": "c8ff29d4105a1403ab69953a799b07b4de4e98aec2f9ab20ce9da956e17758f9",
+    "runs/hauhau-qwen35-9b-q4/fr-stability/responses/FR-002/43/tests.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runs/hauhau-qwen35-9b-q4/fr-stability/responses/FR-002/43/thinking.txt": "82a7d1a5f25b4ba5c92f0af1dab501aed594c845ec8ea36c3fc00beae4c77989",
+    "runs/hauhau-qwen35-9b-q4/fr-stability/responses/FR-002/44/compile.txt": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "runs/hauhau-qwen35-9b-q4/fr-stability/responses/FR-002/44/generated.rs": "d6fda2c35cf49f70546ea43d74db8ea571b5cafd9d3e6bd854f34c64dc6e9ba3",
+    "runs/hauhau-qwen35-9b-q4/fr-stability/responses/FR-002/44/response.txt": "c190e1a93abc39c8aae823cfbba9b929c8fa089da71ec92762f705ba21bf34fc",
+    "runs/hauhau-qwen35-9b-q4/fr-stability/responses/FR-002/44/test.rs": "7b1a737233ed6e1325c41b2b025a936b409371825d57c4de03e5488226749a88",
+    "runs/hauhau-qwen35-9b-q4/fr-stability/responses/FR-002/44/tests.txt": "eb5ff06d38bf5f355085523bf77cdd5d0559a632994dcd4237d9e03d9f6e5f6e",
+    "runs/hauhau-qwen35-9b-q4/fr-stability/responses/FR-002/44/thinking.txt": "03156cf9d215ce30889abdbfcfeae2dcddf68b12fdf24d833be87655c649ee36",
+    "runs/hauhau-qwen35-9b-q4/fr-stability/results.json": "67ba130c1848ea8a6582b388de0922973c57a40efb32670f4990e19c2a4161a1",
+    "runs/hauhau-qwen35-9b-q4/run-status.json": "396c7719094132da0d81f591a4b920ad29a733020d1c924db242a9f1f9dc7a57",
+    "source/test_set.json": "d9142c138d5a40a02064564259104c04c0686ef36eec63a3d031c5dab0087200"
+  }
+}

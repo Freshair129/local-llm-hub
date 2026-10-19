@@ -1,0 +1,147 @@
+{
+  "metadata": {
+    "startedAt": "2026-10-19T04:19:51.647Z",
+    "ollamaVersion": "0.40.5",
+    "hardware": "NVIDIA GeForce RTX 3060 12GB",
+    "testSetSource": "https://github.com/Freshair129/local-llm-hub/blob/main/scripts/benchmark_mellum_thinking_vs_instruct.mjs",
+    "testSetSha256": "d9142c138d5a40a02064564259104c04c0686ef36eec63a3d031c5dab0087200",
+    "tasks": [
+      "FR-002",
+      "FR-006"
+    ],
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      63,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71
+    ],
+    "sampling": {
+      "temperature": 0.6,
+      "top_p": 0.95,
+      "top_k": 20,
+      "repeat_penalty": 1
+    },
+    "profile": {
+      "id": "local-16k",
+      "label": "RTX 3060 local context",
+      "num_ctx": 16384,
+      "num_predict": 81920
+    },
+    "model": {
+      "key": "hauhau-qwen35-9b-q4",
+      "label": "Hauhau Qwen3.5-9B Aggressive Q4_K_M",
+      "tag": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+      "quant": "Q4_K_M"
+    },
+    "expectedSamples": 60,
+    "execution": "Run only this model; unload all models before and after the model group; verify /api/ps before and after every scored inference; discard contaminated attempts and retry up to three times.",
+    "responseTransport": "Ollama /api/chat NDJSON streaming, reassembled before scoring; prompt, seed, sampler, context, and token cap are unchanged.",
+    "qualityMetric": "Strict pass requires fenced code, Rust compile, all task harness tests, adjacent trace comment, and no forbidden unwrap/expect/panic construct.",
+    "note": "Matched local comparison protocol: 16k context and shared sampling settings. Speed is recorded for diagnostics only."
+  },
+  "results": [
+    {
+      "task": "FR-002",
+      "seed": 42,
+      "attempt": 1,
+      "modelKey": "hauhau-qwen35-9b-q4",
+      "model": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-16k",
+      "wallMs": 128621,
+      "promptTokens": 196,
+      "generatedTokens": 5037,
+      "generationTokensPerSecond": 52.411750038010744,
+      "thinkingChars": 14915,
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 43,
+      "attempt": 1,
+      "modelKey": "hauhau-qwen35-9b-q4",
+      "model": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-16k",
+      "wallMs": 190074,
+      "promptTokens": 196,
+      "generatedTokens": 9719,
+      "generationTokensPerSecond": 51.29514000688893,
+      "thinkingChars": 31581,
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": false,
+        "testsPassed": false,
+        "strictPass": false,
+        "compileStatus": 1,
+        "compileError": null,
+        "testOutput": ""
+      }
+    },
+    {
+      "task": "FR-002",
+      "seed": 44,
+      "attempt": 1,
+      "modelKey": "hauhau-qwen35-9b-q4",
+      "model": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+      "quant": "Q4_K_M",
+      "profileId": "local-16k",
+      "wallMs": 133482,
+      "promptTokens": 196,
+      "generatedTokens": 6696,
+      "generationTokensPerSecond": 51.561342678000194,
+      "thinkingChars": 20191,
+      "checks": {
+        "codeBlockFound": true,
+        "forbiddenConstruct": false,
+        "traceCommentAdjacent": true,
+        "compiled": true,
+        "testsPassed": true,
+        "strictPass": true,
+        "compileStatus": 0,
+        "compileError": null,
+        "testOutput": "\nrunning 1 test\ntest test_normalize_cases ... ok\n\ntest result: ok. 1 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s\n\n"
+      }
+    }
+  ],
+  "contaminationLog": [],
+  "infrastructureFailures": []
+}

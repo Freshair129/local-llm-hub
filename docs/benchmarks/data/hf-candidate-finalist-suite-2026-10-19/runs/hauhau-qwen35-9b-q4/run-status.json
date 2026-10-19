@@ -1,0 +1,45 @@
+{
+  "updatedAt": "2026-10-19T21:14:17.9837133+07:00",
+  "status": "paused",
+  "modelKey": "hauhau-qwen35-9b-q4",
+  "model": "hf.co/HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive:Q4_K_M",
+  "suite": "FR-002 and FR-006, seeds 42-71, one model at a time",
+  "profile": {
+    "id": "local-16k",
+    "num_ctx": 16384,
+    "num_predict": 81920,
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "repeat_penalty": 1.0
+  },
+  "completedSamples": 3,
+  "expectedSamples": 60,
+  "pendingSamples": 57,
+  "currentTask": "FR-002",
+  "completedSeeds": [
+    42,
+    43,
+    44
+  ],
+  "latest": {
+    "seed": 44,
+    "strictPass": true,
+    "compiled": true,
+    "testsPassed": true
+  },
+  "aggregate": {
+    "strictPass": 2,
+    "compiled": 2,
+    "testsPassed": 2
+  },
+  "humanEvalPlusStatus": "not_started",
+  "resultsFile": "fr-stability/results.json",
+  "resumeCommand": "node .\\run_fr_stability.mjs",
+  "resumeBehavior": "Validated runner resumes matching settings and skips completed task/seed pairs.",
+  "ollamaEndpoints": {
+    "127.0.0.1:11435": "empty",
+    "127.0.0.1:11434": "empty"
+  },
+  "gpuMemoryUsedMiB": 907
+}
