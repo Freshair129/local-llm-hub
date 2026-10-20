@@ -244,6 +244,7 @@ test('classifies output cut off at the configured generation cap as a resource l
   assert.equal(result.outcome, 'RESOURCE_LIMIT');
   assert.equal(result.failure_reason, 'planner output reached its configured token cap before valid JSON');
   assert.equal(result.role_events[0].finish_reason, 'length');
+  assert.equal(result.reviewer_verifier_approved, null);
   assert.equal(result.gates.compile, 'NOT_RUN');
 });
 

@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "run_id": "pilot001-mellum21-6-v3-20261020T173141",
+  "base_commit": "4c6dec53405a3b033c78bb7cf342e49c18556ed5",
+  "task_file_sha256": "66b70295443471534c15046747b5e02df652262defd93396dfa6e2eddec70ab5",
+  "workflow_config_file_sha256": "d8d9feb9b6a5490e7584dfd58011aeaf16cf6a9d5480e9f03bbb2385f7e00d61",
+  "ollama_version": "ollama version is 0.40.6",
+  "model": {
+    "name": "mellum:latest",
+    "digest": "2bd7f30f9812a9548edfeec647ff23090def507d5bf104dc04e159f634df58cb",
+    "size_bytes": 8071297009,
+    "family": "mellum",
+    "quantization": "Q4_K_M"
+  },
+  "runtime": "v24.20.0",
+  "os": "win32-x64",
+  "ollama_endpoint": "http://127.0.0.1:11434",
+  "secondary_endpoint": {
+    "endpoint": "http://127.0.0.1:11435",
+    "available": false,
+    "unloaded": []
+  },
+  "released_before_run": [
+    {
+      "endpoint": "http://127.0.0.1:11434",
+      "available": true,
+      "unloaded": []
+    },
+    {
+      "endpoint": "http://127.0.0.1:11435",
+      "available": false,
+      "unloaded": []
+    }
+  ],
+  "baseline_visible_suite": {
+    "state": "FAIL_EXPECTED",
+    "exit_code": 1,
+    "stdout_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "stderr_sha256": "657ad9ba0c5f7017b9205dfa36d44017109708ac256ec04830726c65dc8e31b1"
+  },
+  "gpu_before": "NVIDIA GeForce RTX 3060, 0 %, 1757 MiB, 12288 MiB, 12.07 W",
+  "started_at": "2026-10-20T17:31:41.069Z",
+  "finished_at": "2026-10-20T17:33:44.231Z",
+  "gpu_after": "NVIDIA GeForce RTX 3060, 0 %, 1913 MiB, 12288 MiB, 87.77 W",
+  "released_after_run": {
+    "endpoint": "http://127.0.0.1:11434",
+    "available": true,
+    "unloaded": [
+      "mellum:latest"
+    ]
+  },
+  "ollama_ps_after": [],
+  "runner_error": null
+}

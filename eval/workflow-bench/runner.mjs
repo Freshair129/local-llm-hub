@@ -607,7 +607,9 @@ export async function runWorkflowBenchTask({ repoDir, task, config, agentCall, a
     usage: usageTotals,
     budget: config.budget,
     repair_calls: repairCalls,
-    reviewer_verifier_approved: lastReviewerFindings.length === 0 && lastVerifierFindings.length === 0,
+    reviewer_verifier_approved: roles.some(event => event.role === 'reviewer') && roles.some(event => event.role === 'verifier')
+      ? lastReviewerFindings.length === 0 && lastVerifierFindings.length === 0
+      : null,
     final_artifact_sha256: finalDiffSha256,
     artifact: finalDiff ? 'final.diff' : null,
     gates: gateStates,

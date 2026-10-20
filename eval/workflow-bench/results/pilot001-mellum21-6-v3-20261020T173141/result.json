@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "run_id": "pilot001-mellum21-6-v3-20261020T173141",
+  "task_id": "pilot-001-model-name-slug",
+  "task_family": "focused-code-change",
+  "seed": 42,
+  "task_hash": "b9165584f1ffc86d7f1f9460347f1f30dd63698da0f1cb6f238c4febc1abb87c",
+  "hidden_suite_hashes": {
+    "suite_1": "8d152d41fe4f384513ad93e64704b311f26e8f60f677661c52d2e7d25ade8b85"
+  },
+  "base_commit": "4c6dec53405a3b033c78bb7cf342e49c18556ed5",
+  "workflow_config_id": "CFG-MELLUM21-6-PILOT-V3",
+  "workflow_config_version": "1.2.0",
+  "workflow_config_hash": "98eccdfe1e2909b709989999441db22a103ce0b004984272ec037f1d8b3397f8",
+  "provider": "ollama",
+  "model": "mellum:latest",
+  "model_digest": "2bd7f30f9812a9548edfeec647ff23090def507d5bf104dc04e159f634df58cb",
+  "prompt_version": "workflow-role-prompts-v1",
+  "started_at": "2026-10-20T17:31:41.193Z",
+  "finished_at": "2026-10-20T17:33:44.069Z",
+  "duration_ms": 122876,
+  "role_events": [
+    {
+      "role": "planner",
+      "provider": "ollama",
+      "model": "mellum:latest",
+      "modelDigest": "2bd7f30f9812a9548edfeec647ff23090def507d5bf104dc04e159f634df58cb",
+      "startedAt": "2026-10-20T17:31:43.255Z",
+      "finishedAt": "2026-10-20T17:31:51.419Z",
+      "durationMs": 8164,
+      "promptSha256": "cdc18f2aba8a6cf8158819dcb8e92fe3ce8b2b91f47ad42d7e823e9772dd56c7",
+      "responseSha256": "3b2fefa7ef636a00930a42f91a7a6350f26e2498834a0a01e918361994758f46",
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 375,
+        "completion_tokens": 507,
+        "total_tokens": 882,
+        "tokens_per_second": 135.1
+      },
+      "seed": 42
+    },
+    {
+      "role": "executor",
+      "provider": "ollama",
+      "model": "mellum:latest",
+      "modelDigest": "2bd7f30f9812a9548edfeec647ff23090def507d5bf104dc04e159f634df58cb",
+      "startedAt": "2026-10-20T17:31:51.419Z",
+      "finishedAt": "2026-10-20T17:33:43.324Z",
+      "durationMs": 111905,
+      "promptSha256": "9ee14635dfd6bade228c956fc252b2d0436a46f343bf352d18eaeed98ac7bf1a",
+      "responseSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "finish_reason": "length",
+      "usage": {
+        "prompt_tokens": 477,
+        "completion_tokens": 14336,
+        "total_tokens": 14813,
+        "tokens_per_second": 128.36
+      },
+      "seed": 43
+    }
+  ],
+  "usage": {
+    "prompt_tokens": 852,
+    "completion_tokens": 14843,
+    "total_tokens": 15695
+  },
+  "budget": {
+    "maxRoleCalls": 9,
+    "maxTotalTokens": 150000,
+    "maxWallTimeMs": 1800000,
+    "monetaryCost": "Unpriced exploratory local pilot; do not compare monetary cost."
+  },
+  "repair_calls": 0,
+  "reviewer_verifier_approved": true,
+  "final_artifact_sha256": null,
+  "artifact": null,
+  "gates": {
+    "patch_valid": "NOT_RUN",
+    "scope": "NOT_RUN",
+    "compile": "NOT_RUN",
+    "visible_tests": "NOT_RUN",
+    "security": "NOT_RUN",
+    "held_out_tests": "NOT_RUN"
+  },
+  "held_out_execution": null,
+  "cost": {
+    "provider_billing_usd": null,
+    "local_energy_kwh": null,
+    "estimated_total_usd": null,
+    "note": "Exploratory local run; monetary/energy cost not measured."
+  },
+  "outcome": "RESOURCE_LIMIT",
+  "failure_reason": "executor output reached its configured token cap before valid JSON"
+}
