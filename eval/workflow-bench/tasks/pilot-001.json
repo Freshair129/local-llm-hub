@@ -1,0 +1,20 @@
+{
+  "taskId": "pilot-001-model-name-slug",
+  "family": "focused-code-change",
+  "seed": 42,
+  "request": "Implement slugifyModelName(value) in eval/workflow-bench/fixtures/pilot-001/slugify.mjs. For string input, normalize with Unicode NFKD, remove combining marks, lowercase, replace every run of characters outside ASCII a-z and 0-9 with one hyphen, and trim leading or trailing hyphens. For non-string or empty input, return an empty string. Do not add dependencies.",
+  "acceptanceCriteria": [
+    { "id": "AC-01", "description": "String inputs become lowercase ASCII kebab-case with repeated separators collapsed and edge separators removed." },
+    { "id": "AC-02", "description": "NFKD normalization and combining-mark removal preserve the base ASCII letters of accented Latin input." },
+    { "id": "AC-03", "description": "Non-string and empty inputs return an empty string." },
+    { "id": "AC-04", "description": "The implementation has no external dependency or dynamic code execution." }
+  ],
+  "allowedPaths": ["eval/workflow-bench/fixtures/pilot-001/slugify.mjs"],
+  "publicFiles": ["eval/workflow-bench/fixtures/pilot-001/slugify.mjs"],
+  "hiddenFiles": ["hidden.test.mjs"],
+  "timeoutMs": 60000,
+  "compileCommand": { "executable": "__NODE__", "args": ["--check", "eval/workflow-bench/fixtures/pilot-001/slugify.mjs"] },
+  "visibleCommand": { "executable": "__NODE__", "args": ["eval/workflow-bench/fixtures/pilot-001/visible.test.mjs"] },
+  "securityCommand": { "executable": "__NODE__", "args": ["eval/workflow-bench/fixtures/pilot-001/security.mjs"] },
+  "hiddenCommand": { "executable": "__NODE__", "args": ["{{HIDDEN_ROOT}}/hidden.test.mjs", "{{WORKTREE}}/eval/workflow-bench/fixtures/pilot-001/slugify.mjs"] }
+}

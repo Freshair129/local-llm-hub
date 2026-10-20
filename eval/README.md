@@ -6,7 +6,7 @@
 | **Framework Version** | 1.0.0 |
 | **Target Hardware** | NVIDIA GeForce RTX 3060 (12GB GDDR6 CUDA) + Intel Core i7-8700K |
 | **Status** | Phase 1 & 2 Operational |
-| **Workflow comparison** | Protocol draft: [WORKFLOW-BENCH](../docs/benchmarks/WORKFLOW-BENCH.md); runner not implemented |
+| **Workflow comparison** | [WORKFLOW-BENCH](../docs/benchmarks/WORKFLOW-BENCH.md); isolated six-role pilot runner implemented, confirmatory batch tooling pending |
 
 ---
 
@@ -82,6 +82,10 @@ To verify the evaluation harness:
 ```bash
 node eval/tests/eval_harness.test.mjs
 ```
+
+### Workflow benchmark pilot
+
+The six-role workflow runner and Mellum2.1 pilot are documented in [workflow-bench](workflow-bench/README.md). The pilot is exploratory and uses one task and one seed; it does not support a model ranking.
 
 ---
 

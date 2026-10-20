@@ -1,0 +1,25 @@
+{
+  "id": "CFG-MELLUM21-6-PILOT",
+  "version": "1.0.0",
+  "provider": "ollama",
+  "model": "mellum:latest",
+  "modelDigest": "2bd7f30f9812a9548edfeec647ff23090def507d5bf104dc04e159f634df58cb",
+  "promptVersion": "workflow-role-prompts-v1",
+  "roles": ["planner", "executor", "reviewer", "verifier", "tester", "repairer"],
+  "settings": {
+    "temperature": 0.6,
+    "top_p": 0.95,
+    "top_k": 20,
+    "repeat_penalty": 1.0,
+    "num_ctx": 16384,
+    "num_predict": 4096
+  },
+  "repairLimit": 1,
+  "keepAlive": "20m",
+  "budget": {
+    "maxRoleCalls": 9,
+    "maxTotalTokens": 60000,
+    "maxWallTimeMs": 1800000,
+    "monetaryCost": "Unpriced exploratory local pilot; do not compare monetary cost."
+  }
+}
