@@ -99,7 +99,8 @@ async function main() {
   const baseCommit = run('git', ['rev-parse', 'HEAD']);
   const ollamaVersion = run('ollama', ['--version']);
   const modelList = run('ollama', ['list']);
-  if (!modelList.split(/\r?\n/).some(line => line.startsWith(`${MODEL_NAME}\t`))) {
+  const installedTags = modelList.split(/\r?\n/).slice(1).map(line => line.trim().split(/\s+/)[0]);
+  if (!installedTags.includes(MODEL_NAME)) {
     throw new Error(`${MODEL_NAME} is not installed; refusing to substitute another tag`);
   }
 
