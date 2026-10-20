@@ -126,7 +126,7 @@ async function main() {
   if (psBefore.length) throw new Error('Ollama still has resident models after preflight cleanup');
 
   const startedAt = new Date().toISOString();
-  const runId = `pilot001-mellum21-6-${startedAt.replace(/[^0-9TZ]/g, '').slice(0, 15)}`;
+  const runId = `pilot001-mellum21-6-v2-${startedAt.replace(/[^0-9TZ]/g, '').slice(0, 15)}`;
   const artifactDir = path.join(artifactsRoot, runId);
   fs.mkdirSync(artifactDir, { recursive: true });
   const environment = {
@@ -170,7 +170,7 @@ async function main() {
           { role: 'user', content: prompt }
         ];
         const options = { ...settings, seed };
-        const exactRequest = { model, messages, format: 'json', stream: false, keep_alive: config.keepAlive, options };
+        const exactRequest = { model, messages, format: 'json', stream: false, think: config.think, keep_alive: config.keepAlive, options };
         const promptSha256 = sha256(JSON.stringify(exactRequest));
         const callStart = Date.now();
         const response = await requestJson(`${OLLAMA}/api/chat`, exactRequest, 600_000);
@@ -181,6 +181,7 @@ async function main() {
           provider: 'ollama',
           model: response.model || model,
           modelDigest: modelInfo.digest,
+          finishReason: response.done_reason || response.message?.done_reason || null,
           durationMs: Date.now() - callStart,
           promptSha256,
           usage: {

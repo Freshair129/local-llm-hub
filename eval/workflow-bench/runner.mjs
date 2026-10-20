@@ -415,6 +415,7 @@ export async function runWorkflowBenchTask({ repoDir, task, config, agentCall, a
       durationMs: response.durationMs ?? (Date.now() - callStart),
       promptSha256: response.promptSha256 || sha256(prompt),
       responseSha256: sha256(text),
+      finish_reason: response.finishReason || null,
       usage: response.usage || null,
       seed
     };
@@ -427,7 +428,18 @@ export async function runWorkflowBenchTask({ repoDir, task, config, agentCall, a
     if (usageTotals.total_tokens > config.budget.maxTotalTokens) {
       throw Object.assign(new Error('workflow exceeded maxTotalTokens'), { resourceLimit: true });
     }
-    const parsed = parseOutput(text, role);
+    let parsed;
+    try {
+      parsed = parseOutput(text, role);
+    } catch (error) {
+      const outputCap = Number(config.settings.num_predict);
+      const outputLimitReached = response.finishReason === 'length' ||
+        (Number.isInteger(outputCap) && outputCap > 0 && completionTokens >= outputCap);
+      if (outputLimitReached) {
+        throw Object.assign(new Error(`${role} output reached its configured token cap before valid JSON`), { resourceLimit: true });
+      }
+      throw error;
+    }
     validateRoleResult(role, parsed, task);
     return parsed;
   };

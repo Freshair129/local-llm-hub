@@ -21,6 +21,6 @@ The harness fixtures create their own synthetic held-out suite inside a temporar
 
 ## Pilot settings and limits
 
-The local Ollama call uses temperature `0.6`, `top_p=0.95`, `top_k=20`, `repeat_penalty=1.0`, and `num_ctx=16384`. `num_predict=4096` is a per-role output budget for this workflow pilot; it is lower than the larger output cap used by the earlier FR benchmark. The pilot uses a single seed, one task, and one model. Its latency, outcome, and token counts are exploratory only; no confidence interval, power claim, or model ranking is produced.
+The local Ollama call enables thinking and uses temperature `0.6`, `top_p=0.95`, `top_k=20`, `repeat_penalty=1.0`, and `num_ctx=16384`. `num_predict=8192` is a per-role output budget for this workflow pilot; it is lower than the model-card maximum and the larger output cap used by the earlier FR benchmark. The first pilot attempt reached its 4096-token output cap before producing executor JSON. That attempt is preserved; the runner now records capped malformed responses as resource limits. The pilot uses one task and one model. Its latency, outcome, and token counts are exploratory only; no confidence interval, power claim, or model ranking is produced.
 
 The confirmatory requirements and decision rules remain in [WORKFLOW-BENCH](../../docs/benchmarks/WORKFLOW-BENCH.md). Batch comparison, preregistered sample size, and complete cost accounting are still required before making comparative claims.

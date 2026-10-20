@@ -230,6 +230,23 @@ test('an unrun required security gate cannot produce a verified success', async 
   assert.equal(result.outcome, 'INFRA_FAILURE');
 });
 
+test('classifies output cut off at the configured generation cap as a resource limit', async t => {
+  const repo = createRepo();
+  t.after(() => fs.rmSync(repo, { recursive: true, force: true }));
+  const result = await runWorkflowBenchTask({
+    repoDir: repo,
+    task: makeTask(repo),
+    config: makeConfig({ settings: { temperature: 0, num_predict: 4 } }),
+    agentCall: async () => ({ text: '', finishReason: 'length', usage: { prompt_tokens: 2, completion_tokens: 4 } }),
+    artifactRoot: tempArtifacts(t),
+    baseCommit: git(repo, ['rev-parse', 'HEAD'])
+  });
+  assert.equal(result.outcome, 'RESOURCE_LIMIT');
+  assert.equal(result.failure_reason, 'planner output reached its configured token cap before valid JSON');
+  assert.equal(result.role_events[0].finish_reason, 'length');
+  assert.equal(result.gates.compile, 'NOT_RUN');
+});
+
 test('rejects out-of-scope replacements before applying them', async t => {
   const repo = createRepo();
   t.after(() => fs.rmSync(repo, { recursive: true, force: true }));
