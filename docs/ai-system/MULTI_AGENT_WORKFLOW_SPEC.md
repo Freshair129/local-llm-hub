@@ -8,7 +8,7 @@
 | **Status** | `Approved / Implementation Ready` |
 | **Target Hardware** | NVIDIA GeForce RTX 3060 12GB (CUDA0 Compute 8.6) |
 | **Runtime Environment** | Local Ollama Daemon (`127.0.0.1:11434`), Node.js ESM Runtime |
-| **Related Documents** | [docs/benchmarks/code_review_model_benchmark.md](../benchmarks/code_review_model_benchmark.md), [docs/PRD-SDD-v1.0.md](../PRD-SDD-v1.0.md) |
+| **Related Documents** | [WORKFLOW-BENCH](../benchmarks/WORKFLOW-BENCH.md), [docs/benchmarks/code_review_model_benchmark.md](../benchmarks/code_review_model_benchmark.md), [docs/PRD-SDD-v1.0.md](../PRD-SDD-v1.0.md) |
 
 ---
 

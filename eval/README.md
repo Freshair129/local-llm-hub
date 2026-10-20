@@ -6,6 +6,7 @@
 | **Framework Version** | 1.0.0 |
 | **Target Hardware** | NVIDIA GeForce RTX 3060 (12GB GDDR6 CUDA) + Intel Core i7-8700K |
 | **Status** | Phase 1 & 2 Operational |
+| **Workflow comparison** | Protocol draft: [WORKFLOW-BENCH](../docs/benchmarks/WORKFLOW-BENCH.md); runner not implemented |
 
 ---
 
