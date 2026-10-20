@@ -126,7 +126,7 @@ async function main() {
   if (psBefore.length) throw new Error('Ollama still has resident models after preflight cleanup');
 
   const startedAt = new Date().toISOString();
-  const runId = `pilot001-mellum21-6-v2-${startedAt.replace(/[^0-9TZ]/g, '').slice(0, 15)}`;
+  const runId = `pilot001-mellum21-6-v3-${startedAt.replace(/[^0-9TZ]/g, '').slice(0, 15)}`;
   const artifactDir = path.join(artifactsRoot, runId);
   fs.mkdirSync(artifactDir, { recursive: true });
   const environment = {
