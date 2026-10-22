@@ -1,9 +1,49 @@
 import { openModelCard } from './card.js';
 import { invoke } from './api.js';
+import { getModelLifecyclePresentation } from './model_lifecycle.js';
 
 // Current view mode: 'grid' | 'list'
 let currentViewMode = 'grid';
 let activeTagFilter = 'all';
+const pendingModelLifecycleKeys = new Set();
+
+function lifecycleKey(backend, modelName) {
+  return encodeURIComponent(`${String(backend || '').toLowerCase()}\u0000${String(modelName || '').toLowerCase()}`);
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, character => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[character]);
+}
+
+function renderLifecycleButton(model, lifecycle, { compact = false } = {}) {
+  const backend = String(model.backend || '').toLowerCase();
+  const name = String(model.name || '');
+  const key = lifecycleKey(backend, name);
+  const pending = pendingModelLifecycleKeys.has(key);
+  const canToggle = lifecycle.canToggle && !pending;
+  const label = pending
+    ? 'Working…'
+    : lifecycle.canToggle
+      ? (model.is_active ? 'Unload' : 'Load')
+      : lifecycle.lifecycleStatusKnown
+        ? 'Managed externally'
+        : 'State unknown';
+  const title = pending ? 'Waiting for model lifecycle confirmation' : lifecycle.actionTitle;
+  const icon = pending ? 'ph-spinner-gap ph-spin' : lifecycle.actionIcon;
+  const color = lifecycle.canToggle ? (model.is_active ? '#ef4444' : '#10b981') : '#8b95a1';
+
+  const border = lifecycle.canToggle
+    ? (model.is_active ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.3)')
+    : 'rgba(148,163,184,0.3)';
+
+  return `<button class="btn btn-ghost model-lifecycle-control" style="padding:6px 10px; font-size:11.5px; color:${color}; border-color:${border}; opacity:${canToggle ? '1' : '0.55'};" data-lifecycle-key="${key}" data-backend="${escapeHtml(backend)}" data-model-name="${escapeHtml(name)}" data-is-active="${Boolean(model.is_active)}" data-lifecycle-supported="${lifecycle.lifecycleSupported}" data-lifecycle-status-known="${lifecycle.lifecycleStatusKnown}" onclick="window.toggleModelLifecycle(this)" title="${escapeHtml(title)}" aria-label="${escapeHtml(label)}" aria-busy="${pending}" ${canToggle ? '' : 'disabled'}><i class="ph ${icon}"></i>${compact ? '' : ` ${escapeHtml(label)}`}</button>`;
+}
 
 try {
   const savedMode = localStorage.getItem('local-llm-hub-models-view-mode');
@@ -15,16 +55,36 @@ try {
 // Global exposed methods
 if (typeof window !== 'undefined') {
   window.openModelCard = openModelCard;
-  window.toggleModelLifecycle = async (backend, modelName, isCurrentlyActive) => {
+  window.toggleModelLifecycle = async (button) => {
+    let ownsPending = false;
+    const backend = String(button?.dataset?.backend || '').toLowerCase();
+    const modelName = button?.dataset?.modelName || '';
+    const isCurrentlyActive = button?.dataset?.isActive === 'true';
+    const lifecycleSupported = button?.dataset?.lifecycleSupported === 'true';
+    const lifecycleStatusKnown = button?.dataset?.lifecycleStatusKnown === 'true';
+    const key = lifecycleKey(backend, modelName);
     try {
+      if (backend !== 'ollama' || lifecycleSupported !== true || lifecycleStatusKnown !== true) {
+        throw new Error('Lifecycle control is unavailable for this model/backend state');
+      }
+      if (!button || pendingModelLifecycleKeys.has(key)) return;
+      pendingModelLifecycleKeys.add(key);
+      ownsPending = true;
+      button.disabled = true;
+      button.setAttribute('aria-busy', 'true');
+      button.innerHTML = '<i class="ph ph-spinner-gap ph-spin"></i> Working…';
       if (isCurrentlyActive) {
         await invoke('stop_model', { backend, modelName });
       } else {
         await invoke('start_model', { backend, modelName });
       }
-      await syncAllModels();
     } catch (err) {
       alert(`Lifecycle error: ${err}`);
+    } finally {
+      if (ownsPending) {
+        pendingModelLifecycleKeys.delete(key);
+        await syncAllModels();
+      }
     }
   };
 
@@ -232,6 +292,7 @@ export function renderModels(allModels) {
   // ══════════════════════════════════════════════════════════════
   if (currentViewMode === 'list') {
     grid.innerHTML = models.map(m => {
+      const lifecycle = getModelLifecyclePresentation(m);
       const stats = m.stats;
       const hasStats = stats && stats.total_tasks > 0;
       const taskRate = hasStats ? ((stats.successful_tasks / stats.total_tasks) * 100).toFixed(0) : 100;
@@ -241,11 +302,11 @@ export function renderModels(allModels) {
       const isReasoning = /r1|reason|thinking|deepseek-r1/i.test(m.name);
       const isEmbed = /bge|embed|bert|nomic/i.test(m.name);
 
-      const formatName = (m.format || 'GGUF').toUpperCase();
-      const quantName = m.quantization || (m.backend === 'ollama' ? 'Standard' : '—');
+      const formatName = (m.format || 'Unavailable').toUpperCase();
+      const quantName = m.quantization || 'Unavailable';
       const sizeText = m.size_bytes && m.size_bytes > 0 ? formatBytes(m.size_bytes) : '—';
       const engineTitle = `${m.backend ? m.backend.toUpperCase() : 'OLLAMA'} Engine`;
-      const contextK = /llama3|qwen|deepseek|gemini/i.test(m.name) ? '128k' : /mistral|gemma/i.test(m.name) ? '32k' : '8k';
+      const contextK = 'Unavailable';
       const tagsListHtml = (m.tags && m.tags.length > 0)
         ? m.tags.map(t => `<span class="tag-badge-pill">🏷️ ${t}</span>`).join(' ')
         : '';
@@ -256,14 +317,14 @@ export function renderModels(allModels) {
         <div class="model-row-left">
           <div class="card-avatar-box" style="width:40px; height:40px; font-size:20px; flex-shrink:0;">
             ${isEmbed ? '📐' : isVision ? '👁️' : isCoder ? '⚡' : '🤖'}
-            <span class="card-avatar-dot ${m.is_active ? 'active' : ''}"></span>
+            <span class="card-avatar-dot ${m.is_active && lifecycle.lifecycleStatusKnown ? 'active' : ''}"></span>
           </div>
           <div class="model-row-info">
             <div class="model-row-title" title="${m.name}">
               ${m.name}
-              <span class="card-status-pill ${m.is_active ? 'active' : ''}" style="padding: 2px 8px; font-size: 10px;">
+              <span class="card-status-pill ${m.is_active && lifecycle.lifecycleStatusKnown ? 'active' : ''}" style="padding: 2px 8px; font-size: 10px;">
                 <span class="dot" style="width:5px; height:5px;"></span>
-                ${m.is_active ? 'ACTIVE' : 'READY'}
+                ${lifecycle.statusLabel}
               </span>
             </div>
             <div class="model-row-subtitle">${engineTitle}</div>
@@ -281,15 +342,12 @@ export function renderModels(allModels) {
         <!-- Stats & Quota Column -->
         <div class="model-row-stats">
           <div style="display:flex; justify-content:space-between; font-size:11px; font-family:var(--mono);">
-            <span style="color:var(--tx);">${hasStats ? `${stats.total_tasks} tasks (${taskRate}%)` : 'Ready • 0 runs'}</span>
-            <span style="color:var(--green); font-weight:700;">${hasStats && stats.avg_tps > 0 ? `${stats.avg_tps} t/s` : 'Nominal'}</span>
-          </div>
-          <div class="card-quota-track" style="height:4px; margin:0;">
-            <div class="card-quota-fill" style="width: ${hasStats ? Math.min(100, Math.max(10, (stats.total_tokens / 131072) * 100)) : 0}%;"></div>
+            <span style="color:var(--tx);">${hasStats ? `${stats.total_tasks} tasks (${taskRate}%)` : 'No recorded runs'}</span>
+            <span style="color:var(--green); font-weight:700;">${hasStats && stats.avg_tps > 0 ? `${stats.avg_tps} t/s` : 'Unavailable'}</span>
           </div>
           <div style="display:flex; justify-content:space-between; font-size:9.5px; font-family:var(--mono); color:rgba(255,255,255,0.4);">
-            <span>${hasStats ? formatTokens(stats.total_tokens) : '0 tokens'}</span>
-            <span>${contextK} Window</span>
+            <span>${hasStats ? formatTokens(stats.total_tokens) : 'Unavailable'}</span>
+            <span>${contextK} Context Limit</span>
           </div>
         </div>
 
@@ -301,9 +359,7 @@ export function renderModels(allModels) {
           <button class="btn-card-config" onclick="window.openModelCard('${m.id}', '${m.backend}')" title="Configure model parameters and prompt">
             <i class="ph ph-gear"></i> Config
           </button>
-          <button class="btn btn-ghost" style="padding:6px 10px; font-size:11.5px; color:${m.is_active ? '#ef4444' : '#10b981'}; border-color:${m.is_active ? 'rgba(239,68,68,0.3)' : 'rgba(16,185,129,0.3)'};" onclick="window.toggleModelLifecycle('${m.backend}', '${m.name}', ${m.is_active})" title="${m.is_active ? 'Unload model' : 'Load model'}">
-            <i class="ph ${m.is_active ? 'ph-stop' : 'ph-play'}"></i>
-          </button>
+          ${renderLifecycleButton(m, lifecycle, { compact: true })}
         </div>
       </div>
       `;
@@ -315,6 +371,7 @@ export function renderModels(allModels) {
   // GRID VIEW (RICH UNIFIED CARD MATCHING SCREENSHOT 1:1)
   // ══════════════════════════════════════════════════════════════
   grid.innerHTML = models.map(m => {
+    const lifecycle = getModelLifecyclePresentation(m);
     const stats = m.stats;
     const hasStats = stats && stats.total_tasks > 0;
     const taskRate = hasStats ? ((stats.successful_tasks / stats.total_tasks) * 100).toFixed(0) : 100;
@@ -325,12 +382,11 @@ export function renderModels(allModels) {
     const isEmbed = /bge|embed|bert|nomic/i.test(m.name);
     const hasTools = /hermes|mistral|command|llama3|qwen2.5|qwen3/i.test(m.name);
 
-    const formatName = (m.format || 'GGUF').toLowerCase();
-    const quantName = m.quantization || (m.backend === 'ollama' ? 'Standard' : '—');
+    const formatName = (m.format || 'Unavailable').toLowerCase();
+    const quantName = m.quantization || 'Unavailable';
     const sizeText = m.size_bytes && m.size_bytes > 0 ? formatBytes(m.size_bytes) : '—';
     const engineTitle = `${m.backend ? m.backend.toUpperCase() : 'OLLAMA'} Autonomous Engine`;
-    const contextK = /llama3|qwen|deepseek|gemini/i.test(m.name) ? '128k' : /mistral|gemma/i.test(m.name) ? '32k' : '8k';
-    const quotaPct = hasStats ? Math.min(100, Math.max(10, (stats.total_tokens / 131072) * 100)).toFixed(0) : 0;
+    const contextK = 'Unavailable';
     const tagsListHtml = (m.tags && m.tags.length > 0)
       ? m.tags.map(t => `<span class="tag-badge-pill">🏷️ ${t}</span>`).join(' ')
       : '';
@@ -345,12 +401,12 @@ export function renderModels(allModels) {
           <div class="card-avatar-row">
             <div class="card-avatar-box" title="${m.name}">
               ${isEmbed ? '📐' : isVision ? '👁️' : isCoder ? '⚡' : '🤖'}
-              <span class="card-avatar-dot ${m.is_active ? 'active' : ''}"></span>
+              <span class="card-avatar-dot ${m.is_active && lifecycle.lifecycleStatusKnown ? 'active' : ''}"></span>
             </div>
 
-            <div class="card-status-pill ${m.is_active ? 'active' : ''}">
+            <div class="card-status-pill ${m.is_active && lifecycle.lifecycleStatusKnown ? 'active' : ''}">
               <span class="dot"></span>
-              <span>${m.is_active ? 'ACTIVE' : 'READY'}</span>
+              <span>${lifecycle.statusLabel}</span>
             </div>
           </div>
 
@@ -389,24 +445,21 @@ export function renderModels(allModels) {
           </div>
           <div class="card-stat-box">
             <div class="card-stat-lbl">${hasStats && stats.avg_tps > 0 ? 'Speed (t/s)' : 'Status'}</div>
-            <div class="card-stat-val highlight">${hasStats && stats.avg_tps > 0 ? `${stats.avg_tps} t/s` : hasStats ? `${taskRate}%` : 'Ready'}</div>
+            <div class="card-stat-val highlight">${hasStats && stats.avg_tps > 0 ? `${stats.avg_tps} t/s` : hasStats ? `${taskRate}%` : 'Unavailable'}</div>
           </div>
         </div>
 
-        <!-- Context / Quota Limit Bar with Countdown -->
+        <!-- Recorded token usage; context limit is not supplied by this catalog. -->
         <div class="card-quota-container">
           <div class="card-quota-header">
-            <span>Context / Quota Limit</span>
-            <span class="card-quota-timer" style="color:${hasStats ? '#ff6363' : 'var(--green)'};">
-              <i class="ph ${hasStats ? 'ph-hourglass' : 'ph-check-circle'}"></i> ${hasStats ? '14:59' : '100% Available'}
+            <span>Recorded token usage</span>
+            <span class="card-quota-timer" style="color:var(--text-dim);">
+              <i class="ph ph-info"></i> ${hasStats ? formatTokens(stats.total_tokens) : 'No recorded usage'}
             </span>
           </div>
-          <div class="card-quota-track">
-            <div class="card-quota-fill" style="width: ${quotaPct}%; background:${quotaPct > 0 ? 'linear-gradient(90deg, #ff6363 0%, #ff8a1e 100%)' : 'rgba(255,255,255,0.1)'};"></div>
-          </div>
           <div class="card-quota-sub">
-            <span>${hasStats ? formatTokens(stats.total_tokens) : '0 tokens used'}</span>
-            <span>${contextK} Context Window</span>
+            <span>Total: ${hasStats ? formatTokens(stats.total_tokens) : 'Unavailable'}</span>
+            <span>${contextK} Context Limit</span>
           </div>
         </div>
 
@@ -442,6 +495,7 @@ export function renderModels(allModels) {
           <button class="btn-card-config" onclick="window.openModelCard('${m.id}', '${m.backend}')" title="Open Interactive 3D Model Card & Configuration">
             <i class="ph ph-gear"></i> Config
           </button>
+          ${renderLifecycleButton(m, lifecycle)}
         </div>
       </div>
 

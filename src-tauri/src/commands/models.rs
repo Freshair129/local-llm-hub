@@ -5,7 +5,9 @@
 
 use crate::models::types::{DuplicateInfo, ProbeResult, UnifiedModel};
 use crate::state::BackendConfig;
+use std::collections::HashSet;
 use std::path::Path;
+use std::time::Duration;
 
 /// Normalizes a raw model name or file path into a canonical name according to BR-002.
 /// Rules:
@@ -93,6 +95,24 @@ pub fn normalize_model_name(raw: &str) -> String {
     final_tokens.join(" ")
 }
 
+/// Compares Ollama tag identities without collapsing versions or quantizations.
+/// Ollama treats an omitted tag as `latest`; all other tag text is significant.
+pub fn ollama_model_identity_matches(left: &str, right: &str) -> bool {
+    fn identity_key(name: &str) -> String {
+        let trimmed = name.trim();
+        let last_segment_start = trimmed.rfind('/').map_or(0, |index| index + 1);
+        let last_segment = &trimmed[last_segment_start..];
+        let tagged = if last_segment.contains(':') {
+            trimmed.to_string()
+        } else {
+            format!("{trimmed}:latest")
+        };
+        tagged.to_ascii_lowercase()
+    }
+
+    identity_key(left) == identity_key(right)
+}
+
 /// Extracts quantization tag if present in the model name
 pub fn extract_quantization(raw: &str) -> Option<String> {
     let lower = raw.to_lowercase();
@@ -141,6 +161,10 @@ pub async fn fetch_ollama_models(client: &reqwest::Client, base_url: &str) -> Ve
         Err(_) => return Vec::new(),
     };
 
+    let loaded_names = fetch_ollama_loaded_model_names(client, base_url).await;
+    let lifecycle_status_known = loaded_names.is_ok();
+    let loaded_names = loaded_names.unwrap_or_default();
+
     let mut results = Vec::new();
     if let Some(list) = body.models {
         for m in list {
@@ -156,6 +180,9 @@ pub async fn fetch_ollama_models(client: &reqwest::Client, base_url: &str) -> Ve
                 .and_then(|d| d.format.clone())
                 .unwrap_or_else(|| "gguf".to_string());
 
+            let is_active = loaded_names
+                .iter()
+                .any(|loaded_name| ollama_model_identity_matches(loaded_name, &m.name));
             let mut model = UnifiedModel::new(
                 format!("ollama:{}", m.name),
                 m.name,
@@ -164,14 +191,70 @@ pub async fn fetch_ollama_models(client: &reqwest::Client, base_url: &str) -> Ve
                 fmt,
                 m.size.unwrap_or(0),
                 quant,
-                false,
+                is_active,
             );
+            model.lifecycle_status_known = lifecycle_status_known;
+            model.lifecycle_supported = true;
             model.tags = classify_model_tags(&model.name, &model.format, model.size_bytes);
             results.push(model);
         }
     }
 
     results
+}
+
+/// Returns names of models currently loaded in Ollama memory.
+pub async fn fetch_ollama_loaded_model_names(
+    client: &reqwest::Client,
+    base_url: &str,
+) -> Result<HashSet<String>, String> {
+    #[derive(serde::Deserialize)]
+    struct OllamaRunningModel {
+        name: Option<String>,
+        model: Option<String>,
+    }
+
+    #[derive(serde::Deserialize)]
+    struct OllamaPsResponse {
+        models: Option<Vec<OllamaRunningModel>>,
+    }
+
+    let target = format!("{}/api/ps", base_url.trim_end_matches('/'));
+    let response = client
+        .get(&target)
+        .timeout(Duration::from_secs(5))
+        .send()
+        .await
+        .map_err(|err| format!("Failed to read Ollama loaded-model state: {err}"))?;
+    if !response.status().is_success() {
+        return Err(format!(
+            "Ollama /api/ps returned status {}",
+            response.status()
+        ));
+    }
+
+    let body = response
+        .json::<OllamaPsResponse>()
+        .await
+        .map_err(|err| format!("Invalid Ollama /api/ps response: {err}"))?;
+    let models = body
+        .models
+        .ok_or_else(|| "Ollama /api/ps response did not contain a models list".to_string())?;
+    let mut names = HashSet::new();
+    for model in models {
+        let name = model.name.filter(|name| !name.trim().is_empty());
+        let model_name = model.model.filter(|name| !name.trim().is_empty());
+        if name.is_none() && model_name.is_none() {
+            return Err("Ollama /api/ps contained a model entry without a name".to_string());
+        }
+        if let Some(name) = name {
+            names.insert(name);
+        }
+        if let Some(model_name) = model_name {
+            names.insert(model_name);
+        }
+    }
+    Ok(names)
 }
 
 /// Fetches models from vLLM via /v1/models
@@ -213,7 +296,7 @@ pub async fn fetch_vllm_models(client: &reqwest::Client, base_url: &str) -> Vec<
                 "safetensors",
                 0,
                 quant,
-                false,
+                true,
             );
             model.tags = classify_model_tags(&model.name, &model.format, model.size_bytes);
             results.push(model);
@@ -440,6 +523,7 @@ pub async fn aggregate_models(config: &BackendConfig, probes: &[ProbeResult]) ->
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::commands::test_support::{spawn_json_http_fixture, FixtureReply};
 
     // trace:verifies FR-002
     #[test]
@@ -458,6 +542,17 @@ mod tests {
         let input3 = "llama3:latest";
         let norm3 = normalize_model_name(input3);
         assert_eq!(norm3, "llama3");
+    }
+
+    #[test]
+    fn ollama_identity_keeps_versions_and_quantization_distinct() {
+        assert!(ollama_model_identity_matches("mellum", "mellum:latest"));
+        assert!(ollama_model_identity_matches(
+            "registry.example/team/model:q4_k_m",
+            "registry.example/team/model:Q4_K_M"
+        ));
+        assert!(!ollama_model_identity_matches("model:v1", "model:v2"));
+        assert!(!ollama_model_identity_matches("model:q4_k_m", "model:q8_0"));
     }
 
     // trace:verifies FR-002
@@ -493,6 +588,130 @@ mod tests {
             models.is_empty(),
             "When all backends offline, must return empty list"
         );
+    }
+
+    // trace:verifies FR-005
+    #[tokio::test]
+    async fn ollama_catalog_uses_api_ps_for_loaded_state() {
+        let (base_url, fixture) = spawn_json_http_fixture(vec![
+            FixtureReply::json(
+                200,
+                r#"{"models":[{"name":"mellum:latest","size":100,"details":{}}]}"#,
+            ),
+            FixtureReply::json(200, r#"{"models":[{"name":"mellum:latest"}]}"#),
+        ])
+        .await;
+
+        let models = fetch_ollama_models(&reqwest::Client::new(), &base_url).await;
+        assert_eq!(models.len(), 1);
+        assert!(models[0].is_active);
+        assert!(models[0].lifecycle_status_known);
+        assert!(models[0].lifecycle_supported);
+
+        let requests = fixture.await.expect("fixture task");
+        assert!(requests[0].starts_with("GET /api/tags "));
+        assert!(requests[1].starts_with("GET /api/ps "));
+    }
+
+    // trace:verifies FR-005
+    #[tokio::test]
+    async fn ollama_catalog_does_not_mark_another_tag_active() {
+        let (base_url, fixture) = spawn_json_http_fixture(vec![
+            FixtureReply::json(
+                200,
+                r#"{"models":[{"name":"model:v1"},{"name":"model:v2"},{"name":"model:q4_k_m"},{"name":"model:q8_0"}]}"#,
+            ),
+            FixtureReply::json(
+                200,
+                r#"{"models":[{"name":"model:v2","model":"model:v2"},{"name":"model:q8_0","model":"model:q8_0"}]}"#,
+            ),
+        ])
+        .await;
+
+        let models = fetch_ollama_models(&reqwest::Client::new(), &base_url).await;
+        assert_eq!(models.len(), 4);
+        assert!(
+            !models
+                .iter()
+                .find(|model| model.name == "model:v1")
+                .unwrap()
+                .is_active
+        );
+        assert!(
+            models
+                .iter()
+                .find(|model| model.name == "model:v2")
+                .unwrap()
+                .is_active
+        );
+        assert!(
+            !models
+                .iter()
+                .find(|model| model.name == "model:q4_k_m")
+                .unwrap()
+                .is_active
+        );
+        assert!(
+            models
+                .iter()
+                .find(|model| model.name == "model:q8_0")
+                .unwrap()
+                .is_active
+        );
+        let _ = fixture.await.expect("fixture task");
+    }
+
+    // trace:verifies FR-005
+    #[tokio::test]
+    async fn ollama_catalog_marks_loaded_state_unknown_when_api_ps_fails() {
+        let (base_url, _fixture) = spawn_json_http_fixture(vec![
+            FixtureReply::json(
+                200,
+                r#"{"models":[{"name":"mellum:latest","size":100,"details":{}}]}"#,
+            ),
+            FixtureReply::json(503, r#"{"error":"temporarily unavailable"}"#),
+        ])
+        .await;
+
+        let models = fetch_ollama_models(&reqwest::Client::new(), &base_url).await;
+        assert_eq!(models.len(), 1);
+        assert!(!models[0].is_active);
+        assert!(!models[0].lifecycle_status_known);
+        assert!(models[0].lifecycle_supported);
+    }
+
+    // trace:verifies FR-005
+    #[tokio::test]
+    async fn ollama_catalog_marks_loaded_state_unknown_for_malformed_api_ps_entries() {
+        let (base_url, _fixture) = spawn_json_http_fixture(vec![
+            FixtureReply::json(
+                200,
+                r#"{"models":[{"name":"mellum:latest","size":100,"details":{}}]}"#,
+            ),
+            FixtureReply::json(200, r#"{"models":[{}]}"#),
+        ])
+        .await;
+
+        let models = fetch_ollama_models(&reqwest::Client::new(), &base_url).await;
+        assert_eq!(models.len(), 1);
+        assert!(!models[0].is_active);
+        assert!(!models[0].lifecycle_status_known);
+    }
+
+    // trace:verifies FR-005
+    #[tokio::test]
+    async fn vllm_catalog_models_are_serving_without_hub_lifecycle_control() {
+        let (base_url, _fixture) = spawn_json_http_fixture(vec![FixtureReply::json(
+            200,
+            r#"{"data":[{"id":"qwen-local"}]}"#,
+        )])
+        .await;
+
+        let models = fetch_vllm_models(&reqwest::Client::new(), &base_url).await;
+        assert_eq!(models.len(), 1);
+        assert!(models[0].is_active);
+        assert!(models[0].lifecycle_status_known);
+        assert!(!models[0].lifecycle_supported);
     }
 
     // trace:verifies FR-003

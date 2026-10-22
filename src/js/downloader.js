@@ -20,7 +20,7 @@ function renderDownloaderSkeleton(container) {
     <div class="view-header">
       <div class="header-title-group">
         <h2>📥 In-App Model Downloader</h2>
-        <p class="subtitle">Search, pull, and stream GGUF and Ollama weights directly into RTX 3060 local storage</p>
+        <p class="subtitle">Search and pull GGUF and Ollama model files into configured local storage</p>
       </div>
     </div>
 
@@ -40,7 +40,7 @@ function renderDownloaderSkeleton(container) {
 
       <!-- Quick Preset Recommendation Tags -->
       <div class="quick-download-tags">
-        <span class="tag-heading">🔥 Recommended Local Candidates (12GB CUDA):</span>
+        <span class="tag-heading">🔥 Local candidates (check available GPU memory before loading):</span>
         <div class="tag-list">
           <button class="dl-tag" data-model="qwen2.5-coder:7b">qwen2.5-coder:7b (4.7 GB)</button>
           <button class="dl-tag" data-model="llama3.2:3b">llama3.2:3b (2.0 GB)</button>
@@ -75,8 +75,8 @@ function renderDownloaderSkeleton(container) {
         <div class="storage-item">
           <span class="storage-icon">⚡</span>
           <div>
-            <div class="storage-label">Target Hardware</div>
-            <div class="storage-val">NVIDIA GeForce RTX 3060 (12GB VRAM)</div>
+            <div class="storage-label">GPU Runtime</div>
+            <div class="storage-val">Model pulls do not load a model or reserve VRAM</div>
           </div>
         </div>
         <div class="storage-item">

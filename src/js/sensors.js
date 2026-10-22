@@ -56,13 +56,14 @@ export async function refreshLhmStatus() {
 export async function refreshSensorTree() {
   try {
     const readings = await invoke('get_sensor_tree');
-    if (Array.isArray(readings) && readings.length > 0) {
-      sensorsCache = readings;
-      renderSensorsView();
-      updateRailCount(readings.length);
-    }
+    sensorsCache = Array.isArray(readings) ? readings : [];
+    renderSensorsView();
+    updateRailCount(sensorsCache.length);
   } catch (err) {
     console.error('get_sensor_tree error:', err);
+    sensorsCache = [];
+    renderSensorsView();
+    updateRailCount(0);
   }
 }
 
@@ -82,7 +83,7 @@ function updateStatusPill(status) {
     pill.style.background = 'rgba(124, 242, 107, 0.15)';
     pill.style.color = 'var(--green)';
     pill.style.border = '1px solid rgba(124, 242, 107, 0.3)';
-    pill.innerHTML = `● LHM Sidecar Active (${sensorsCache.length || 102} Sensors)`;
+    pill.innerHTML = `● LHM Sidecar Active (${sensorsCache.length} Sensors)`;
   } else {
     pill.className = 'badge';
     pill.style.background = 'rgba(235, 179, 56, 0.15)';
@@ -98,10 +99,13 @@ export function renderSensorsView() {
 
   // 1. KPI Aggregates
   const totalSensors = sensorsCache.length;
-  const cpuTemp = sensorsCache.find(s => s.kind === 'temperature' && (s.name.includes('Package') || s.name.includes('Core')) && s.hw.includes('Intel'))?.value || 48.0;
-  const gpuHotspot = sensorsCache.find(s => s.kind === 'temperature' && s.name.includes('Hotspot'))?.value || 64.0;
-  const v12Rail = sensorsCache.find(s => s.kind === 'voltage' && s.name.includes('+12V'))?.value || 12.1;
-  const fansCount = sensorsCache.filter(s => s.kind === 'fan' && s.value > 0).length;
+  const cpuTemp = sensorsCache.find(s => s.kind === 'temperature' && (s.name.includes('Package') || s.name.includes('Core')) && s.hw.includes('Intel'))?.value ?? null;
+  const gpuHotspot = sensorsCache.find(s => s.kind === 'temperature'
+    && s.name.toLowerCase().includes('hotspot')
+    && /nvidia|geforce/i.test(s.hw))?.value ?? null;
+  const v12Rail = sensorsCache.find(s => s.kind === 'voltage' && s.name.includes('+12V'))?.value ?? null;
+  const fanReadings = sensorsCache.filter(s => s.kind === 'fan' && Number.isFinite(s.value));
+  const fansCount = fanReadings.filter(s => s.value > 0).length;
 
   const kpiTotal = document.getElementById('kpi-sensor-total');
   const kpiCpuTemp = document.getElementById('kpi-sensor-cputemp');
@@ -110,22 +114,28 @@ export function renderSensorsView() {
   const kpiFans = document.getElementById('kpi-sensor-fans');
 
   if (kpiTotal) kpiTotal.textContent = totalSensors;
-  if (kpiCpuTemp) kpiCpuTemp.textContent = `${cpuTemp.toFixed(1)} °C`;
-  if (kpiGpuHotspot) kpiGpuHotspot.textContent = `${gpuHotspot.toFixed(1)} °C`;
-  if (kpiV12) kpiV12.textContent = `${v12Rail.toFixed(2)} V`;
-  if (kpiFans) kpiFans.textContent = `${fansCount} Active`;
+  if (kpiCpuTemp) kpiCpuTemp.textContent = cpuTemp === null ? 'Unavailable' : `${cpuTemp.toFixed(1)} °C`;
+  if (kpiGpuHotspot) kpiGpuHotspot.textContent = gpuHotspot === null ? 'Unavailable' : `${gpuHotspot.toFixed(1)} °C`;
+  if (kpiV12) kpiV12.textContent = v12Rail === null ? 'Unavailable' : `${v12Rail.toFixed(2)} V`;
+  if (kpiFans) kpiFans.textContent = fanReadings.length > 0 ? `${fansCount} Active` : 'Unavailable';
 
   // trace:implements GAP-OBS-01
   // trace:implements MT-OBS-4.1
   // Thermal Threshold Warning for GPU Hotspot / VRAM (Safe limit <= 88°C)
-  const vramTemp = sensorsCache.find(s => s.kind === 'temperature' && (s.name.includes('VRAM') || s.name.includes('Memory')) && s.hw.includes('NVIDIA'))?.value || 0.0;
-  const isThermalWarning = gpuHotspot >= 88.0 || vramTemp >= 90.0;
+  const vramTemp = sensorsCache.find(s => s.kind === 'temperature'
+    && (s.name.includes('VRAM') || s.name.includes('Memory'))
+    && /nvidia|geforce/i.test(s.hw))?.value ?? null;
+  const isThermalWarning = (gpuHotspot !== null && gpuHotspot >= 88.0)
+    || (vramTemp !== null && vramTemp >= 90.0);
 
   if (isThermalWarning) {
     const now = Date.now();
     if (now - lastThermalToastTime > 60000) { // 60s debounce
       lastThermalToastTime = now;
-      showToast(`🔥 THERMAL THROTTLE ALERT: GPU Hotspot is ${gpuHotspot.toFixed(1)}°C! Performance may throttle.`, 'error', 6000);
+      const source = gpuHotspot !== null && gpuHotspot >= 88.0
+        ? `GPU Hotspot is ${gpuHotspot.toFixed(1)}°C`
+        : `GPU memory is ${vramTemp.toFixed(1)}°C`;
+      showToast(`🔥 THERMAL THROTTLE ALERT: ${source}! Performance may throttle.`, 'error', 6000);
     }
   }
 
@@ -137,7 +147,7 @@ export function renderSensorsView() {
         <span style="font-size:20px;">🔥</span>
         <div>
           <strong style="color:#ef4444; font-weight:700;">THERMAL THROTTLE ALERT:</strong> 
-          GPU Hotspot temperature is <strong>${gpuHotspot.toFixed(1)} °C</strong> (Threshold: 88.0 °C). 
+          GPU temperature is <strong>${gpuHotspot !== null ? `${gpuHotspot.toFixed(1)} °C hotspot` : `${vramTemp.toFixed(1)} °C memory`}</strong> (Threshold: ${gpuHotspot !== null && gpuHotspot >= 88.0 ? '88.0' : '90.0'} °C).
           CUDA inference performance may be throttled to prevent silicon degradation. Increasing fan curve recommended.
         </div>
       `;

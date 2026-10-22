@@ -54,9 +54,8 @@ async fn collect_system_resources() -> (u64, u64, f32) {
 
 /// Runs nvidia-smi with a strict timeout and parses CSV output into structured GpuInfo models
 async fn query_nvidia_smi() -> Vec<GpuInfo> {
-    let mut gpus = Vec::new();
-
     let mut cmd = tokio::process::Command::new("nvidia-smi");
+    cmd.kill_on_drop(true);
     cmd.args([
         "--query-gpu=index,name,memory.used,memory.total,utilization.gpu,temperature.gpu",
         "--format=csv,noheader,nounits",
@@ -70,26 +69,7 @@ async fn query_nvidia_smi() -> Vec<GpuInfo> {
     match output_res {
         Ok(Ok(output)) if output.status.success() => {
             let stdout_str = String::from_utf8_lossy(&output.stdout);
-            for line in stdout_str.lines() {
-                let parts: Vec<&str> = line.split(',').map(|s| s.trim()).collect();
-                if parts.len() >= 6 {
-                    let index = parts[0].parse::<u32>().unwrap_or(0);
-                    let name = parts[1].to_string();
-                    let mem_used_mb = parts[2].parse::<u64>().unwrap_or(0);
-                    let mem_total_mb = parts[3].parse::<u64>().unwrap_or(12288);
-                    let util_pct = parts[4].parse::<u32>().unwrap_or(0);
-                    let temp_c = parts[5].parse::<u32>().ok();
-
-                    gpus.push(GpuInfo {
-                        index,
-                        name,
-                        vram_used_bytes: mem_used_mb * 1024 * 1024,
-                        vram_total_bytes: mem_total_mb * 1024 * 1024,
-                        utilization_pct: util_pct,
-                        temperature_c: temp_c,
-                    });
-                }
-            }
+            return parse_nvidia_smi_output(&stdout_str);
         }
         Ok(Ok(output)) => {
             eprintln!(
@@ -99,26 +79,43 @@ async fn query_nvidia_smi() -> Vec<GpuInfo> {
             );
         }
         Ok(Err(e)) => {
-            eprintln!("[INFO:telemetry] nvidia-smi unavailable on host ({e}), falling back to default GPU definition.");
+            eprintln!("[INFO:telemetry] GPU monitoring unavailable because nvidia-smi could not start: {e}");
         }
         Err(_) => {
             eprintln!("[WARN:telemetry] nvidia-smi call timed out after 600ms.");
         }
     }
 
-    // Fallback default GPU if nvidia-smi wasn't available or empty
-    if gpus.is_empty() {
-        gpus.push(GpuInfo {
-            index: 0,
-            name: "Discrete/Integrated Accelerator".to_string(),
-            vram_used_bytes: 4 * 1024 * 1024 * 1024,
-            vram_total_bytes: 12 * 1024 * 1024 * 1024,
-            utilization_pct: 12,
-            temperature_c: Some(48),
-        });
-    }
+    Vec::new()
+}
 
-    gpus
+fn parse_nvidia_smi_output(output: &str) -> Vec<GpuInfo> {
+    output
+        .lines()
+        .filter_map(|line| {
+            let parts: Vec<&str> = line.split(',').map(str::trim).collect();
+            if parts.len() < 6 || parts[1].is_empty() || parts[1] == "[Not Found]" {
+                return None;
+            }
+
+            let index = parts[0].parse::<u32>().ok()?;
+            let mem_used_mb = parts[2].parse::<u64>().ok()?;
+            let mem_total_mb = parts[3].parse::<u64>().ok()?;
+            let utilization_pct = parts[4].parse::<u32>().ok()?;
+            if mem_total_mb == 0 {
+                return None;
+            }
+
+            Some(GpuInfo {
+                index,
+                name: parts[1].to_string(),
+                vram_used_bytes: mem_used_mb * 1024 * 1024,
+                vram_total_bytes: mem_total_mb * 1024 * 1024,
+                utilization_pct,
+                temperature_c: parts[5].parse::<u32>().ok(),
+            })
+        })
+        .collect()
 }
 
 /// Polls system RAM, CPU load, and NVIDIA GPU stats safely by aggregating helper routines
@@ -189,9 +186,27 @@ mod tests {
     async fn test_poll_hardware_telemetry() {
         let telemetry = poll_hardware_telemetry().await;
         assert!(telemetry.system_ram_total_bytes > 0);
-        assert!(!telemetry.gpus.is_empty());
-        let primary_gpu = &telemetry.gpus[0];
-        assert!(primary_gpu.vram_total_bytes > 0);
+        assert!(telemetry.gpus.iter().all(|gpu| gpu.vram_total_bytes > 0));
+    }
+
+    // trace:verifies FR-006
+    #[test]
+    fn unavailable_or_malformed_nvidia_smi_output_has_no_gpu_readings() {
+        assert!(parse_nvidia_smi_output("").is_empty());
+        assert!(parse_nvidia_smi_output("not,numeric,telemetry").is_empty());
+        assert!(parse_nvidia_smi_output("0,RTX 3060,not-a-number,12288,12,48").is_empty());
+    }
+
+    // trace:verifies FR-006
+    #[test]
+    fn parses_only_reported_nvidia_smi_values() {
+        let gpus = parse_nvidia_smi_output("0,RTX 3060,4000,12288,12,48");
+        assert_eq!(gpus.len(), 1);
+        assert_eq!(gpus[0].name, "RTX 3060");
+        assert_eq!(gpus[0].vram_used_bytes, 4_000 * 1024 * 1024);
+        assert_eq!(gpus[0].vram_total_bytes, 12_288 * 1024 * 1024);
+        assert_eq!(gpus[0].utilization_pct, 12);
+        assert_eq!(gpus[0].temperature_c, Some(48));
     }
 
     // trace:verifies FR-006

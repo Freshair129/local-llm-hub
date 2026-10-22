@@ -9,6 +9,7 @@ import { refreshGpuTelemetry } from './gpu_tuning.js';
 import { refreshHardwareSurfaces } from './hardware_surfaces.js';
 import { refreshProcesses } from './process_manager.js';
 import { invoke } from './api.js';
+import { gpuTelemetryView } from './gpu_telemetry_view.js';
 
 let pollInterval = null;
 let currentCadenceMs = 2000;
@@ -41,45 +42,47 @@ export async function updateTelemetryDOM(telemetry) {
   if (liveText && currentCadenceMs > 0) liveText.textContent = 'LIVE';
 
   const gpu = telemetry.gpus?.[0];
+  const gpuView = gpuTelemetryView(gpu);
   const cpuPct = Math.round(telemetry.cpu_usage_pct || 14.5);
   const cpuTemp = Math.round(38 + (telemetry.cpu_usage_pct || 0) * 0.35);
-  const gpuTemp = gpu?.temperature_c || 52;
-  const gpuHotspot = gpuTemp + 12;
-  const gpuFanRpm = Math.max(30, Math.min(100, Math.round(gpuTemp * 0.95)));
 
   // 2. Pass mapped telemetry to 3D Digital Twin simulation
   updateDigitalTwinTelemetry({
-    gpuTemp,
-    gpuUtil: gpu?.utilization_pct || 42,
-    gpuFan: gpuFanRpm,
+    gpuName: gpuView.name,
+    gpuTemp: gpuView.temperatureC,
+    gpuUtil: gpuView.utilizationPct,
+    gpuFan: null,
     cpuTemp,
     cpuUtil: cpuPct,
-    vramUsed: Number(formatGb(gpu?.vram_used_bytes || 0)),
-    vramTotal: Number(formatGb(gpu?.vram_total_bytes || 12884901888)),
+    vramUsed: gpuView.vramUsedGb,
+    vramTotal: gpuView.vramTotalGb,
     ramUsed: Number(formatGb(telemetry.system_ram_used_bytes || 0)),
     ramTotal: Number(formatGb(telemetry.system_ram_total_bytes || 34359738368))
   });
 
   recordTelemetrySample({
     cpu_pct: cpuPct,
-    vram_used: gpu?.vram_used_bytes || 0,
-    gpu_util: gpu?.utilization_pct || 0,
-    gpu_temp: gpuTemp
+    vram_used: gpu?.vram_used_bytes ?? null,
+    gpu_util: gpuView.utilizationPct,
+    gpu_temp: gpuView.temperatureC
   });
 
 
   // 3. Topbar Status Pills
   const vramPill = document.getElementById('stat-gpu-vram');
-  if (vramPill && gpu) {
-    const usedGb = formatGb(gpu.vram_used_bytes);
-    const totalGb = formatGb(gpu.vram_total_bytes);
-    const pct = Math.round((gpu.vram_used_bytes / (gpu.vram_total_bytes || 1)) * 100);
-    const tempStr = gpu.temperature_c ? ` • ${gpu.temperature_c}°C` : '';
+  if (vramPill) {
+    const pct = gpuView.vramUsedGb !== null && gpuView.vramTotalGb !== null
+      ? Math.round((gpuView.vramUsedGb / gpuView.vramTotalGb) * 100)
+      : null;
+    const vramText = pct === null ? gpuView.vramText : `${gpuView.vramText} (${pct}%)`;
+    const tempStr = gpuView.temperatureC === null ? '' : ` • ${gpuView.temperatureC}°C`;
     vramPill.innerHTML = `
       <span style="color:#60a5fa; font-weight:600;">VRAM:</span> 
-      <span>${usedGb}/${totalGb} GB (${pct}%)${tempStr}</span>
+      <span>${vramText}${tempStr}</span>
     `;
-    vramPill.title = `${gpu.name} - GPU Load: ${gpu.utilization_pct}%`;
+    vramPill.title = gpuView.available
+      ? `${gpuView.name} - GPU Load: ${gpuView.utilizationText}`
+      : gpuView.status;
   }
 
   const ramPill = document.getElementById('stat-ram');
@@ -106,15 +109,17 @@ export async function updateTelemetryDOM(telemetry) {
   const obsGpuText = document.getElementById('obs-gpu-vram-text');
   const obsGpuSub = document.getElementById('obs-gpu-sub');
   const obsGpuBar = document.getElementById('obs-gpu-bar');
-  if (obsGpuText && gpu) {
-    const usedGb = formatGb(gpu.vram_used_bytes);
-    const totalGb = formatGb(gpu.vram_total_bytes);
-    const pct = Math.round((gpu.vram_used_bytes / (gpu.vram_total_bytes || 1)) * 100);
-    obsGpuText.textContent = `${usedGb} / ${totalGb} GB (${pct}%)`;
-    if (obsGpuBar) obsGpuBar.style.width = `${pct}%`;
+  const vramPct = gpuView.vramUsedGb !== null && gpuView.vramTotalGb !== null
+    ? Math.round((gpuView.vramUsedGb / gpuView.vramTotalGb) * 100)
+    : null;
+  if (obsGpuText) {
+    obsGpuText.textContent = vramPct === null ? gpuView.vramText : `${gpuView.vramText} (${vramPct}%)`;
+    obsGpuText.title = gpuView.status;
   }
-  if (obsGpuSub && gpu) {
-    obsGpuSub.textContent = `Core: ${gpuTemp} °C • Hotspot: ${gpuHotspot} °C • VRAM: ${formatGb(gpu.vram_used_bytes)} GB`;
+  if (obsGpuBar) obsGpuBar.style.width = `${vramPct ?? 0}%`;
+  if (obsGpuSub) {
+    const tempText = gpuView.temperatureC === null ? 'Core: Unavailable' : `Core: ${gpuView.temperatureC} °C`;
+    obsGpuSub.textContent = `${tempText} • Utilization: ${gpuView.utilizationText}`;
   }
 
   const obsRamText = document.getElementById('obs-ram-text');
@@ -132,10 +137,9 @@ export async function updateTelemetryDOM(telemetry) {
   const obsPowerText = document.getElementById('obs-power-text');
   const obsPowerSub = document.getElementById('obs-power-sub');
   const obsPowerBar = document.getElementById('obs-power-bar');
-  const totalPowerW = Math.round(135 + cpuPct * 0.4 + (gpu?.utilization_pct || 40) * 0.8);
-  if (obsPowerText) obsPowerText.textContent = `${totalPowerW} W • Nominal`;
-  if (obsPowerSub) obsPowerSub.textContent = `GPU: ${(100 + (gpu?.utilization_pct || 40) * 0.9).toFixed(0)} W • CPU: ${(50 + cpuPct * 0.4).toFixed(0)} W • NVMe: 42 °C • VRM: 49 °C`;
-  if (obsPowerBar) obsPowerBar.style.width = `${Math.min(100, Math.round((totalPowerW / 450) * 100))}%`;
+  if (obsPowerText) obsPowerText.textContent = 'Unavailable';
+  if (obsPowerSub) obsPowerSub.textContent = 'Power draw sensors are not available from the current telemetry source.';
+  if (obsPowerBar) obsPowerBar.style.width = '0%';
 
   // Wait for this batch before scheduling another hardware refresh.
   await Promise.allSettled([

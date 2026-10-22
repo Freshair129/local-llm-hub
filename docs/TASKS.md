@@ -51,12 +51,13 @@
   - Run `nvidia-smi --query-gpu=... --format=csv,noheader,nounits`
   - Parse output เป็น `GpuStats`
   - RAM stats ผ่าน `sysinfo` crate
-  - Graceful fallback ถ้า nvidia-smi ไม่พบ
+  - เมื่อ `nvidia-smi` ไม่พบ คืน GPU list ว่าง; UI แสดง `Unavailable` โดยไม่มี synthetic GPU readings
   - _Requirements: FR-006, AC-005_
 
 - [x] **1.8** Implement `start_model` / `stop_model` commands
-  - Ollama: POST `/api/generate` พร้อม `keep_alive: "5m"` (start) หรือ `keep_alive: 0` (stop)
-  - vLLM: แสดง instruction ว่า vLLM ต้อง restart server
+  - Ollama: POST `/api/generate`, ตรวจ success payload แล้ว verify identity ผ่าน `/api/ps`
+  - vLLM/GGUF/HF: lifecycle disabled while no managed process controller is configured
+  - Ollama lifecycle buttons appear in grid/list only when state is known; backend operation failures refresh state and show an error
   - _Requirements: FR-005_
 
 - [x] **1.9** Implement `scan_gguf` command
@@ -164,10 +165,9 @@
   - Chat history container
 
 - [x] **4.8** Build Monitor view (`src/js/observability.js`)
-  - GPU VRAM gauge bar
-  - Host RAM bar
-  - CUDA core load & GPU temperature
-  - Polling interval 2000ms
+  - Show GPU VRAM/utilization/core temperature only when returned by native telemetry
+  - Show unavailable state if GPU metrics are absent
+  - Other CPU/RAM fallback fields and multi-GPU presentation remain outside the confirmed scope
 
 - [x] **4.9** Build LAN Drive Share view (`src/main.js` + `src/commands/share.rs`)
   - Built-in HTTP streaming server with HTTP 206 Partial Content (Resume)
@@ -232,9 +232,8 @@
   - _Requirements: FR-006, ARCH-001_
 
 - [x] **7.2** 3D Hardware Digital Twin Simulation (`src/js/digital_twin_3d.js`)
-  - WebGL Three.js interactive physical hardware model: Motherboard PCB, CPU heatsink tower with spinning 120mm PWM fan and dynamic thermal color gradient (Cyan ⟷ Amber ⟷ Red), NVIDIA GeForce RTX 3060 with dual spinning cooling fans, RAM sticks, M.2 NVMe SSD with activity LED.
-  - OrbitControls (left-click rotate, right-click pan, scroll-wheel zoom) + 4 Camera Presets (`Isometric`, `RTX 3060 Focus`, `CPU Cooler`, `Top-Down PCB`).
-  - Wired directly into real-time telemetry polling.
+  - WebGL Three.js hardware illustration with generic GPU geometry; measured GPU fields update when telemetry is available, and missing readings remain unavailable.
+  - OrbitControls and camera presets are visual interaction affordances; they do not establish live hardware identification or cross-app VRAM ownership.
   - _Requirements: FR-006, FR-016, FEAT-018_
 
 - [x] **7.3** Storage & Symlink Offloader (FR-015)

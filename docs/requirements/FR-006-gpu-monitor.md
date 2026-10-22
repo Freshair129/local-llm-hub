@@ -17,49 +17,55 @@ implements_test:
 
 ## Statement
 
-ระบบต้องแสดง GPU VRAM และ RAM usage แบบ real-time เพื่อให้ผู้ใช้วางแผนการโหลดโมเดลได้
+ระบบแสดง GPU telemetry ที่ตรวจวัดได้และ RAM telemetry เพื่อช่วยให้ผู้ใช้ตรวจสอบทรัพยากร ระบบต้องแยกค่าที่อ่านไม่ได้ออกจากค่าศูนย์อย่างชัดเจน
 
 ## Acceptance Criteria
 
-1. **WHEN** user เปิด Monitor page **THEN** system SHALL เริ่ม polling GPU stats ทุก 2 วินาที
-2. **WHEN** GPU stats ได้รับ **THEN** system SHALL update gauge animation ภายใน 200ms
-3. **WHEN** VRAM usage เกิน 90% **THEN** system SHALL เปลี่ยน gauge สีแดงและแสดง toast warning
-4. **WHEN** nvidia-smi ไม่พบ **THEN** system SHALL ซ่อน GPU section และแสดง "GPU monitoring unavailable"
-5. **WHEN** user ออกจาก Monitor page **THEN** system SHALL หยุด polling (ไม่ waste CPU background)
-6. **IF** มีหลาย GPU **THEN** system SHALL แสดง gauge แยกต่างหากสำหรับแต่ละ GPU
+1. **WHEN** native telemetry มี GPU readings **THEN** system SHALL แสดง readings ที่ได้รับจาก `nvidia-smi` และ sensor provider โดยไม่เติมค่าประมาณ
+2. **WHEN** utilization เป็น `0` **THEN** system SHALL แสดง `0`; เมื่อ field หายหรืออ่านไม่ได้ SHALL แสดง `Unavailable`
+3. **WHEN** nvidia-smi ไม่พบหรือคำสั่งล้มเหลว **THEN** native command SHALL คืน GPU list ว่างและ UI SHALL แสดง `Unavailable` โดยไม่สร้าง GPU จำลอง
+4. **WHEN** system ไม่มี power, hotspot, fan หรือ clock sensor **THEN** field เหล่านั้น SHALL แสดง `Unavailable`
+5. Current dashboard presents the first GPU in the native telemetry list; separate multi-GPU cards and live hardware acceptance remain unverified.
+6. CPU/RAM fallback behavior and cross-application VRAM ownership are outside the verified GPU telemetry scope and SHALL NOT be represented as measured GPU state.
 
 ## Data Points ที่ต้องแสดง
 
 | Metric | Unit | Source |
 |--------|------|--------|
-| VRAM Used / Total | GB | nvidia-smi |
-| GPU Utilization | % | nvidia-smi |
-| GPU Temperature | °C | nvidia-smi |
-| Power Draw | W | nvidia-smi |
-| RAM Used / Total | GB | sysinfo crate |
+| VRAM Used / Total | GB | `nvidia-smi`; unavailable if absent |
+| GPU Utilization | % | `nvidia-smi`; preserves measured zero |
+| GPU Core Temperature | °C | `nvidia-smi`; nullable |
+| GPU Hotspot | °C | native sensor provider when available; otherwise `Unavailable` |
+| Fan Speed | RPM or % | native sensor provider when available; otherwise `Unavailable` |
+| Clocks | MHz | native sensor provider when available; otherwise `Unavailable` |
+| Board Power | W | native sensor provider when available; otherwise `Unavailable` |
+| RAM Used / Total | GB | native system telemetry; current UI fallback must be checked separately |
 
 ## Polling Command
 
 ```
-nvidia-smi --query-gpu=index,name,memory.used,memory.total,utilization.gpu,temperature.gpu,power.draw \
+nvidia-smi --query-gpu=index,name,memory.used,memory.total,utilization.gpu,temperature.gpu \
            --format=csv,noheader,nounits
 ```
+
+The current native query reads GPU index, name, VRAM used/total, utilization and core temperature. It does not read power draw, hotspot, fan or clocks.
 
 ## Color Zones (gauge)
 
 | Range | Color | Meaning |
 |-------|-------|---------|
-| 0–70% | 🟢 Green | ปลอดภัย โหลดโมเดลได้ |
-| 70–90% | 🟡 Yellow | ระวัง พื้นที่จำกัด |
-| > 90% | 🔴 Red | Warning อาจโหลดไม่ได้ |
+| 0–70% | 🟢 Green | Lower reported GPU utilization; does not guarantee a model will fit |
+| 70–90% | 🟡 Yellow | Higher GPU utilization |
+| > 90% | 🔴 Red | Very high GPU utilization; VRAM capacity is shown separately |
 
 ## Traceability
 
 ```
 FR-006
-  ├── implements ← src-tauri/src/commands/gpu.rs::get_gpu_stats
-  ├── implements ← src/js/pages/monitor.js::startMonitoring
-  ├── implements ← src/js/components/gpuGauge.js::GPUGauge
-  └── verified_by ← tests/gpu_test.rs::test_nvidia_smi_parse
-                  ← tests/gpu_test.rs::test_gpu_stats_no_nvidia_smi_fallback
+  ├── implements ← src-tauri/src/commands/gpu.rs::query_nvidia_smi
+  ├── implements ← src-tauri/src/commands/gpu.rs::poll_hardware_telemetry
+  ├── implements ← src/js/observability.js::updateTelemetryDOM
+  ├── implements ← src/js/gpu_telemetry_view.js::gpuTelemetryView
+  └── verified_by ← src-tauri/src/commands/gpu.rs tests
+                  ← eval/desktop/gpu_telemetry_view.test.mjs
 ```
